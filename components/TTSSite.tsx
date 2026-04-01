@@ -265,7 +265,13 @@ export default function TTSSite() {
       />
 
       <div
-        style={{ cursor: "none", background: "#09090b", minHeight: "100vh" }}
+        style={{
+          cursor: "none",
+          background: "#09090b",
+          minHeight: "100vh",
+          fontFamily:
+            "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        }}
       >
         {/* ── NAV ── scroll-aware: hidden at top, slides in after 80px */}
         <nav
@@ -560,12 +566,13 @@ export default function TTSSite() {
             <h1
               className="tts-fade"
               style={{
-                fontSize: "clamp(56px, 10vw, 120px)",
+                fontSize: "clamp(64px, 9vw, 108px)",
                 fontWeight: 900,
-                letterSpacing: "-0.04em",
-                lineHeight: 0.92,
-                margin: "0 0 32px",
+                letterSpacing: "-0.03em",
+                lineHeight: 1,
+                margin: "0 0 28px",
                 color: "#fff",
+                fontFamily: "'Inter', sans-serif",
               }}
             >
               Build.
@@ -576,6 +583,7 @@ export default function TTSSite() {
                     "linear-gradient(135deg, #CC0000 0%, #FF4444 40%, #FFCC00 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
                 }}
               >
                 Solve.
@@ -587,11 +595,12 @@ export default function TTSSite() {
             <p
               className="tts-fade"
               style={{
-                fontSize: 18,
+                fontSize: 17,
                 color: "#71717a",
-                maxWidth: 560,
-                margin: "0 auto 48px",
-                lineHeight: 1.7,
+                maxWidth: 480,
+                margin: "0 auto 40px",
+                lineHeight: 1.65,
+                fontWeight: 400,
               }}
             >
               Trojan Technology Solutions is USC&apos;s hands-on tech club. No

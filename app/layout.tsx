@@ -3,7 +3,11 @@ import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "VisionWeb — Spatial Browser Interface",
@@ -18,7 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} h-full`}>
-      <body className="min-h-full bg-zinc-950 antialiased">
+      <body className={`${inter.className} min-h-full bg-zinc-950 antialiased`}>
         {children}
         <Toaster theme="dark" />
       </body>
