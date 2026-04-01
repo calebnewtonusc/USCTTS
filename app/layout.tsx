@@ -10,9 +10,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "VisionWeb — Spatial Browser Interface",
+  title: "Trojan Tech Solutions",
   description:
-    "Eye and hand controlled spatial web interface. Vision Pro-inspired, runs entirely in your browser.",
+    "USC pro-bono tech consulting club. Small Businesses. Big Impacts.",
 };
 
 export default function RootLayout({
