@@ -56,6 +56,7 @@ export default function TTSSite() {
   }>({ target: null, progress: 0 });
   const [email, setEmail] = useState("");
   const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [navVisible, setNavVisible] = useState(false);
   const gazeStartedRef = useRef(false);
   const dwellFiredRef = useRef(false);
   const gazeDotRef = useRef<HTMLDivElement>(null);
@@ -89,6 +90,19 @@ export default function TTSSite() {
     };
   }, []);
 
+  // Scroll-aware nav
+  useEffect(() => {
+    const handle = () => {
+      const scrollY = window.scrollY;
+      const nearBottom =
+        scrollY + window.innerHeight >=
+        document.documentElement.scrollHeight - 200;
+      setNavVisible(scrollY > 80 && !nearBottom);
+    };
+    window.addEventListener("scroll", handle, { passive: true });
+    return () => window.removeEventListener("scroll", handle);
+  }, []);
+
   // Scroll reveal
   useEffect(() => {
     const obs = new IntersectionObserver(
@@ -118,6 +132,18 @@ export default function TTSSite() {
     const wg = (window as any).webgazer;
     if (!wg) {
       toast.error("WebGazer failed to load. Try refreshing.", { id: "gaze" });
+      return;
+    }
+    // Guard: wait for internal methods to be available (object exists before fully init'd)
+    let methodWait = 0;
+    while (typeof wg.setGazeListener !== "function" && methodWait < 3000) {
+      await new Promise((r) => setTimeout(r, 100));
+      methodWait += 100;
+    }
+    if (typeof wg.setGazeListener !== "function") {
+      toast.error("WebGazer did not initialize correctly. Try refreshing.", {
+        id: "gaze",
+      });
       return;
     }
     try {
@@ -241,7 +267,7 @@ export default function TTSSite() {
       <div
         style={{ cursor: "none", background: "#09090b", minHeight: "100vh" }}
       >
-        {/* ── NAV ── */}
+        {/* ── NAV ── scroll-aware: hidden at top, slides in after 80px */}
         <nav
           style={{
             position: "fixed",
@@ -253,6 +279,9 @@ export default function TTSSite() {
             WebkitBackdropFilter: "blur(20px)",
             background: "rgba(9,9,11,0.9)",
             borderBottom: "1px solid rgba(255,255,255,0.06)",
+            transform: navVisible ? "translateY(0)" : "translateY(-100%)",
+            opacity: navVisible ? 1 : 0,
+            transition: "transform 0.3s ease, opacity 0.3s ease",
           }}
         >
           <div
