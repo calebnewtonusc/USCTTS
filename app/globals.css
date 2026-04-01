@@ -128,15 +128,34 @@
     @apply font-sans;
   }
 }
+/* Force-hide all WebGazer DOM elements */
+#webgazerVideoContainer,
+#webgazerFaceOverlay,
+#webgazerFaceFeedbackBox,
+#webgazer-loading-screen,
+#gazeDot,
+video[id^="webgazer"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 .gaze-focus {
   border-color: rgba(99, 102, 241, 0.6) !important;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 40px rgba(99,102,241,0.25) !important;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(99, 102, 241, 0.25) !important;
 }
 .glass {
-  background: rgba(255,255,255,0.07);
+  background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.10);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
-.panel-header { cursor: grab; }
-.panel-header:active { cursor: grabbing; }
+.panel-header {
+  cursor: grab;
+}
+.panel-header:active {
+  cursor: grabbing;
+}

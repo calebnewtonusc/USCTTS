@@ -298,6 +298,10 @@ export default function VisionWeb() {
 
     try {
       gazeStartedRef.current = true;
+      toast.loading("Starting eye tracking…", {
+        id: "gaze-init",
+        duration: 8000,
+      });
       await wg
         .setGazeListener((data) => {
           if (!data) return;
@@ -324,9 +328,10 @@ export default function VisionWeb() {
       wg.showFaceFeedbackBox(false);
       wg.showPredictionPoints(false);
       setGazeActive(true);
+      toast.success("Eye tracking active", { id: "gaze-init" });
     } catch {
       gazeStartedRef.current = false;
-      toast.error("Eye tracking failed to start.");
+      toast.error("Eye tracking failed to start.", { id: "gaze-init" });
     }
   }, []);
 
@@ -337,6 +342,10 @@ export default function VisionWeb() {
     if (!videoRef.current) return;
 
     handsStartedRef.current = true;
+    toast.loading("Loading hand tracking…", {
+      id: "hands-init",
+      duration: 20000,
+    });
     try {
       const { GestureRecognizer, FilesetResolver } = await import(
         // @ts-expect-error CDN dynamic import
@@ -356,6 +365,7 @@ export default function VisionWeb() {
       });
       gestureRecRef.current = rec;
       setHandsActive(true);
+      toast.success("Hand tracking active", { id: "hands-init" });
 
       const video = videoRef.current;
       function loop() {
@@ -416,7 +426,7 @@ export default function VisionWeb() {
       loop();
     } catch {
       handsStartedRef.current = false;
-      toast.error("Hand tracking failed to initialize.");
+      toast.error("Hand tracking failed to initialize.", { id: "hands-init" });
     }
   }, []);
 
@@ -426,21 +436,23 @@ export default function VisionWeb() {
     setStage("calibration");
   }, [startCamera]);
 
-  // FIX #4: proper calibration done — only starts tracking, doesn't skip calibration
-  const handleCalibrationDone = useCallback(async () => {
+  const handleCalibrationDone = useCallback(() => {
+    // Show panels immediately — don't block on tracking startup
     setStage("app");
-    await Promise.all([startGaze(), startHands()]);
     setPanels([
-      { id: "welcome", title: "Welcome", x: 60, y: 100, content: "welcome" },
+      { id: "welcome", title: "Welcome", x: 60, y: 120, content: "welcome" },
       {
         id: "gestures",
         title: "Gesture Reference",
         x: 440,
-        y: 100,
+        y: 120,
         content: "gestures",
       },
-      { id: "focus", title: "System Status", x: 820, y: 100, content: "focus" },
+      { id: "focus", title: "System Status", x: 820, y: 120, content: "focus" },
     ]);
+    // Start tracking in the background — panels don't wait on this
+    startGaze();
+    startHands();
   }, [startGaze, startHands]);
 
   // FIX #4: recalibrate goes back to calibration screen properly
