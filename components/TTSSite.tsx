@@ -58,6 +58,7 @@ const TRACKS = [
     title: "Building",
     sub: "Product & Startups",
     tagline: "Ship something real this semester.",
+    featured: false,
     items: [
       "Build apps and tools with AI",
       "Deploy live products with real users",
@@ -73,6 +74,7 @@ const TRACKS = [
     title: "Consulting",
     sub: "Client Work & Strategy",
     tagline: "Solve real problems for real organizations.",
+    featured: true,
     items: [
       "Live client engagements",
       "AI-first research and analysis",
@@ -84,10 +86,11 @@ const TRACKS = [
   {
     num: "03",
     icon: TrendingUp,
-    accent: "#818cf8",
-    title: "Grow",
+    accent: "#10b981",
+    title: "Growing",
     sub: "Career & Network",
     tagline: "Use AI to get ahead in your own field.",
+    featured: false,
     items: [
       "Apply AI directly to your major",
       "Access YC founders, McKinsey operators",
@@ -133,10 +136,45 @@ const FOUNDERS = [
   },
 ];
 
+const FAQ_ITEMS = [
+  {
+    q: "When do we meet?",
+    a: "Weekly sessions each semester. Follow our Instagram for this semester's schedule and location on campus.",
+  },
+  {
+    q: "Do I need coding experience?",
+    a: "No. Building has beginner-friendly entry points. Consulting and Growing require zero technical background.",
+  },
+  {
+    q: "What's the time commitment?",
+    a: "About 3-5 hours per week including the meeting, depending on which track you choose.",
+  },
+  {
+    q: "Can I join mid-semester?",
+    a: "Yes. There's no cut-off date. Join any week and we'll place you into an active project.",
+  },
+  {
+    q: "Is there a cost?",
+    a: "Never. TTS is completely free. No dues, no fees, no catch.",
+  },
+  {
+    q: "I'm pre-med, law, or not a CS major. Is this for me?",
+    a: "The Growing track is built for non-technical majors. AI is changing every field — we help you use it in yours.",
+  },
+];
+
 const APPLICATION_URL =
   "mailto:trojantechsolutions@gmail.com?subject=TTS Application";
 const PARTNERSHIP_URL =
   "mailto:trojantechsolutions@gmail.com?subject=Partnership Inquiry";
+const INSTAGRAM_URL = "https://instagram.com/trojantechsolutions";
+
+const NAV_LINKS = [
+  { label: "Mission", id: "mission" },
+  { label: "Tracks", id: "tracks" },
+  { label: "Team", id: "leadership" },
+  { label: "Join", id: "join" },
+] as const;
 
 export default function TTSSite() {
   const [gazeActive, setGazeActive] = useState(false);
@@ -198,7 +236,6 @@ export default function TTSSite() {
         const maxScroll = sect.offsetHeight - winH;
         const prog = Math.max(0, Math.min(1, scrolled / maxScroll));
         setHeroProgress(prog);
-        // Nav appears after morph begins (prog > 0.60) or past the hero entirely
         const pastShip =
           prog > 0.6 || scrollY > sect.offsetTop + sect.offsetHeight;
         setNavVisible(pastShip && scrollY + winH < docH - 200);
@@ -233,7 +270,7 @@ export default function TTSSite() {
         }),
       { threshold: 0.3 },
     );
-    ["hero", "mission", "tracks", "leadership", "join"].forEach((id) => {
+    ["hero", "mission", "tracks", "leadership", "faq", "join"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) obs.observe(el);
     });
@@ -304,7 +341,6 @@ export default function TTSSite() {
         duration: 5000,
       });
     } catch (err) {
-      console.error("[WebGazer]", err);
       gazeStartedRef.current = false;
       toast.error(
         `Eye tracking failed: ${err instanceof Error ? err.message : String(err)}`,
@@ -313,24 +349,88 @@ export default function TTSSite() {
     }
   }, [scrollTo]);
 
-  // Scroll-driven hero word reveal thresholds
   const word2Shown = heroProgress > 0.2;
   const word3Shown = heroProgress > 0.38;
-  const wordsMorphing = heroProgress > 0.54; // crossfade: Build/Solve/Ship → Trojan/Tech/Solutions
+  const wordsMorphing = heroProgress > 0.54;
   const heroContentShown = heroProgress > 0.74;
 
-  const NAV_LINKS = [
-    { label: "Mission", id: "mission" },
-    { label: "Tracks", id: "tracks" },
-    { label: "Team", id: "leadership" },
-  ] as const;
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || emailLoading) return;
+    setEmailLoading(true);
+    try {
+      await fetch("/api/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      setEmailSubmitted(true);
+    } catch {
+      setEmailSubmitted(true);
+    } finally {
+      setEmailLoading(false);
+    }
+  };
 
   return (
     <>
+      <style>{`
+        @media (max-width: 900px) {
+          .tts-mission-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+          .tts-join-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
+          .tts-leadership-grid { grid-template-columns: 1fr !important; }
+          .tts-footer-cols { flex-direction: column !important; gap: 32px !important; align-items: flex-start !important; }
+        }
+        @media (max-width: 768px) {
+          .tts-tracks-grid { grid-template-columns: 1fr !important; }
+          .tts-faq-grid { grid-template-columns: 1fr !important; }
+          .tts-hero-content { padding: 0 20px !important; }
+          .tts-section-pad { padding: 80px 20px !important; }
+          .tts-nav-dots { display: none !important; }
+          .tts-footer-wrap { padding: 40px 20px 24px !important; }
+        }
+        @media (hover: none), (pointer: coarse) {
+          #tts-cursor-dot, #tts-cursor-ring { display: none !important; }
+          .tts-main { cursor: auto !important; }
+        }
+        button:focus-visible, a:focus-visible, input:focus-visible {
+          outline: 2px solid #CC0000 !important;
+          outline-offset: 2px !important;
+          border-radius: 4px;
+        }
+      `}</style>
+
       <Script
         src="https://webgazer.cs.brown.edu/webgazer.js"
         strategy="afterInteractive"
       />
+
+      {/* Skip to main content */}
+      <a
+        href="#mission"
+        style={{
+          position: "fixed",
+          top: -100,
+          left: 8,
+          zIndex: 99999,
+          padding: "8px 16px",
+          background: "#CC0000",
+          color: "#fff",
+          fontSize: 14,
+          fontWeight: 600,
+          borderRadius: 8,
+          textDecoration: "none",
+          transition: "top 0.2s",
+        }}
+        onFocus={(e) => {
+          (e.currentTarget as HTMLAnchorElement).style.top = "8px";
+        }}
+        onBlur={(e) => {
+          (e.currentTarget as HTMLAnchorElement).style.top = "-100px";
+        }}
+      >
+        Skip to main content
+      </a>
 
       {/* Progress bar */}
       <div
@@ -352,6 +452,7 @@ export default function TTSSite() {
 
       {/* Nav dots */}
       <div
+        className="tts-nav-dots"
         aria-hidden="true"
         style={{
           position: "fixed",
@@ -397,8 +498,9 @@ export default function TTSSite() {
         )}
       </div>
 
-      {/* Cursor */}
+      {/* Custom cursor */}
       <div
+        id="tts-cursor-dot"
         ref={cursorDotRef}
         aria-hidden="true"
         style={{
@@ -415,6 +517,7 @@ export default function TTSSite() {
         }}
       />
       <div
+        id="tts-cursor-ring"
         ref={cursorRingRef}
         aria-hidden="true"
         style={{
@@ -451,6 +554,7 @@ export default function TTSSite() {
       />
 
       <div
+        className="tts-main"
         style={{
           cursor: "none",
           background: "#09090b",
@@ -460,6 +564,7 @@ export default function TTSSite() {
       >
         {/* ── NAV ── */}
         <nav
+          aria-label="Main navigation"
           style={{
             position: "fixed",
             top: 0,
@@ -488,6 +593,7 @@ export default function TTSSite() {
           >
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              aria-label="Back to top"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -526,6 +632,7 @@ export default function TTSSite() {
             <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
               {NAV_LINKS.map(({ label, id }) => {
                 const isTarget = gazeNav.target === id;
+                const isActive = activeSection === id;
                 return (
                   <button
                     key={id}
@@ -538,7 +645,8 @@ export default function TTSSite() {
                       padding: "6px 14px",
                       borderRadius: 8,
                       fontSize: 13,
-                      color: "#a1a1aa",
+                      color: isActive ? "#fff" : "#a1a1aa",
+                      fontWeight: isActive ? 600 : 400,
                       background: "none",
                       border: "none",
                       cursor: "pointer",
@@ -550,7 +658,7 @@ export default function TTSSite() {
                     }
                     onMouseLeave={(e) =>
                       ((e.currentTarget as HTMLButtonElement).style.color =
-                        "#a1a1aa")
+                        isActive ? "#fff" : "#a1a1aa")
                     }
                   >
                     {gazeActive && (
@@ -595,7 +703,8 @@ export default function TTSSite() {
               {!gazeActive ? (
                 <button
                   onClick={startGaze}
-                  title="Enable eye tracking navigation"
+                  title="Enable eye tracking navigation — requires camera access"
+                  aria-label="Enable eye tracking navigation (requires camera access)"
                   style={{
                     width: 36,
                     height: 36,
@@ -630,6 +739,8 @@ export default function TTSSite() {
                 </button>
               ) : (
                 <div
+                  role="status"
+                  aria-label="Eye tracking active"
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -650,7 +761,7 @@ export default function TTSSite() {
                   />
                   <span
                     style={{
-                      fontSize: 10,
+                      fontSize: 11,
                       color: "#FFCC00",
                       fontWeight: 600,
                       letterSpacing: "0.05em",
@@ -689,14 +800,11 @@ export default function TTSSite() {
           </div>
         </nav>
 
-        {/* ── HERO ── scroll-pinned 3-word reveal */}
+        {/* ── HERO ── */}
         <section
           id="hero"
           ref={heroSectionRef}
-          style={{
-            height: "300vh",
-            position: "relative",
-          }}
+          style={{ height: "300vh", position: "relative" }}
         >
           <div
             style={{
@@ -710,7 +818,6 @@ export default function TTSSite() {
               background: "#09090b",
             }}
           >
-            {/* Dot grid */}
             <div
               aria-hidden="true"
               style={{
@@ -722,7 +829,6 @@ export default function TTSSite() {
                 pointerEvents: "none",
               }}
             />
-            {/* Cardinal glow */}
             <div
               aria-hidden="true"
               style={{
@@ -740,6 +846,7 @@ export default function TTSSite() {
             />
 
             <div
+              className="tts-hero-content"
               style={{
                 maxWidth: 1200,
                 margin: "0 auto",
@@ -749,8 +856,8 @@ export default function TTSSite() {
                 zIndex: 1,
               }}
             >
-              {/* Badge — appears after Ship., hides when full content block shows */}
               <div
+                aria-hidden="true"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -767,7 +874,7 @@ export default function TTSSite() {
                       : "translateY(8px)",
                   transition:
                     "opacity 0.5s ease, transform 0.5s cubic-bezier(0.16,1,0.3,1)",
-                  pointerEvents: word3Shown && !wordsMorphing ? "auto" : "none",
+                  pointerEvents: "none",
                 }}
               >
                 <div
@@ -791,8 +898,9 @@ export default function TTSSite() {
                 </span>
               </div>
 
-              {/* Scroll-driven word reveal + morph into Trojan Tech Solutions */}
+              {/* Morph h1 — aria-label carries the semantic meaning */}
               <h1
+                aria-label="Trojan Technology Solutions"
                 style={{
                   fontSize: "clamp(72px, 9vw, 112px)",
                   fontWeight: 900,
@@ -802,8 +910,10 @@ export default function TTSSite() {
                   padding: 0,
                 }}
               >
-                {/* Slot 1: Build. → Trojan */}
-                <span style={{ display: "block", position: "relative" }}>
+                <span
+                  aria-hidden="true"
+                  style={{ display: "block", position: "relative" }}
+                >
                   <span
                     style={{
                       display: "block",
@@ -819,7 +929,6 @@ export default function TTSSite() {
                     Build.
                   </span>
                   <span
-                    aria-hidden="true"
                     style={{
                       display: "block",
                       position: "absolute",
@@ -838,8 +947,10 @@ export default function TTSSite() {
                   </span>
                 </span>
 
-                {/* Slot 2: Solve. → Tech */}
-                <span style={{ display: "block", position: "relative" }}>
+                <span
+                  aria-hidden="true"
+                  style={{ display: "block", position: "relative" }}
+                >
                   <span
                     style={{
                       display: "block",
@@ -857,7 +968,6 @@ export default function TTSSite() {
                     Solve.
                   </span>
                   <span
-                    aria-hidden="true"
                     style={{
                       display: "block",
                       position: "absolute",
@@ -874,8 +984,10 @@ export default function TTSSite() {
                   </span>
                 </span>
 
-                {/* Slot 3: Ship. → Solutions */}
-                <span style={{ display: "block", position: "relative" }}>
+                <span
+                  aria-hidden="true"
+                  style={{ display: "block", position: "relative" }}
+                >
                   <span
                     style={{
                       display: "block",
@@ -893,7 +1005,6 @@ export default function TTSSite() {
                     Ship.
                   </span>
                   <span
-                    aria-hidden="true"
                     style={{
                       display: "block",
                       position: "absolute",
@@ -913,7 +1024,7 @@ export default function TTSSite() {
                 </span>
               </h1>
 
-              {/* Content block — fades in at 75% scroll, replaces badge */}
+              {/* Content block */}
               <div
                 style={{
                   marginTop: 48,
@@ -953,6 +1064,7 @@ export default function TTSSite() {
                     alignItems: "center",
                     gap: 12,
                     marginBottom: 72,
+                    flexWrap: "wrap",
                   }}
                 >
                   <button
@@ -1030,6 +1142,8 @@ export default function TTSSite() {
                     gap: 48,
                     paddingTop: 32,
                     borderTop: "1px solid rgba(255,255,255,0.06)",
+                    flexWrap: "wrap",
+                    rowGap: 24,
                   }}
                 >
                   {[
@@ -1040,20 +1154,22 @@ export default function TTSSite() {
                     <div key={label}>
                       <div
                         style={{
-                          fontSize: 22,
+                          fontSize: 36,
                           fontWeight: 800,
                           color: "#fff",
                           letterSpacing: "-0.03em",
+                          lineHeight: 1,
                         }}
                       >
                         {val}
                       </div>
                       <div
                         style={{
-                          fontSize: 11,
+                          fontSize: 12,
                           color: "#a1a1aa",
-                          marginTop: 3,
+                          marginTop: 5,
                           letterSpacing: "0.04em",
+                          textTransform: "uppercase",
                         }}
                       >
                         {label}
@@ -1069,9 +1185,11 @@ export default function TTSSite() {
         {/* ── MISSION ── */}
         <section
           id="mission"
+          className="tts-section-pad"
           style={{ background: "#0c0c0f", padding: "120px 40px" }}
         >
           <div
+            className="tts-mission-grid"
             style={{
               maxWidth: 1200,
               margin: "0 auto",
@@ -1082,7 +1200,6 @@ export default function TTSSite() {
             }}
           >
             <div>
-              {/* No generic label here. Let the content lead. */}
               <h2
                 className="tts-from-left"
                 style={{
@@ -1094,11 +1211,9 @@ export default function TTSSite() {
                   marginBottom: 32,
                 }}
               >
-                AI is changing
+                Build things that
                 <br />
-                <span style={{ color: "#CC0000" }}>every industry.</span>
-                <br />
-                Are you using it?
+                <span style={{ color: "#CC0000" }}>actually work.</span>
               </h2>
               <p
                 className="tts-fade"
@@ -1110,9 +1225,9 @@ export default function TTSSite() {
                   transitionDelay: "0.08s",
                 }}
               >
-                There are two types of students graduating right now. Those who
-                ignored AI and fell behind. Those who learned to use it and
-                moved ahead.
+                TTS is USC&apos;s club for students who want real experience
+                before they graduate. Not another resume line. Actual work that
+                ships, advises clients, or lands the opportunity.
               </p>
               <p
                 className="tts-fade"
@@ -1124,8 +1239,8 @@ export default function TTSSite() {
                   transitionDelay: "0.12s",
                 }}
               >
-                TTS exists for the second group. The standard is actually
-                shipping, actually consulting, actually growing.
+                The standard here is shipping, consulting, and growing — not
+                planning to.
               </p>
               <div
                 className="tts-fade"
@@ -1139,7 +1254,7 @@ export default function TTSSite() {
                 {[
                   { c: "#CC0000", t: "Less talk, more shipping" },
                   { c: "#FFCC00", t: "Less theory, more client work" },
-                  { c: "#818cf8", t: "Less gatekeeping, more open doors" },
+                  { c: "#10b981", t: "Less gatekeeping, more open doors" },
                   {
                     c: "#CC0000",
                     t: "Less burnout, more sustainable intensity",
@@ -1192,7 +1307,7 @@ export default function TTSSite() {
                   <div style={{ fontSize: 12, fontWeight: 700, color: "#fff" }}>
                     TTS at USC
                   </div>
-                  <div style={{ fontSize: 11, color: "#a1a1aa", marginTop: 2 }}>
+                  <div style={{ fontSize: 12, color: "#a1a1aa", marginTop: 2 }}>
                     University of Southern California
                   </div>
                 </div>
@@ -1230,7 +1345,7 @@ export default function TTSSite() {
                     >
                       {v}
                     </div>
-                    <div style={{ fontSize: 10, color: "#a1a1aa" }}>{l}</div>
+                    <div style={{ fontSize: 12, color: "#a1a1aa" }}>{l}</div>
                   </div>
                 ))}
               </div>
@@ -1241,6 +1356,7 @@ export default function TTSSite() {
         {/* ── TRACKS ── */}
         <section
           id="tracks"
+          className="tts-section-pad"
           style={{ background: "#09090b", padding: "120px 40px" }}
         >
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
@@ -1269,8 +1385,8 @@ export default function TTSSite() {
               </p>
             </div>
 
-            {/* 3-column track cards */}
             <div
+              className="tts-tracks-grid"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(3, 1fr)",
@@ -1288,6 +1404,7 @@ export default function TTSSite() {
                     tagline,
                     items,
                     for: forText,
+                    featured,
                   },
                   i,
                 ) => {
@@ -1300,170 +1417,226 @@ export default function TTSSite() {
                   return (
                     <div
                       key={num}
-                      className={`${animClass} tts-card`}
+                      className={animClass}
                       style={{
-                        background: "#111113",
-                        borderRadius: 16,
-                        border: "1px solid rgba(255,255,255,0.07)",
-                        borderTop: `3px solid ${accent}`,
-                        padding: "32px 28px",
-                        display: "flex",
-                        flexDirection: "column",
                         transitionDelay: `${i * 0.1}s`,
+                        position: "relative",
                       }}
                     >
-                      {/* Header row: num + icon */}
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "flex-start",
-                          justifyContent: "space-between",
-                          marginBottom: 28,
-                        }}
-                      >
+                      {featured && (
                         <div
                           style={{
-                            fontSize: 64,
-                            fontWeight: 900,
-                            color: accent,
-                            opacity: 0.15,
-                            letterSpacing: "-0.05em",
-                            lineHeight: 1,
-                            userSelect: "none",
+                            position: "absolute",
+                            top: 0,
+                            left: "50%",
+                            transform: "translateX(-50%) translateY(-50%)",
+                            zIndex: 2,
+                            background: "#FFCC00",
+                            color: "#09090b",
+                            fontSize: 10,
+                            fontWeight: 800,
+                            letterSpacing: "0.1em",
+                            textTransform: "uppercase",
+                            padding: "3px 10px",
+                            borderRadius: 100,
+                            whiteSpace: "nowrap",
                           }}
                         >
-                          {num}
+                          Most popular
                         </div>
-                        <div
-                          style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 11,
-                            background: `${accent}15`,
-                            border: `1px solid ${accent}30`,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            flexShrink: 0,
-                          }}
-                        >
-                          <Icon size={18} color={accent} />
-                        </div>
-                      </div>
-
-                      {/* Track name */}
+                      )}
                       <div
+                        className="tts-card"
                         style={{
-                          fontSize: 10,
-                          fontWeight: 600,
-                          color: accent,
-                          letterSpacing: "0.1em",
-                          textTransform: "uppercase",
-                          marginBottom: 6,
-                          opacity: 0.85,
-                        }}
-                      >
-                        {sub}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 26,
-                          fontWeight: 800,
-                          color: "#fff",
-                          letterSpacing: "-0.03em",
-                          lineHeight: 1.1,
-                          marginBottom: 12,
-                        }}
-                      >
-                        {title}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 14,
-                          color: "#a1a1aa",
-                          lineHeight: 1.65,
-                          marginBottom: 28,
-                        }}
-                      >
-                        {tagline}
-                      </div>
-
-                      {/* Separator */}
-                      <div
-                        style={{
-                          height: 1,
-                          background: "rgba(255,255,255,0.06)",
-                          marginBottom: 20,
-                        }}
-                      />
-
-                      {/* Items */}
-                      <ul
-                        style={{
-                          listStyle: "none",
-                          margin: 0,
-                          padding: 0,
+                          background: featured ? "#131208" : "#111113",
+                          borderRadius: 16,
+                          border: featured
+                            ? "1px solid rgba(255,204,0,0.2)"
+                            : "1px solid rgba(255,255,255,0.07)",
+                          borderTop: `3px solid ${accent}`,
+                          padding: "32px 28px",
                           display: "flex",
                           flexDirection: "column",
-                          gap: 11,
-                          flex: 1,
-                        }}
-                      >
-                        {items.map((item) => (
-                          <li
-                            key={item}
-                            style={{
-                              display: "flex",
-                              alignItems: "flex-start",
-                              gap: 10,
-                              fontSize: 13,
-                              color: "#c4c4c8",
-                            }}
-                          >
-                            <div
-                              style={{
-                                width: 5,
-                                height: 5,
-                                borderRadius: "50%",
-                                background: accent,
-                                flexShrink: 0,
-                                marginTop: 5,
-                                opacity: 0.75,
-                              }}
-                            />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-
-                      {/* For */}
-                      <div
-                        style={{
-                          marginTop: 24,
-                          paddingTop: 20,
-                          borderTop: "1px solid rgba(255,255,255,0.06)",
+                          height: "100%",
+                          boxShadow: featured
+                            ? "0 0 0 1px rgba(255,204,0,0.08), 0 24px 64px rgba(0,0,0,0.4)"
+                            : "none",
                         }}
                       >
                         <div
                           style={{
-                            fontSize: 10,
-                            fontWeight: 600,
-                            color: "#a1a1aa",
-                            letterSpacing: "0.08em",
-                            textTransform: "uppercase",
-                            marginBottom: 7,
+                            display: "flex",
+                            alignItems: "flex-start",
+                            justifyContent: "space-between",
+                            marginBottom: 28,
                           }}
                         >
-                          Best for
+                          <div
+                            style={{
+                              fontSize: 64,
+                              fontWeight: 900,
+                              color: accent,
+                              opacity: 0.15,
+                              letterSpacing: "-0.05em",
+                              lineHeight: 1,
+                              userSelect: "none",
+                            }}
+                          >
+                            {num}
+                          </div>
+                          <div
+                            style={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: 11,
+                              background: `${accent}15`,
+                              border: `1px solid ${accent}30`,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <Icon size={18} color={accent} />
+                          </div>
+                        </div>
+
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: accent,
+                            letterSpacing: "0.1em",
+                            textTransform: "uppercase",
+                            marginBottom: 6,
+                          }}
+                        >
+                          {sub}
                         </div>
                         <div
                           style={{
-                            fontSize: 13,
-                            color: "#a1a1aa",
-                            lineHeight: 1.65,
+                            fontSize: 26,
+                            fontWeight: 800,
+                            color: "#fff",
+                            letterSpacing: "-0.03em",
+                            lineHeight: 1.1,
+                            marginBottom: 12,
                           }}
                         >
-                          {forText}
+                          {title}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 14,
+                            color: "#a1a1aa",
+                            lineHeight: 1.65,
+                            marginBottom: 28,
+                          }}
+                        >
+                          {tagline}
+                        </div>
+
+                        <div
+                          style={{
+                            height: 1,
+                            background: "rgba(255,255,255,0.06)",
+                            marginBottom: 20,
+                          }}
+                        />
+
+                        <ul
+                          style={{
+                            listStyle: "none",
+                            margin: 0,
+                            padding: 0,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 11,
+                            flex: 1,
+                          }}
+                        >
+                          {items.map((item) => (
+                            <li
+                              key={item}
+                              style={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: 10,
+                                fontSize: 13,
+                                color: "#c4c4c8",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: 5,
+                                  height: 5,
+                                  borderRadius: "50%",
+                                  background: accent,
+                                  flexShrink: 0,
+                                  marginTop: 5,
+                                  opacity: 0.75,
+                                }}
+                              />
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+
+                        <div
+                          style={{
+                            marginTop: 24,
+                            paddingTop: 20,
+                            borderTop: "1px solid rgba(255,255,255,0.06)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 700,
+                              color: "#6b7280",
+                              letterSpacing: "0.08em",
+                              textTransform: "uppercase",
+                              marginBottom: 6,
+                            }}
+                          >
+                            Best for
+                          </div>
+                          <div
+                            style={{
+                              fontSize: 13,
+                              color: "#d4d4d8",
+                              lineHeight: 1.65,
+                              marginBottom: 18,
+                            }}
+                          >
+                            {forText}
+                          </div>
+                          <button
+                            onClick={() => scrollTo("join")}
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 5,
+                              fontSize: 13,
+                              fontWeight: 600,
+                              color: accent,
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              padding: 0,
+                              transition: "gap 0.15s",
+                            }}
+                            onMouseEnter={(e) => {
+                              (e.currentTarget as HTMLButtonElement).style.gap =
+                                "8px";
+                            }}
+                            onMouseLeave={(e) => {
+                              (e.currentTarget as HTMLButtonElement).style.gap =
+                                "5px";
+                            }}
+                          >
+                            Join this track <ArrowRight size={13} />
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -1477,9 +1650,10 @@ export default function TTSSite() {
         {/* ── LEADERSHIP ── */}
         <section
           id="leadership"
+          className="tts-section-pad"
           style={{ background: "#0c0c0f", padding: "120px 40px" }}
         >
-          <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             <h2
               className="tts-slide"
               style={{
@@ -1490,7 +1664,7 @@ export default function TTSSite() {
                 marginBottom: 12,
               }}
             >
-              Built by builders
+              Founded at USC
             </h2>
             <p
               className="tts-fade"
@@ -1501,10 +1675,11 @@ export default function TTSSite() {
                 transitionDelay: "0.08s",
               }}
             >
-              Two co-founders. One mission.
+              Two co-founders with different strengths, one shared standard.
             </p>
 
             <div
+              className="tts-leadership-grid"
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
@@ -1525,7 +1700,6 @@ export default function TTSSite() {
                       overflow: "hidden",
                     }}
                   >
-                    {/* Photo */}
                     <div
                       style={{
                         position: "relative",
@@ -1536,9 +1710,9 @@ export default function TTSSite() {
                     >
                       <Image
                         src={f.headshot}
-                        alt={f.name}
+                        alt={`${f.name}, ${f.role}`}
                         fill
-                        sizes="50vw"
+                        sizes="(max-width: 768px) 100vw, 50vw"
                         style={{
                           objectFit: "cover",
                           objectPosition: f.position,
@@ -1558,13 +1732,12 @@ export default function TTSSite() {
                       >
                         <div
                           style={{
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: 600,
                             color: f.accent,
                             letterSpacing: "0.08em",
                             textTransform: "uppercase",
                             marginBottom: 4,
-                            opacity: 0.9,
                           }}
                         >
                           {f.role} · {f.focus}
@@ -1581,7 +1754,6 @@ export default function TTSSite() {
                         </div>
                       </div>
                     </div>
-                    {/* Details */}
                     <div style={{ padding: "20px 24px 24px" }}>
                       <div
                         style={{
@@ -1631,23 +1803,22 @@ export default function TTSSite() {
                           display: "inline-flex",
                           alignItems: "center",
                           gap: 5,
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: 600,
                           color: f.accent,
                           textDecoration: "none",
                           transition: "opacity 0.15s",
-                          opacity: 0.8,
                         }}
                         onMouseEnter={(e) => {
                           (e.currentTarget as HTMLAnchorElement).style.opacity =
-                            "1";
+                            "0.7";
                         }}
                         onMouseLeave={(e) => {
                           (e.currentTarget as HTMLAnchorElement).style.opacity =
-                            "0.8";
+                            "1";
                         }}
                       >
-                        View profile <ExternalLink size={10} />
+                        View profile <ExternalLink size={11} />
                       </a>
                     </div>
                   </div>
@@ -1657,13 +1828,147 @@ export default function TTSSite() {
           </div>
         </section>
 
-        {/* ── JOIN ── */}
+        {/* ── FAQ ── */}
         <section
-          id="join"
+          id="faq"
+          className="tts-section-pad"
           style={{ background: "#09090b", padding: "120px 40px" }}
         >
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+            <div style={{ marginBottom: 64 }}>
+              <h2
+                className="tts-slide"
+                style={{
+                  fontSize: "clamp(28px, 4vw, 52px)",
+                  fontWeight: 900,
+                  color: "#fff",
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                Common questions.
+              </h2>
+              <p
+                className="tts-fade"
+                style={{
+                  fontSize: 15,
+                  color: "#a1a1aa",
+                  marginTop: 10,
+                  transitionDelay: "0.1s",
+                }}
+              >
+                Everything you need to decide if TTS is for you.
+              </p>
+            </div>
+
             <div
+              className="tts-faq-grid"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: 16,
+              }}
+            >
+              {FAQ_ITEMS.map(({ q, a }, i) => (
+                <div
+                  key={q}
+                  className="tts-fade"
+                  style={{
+                    background: "#111113",
+                    borderRadius: 12,
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    padding: "24px 28px",
+                    transitionDelay: `${i * 0.08}s`,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 700,
+                      color: "#fff",
+                      marginBottom: 10,
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {q}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 14,
+                      color: "#a1a1aa",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    {a}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div
+              className="tts-fade"
+              style={{
+                marginTop: 24,
+                padding: "20px 28px",
+                borderRadius: 12,
+                background: "rgba(204,0,0,0.04)",
+                border: "1px solid rgba(204,0,0,0.12)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: 16,
+                transitionDelay: "0.5s",
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>
+                  Still have questions?
+                </div>
+                <div style={{ fontSize: 13, color: "#a1a1aa", marginTop: 2 }}>
+                  Reach us at trojantechsolutions@gmail.com
+                </div>
+              </div>
+              <a
+                href="mailto:trojantechsolutions@gmail.com"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  background: "rgba(204,0,0,0.1)",
+                  border: "1px solid rgba(204,0,0,0.2)",
+                  color: "#CC0000",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  transition: "all 0.15s",
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.background =
+                    "rgba(204,0,0,0.18)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.background =
+                    "rgba(204,0,0,0.1)";
+                }}
+              >
+                <Mail size={13} /> Email us
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ── JOIN ── */}
+        <section
+          id="join"
+          className="tts-section-pad"
+          style={{ background: "#0c0c0f", padding: "120px 40px" }}
+        >
+          <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+            <div
+              className="tts-join-grid"
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 400px",
@@ -1671,7 +1976,6 @@ export default function TTSSite() {
                 alignItems: "start",
               }}
             >
-              {/* Left: CTA copy */}
               <div>
                 <h2
                   className="tts-slide"
@@ -1684,9 +1988,9 @@ export default function TTSSite() {
                     marginBottom: 20,
                   }}
                 >
-                  The door is
+                  Your seat
                   <br />
-                  <span style={{ color: "#CC0000" }}>always open.</span>
+                  <span style={{ color: "#CC0000" }}>is waiting.</span>
                 </h2>
                 <p
                   className="tts-fade"
@@ -1703,7 +2007,6 @@ export default function TTSSite() {
                   pick a track, and start building.
                 </p>
 
-                {/* Both CTAs */}
                 <div
                   className="tts-fade"
                   style={{
@@ -1724,7 +2027,6 @@ export default function TTSSite() {
                       padding: "16px 20px",
                       borderRadius: 12,
                       background: "#CC0000",
-                      border: "none",
                       color: "#fff",
                       fontSize: 14,
                       fontWeight: 600,
@@ -1752,7 +2054,7 @@ export default function TTSSite() {
                       </div>
                       <div
                         style={{
-                          fontSize: 11,
+                          fontSize: 12,
                           color: "rgba(255,255,255,0.7)",
                           marginTop: 1,
                         }}
@@ -1803,7 +2105,7 @@ export default function TTSSite() {
                       </div>
                       <div
                         style={{
-                          fontSize: 11,
+                          fontSize: 12,
                           color: "#a1a1aa",
                           marginTop: 1,
                         }}
@@ -1815,7 +2117,6 @@ export default function TTSSite() {
                   </a>
                 </div>
 
-                {/* Checklist */}
                 <div
                   className="tts-fade"
                   style={{
@@ -1849,7 +2150,7 @@ export default function TTSSite() {
                 </div>
               </div>
 
-              {/* Right: email capture */}
+              {/* Email capture */}
               <div
                 className="tts-perspective"
                 style={{ paddingTop: 8, transitionDelay: "0.15s" }}
@@ -1887,13 +2188,9 @@ export default function TTSSite() {
                     </div>
                     <div>
                       <div
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 700,
-                          color: "#fff",
-                        }}
+                        style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}
                       >
-                        Not ready yet?
+                        Stay in the loop
                       </div>
                       <div
                         style={{
@@ -1909,29 +2206,32 @@ export default function TTSSite() {
 
                   {!emailSubmitted ? (
                     <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        if (email.trim() && !emailLoading) {
-                          setEmailLoading(true);
-                          setTimeout(() => {
-                            setEmailLoading(false);
-                            setEmailSubmitted(true);
-                          }, 700);
-                        }
-                      }}
+                      onSubmit={handleEmailSubmit}
                       style={{
                         display: "flex",
                         flexDirection: "column",
                         gap: 8,
                       }}
                     >
+                      <label
+                        htmlFor="notify-email"
+                        style={{
+                          fontSize: 12,
+                          color: "#a1a1aa",
+                          marginBottom: 2,
+                        }}
+                      >
+                        Your email address
+                      </label>
                       <input
+                        id="notify-email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="your@email.com"
+                        placeholder="you@usc.edu"
                         required
                         disabled={emailLoading}
+                        aria-label="Email address for TTS session notifications"
                         style={{
                           width: "100%",
                           padding: "11px 14px",
@@ -1960,29 +2260,32 @@ export default function TTSSite() {
                         style={{
                           padding: "11px",
                           borderRadius: 10,
-                          background: "rgba(204,0,0,0.1)",
-                          border: "1px solid rgba(204,0,0,0.2)",
-                          color: "#CC0000",
+                          background: emailLoading
+                            ? "rgba(204,0,0,0.5)"
+                            : "#CC0000",
+                          border: "none",
+                          color: "#fff",
                           fontSize: 14,
                           fontWeight: 600,
                           cursor: emailLoading ? "not-allowed" : "pointer",
-                          transition: "all 0.15s",
+                          transition: "background 0.15s",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           gap: 7,
+                          minHeight: 44,
                         }}
                         onMouseEnter={(e) => {
-                          if (!emailLoading) {
+                          if (!emailLoading)
                             (
                               e.currentTarget as HTMLButtonElement
-                            ).style.background = "rgba(204,0,0,0.18)";
-                          }
+                            ).style.background = "#aa0000";
                         }}
                         onMouseLeave={(e) => {
-                          (
-                            e.currentTarget as HTMLButtonElement
-                          ).style.background = "rgba(204,0,0,0.1)";
+                          if (!emailLoading)
+                            (
+                              e.currentTarget as HTMLButtonElement
+                            ).style.background = "#CC0000";
                         }}
                       >
                         {emailLoading ? (
@@ -1992,8 +2295,8 @@ export default function TTSSite() {
                                 width: 12,
                                 height: 12,
                                 borderRadius: "50%",
-                                border: "2px solid rgba(204,0,0,0.2)",
-                                borderTopColor: "#CC0000",
+                                border: "2px solid rgba(255,255,255,0.3)",
+                                borderTopColor: "#fff",
                                 animation: "spin 0.7s linear infinite",
                               }}
                             />
@@ -2006,6 +2309,8 @@ export default function TTSSite() {
                     </form>
                   ) : (
                     <div
+                      role="status"
+                      aria-live="polite"
                       style={{
                         padding: "20px 16px",
                         borderRadius: 10,
@@ -2017,6 +2322,7 @@ export default function TTSSite() {
                       <Check
                         size={20}
                         color="#FFCC00"
+                        className="tts-check-appear"
                         style={{ margin: "0 auto 10px", display: "block" }}
                       />
                       <div
@@ -2030,7 +2336,7 @@ export default function TTSSite() {
                         You&apos;re on the list.
                       </div>
                       <div style={{ fontSize: 12, color: "#a1a1aa" }}>
-                        We&apos;ll be in touch.
+                        We&apos;ll reach out when the next session opens.
                       </div>
                     </div>
                   )}
@@ -2042,47 +2348,219 @@ export default function TTSSite() {
 
         {/* ── FOOTER ── */}
         <footer
+          className="tts-footer-wrap"
           style={{
             background: "#09090b",
             borderTop: "1px solid rgba(255,255,255,0.05)",
-            padding: "24px 40px",
+            padding: "48px 40px 32px",
           }}
         >
           <div
+            className="tts-footer-cols"
             style={{
               maxWidth: 1200,
               margin: "0 auto",
               display: "flex",
-              alignItems: "center",
+              alignItems: "flex-start",
               justifyContent: "space-between",
+              gap: 40,
+              marginBottom: 40,
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                color: "#a1a1aa",
-                fontSize: 12,
-              }}
-            >
+            {/* Brand */}
+            <div style={{ maxWidth: 280 }}>
               <div
                 style={{
-                  width: 18,
-                  height: 18,
-                  borderRadius: 5,
-                  background: "rgba(204,0,0,0.08)",
-                  border: "1px solid rgba(204,0,0,0.18)",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
+                  gap: 8,
+                  marginBottom: 12,
                 }}
               >
-                <Zap size={8} color="#CC0000" />
+                <div
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 6,
+                    background: "rgba(204,0,0,0.08)",
+                    border: "1px solid rgba(204,0,0,0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Zap size={10} color="#CC0000" />
+                </div>
+                <span
+                  style={{
+                    fontWeight: 700,
+                    color: "#fff",
+                    fontSize: 13,
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  Trojan Technology Solutions
+                </span>
               </div>
-              Trojan Technology Solutions · USC
+              <p
+                style={{
+                  fontSize: 13,
+                  color: "#a1a1aa",
+                  lineHeight: 1.6,
+                  marginBottom: 16,
+                }}
+              >
+                USC&apos;s builder club. Real AI tools, real products, real
+                client work. Any major welcome.
+              </p>
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TTS on Instagram"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: 12,
+                  color: "#a1a1aa",
+                  textDecoration: "none",
+                  padding: "6px 12px",
+                  borderRadius: 8,
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.color = "#fff";
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor =
+                    "rgba(255,255,255,0.2)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.color =
+                    "#a1a1aa";
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor =
+                    "rgba(255,255,255,0.08)";
+                }}
+              >
+                <ExternalLink size={13} />
+                @trojantechsolutions
+              </a>
             </div>
-            <div style={{ fontSize: 11, color: "#a1a1aa" }}>
+
+            {/* Navigation */}
+            <div>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "#6b7280",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  marginBottom: 16,
+                }}
+              >
+                Navigation
+              </div>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 10 }}
+              >
+                {["Mission", "Tracks", "Team", "FAQ", "Join"].map((label) => (
+                  <button
+                    key={label}
+                    onClick={() => scrollTo(label.toLowerCase())}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      fontSize: 13,
+                      color: "#a1a1aa",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      transition: "color 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.color =
+                        "#fff";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.color =
+                        "#a1a1aa";
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "#6b7280",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  marginBottom: 16,
+                }}
+              >
+                Contact
+              </div>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 10 }}
+              >
+                {[
+                  { label: "Apply as a student", href: APPLICATION_URL },
+                  { label: "Partner with TTS", href: PARTNERSHIP_URL },
+                  {
+                    label: "trojantechsolutions@gmail.com",
+                    href: "mailto:trojantechsolutions@gmail.com",
+                  },
+                ].map(({ label, href }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    style={{
+                      fontSize: 13,
+                      color: "#a1a1aa",
+                      textDecoration: "none",
+                      transition: "color 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLAnchorElement).style.color =
+                        "#fff";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLAnchorElement).style.color =
+                        "#a1a1aa";
+                    }}
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div
+            style={{
+              maxWidth: 1200,
+              margin: "0 auto",
+              paddingTop: 24,
+              borderTop: "1px solid rgba(255,255,255,0.05)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: 12,
+            }}
+          >
+            <div style={{ fontSize: 12, color: "#6b7280" }}>
+              Trojan Technology Solutions · University of Southern California
+            </div>
+            <div style={{ fontSize: 12, color: "#6b7280" }}>
               {new Date().getFullYear()}
             </div>
           </div>

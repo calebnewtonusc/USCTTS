@@ -346,3 +346,28 @@ video[id^="webgazer"] {
   opacity: 1;
   transform: perspective(700px) rotateX(0deg) translateY(0);
 }
+
+/* Prefers-reduced-motion: disable all scroll animations */
+@media (prefers-reduced-motion: reduce) {
+  .tts-fade,
+  .tts-slide,
+  .tts-from-left,
+  .tts-from-right,
+  .tts-scale,
+  .tts-curtain,
+  .tts-perspective {
+    transition: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+  .tts-apply-pulse {
+    animation: none !important;
+  }
+  .tts-check-appear {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: scale(1) !important;
+  }
+}
