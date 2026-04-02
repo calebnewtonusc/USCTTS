@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import {
-  Eye,
   Zap,
   ArrowRight,
   Check,
@@ -180,14 +179,6 @@ const PARTNERSHIP_URL =
   "mailto:trojantechsolutions@gmail.com?subject=Partnership Inquiry";
 const INSTAGRAM_URL = "https://instagram.com/trojantechsolutions";
 
-const NAV_LINKS = [
-  { label: "Mission", id: "mission" },
-  { label: "Tracks", id: "tracks" },
-  { label: "Team", id: "leadership" },
-  { label: "FAQ", id: "faq" },
-  { label: "Join", id: "join" },
-] as const;
-
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function TTSSite() {
   const [gazeActive, setGazeActive] = useState(false);
@@ -199,7 +190,6 @@ export default function TTSSite() {
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [navVisible, setNavVisible] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
   const [heroProgress, setHeroProgress] = useState(0);
   const [scrolled, setScrolled] = useState(false);
@@ -257,7 +247,6 @@ export default function TTSSite() {
         setHeroProgress(prog);
         const pastShip =
           prog > 0.6 || scrollY > sect.offsetTop + sect.offsetHeight;
-        setNavVisible(pastShip && scrollY + winH < docH - 200);
       }
     };
     window.addEventListener("scroll", handle, { passive: true });
@@ -431,7 +420,6 @@ export default function TTSSite() {
   return (
     <>
       <style>{`
-        html { scroll-padding-top: 72px; }
         @media (max-width: 900px) {
           .tts-mission-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
           .tts-join-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
@@ -444,7 +432,6 @@ export default function TTSSite() {
           .tts-section-pad { padding: 80px 20px !important; }
           .tts-nav-dots { display: none !important; }
           .tts-footer-wrap { padding: 40px 20px 24px !important; }
-          .tts-nav-inner { padding: 0 16px !important; }
         }
         @media (hover: none), (pointer: coarse) {
           #tts-cursor-dot, #tts-cursor-ring { display: none !important; }
@@ -624,249 +611,6 @@ export default function TTSSite() {
           fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         }}
       >
-        {/* ── NAV ── */}
-        <nav
-          aria-label="Main navigation"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 50,
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            background: "rgba(9,9,11,0.9)",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
-            transform: navVisible ? "translateY(0)" : "translateY(-100%)",
-            opacity: navVisible ? 1 : 0,
-            transition: "transform 0.3s ease, opacity 0.3s ease",
-          }}
-        >
-          <div
-            className="tts-nav-inner"
-            style={{
-              maxWidth: 1200,
-              margin: "0 auto",
-              padding: "0 40px",
-              height: 56,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              aria-label="Back to top"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 9,
-                cursor: "pointer",
-                background: "none",
-                border: "none",
-              }}
-            >
-              <div
-                style={{
-                  width: 26,
-                  height: 26,
-                  borderRadius: 7,
-                  background: "rgba(204,0,0,0.12)",
-                  border: "1px solid rgba(204,0,0,0.3)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Zap size={12} color="#CC0000" />
-              </div>
-              <span
-                style={{
-                  fontWeight: 700,
-                  color: "#fff",
-                  fontSize: 13,
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                TTS
-              </span>
-            </button>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-              {NAV_LINKS.map(({ label, id }) => {
-                const isTarget = gazeNav.target === id;
-                const isActive = activeSection === id;
-                return (
-                  <button
-                    key={id}
-                    data-gaze-nav={id}
-                    onClick={() => scrollTo(id)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      padding: "6px 12px",
-                      borderRadius: 8,
-                      fontSize: 13,
-                      color: isActive ? "#fff" : "#a1a1aa",
-                      fontWeight: isActive ? 600 : 400,
-                      background: isActive ? "rgba(255,255,255,0.05)" : "none",
-                      border: "none",
-                      cursor: "pointer",
-                      transition: "color 0.15s, background 0.15s",
-                      borderBottom: isActive
-                        ? "1px solid rgba(204,0,0,0.5)"
-                        : "1px solid transparent",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.color =
-                        "#fff";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.color =
-                        isActive ? "#fff" : "#a1a1aa";
-                    }}
-                  >
-                    {gazeActive && (
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        style={{
-                          transform: "rotate(-90deg)",
-                          opacity: isTarget ? 1 : 0,
-                          transition: "opacity 0.2s",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          fill="none"
-                          stroke="rgba(255,204,0,0.15)"
-                          strokeWidth="2.5"
-                        />
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          fill="none"
-                          stroke="#FFCC00"
-                          strokeWidth="2.5"
-                          strokeDasharray={`${gazeNav.progress * ARC} ${ARC}`}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    )}
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              {!gazeActive ? (
-                <button
-                  onClick={startGaze}
-                  title="Enable gaze navigation (requires camera access)"
-                  aria-label="Enable gaze navigation (requires camera access)"
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 8,
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                    color: "#a1a1aa",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                      "rgba(255,204,0,0.08)";
-                    (e.currentTarget as HTMLButtonElement).style.color =
-                      "#FFCC00";
-                    (e.currentTarget as HTMLButtonElement).style.borderColor =
-                      "rgba(255,204,0,0.25)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                      "rgba(255,255,255,0.05)";
-                    (e.currentTarget as HTMLButtonElement).style.color =
-                      "#a1a1aa";
-                    (e.currentTarget as HTMLButtonElement).style.borderColor =
-                      "rgba(255,255,255,0.1)";
-                  }}
-                >
-                  <Eye size={14} />
-                </button>
-              ) : (
-                <div
-                  role="status"
-                  aria-label="Gaze tracking active"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 5,
-                    padding: "4px 10px",
-                    borderRadius: 8,
-                    background: "rgba(255,204,0,0.08)",
-                    border: "1px solid rgba(255,204,0,0.2)",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 5,
-                      height: 5,
-                      borderRadius: "50%",
-                      background: "#FFCC00",
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: "#FFCC00",
-                      fontWeight: 600,
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    Gaze on
-                  </span>
-                </div>
-              )}
-              <button
-                onClick={() => scrollTo("join")}
-                aria-label="Go to join section"
-                style={{
-                  padding: "8px 18px",
-                  borderRadius: 8,
-                  background: "#CC0000",
-                  border: "none",
-                  color: "#fff",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  transition: "background 0.15s",
-                  minHeight: 36,
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background =
-                    "#aa0000";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background =
-                    "#CC0000";
-                }}
-              >
-                Join
-              </button>
-            </div>
-          </div>
-        </nav>
-
         {/* ── HERO ── */}
         <section
           id="hero"
