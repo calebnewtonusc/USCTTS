@@ -220,6 +220,7 @@ function AboutContent() {
 
 // ── Main component ─────────────────────────────────────────────────────────
 export default function VisionWeb() {
+  const [started, setStarted] = useState(false);
   const [ready, setReady] = useState(false);
   const [gazePos, setGazePos] = useState<GazePoint>({ x: -100, y: -100 });
   const [dwellProgress, setDwellProgress] = useState(0);
@@ -418,91 +419,79 @@ export default function VisionWeb() {
     }
   }, []);
 
-  // ── Auto-init camera on mount — no button required ─────────────────────
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    let cancelled = false;
+  // ── Camera init — called from splash button (user gesture = guaranteed prompt) ──
+  const handleStart = useCallback(async () => {
+    setStarted(true);
+    toast.loading("Starting VisionWeb…", { id: "vw-init" });
 
-    async function init() {
-      // Confirm effect is firing
-      toast.loading("Starting VisionWeb…", { id: "vw-init" });
-
-      // Guard: mediaDevices unavailable (non-HTTPS or old browser)
-      if (!navigator?.mediaDevices?.getUserMedia) {
-        toast.error("Camera API unavailable. Requires HTTPS.", {
-          id: "vw-init",
-        });
-        setCameraError(true);
-        return;
-      }
-
-      let stream: MediaStream;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 960 },
-            height: { ideal: 540 },
-            facingMode: "user",
-            frameRate: { ideal: 30 },
-          },
-          audio: false,
-        });
-      } catch (err) {
-        if (cancelled) return;
-        const msg =
-          err instanceof Error && err.name === "NotAllowedError"
-            ? "Camera permission denied. Allow camera access and reload."
-            : "Could not access camera. Check browser settings.";
-        toast.error(msg, { id: "vw-init" });
-        setCameraError(true);
-        return;
-      }
-
-      if (cancelled) {
-        stream.getTracks().forEach((t) => t.stop());
-        return;
-      }
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-
-      toast.success("Camera ready", { id: "vw-init" });
-      setReady(true);
-      setPanels([
-        {
-          id: "welcome",
-          title: "Welcome to VisionWeb",
-          x: 60,
-          y: 100,
-          content: "welcome",
-        },
-        {
-          id: "gestures",
-          title: "Gesture Reference",
-          x: 440,
-          y: 100,
-          content: "gestures",
-        },
-        {
-          id: "focus",
-          title: "System Status",
-          x: 820,
-          y: 100,
-          content: "focus",
-        },
-      ]);
-      startGaze();
-      startHands();
+    if (!navigator?.mediaDevices?.getUserMedia) {
+      toast.error("Camera API unavailable. Requires HTTPS.", { id: "vw-init" });
+      setCameraError(true);
+      return;
     }
 
-    init();
+    let stream: MediaStream;
+    try {
+      // getUserMedia is called synchronously within the user gesture chain — browser MUST show the dialog
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 960 },
+          height: { ideal: 540 },
+          facingMode: "user",
+          frameRate: { ideal: 30 },
+        },
+        audio: false,
+      });
+    } catch (err) {
+      const msg =
+        err instanceof Error && err.name === "NotAllowedError"
+          ? "Camera permission denied. Allow camera access and reload."
+          : "Could not access camera. Check browser settings.";
+      toast.error(msg, { id: "vw-init" });
+      setCameraError(true);
+      return;
+    }
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+      await videoRef.current.play();
+    }
+
+    toast.success("Camera ready", { id: "vw-init" });
+    setReady(true);
+    setPanels([
+      {
+        id: "welcome",
+        title: "Welcome to VisionWeb",
+        x: 60,
+        y: 100,
+        content: "welcome",
+      },
+      {
+        id: "gestures",
+        title: "Gesture Reference",
+        x: 440,
+        y: 100,
+        content: "gestures",
+      },
+      {
+        id: "focus",
+        title: "System Status",
+        x: 820,
+        y: 100,
+        content: "focus",
+      },
+    ]);
+    startGaze();
+    startHands();
+  }, [startGaze, startHands]);
+
+  // ── Cleanup only on unmount ────────────────────────────────────────────────
+  useEffect(() => {
     return () => {
-      cancelled = true;
       cancelAnimationFrame(animIdRef.current);
     };
-  }, []); // [] — run once on mount only
+  }, []);
 
   const closePanel = useCallback((id: string) => {
     setPanels((p) => p.filter((panel) => panel.id !== id));
@@ -584,6 +573,91 @@ export default function VisionWeb() {
         muted
         className="absolute -top-[9999px] -left-[9999px] w-px h-px"
       />
+
+      {/* Vision Pro-style splash — shown before user clicks Start */}
+      {!started && (
+        <div
+          className="fixed inset-0 z-[9500] flex flex-col items-center justify-center bg-zinc-950"
+          style={{
+            background:
+              "radial-gradient(ellipse at 50% 40%, rgba(99,102,241,0.18), transparent 65%), #09090b",
+          }}
+        >
+          {/* Dot grid overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
+              backgroundSize: "28px 28px",
+            }}
+          />
+
+          <div className="relative z-10 flex flex-col items-center text-center max-w-sm px-6">
+            {/* Icon */}
+            <div
+              className="w-20 h-20 rounded-[28px] flex items-center justify-center mb-8"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.15))",
+                border: "1px solid rgba(99,102,241,0.3)",
+                boxShadow:
+                  "0 0 40px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.08)",
+              }}
+            >
+              <Eye size={36} className="text-indigo-400" />
+            </div>
+
+            {/* Title */}
+            <h1 className="text-3xl font-bold tracking-tight text-white mb-2">
+              VisionWeb
+            </h1>
+            <p className="text-zinc-400 text-sm leading-relaxed mb-10">
+              Spatial computing in your browser. Controlled by your eyes and
+              hands. No headset required.
+            </p>
+
+            {/* Capability pills */}
+            <div className="flex gap-2 mb-10 flex-wrap justify-center">
+              {[
+                { icon: Eye, label: "Eye tracking" },
+                { icon: Hand, label: "Gesture control" },
+                { icon: Zap, label: "Pinch to click" },
+              ].map(({ icon: Icon, label }) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "rgba(255,255,255,0.5)",
+                  }}
+                >
+                  <Icon size={11} />
+                  {label}
+                </div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <button
+              onClick={handleStart}
+              className="w-full py-3.5 rounded-2xl font-semibold text-white text-sm transition-all duration-200 cursor-pointer active:scale-[0.98]"
+              style={{
+                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                boxShadow:
+                  "0 4px 24px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.12)",
+              }}
+            >
+              Start VisionWeb
+            </button>
+
+            <p className="mt-4 text-[11px] text-zinc-600">
+              Camera access required. Your feed never leaves your browser.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Camera error state */}
       {cameraError && (
