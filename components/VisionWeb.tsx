@@ -30,7 +30,7 @@ interface PanelDef {
   content: "welcome" | "gestures" | "focus" | "about";
 }
 
-// ── Focus engine (module-level, not React state) ───────────────────────────
+// ── Focus engine (module-level) ────────────────────────────────────────────
 const STABILITY_MS = 180;
 const SWITCH_DIST = 60;
 let _feCurrent: Element | null = null;
@@ -89,20 +89,35 @@ function feUpdate(x: number, y: number, now: number) {
   };
 }
 
+// ── Scroll helper — find nearest scrollable ancestor ──────────────────────
+function getScrollTarget(el: Element | null): Element | Window {
+  let cur = el;
+  while (cur && cur !== document.documentElement) {
+    const s = window.getComputedStyle(cur);
+    if (
+      (s.overflowY === "scroll" || s.overflowY === "auto") &&
+      cur.scrollHeight > cur.clientHeight
+    )
+      return cur;
+    cur = cur.parentElement;
+  }
+  return window;
+}
+
 // ── Panel content components ───────────────────────────────────────────────
 function WelcomeContent() {
   return (
     <div className="space-y-3">
       <p className="text-sm text-zinc-400 leading-relaxed">
-        VisionWeb is a spatial browser interface controlled by your eyes and
-        hands. Look at things to focus them. Pinch to select.
+        VisionWeb is a spatial interface controlled by your eyes and hands. Look
+        at things to focus them. Pinch to select. Pinch and drag to scroll.
       </p>
       <div className="space-y-2">
         {[
-          ["Eye tracking", "Gaze cursor follows your eyes"],
-          ["Pinch to select", "Thumb + index finger pinch"],
-          ["Long press", "Hold pinch for 220ms"],
-          ["Drag", "Pinch + move to reposition panels"],
+          ["Look", "Gaze cursor follows your eyes"],
+          ["Pinch", "Thumb + index finger = click"],
+          ["Pinch + drag", "Move hand up/down to scroll"],
+          ["Dwell", "Stare 1.2s at any target to click"],
         ].map(([k, v]) => (
           <div key={k} className="flex gap-3 items-start">
             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 flex-shrink-0" />
@@ -119,9 +134,10 @@ function WelcomeContent() {
 
 function GestureContent() {
   const rows: [string, string, string][] = [
-    ["Pinch", "Index + thumb close", "Select / click"],
+    ["Pinch", "Index + thumb close", "Click / select"],
+    ["Pinch + drag up", "Pinch, move hand up", "Scroll down"],
+    ["Pinch + drag down", "Pinch, move hand down", "Scroll up"],
     ["Hold pinch", "Hold 220ms", "Long press"],
-    ["Drag", "Pinch + move", "Reposition panel"],
     ["Two-hand pinch", "Both hands", "Zoom + rotate"],
   ];
   return (
@@ -204,9 +220,7 @@ function AboutContent() {
 
 // ── Main component ─────────────────────────────────────────────────────────
 export default function VisionWeb() {
-  const [stage, setStage] = useState<"permission" | "calibration" | "app">(
-    "permission",
-  );
+  const [ready, setReady] = useState(false);
   const [gazePos, setGazePos] = useState<GazePoint>({ x: -100, y: -100 });
   const [dwellProgress, setDwellProgress] = useState(0);
   const [gazeActive, setGazeActive] = useState(false);
@@ -214,9 +228,9 @@ export default function VisionWeb() {
   const [fps, setFps] = useState(0);
   const [debugOpen, setDebugOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [calProgress, setCalProgress] = useState(0);
   const [panels, setPanels] = useState<PanelDef[]>([]);
   const [dwellMs, setDwellMs] = useState(1200);
+  const [cameraError, setCameraError] = useState(false);
   const dwellFiredRef = useRef(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -227,56 +241,24 @@ export default function VisionWeb() {
   const gestureRecRef = useRef<unknown>(null);
   const animIdRef = useRef<number>(0);
   const lastVideoTime = useRef(-1);
-  // FIX #2: track WebGazer load state as a ref (not state) to avoid re-renders
   const webgazerReadyRef = useRef(false);
-  // FIX #5: guard against double-init
   const gazeStartedRef = useRef(false);
   const handsStartedRef = useRef(false);
 
-  // Sync dwell time to focus engine
   useEffect(() => {
     _feDwellMs = dwellMs;
   }, [dwellMs]);
 
-  // (no scroll-aware navbar — this is a fixed full-screen app)
-
-  // Init camera
-  const startCamera = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 960 },
-          height: { ideal: 540 },
-          facingMode: "user",
-          frameRate: { ideal: 30 },
-        },
-        audio: false,
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-      return true;
-    } catch {
-      toast.error("Camera access denied. VisionWeb requires webcam access.");
-      return false;
-    }
-  }, []);
-
-  // Init WebGazer — FIX #2: wait for webgazer to be ready
+  // ── WebGazer init ──────────────────────────────────────────────────────
   const startGaze = useCallback(async () => {
-    // FIX #5: guard double-init
     if (gazeStartedRef.current) return;
 
-    // Wait up to 5s for WebGazer script to load
     let waited = 0;
-    while (!webgazerReadyRef.current && waited < 5000) {
+    while (!webgazerReadyRef.current && waited < 8000) {
       await new Promise((r) => setTimeout(r, 100));
       waited += 100;
-      // also check if webgazer is actually on window
-      if ((window as unknown as Record<string, unknown>).webgazer) {
+      if ((window as unknown as Record<string, unknown>).webgazer)
         webgazerReadyRef.current = true;
-      }
     }
 
     const wg = (window as unknown as { webgazer?: unknown }).webgazer as
@@ -291,17 +273,10 @@ export default function VisionWeb() {
         }
       | undefined;
 
-    if (!wg) {
-      toast.error("WebGazer failed to load. Check your connection.");
-      return;
-    }
+    if (!wg) return;
 
     try {
       gazeStartedRef.current = true;
-      toast.loading("Starting eye tracking…", {
-        id: "gaze-init",
-        duration: 8000,
-      });
       await wg
         .setGazeListener((data) => {
           if (!data) return;
@@ -309,11 +284,9 @@ export default function VisionWeb() {
           setGazePos({ x: data.x, y: data.y });
           const r = feUpdate(data.x, data.y, now);
           setDwellProgress(r.dwellProgress);
-          // Fire dwell click when progress completes
           if (r.dwellProgress >= 1 && r.target && !dwellFiredRef.current) {
             dwellFiredRef.current = true;
             (r.target as HTMLElement).click();
-            // Reset dwell start so it doesn't fire again immediately
             _feDwellStart = now;
             setTimeout(() => {
               dwellFiredRef.current = false;
@@ -328,24 +301,17 @@ export default function VisionWeb() {
       wg.showFaceFeedbackBox(false);
       wg.showPredictionPoints(false);
       setGazeActive(true);
-      toast.success("Eye tracking active", { id: "gaze-init" });
+      toast.success("Eye tracking active");
     } catch {
       gazeStartedRef.current = false;
-      toast.error("Eye tracking failed to start.", { id: "gaze-init" });
     }
   }, []);
 
-  // Init MediaPipe hands
+  // ── MediaPipe hands init ───────────────────────────────────────────────
   const startHands = useCallback(async () => {
-    // FIX #5: guard double-init
-    if (handsStartedRef.current) return;
-    if (!videoRef.current) return;
-
+    if (handsStartedRef.current || !videoRef.current) return;
     handsStartedRef.current = true;
-    toast.loading("Loading hand tracking…", {
-      id: "hands-init",
-      duration: 20000,
-    });
+
     try {
       const { GestureRecognizer, FilesetResolver } = await import(
         // @ts-expect-error CDN dynamic import
@@ -365,9 +331,10 @@ export default function VisionWeb() {
       });
       gestureRecRef.current = rec;
       setHandsActive(true);
-      toast.success("Hand tracking active", { id: "hands-init" });
+      toast.success("Hand tracking active");
 
       const video = videoRef.current;
+
       function loop() {
         animIdRef.current = requestAnimationFrame(loop);
         if (!video || video.readyState < 2) return;
@@ -403,7 +370,27 @@ export default function VisionWeb() {
               const detector =
                 side === "left" ? pinchLeft.current : pinchRight.current;
               const result = detector.update(lm, now);
-              // Wire pinch "released" state to a click at the pinch center
+
+              // SCROLL: pinch + drag — Vision Pro style
+              if (result.state === "dragging" && result.center) {
+                // x is mirrored (selfie cam), y is not
+                const sx = (1 - result.center.x) * window.innerWidth;
+                const sy = result.center.y * window.innerHeight;
+                const el = document.elementFromPoint(sx, sy);
+                // delta.y < 0 = hand moved up = scroll content down
+                const scrollAmount = -result.delta.y * 700;
+                const target = getScrollTarget(el);
+                if (target === window) {
+                  window.scrollBy({ top: scrollAmount, behavior: "instant" });
+                } else {
+                  (target as Element).scrollBy({
+                    top: scrollAmount,
+                    behavior: "instant",
+                  });
+                }
+              }
+
+              // CLICK: pinch release
               if (
                 result.changed &&
                 result.state === "released" &&
@@ -423,44 +410,79 @@ export default function VisionWeb() {
           /* ignore per-frame errors */
         }
       }
+
       loop();
     } catch {
       handsStartedRef.current = false;
-      toast.error("Hand tracking failed to initialize.", { id: "hands-init" });
+      toast.error("Hand tracking failed to initialize.");
     }
   }, []);
 
-  const handlePermissionGrant = useCallback(async () => {
-    const ok = await startCamera();
-    if (!ok) return;
-    setStage("calibration");
-  }, [startCamera]);
+  // ── Auto-init camera on mount — no button required ─────────────────────
+  useEffect(() => {
+    let cancelled = false;
 
-  const handleCalibrationDone = useCallback(() => {
-    // Show panels immediately — don't block on tracking startup
-    setStage("app");
-    setPanels([
-      { id: "welcome", title: "Welcome", x: 60, y: 120, content: "welcome" },
-      {
-        id: "gestures",
-        title: "Gesture Reference",
-        x: 440,
-        y: 120,
-        content: "gestures",
-      },
-      { id: "focus", title: "System Status", x: 820, y: 120, content: "focus" },
-    ]);
-    // Start tracking in the background — panels don't wait on this
-    startGaze();
-    startHands();
+    async function init() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 960 },
+            height: { ideal: 540 },
+            facingMode: "user",
+            frameRate: { ideal: 30 },
+          },
+          audio: false,
+        });
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+        setReady(true);
+        setPanels([
+          {
+            id: "welcome",
+            title: "Welcome to VisionWeb",
+            x: 60,
+            y: 100,
+            content: "welcome",
+          },
+          {
+            id: "gestures",
+            title: "Gesture Reference",
+            x: 440,
+            y: 100,
+            content: "gestures",
+          },
+          {
+            id: "focus",
+            title: "System Status",
+            x: 820,
+            y: 100,
+            content: "focus",
+          },
+        ]);
+        startGaze();
+        startHands();
+      } catch {
+        if (!cancelled) {
+          setCameraError(true);
+          toast.error(
+            "Camera access denied. VisionWeb requires webcam access.",
+          );
+        }
+      }
+    }
+
+    init();
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(animIdRef.current);
+    };
   }, [startGaze, startHands]);
-
-  // FIX #4: recalibrate goes back to calibration screen properly
-  const handleRecalibrate = useCallback(() => {
-    setCalProgress(0);
-    setSettingsOpen(false);
-    setStage("calibration");
-  }, []);
 
   const closePanel = useCallback((id: string) => {
     setPanels((p) => p.filter((panel) => panel.id !== id));
@@ -483,18 +505,6 @@ export default function VisionWeb() {
     [],
   );
 
-  const CAL_POINTS: [number, number][] = [
-    [10, 10],
-    [50, 10],
-    [90, 10],
-    [10, 50],
-    [50, 50],
-    [90, 50],
-    [10, 90],
-    [50, 90],
-    [90, 90],
-  ];
-
   const renderPanelContent = (def: PanelDef) => {
     switch (def.content) {
       case "welcome":
@@ -514,7 +524,6 @@ export default function VisionWeb() {
     }
   };
 
-  // ── Toolbar items ──────────────────────────────────────────────────────
   type ToolbarItem = [
     React.ComponentType<{ size: number; className?: string }>,
     string,
@@ -538,7 +547,6 @@ export default function VisionWeb() {
 
   return (
     <>
-      {/* FIX #2: mark WebGazer as ready when script loads */}
       <Script
         src="https://webgazer.cs.brown.edu/webgazer.js"
         strategy="afterInteractive"
@@ -557,140 +565,78 @@ export default function VisionWeb() {
         className="absolute -top-[9999px] -left-[9999px] w-px h-px"
       />
 
-      {/* Nav — always visible during app stage */}
-      <nav
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-zinc-950/80 border-b border-zinc-800/50 px-6 py-3 flex items-center justify-between"
-        style={{
-          transform: stage === "app" ? "translateY(0)" : "translateY(-100%)",
-          opacity: stage === "app" ? 1 : 0,
-          transition: "transform 0.3s ease, opacity 0.3s ease",
-        }}
-      >
-        <span className="font-bold text-sm tracking-tight text-white flex items-center gap-2">
-          <Eye size={16} className="text-indigo-400" /> VisionWeb
-        </span>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setSettingsOpen((s) => !s)}
-            className="p-2 rounded-lg hover:bg-white/[0.07] text-zinc-400 hover:text-white transition-all duration-150 cursor-pointer"
-          >
-            <Settings size={15} />
-          </button>
-          <button
-            onClick={() => setDebugOpen((s) => !s)}
-            className="p-2 rounded-lg hover:bg-white/[0.07] text-zinc-400 hover:text-white transition-all duration-150 cursor-pointer"
-          >
-            <Bug size={15} />
-          </button>
-        </div>
-      </nav>
-
-      {/* ── PERMISSION MODAL ── */}
-      {stage === "permission" && (
-        <div className="fixed inset-0 z-[8000] flex items-center justify-center bg-black/85 backdrop-blur-xl">
-          <div className="glass rounded-3xl p-10 max-w-md w-[calc(100%-48px)] text-center shadow-[0_32px_80px_rgba(0,0,0,0.6)]">
-            <div className="w-16 h-16 rounded-[18px] bg-indigo-500/15 flex items-center justify-center mx-auto mb-5">
-              <Eye size={32} className="text-indigo-400" />
+      {/* Camera error state */}
+      {cameraError && (
+        <div className="fixed inset-0 z-[8000] flex items-center justify-center bg-zinc-950">
+          <div className="text-center max-w-sm px-6">
+            <div className="w-14 h-14 rounded-[18px] bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+              <Eye size={28} className="text-red-400" />
             </div>
-            <h2 className="text-2xl font-bold mb-2">Camera Required</h2>
-            <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-              VisionWeb uses your webcam to track your eyes and hands.
-              Everything runs locally on your device.
-            </p>
-            {/* FIX #1: use explicit static classes, not dynamic template literals */}
-            <div className="space-y-2.5 mb-7 text-left">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
-                  <Eye size={15} className="text-indigo-400" />
-                </div>
-                <span className="text-sm text-zinc-300">
-                  Eye tracking via WebGazer.js
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-violet-500/10 flex items-center justify-center flex-shrink-0">
-                  <Hand size={15} className="text-violet-400" />
-                </div>
-                <span className="text-sm text-zinc-300">
-                  Hand gestures via MediaPipe
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                  <Zap size={15} className="text-emerald-400" />
-                </div>
-                <span className="text-sm text-zinc-300">
-                  Zero data leaves your device
-                </span>
-              </div>
-            </div>
-            <button
-              onClick={handlePermissionGrant}
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-lg shadow-indigo-500/25 cursor-pointer"
-            >
-              Enable Camera Access
-            </button>
-            <p className="text-zinc-600 text-xs mt-3">
-              HTTPS required for webcam access
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* ── CALIBRATION ── */}
-      {stage === "calibration" && (
-        <div className="fixed inset-0 z-[9990] flex flex-col items-center justify-center bg-zinc-950">
-          <div className="text-center mb-8">
-            <div className="text-indigo-400 text-xs font-semibold uppercase tracking-widest mb-3">
-              Eye Tracking Calibration
-            </div>
-            <h2 className="text-3xl font-bold mb-2">
-              Look at each dot and click it
+            <h2 className="text-xl font-bold text-white mb-2">
+              Camera blocked
             </h2>
-            <p className="text-zinc-500 text-sm">
-              Keep your head still. Look directly at the dot before clicking.
+            <p className="text-zinc-400 text-sm leading-relaxed mb-5">
+              VisionWeb needs webcam access. Allow camera in your browser
+              settings and reload the page.
             </p>
-            <div className="text-indigo-400 text-lg font-semibold mt-3">
-              {calProgress} / 9
-            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-2.5 rounded-xl transition-all duration-200 cursor-pointer"
+            >
+              Reload
+            </button>
           </div>
-          <div className="relative w-[min(700px,88vw)] h-[min(420px,55vh)] bg-white/[0.03] border border-white/[0.07] rounded-2xl">
-            {CAL_POINTS.map(([px, py], i) => (
-              <button
-                key={i}
-                className="absolute w-5 h-5 rounded-full bg-indigo-500 border-2 border-white cursor-pointer transition-all duration-150 hover:scale-150 shadow-[0_0_20px_rgba(99,102,241,0.8)]"
-                style={{
-                  left: `${px}%`,
-                  top: `${py}%`,
-                  transform: "translate(-50%,-50%)",
-                }}
-                onClick={(e) => {
-                  const btn = e.currentTarget;
-                  btn.style.background = "#22c55e";
-                  btn.style.boxShadow = "0 0 24px rgba(34,197,94,0.8)";
-                  btn.disabled = true;
-                  // FIX #3: use functional update to avoid stale closure
-                  setCalProgress((prev) => {
-                    const next = prev + 1;
-                    if (next >= 9) setTimeout(handleCalibrationDone, 500);
-                    return next;
-                  });
-                }}
-              />
-            ))}
-          </div>
-          <button
-            onClick={handleCalibrationDone}
-            className="mt-6 text-zinc-600 text-sm underline cursor-pointer hover:text-zinc-400 transition-colors"
-          >
-            Skip calibration
-          </button>
         </div>
       )}
 
-      {/* ── MAIN APP ── */}
-      {stage === "app" && (
+      {/* Loading state — while camera is starting */}
+      {!ready && !cameraError && (
+        <div className="fixed inset-0 z-[7000] flex items-center justify-center bg-zinc-950">
+          <div className="text-center">
+            <div className="w-14 h-14 rounded-[18px] bg-indigo-500/10 flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <Eye size={28} className="text-indigo-400" />
+            </div>
+            <p className="text-zinc-400 text-sm">Requesting camera access…</p>
+          </div>
+        </div>
+      )}
+
+      {/* Main app */}
+      {ready && (
         <>
+          {/* Nav */}
+          <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-zinc-950/80 border-b border-zinc-800/50 px-6 py-3 flex items-center justify-between">
+            <span className="font-bold text-sm tracking-tight text-white flex items-center gap-2">
+              <Eye size={16} className="text-indigo-400" /> VisionWeb
+            </span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <div
+                  className={`w-1.5 h-1.5 rounded-full ${gazeActive ? "bg-emerald-400" : "bg-zinc-600"}`}
+                />
+                {gazeActive ? "Eyes active" : "Calibrating…"}
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                <div
+                  className={`w-1.5 h-1.5 rounded-full ${handsActive ? "bg-violet-400" : "bg-zinc-600"}`}
+                />
+                {handsActive ? "Hands active" : "Loading…"}
+              </div>
+              <button
+                onClick={() => setSettingsOpen((s) => !s)}
+                className="p-2 rounded-lg hover:bg-white/[0.07] text-zinc-400 hover:text-white transition-all duration-150 cursor-pointer"
+              >
+                <Settings size={15} />
+              </button>
+              <button
+                onClick={() => setDebugOpen((s) => !s)}
+                className="p-2 rounded-lg hover:bg-white/[0.07] text-zinc-400 hover:text-white transition-all duration-150 cursor-pointer"
+              >
+                <Bug size={15} />
+              </button>
+            </div>
+          </nav>
+
           {/* Background */}
           <div
             className="fixed inset-0 -z-10"
@@ -813,7 +759,6 @@ export default function VisionWeb() {
               </div>
               <div className="space-y-4 text-xs text-zinc-400">
                 <div>
-                  {/* FIX #6: dwellMs is React state so it updates in UI */}
                   <div className="flex justify-between mb-1">
                     <span>Dwell time</span>
                     <span className="text-zinc-300">{dwellMs}ms</span>
@@ -839,20 +784,36 @@ export default function VisionWeb() {
                     />
                   </button>
                 </div>
-                <div className="pt-2 border-t border-white/[0.06]">
-                  {/* FIX #4: recalibrate goes back to calibration screen */}
-                  <button
-                    onClick={handleRecalibrate}
-                    className="w-full text-xs text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer"
-                  >
-                    Recalibrate eye tracking
-                  </button>
-                </div>
               </div>
+            </div>
+          )}
+
+          {/* Hint — calibrate by clicking around */}
+          {gazeActive && (
+            <div
+              className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 px-4 py-2 rounded-full glass text-xs text-zinc-500 pointer-events-none"
+              style={{ animation: "fadeOut 1s ease 4s forwards" }}
+            >
+              Click around the screen to improve gaze accuracy
             </div>
           )}
         </>
       )}
+
+      <style>{`
+        @keyframes fadeOut {
+          to { opacity: 0; }
+        }
+        /* Force-hide all WebGazer DOM elements */
+        #webgazerVideoContainer,
+        #webgazerFaceOverlay,
+        #webgazerFaceFeedbackBox,
+        #webgazer-loading-screen,
+        #gazeDot,
+        video[id^="webgazer"] {
+          display: none !important;
+        }
+      `}</style>
     </>
   );
 }
