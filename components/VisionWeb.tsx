@@ -244,6 +244,7 @@ export default function VisionWeb() {
   const fpsFrames = useRef(0);
   const fpsLast = useRef(performance.now());
   const gestureRecRef = useRef<unknown>(null);
+  const handsRef = useRef<{ close: () => void } | null>(null);
   const animIdRef = useRef<number>(0);
   const lastVideoTime = useRef(-1);
   const webgazerReadyRef = useRef(false);
@@ -268,6 +269,9 @@ export default function VisionWeb() {
       _feCurrent?.classList.remove("gaze-focus");
       _feCurrent = null;
       _feCandidate = null;
+      // Stop @mediapipe/hands if started
+      handsRef.current?.close();
+      handsRef.current = null;
       // Tell WebGazer to stop if it started
       const wg = (window as unknown as Record<string, unknown>).webgazer as
         | { end?: () => void }
@@ -315,15 +319,16 @@ export default function VisionWeb() {
     try {
       gazeStartedRef.current = true;
 
-      // WebGazer will call its own getUserMedia — that's fine, camera permission
-      // is already granted so it won't show a dialog. Do NOT call setVideoElement;
-      // it does not exist on the Brown CDN build of WebGazer.
-
-      // Hide all WebGazer visual elements BEFORE begin()
-      wg.showVideo(false);
-      wg.showFaceOverlay(false);
-      wg.showFaceFeedbackBox(false);
-      wg.showPredictionPoints(false);
+      // If this CDN build has setVideoElement (v2.1+), use it to share our
+      // existing stream so WebGazer doesn't call getUserMedia a second time.
+      // If the method doesn't exist, WebGazer gets its own stream — that's fine
+      // since camera permission is already granted.
+      const wgAny = wg as unknown as Record<string, unknown>;
+      if (typeof wgAny.setVideoElement === "function" && videoRef.current) {
+        (wgAny.setVideoElement as (v: HTMLVideoElement) => void)(
+          videoRef.current,
+        );
+      }
 
       await wg
         .setGazeListener((data) => {
@@ -353,6 +358,12 @@ export default function VisionWeb() {
         })
         .begin();
 
+      // Hide WebGazer's injected UI elements AFTER begin() — they don't exist before
+      wg.showVideo(false);
+      wg.showFaceOverlay(false);
+      wg.showFaceFeedbackBox(false);
+      wg.showPredictionPoints(false);
+
       setGazeActive(true);
       toast.success("Eye tracking active");
     } catch (err) {
@@ -362,53 +373,116 @@ export default function VisionWeb() {
     }
   }, []);
 
-  // ── MediaPipe hands init ───────────────────────────────────────────────
+  // ── MediaPipe hands init — uses @mediapipe/hands v0.4 (stable since 2021) ──
   const startHands = useCallback(async () => {
     if (handsStartedRef.current || !videoRef.current) return;
     handsStartedRef.current = true;
 
     try {
-      // Use HandLandmarker (simpler than GestureRecognizer — all we need is
-      // landmarks for PinchDetector) and tasks-vision@0.10.14 which fixed the
-      // "e.x is not a function" WebGL init bug present in 0.10.3
-      const { HandLandmarker, FilesetResolver } = await import(
-        // @ts-expect-error CDN dynamic import
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs"
-      );
-      const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm",
-      );
+      // Load @mediapipe/hands via script tag — more reliable than ES module
+      // import for WASM-based libraries; avoids CDN WASM/JS version mismatch
+      await new Promise<void>((resolve, reject) => {
+        if ((window as unknown as Record<string, unknown>).Hands) {
+          resolve();
+          return;
+        }
+        const s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js";
+        s.crossOrigin = "anonymous";
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error("Failed to load @mediapipe/hands"));
+        document.head.appendChild(s);
+      });
 
-      const modelPath =
-        "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
+      type HandLandmark = { x: number; y: number; z: number };
+      type HandsResults = {
+        multiHandLandmarks?: HandLandmark[][];
+        multiHandedness?: { label: string; score: number }[];
+      };
+      type HandsInstance = {
+        setOptions: (o: Record<string, unknown>) => void;
+        onResults: (cb: (r: HandsResults) => void) => void;
+        send: (i: { image: HTMLVideoElement }) => Promise<void>;
+        close: () => void;
+      };
 
-      // Try GPU first — falls back to CPU if WebGL/GPU delegate unavailable
-      let rec: unknown;
-      try {
-        rec = await HandLandmarker.createFromOptions(vision, {
-          baseOptions: { modelAssetPath: modelPath, delegate: "GPU" },
-          runningMode: "VIDEO",
-          numHands: 2,
+      const HandsCtor = (
+        window as unknown as {
+          Hands: new (o: Record<string, unknown>) => HandsInstance;
+        }
+      ).Hands;
+
+      const hi = new HandsCtor({
+        locateFile: (file: string) =>
+          `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+      });
+
+      hi.setOptions({
+        maxNumHands: 2,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5,
+      });
+
+      hi.onResults((results: HandsResults) => {
+        const now = performance.now();
+
+        if (
+          !results.multiHandLandmarks ||
+          results.multiHandLandmarks.length === 0
+        ) {
+          pinchLeft.current.update(null, now);
+          pinchRight.current.update(null, now);
+          return;
+        }
+
+        results.multiHandLandmarks.forEach((lm, i) => {
+          const side =
+            results.multiHandedness?.[i]?.label?.toLowerCase() ?? "right";
+          const detector =
+            side === "left" ? pinchLeft.current : pinchRight.current;
+          const result = detector.update(lm, now);
+
+          // SCROLL: pinch + drag — Vision Pro style
+          if (result.state === "dragging" && result.center) {
+            const sx = (1 - result.center.x) * window.innerWidth;
+            const sy = result.center.y * window.innerHeight;
+            const el = document.elementFromPoint(sx, sy);
+            const rawScroll = -result.delta.y * 700;
+            const scrollAmount =
+              Math.sign(rawScroll) * Math.min(Math.abs(rawScroll), 220);
+            const target = getScrollTarget(el);
+            if (target === window) {
+              window.scrollBy({ top: scrollAmount, behavior: "instant" });
+            } else {
+              (target as Element).scrollBy({
+                top: scrollAmount,
+                behavior: "instant",
+              });
+            }
+          }
+
+          // CLICK: pinch release
+          if (result.changed && result.state === "released" && result.center) {
+            const sx = (1 - result.center.x) * window.innerWidth;
+            const sy = result.center.y * window.innerHeight;
+            const el = document.elementFromPoint(sx, sy);
+            if (el) (el as HTMLElement).click();
+          }
         });
-      } catch {
-        rec = await HandLandmarker.createFromOptions(vision, {
-          baseOptions: { modelAssetPath: modelPath, delegate: "CPU" },
-          runningMode: "VIDEO",
-          numHands: 2,
-        });
-      }
+      });
 
-      gestureRecRef.current = rec;
+      handsRef.current = hi;
+      gestureRecRef.current = hi;
       setHandsActive(true);
       toast.success("Hand tracking active");
 
       const video = videoRef.current;
+      let sending = false;
 
       function loop() {
         animIdRef.current = requestAnimationFrame(loop);
-        if (!video || video.readyState < 2) return;
-        if (video.currentTime === lastVideoTime.current) return;
-        lastVideoTime.current = video.currentTime;
+        if (!video || video.readyState < 2 || sending) return;
 
         const now = performance.now();
         fpsFrames.current++;
@@ -418,69 +492,14 @@ export default function VisionWeb() {
           fpsLast.current = now;
         }
 
-        try {
-          const results = (
-            gestureRecRef.current as {
-              detectForVideo: (
-                v: HTMLVideoElement,
-                t: number,
-              ) => {
-                landmarks?: { x: number; y: number; z?: number }[][];
-                handednesses?: { categoryName: string }[][];
-              };
-            }
-          ).detectForVideo(video, now);
-
-          if (results.landmarks) {
-            results.landmarks.forEach((lm, i) => {
-              const side =
-                results.handednesses?.[i]?.[0]?.categoryName?.toLowerCase() ??
-                "right";
-              const detector =
-                side === "left" ? pinchLeft.current : pinchRight.current;
-              const result = detector.update(lm, now);
-
-              // SCROLL: pinch + drag — Vision Pro style
-              if (result.state === "dragging" && result.center) {
-                // x is mirrored (selfie cam), y is not
-                const sx = (1 - result.center.x) * window.innerWidth;
-                const sy = result.center.y * window.innerHeight;
-                const el = document.elementFromPoint(sx, sy);
-                // delta.y < 0 = hand moved up = scroll content down
-                // Cap velocity to prevent runaway scroll
-                const rawScroll = -result.delta.y * 700;
-                const scrollAmount =
-                  Math.sign(rawScroll) * Math.min(Math.abs(rawScroll), 220);
-                const target = getScrollTarget(el);
-                if (target === window) {
-                  window.scrollBy({ top: scrollAmount, behavior: "instant" });
-                } else {
-                  (target as Element).scrollBy({
-                    top: scrollAmount,
-                    behavior: "instant",
-                  });
-                }
-              }
-
-              // CLICK: pinch release
-              if (
-                result.changed &&
-                result.state === "released" &&
-                result.center
-              ) {
-                const sx = (1 - result.center.x) * window.innerWidth;
-                const sy = result.center.y * window.innerHeight;
-                const el = document.elementFromPoint(sx, sy);
-                if (el) (el as HTMLElement).click();
-              }
-            });
-          } else {
-            pinchLeft.current.update(null, now);
-            pinchRight.current.update(null, now);
-          }
-        } catch {
-          /* ignore per-frame errors */
-        }
+        sending = true;
+        hi.send({ image: video })
+          .then(() => {
+            sending = false;
+          })
+          .catch(() => {
+            sending = false;
+          });
       }
 
       loop();
@@ -643,7 +662,7 @@ export default function VisionWeb() {
           would call getUserMedia before the user clicks Start otherwise */}
       {ready && (
         <Script
-          src="https://webgazer.cs.brown.edu/webgazer.js"
+          src="https://cdn.jsdelivr.net/npm/webgazer@2.1.0/dist/webgazer.js"
           strategy="afterInteractive"
           onReady={() => {
             webgazerReadyRef.current = true;
