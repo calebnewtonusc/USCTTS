@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import Script from "next/script";
 import {
   Eye,
@@ -220,6 +226,38 @@ function AboutContent() {
 
 // ── Main component ─────────────────────────────────────────────────────────
 export default function VisionWeb() {
+  // DEBUG — remove once camera works
+  console.log("[VisionWeb] component function called");
+
+  // DEBUG — write directly to DOM before React paints, bypasses all rendering issues
+  useLayoutEffect(() => {
+    console.log("[VisionWeb] useLayoutEffect fired — component IS mounting");
+    const el = document.createElement("div");
+    el.id = "__vw_debug";
+    el.setAttribute(
+      "style",
+      [
+        "position:fixed",
+        "bottom:16px",
+        "right:16px",
+        "z-index:99999",
+        "background:#16a34a",
+        "color:#fff",
+        "font-family:monospace",
+        "font-size:11px",
+        "padding:8px 12px",
+        "border-radius:8px",
+        "pointer-events:none",
+        "line-height:1.5",
+      ].join(";"),
+    );
+    el.textContent = "VisionWeb mounted";
+    document.body.appendChild(el);
+    return () => {
+      el.remove();
+    };
+  }, []);
+
   const [started, setStarted] = useState(false);
   const [permState, setPermState] = useState<
     "unknown" | "prompt" | "granted" | "denied"
