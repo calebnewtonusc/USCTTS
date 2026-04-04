@@ -487,14 +487,13 @@ export default function VisionWeb() {
       .then((status) => {
         const state = status.state as "prompt" | "granted" | "denied";
         setPermState(state);
-        if (state === "granted") handleStart();
+        // Never auto-launch — always require button click so getUserMedia
+        // fires from a real user gesture
         status.onchange = () => {
           setPermState(status.state as "prompt" | "granted" | "denied");
         };
       })
       .catch(() => setPermState("unknown"));
-    // handleStart is stable — safe to omit from deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Cleanup only on unmount ────────────────────────────────────────────────
