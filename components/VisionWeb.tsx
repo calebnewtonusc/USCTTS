@@ -584,100 +584,116 @@ export default function VisionWeb() {
         className="absolute -top-[9999px] -left-[9999px] w-px h-px"
       />
 
-      {/* Vision Pro-style splash — shown before user clicks Start */}
+      {/* Splash — pure inline styles, no Tailwind dependency */}
       {!started && (
         <div
-          className="fixed inset-0 z-[9500] flex flex-col items-center justify-center bg-zinc-950"
           style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
             background:
               "radial-gradient(ellipse at 50% 40%, rgba(99,102,241,0.18), transparent 65%), #09090b",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontFamily: "Inter, sans-serif",
           }}
         >
-          {/* Dot grid overlay */}
           <div
-            className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage:
-                "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
-              backgroundSize: "28px 28px",
+              textAlign: "center",
+              maxWidth: 360,
+              padding: "0 24px",
+              width: "100%",
             }}
-          />
-
-          <div className="relative z-10 flex flex-col items-center text-center max-w-sm px-6">
+          >
             {/* Icon */}
             <div
-              className="w-20 h-20 rounded-[28px] flex items-center justify-center mb-8"
               style={{
+                width: 80,
+                height: 80,
+                borderRadius: 28,
+                margin: "0 auto 32px",
                 background:
                   "linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.15))",
                 border: "1px solid rgba(99,102,241,0.3)",
-                boxShadow:
-                  "0 0 40px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.08)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              <Eye size={36} className="text-indigo-400" />
+              <Eye size={36} color="#818cf8" />
             </div>
 
-            {/* Title */}
-            <h1 className="text-3xl font-bold tracking-tight text-white mb-2">
+            <h1
+              style={{
+                fontSize: 30,
+                fontWeight: 700,
+                color: "#fff",
+                margin: "0 0 8px",
+                letterSpacing: "-0.02em",
+              }}
+            >
               VisionWeb
             </h1>
-            <p className="text-zinc-400 text-sm leading-relaxed mb-10">
+            <p
+              style={{
+                fontSize: 14,
+                color: "#a1a1aa",
+                lineHeight: 1.6,
+                margin: "0 0 40px",
+              }}
+            >
               Spatial computing in your browser. Controlled by your eyes and
               hands. No headset required.
             </p>
 
-            {/* Capability pills */}
-            <div className="flex gap-2 mb-10 flex-wrap justify-center">
-              {[
-                { icon: Eye, label: "Eye tracking" },
-                { icon: Hand, label: "Gesture control" },
-                { icon: Zap, label: "Pinch to click" },
-              ].map(({ icon: Icon, label }) => (
+            {permState === "denied" ? (
+              <div>
                 <div
-                  key={label}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
                   style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    color: "rgba(255,255,255,0.5)",
+                    borderRadius: 12,
+                    padding: 16,
+                    marginBottom: 12,
+                    background: "rgba(239,68,68,0.08)",
+                    border: "1px solid rgba(239,68,68,0.2)",
+                    textAlign: "left",
                   }}
                 >
-                  <Icon size={11} />
-                  {label}
-                </div>
-              ))}
-            </div>
-
-            {/* CTA — adapts to permission state */}
-            {permState === "denied" ? (
-              <div className="w-full space-y-3">
-                <div className="rounded-xl p-4 bg-red-500/[0.08] border border-red-500/20 text-left">
-                  <p className="text-red-400 text-xs font-semibold mb-1">
+                  <p
+                    style={{
+                      color: "#f87171",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      margin: "0 0 6px",
+                    }}
+                  >
                     Camera access blocked
                   </p>
-                  <p className="text-zinc-400 text-xs leading-relaxed">
-                    You previously denied camera access for this site. To fix
-                    it:
+                  <p
+                    style={{
+                      color: "#a1a1aa",
+                      fontSize: 12,
+                      margin: "0 0 8px",
+                    }}
+                  >
+                    To fix: click the camera icon in your address bar, set to
+                    Allow, then reload.
                   </p>
-                  <ol className="mt-2 space-y-1 text-xs text-zinc-400 list-decimal list-inside">
-                    <li>
-                      Click the{" "}
-                      <span className="text-white font-medium">
-                        camera icon
-                      </span>{" "}
-                      in your browser address bar
-                    </li>
-                    <li>
-                      Set camera to{" "}
-                      <span className="text-white font-medium">Allow</span>
-                    </li>
-                    <li>Click the button below</li>
-                  </ol>
                 </div>
                 <button
                   onClick={() => window.location.reload()}
-                  className="w-full py-3.5 rounded-2xl font-semibold text-white text-sm transition-all duration-200 cursor-pointer active:scale-[0.98] bg-zinc-800 hover:bg-zinc-700 border border-zinc-700"
+                  style={{
+                    width: "100%",
+                    padding: "14px 24px",
+                    borderRadius: 16,
+                    background: "#27272a",
+                    border: "1px solid #3f3f46",
+                    color: "#fff",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
                 >
                   Reload after allowing camera
                 </button>
@@ -686,21 +702,24 @@ export default function VisionWeb() {
               <>
                 <button
                   onClick={handleStart}
-                  className="w-full py-3.5 rounded-2xl font-semibold text-white text-sm transition-all duration-200 cursor-pointer active:scale-[0.98]"
                   style={{
+                    width: "100%",
+                    padding: "14px 24px",
+                    borderRadius: 16,
+                    border: "none",
                     background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                    boxShadow:
-                      "0 4px 24px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.12)",
+                    boxShadow: "0 4px 24px rgba(99,102,241,0.4)",
+                    color: "#fff",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    letterSpacing: "-0.01em",
                   }}
                 >
-                  {permState === "granted"
-                    ? "Launch VisionWeb"
-                    : "Start VisionWeb"}
+                  Start VisionWeb
                 </button>
-                <p className="mt-4 text-[11px] text-zinc-600">
-                  {permState === "granted"
-                    ? "Camera already authorized. Launching now."
-                    : "Camera access required. Your feed never leaves your browser."}
+                <p style={{ marginTop: 16, fontSize: 11, color: "#52525b" }}>
+                  Camera access required. Your feed never leaves your browser.
                 </p>
               </>
             )}
