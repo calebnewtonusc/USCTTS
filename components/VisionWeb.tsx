@@ -232,6 +232,7 @@ export default function VisionWeb() {
   const [panels, setPanels] = useState<PanelDef[]>([]);
   const [dwellMs, setDwellMs] = useState(1200);
   const [cameraError, setCameraError] = useState(false);
+  const [cameraErrorDetail, setCameraErrorDetail] = useState("");
   const dwellFiredRef = useRef(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -419,38 +420,34 @@ export default function VisionWeb() {
     }
   }, []);
 
-  // ── Camera init — called from splash button (user gesture = guaranteed prompt) ──
+  // ── Camera init — getUserMedia MUST be the first call (no state/toast before it) ──
   const handleStart = useCallback(async () => {
-    setStarted(true);
-    toast.loading("Starting VisionWeb…", { id: "vw-init" });
-
+    // getUserMedia is FIRST — nothing before it that could break the user-gesture chain
     if (!navigator?.mediaDevices?.getUserMedia) {
-      toast.error("Camera API unavailable. Requires HTTPS.", { id: "vw-init" });
+      setStarted(true);
       setCameraError(true);
       return;
     }
 
     let stream: MediaStream;
     try {
-      // getUserMedia is called synchronously within the user gesture chain — browser MUST show the dialog
       stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 960 },
-          height: { ideal: 540 },
-          facingMode: "user",
-          frameRate: { ideal: 30 },
-        },
+        video: { facingMode: "user" },
         audio: false,
       });
     } catch (err) {
-      const msg =
-        err instanceof Error && err.name === "NotAllowedError"
-          ? "Camera permission denied. Allow camera access and reload."
-          : "Could not access camera. Check browser settings.";
-      toast.error(msg, { id: "vw-init" });
+      const errName = err instanceof Error ? err.name : "UnknownError";
+      const errMsg = err instanceof Error ? err.message : String(err);
+      // Show the raw error so we know exactly what browser said
+      setStarted(true);
       setCameraError(true);
+      // Store error detail for display
+      setCameraErrorDetail(`${errName}: ${errMsg}`);
       return;
     }
+
+    // Stream acquired — now safe to update state
+    setStarted(true);
 
     if (videoRef.current) {
       videoRef.current.srcObject = stream;
@@ -669,9 +666,18 @@ export default function VisionWeb() {
             <h2 className="text-xl font-bold text-white mb-2">
               Camera blocked
             </h2>
-            <p className="text-zinc-400 text-sm leading-relaxed mb-5">
+            <p className="text-zinc-400 text-sm leading-relaxed mb-3">
               VisionWeb needs webcam access. Allow camera in your browser
-              settings and reload the page.
+              settings and reload.
+            </p>
+            {cameraErrorDetail && (
+              <p className="text-red-400/70 text-xs font-mono mb-5 px-3 py-2 bg-red-500/5 rounded-lg border border-red-500/10 break-all">
+                {cameraErrorDetail}
+              </p>
+            )}
+            <p className="text-zinc-500 text-xs mb-5 leading-relaxed">
+              If you previously denied access: click the camera icon in your
+              browser address bar and allow, then reload.
             </p>
             <button
               onClick={() => window.location.reload()}
