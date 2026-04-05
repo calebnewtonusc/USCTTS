@@ -390,36 +390,23 @@ export default function VisionWeb() {
           gazeSmoothedRef.current = { x: clampedX, y: clampedY };
         }
 
-        // Outlier rejection — skip if jump > 400px (only after initialized)
+        // Outlier rejection — skip single-frame jumps > 300px.
+        // Real saccades happen over multiple frames; 300px in one frame is noise.
         if (!isUninitialized) {
           const jumpDist = Math.hypot(
             clampedX - gazeSmoothedRef.current.x,
             clampedY - gazeSmoothedRef.current.y,
           );
-          if (jumpDist > 400) return;
+          if (jumpDist > 300) return;
         }
 
         const now = performance.now();
-        // Two-pass smoothing for stability + responsiveness:
-        // Pass 1 — tight EMA (alpha 0.04–0.10) keeps the cursor stable at rest
-        // Pass 2 — hard maxStep cap (12px/frame) prevents jitter spikes from
-        //           landing. At 30fps that's 360px/sec max travel — enough to
-        //           track intentional saccades, too slow for noise artifacts.
-        const dist = Math.hypot(
-          clampedX - gazeSmoothedRef.current.x,
-          clampedY - gazeSmoothedRef.current.y,
-        );
-        const t = Math.min(Math.max((dist - 50) / 150, 0), 1);
-        const alpha = 0.04 + t * 0.06; // 0.04 (still) → 0.10 (large saccade)
-        const maxStep = 12; // was 40 — primary jitter source
-        const rawDx = alpha * (clampedX - gazeSmoothedRef.current.x);
-        const rawDy = alpha * (clampedY - gazeSmoothedRef.current.y);
-        const stepDist = Math.hypot(rawDx, rawDy);
-        const scale = stepDist > maxStep ? maxStep / stepDist : 1;
-        gazeSmoothedRef.current.x += rawDx * scale;
-        gazeSmoothedRef.current.y += rawDy * scale;
-        const sx = gazeSmoothedRef.current.x;
-        const sy = gazeSmoothedRef.current.y;
+        // Raw pass-through — no EMA, no step cap, no lag.
+        // Cursor goes exactly where WebGazer predicts the eye is.
+        // Only filter keeping is the outlier rejection above (>300px jumps).
+        gazeSmoothedRef.current = { x: clampedX, y: clampedY };
+        const sx = clampedX;
+        const sy = clampedY;
         setGazePos({ x: sx, y: sy });
         const r = feUpdate(sx, sy, now);
         setDwellProgress(r.dwellProgress);
