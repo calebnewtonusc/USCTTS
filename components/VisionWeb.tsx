@@ -422,37 +422,12 @@ export default function VisionWeb() {
       await wg.begin();
 
       // ── Post-init (must run after begin() resolves) ──────────────────────
-      // Keep video + face feedback box ON during calibration.
-      // The green/red rectangle tells the user if WebGazer has a face lock.
-      // Calibrating without face detection produces garbage training data.
-      wg.showVideo(true);
+      // We show our own videoRef element during calibration (controlled via
+      // the `calibrating` state), so suppress all WebGazer-injected DOM.
+      wg.showVideo(false);
       wg.showFaceOverlay(false);
-      wg.showFaceFeedbackBox(true);
+      wg.showFaceFeedbackBox(false);
       wg.showPredictionPoints(false);
-      // Move WebGazer's video container to bottom-right so it doesn't
-      // cover the top-left calibration dot. done in a rAF so the DOM
-      // element is guaranteed to exist by then.
-      requestAnimationFrame(() => {
-        try {
-          const wgVid = document.getElementById("webgazerVideoContainer");
-          if (wgVid) {
-            Object.assign(wgVid.style, {
-              position: "fixed",
-              top: "auto",
-              left: "auto",
-              bottom: "16px",
-              right: "16px",
-              zIndex: "9999",
-              borderRadius: "12px",
-              overflow: "hidden",
-              border: "2px solid rgba(99,102,241,0.5)",
-              boxShadow: "0 4px 24px rgba(0,0,0,0.6)",
-            });
-          }
-        } catch {
-          /* ignore */
-        }
-      });
       // clearData() is async — wipe any garbage samples from TF.js init
       await wg.clearData();
       // Keep auto click-recording ON during calibration — that's exactly how
@@ -709,16 +684,10 @@ export default function VisionWeb() {
     if (allDone) {
       // Stop learning: removeMouseEventListeners is the correct 2.1.0 API
       const wg = (window as unknown as Record<string, unknown>).webgazer as
-        | {
-            removeMouseEventListeners: () => void;
-            showVideo: (v: boolean) => void;
-            showFaceFeedbackBox: (v: boolean) => void;
-          }
+        | { removeMouseEventListeners: () => void }
         | undefined;
       wg?.removeMouseEventListeners();
-      // Hide webcam preview and face box now that calibration is done
-      wg?.showVideo(false);
-      wg?.showFaceFeedbackBox(false);
+      // Video hides automatically — controlled by `calibrating` state
       calibViewportRef.current = {
         w: window.innerWidth,
         h: window.innerHeight,
@@ -805,24 +774,88 @@ export default function VisionWeb() {
         />
       )}
 
-      {/* Hidden camera video */}
-      <video
-        ref={videoRef}
-        id="camera-video"
-        autoPlay
-        playsInline
-        muted
+      {/* Camera video — hidden normally, shown during calibration so the user
+          can position their face and verify they're in frame */}
+      <div
         style={{
           position: "fixed",
-          top: 0,
-          left: 0,
-          width: 640,
-          height: 480,
-          opacity: 0,
+          bottom: calibrating ? 16 : 0,
+          right: calibrating ? 16 : 0,
+          zIndex: calibrating ? 9500 : -10,
+          borderRadius: calibrating ? 16 : 0,
+          overflow: "hidden",
+          border: calibrating ? "2px solid rgba(99,102,241,0.5)" : "none",
+          boxShadow: calibrating ? "0 8px 32px rgba(0,0,0,0.7)" : "none",
+          transition: "opacity 0.3s ease",
+          opacity: calibrating ? 1 : 0,
           pointerEvents: "none",
-          zIndex: -10,
         }}
-      />
+      >
+        <video
+          ref={videoRef}
+          id="camera-video"
+          autoPlay
+          playsInline
+          muted
+          style={{
+            display: "block",
+            width: 200,
+            height: 150,
+            objectFit: "cover",
+            transform: "scaleX(-1)", // mirror so it feels natural
+          }}
+        />
+        {/* Face position guide overlay */}
+        {calibrating && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              pointerEvents: "none",
+            }}
+          >
+            {/* Oval face guide */}
+            <svg
+              width={200}
+              height={150}
+              viewBox="0 0 200 150"
+              style={{ position: "absolute", inset: 0 }}
+            >
+              <ellipse
+                cx={100}
+                cy={70}
+                rx={42}
+                ry={54}
+                fill="none"
+                stroke="rgba(99,102,241,0.7)"
+                strokeWidth={2}
+                strokeDasharray="6 4"
+              />
+            </svg>
+            {/* Label */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: 6,
+                left: 0,
+                right: 0,
+                textAlign: "center",
+                fontSize: 9,
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 600,
+                color: "rgba(255,255,255,0.7)",
+                letterSpacing: "0.04em",
+              }}
+            >
+              ALIGN FACE TO OVAL
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Splash — pure inline styles, no Tailwind dependency */}
       {!started && (
