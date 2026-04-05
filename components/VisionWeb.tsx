@@ -237,7 +237,8 @@ export default function VisionWeb() {
   const [cameraError, setCameraError] = useState(false);
   const [cameraErrorDetail, setCameraErrorDetail] = useState("");
   const [calibrating, setCalibrating] = useState(false);
-  const [calibDots, setCalibDots] = useState<boolean[]>(Array(9).fill(false));
+  const [calibDots, setCalibDots] = useState<number[]>(Array(9).fill(0));
+  const CALIB_CLICKS_NEEDED = 3;
   const dwellFiredRef = useRef(false);
   const calibSamplesRef = useRef(0);
 
@@ -340,12 +341,24 @@ export default function VisionWeb() {
         // localStorage blocked (private mode) — continue anyway
       }
 
-      // DO NOT call setVideoElement — our videoRef is 1×1px off-screen.
-      // WebGazer's TensorFlow face detection reads actual pixel data from the
-      // video element dimensions. Passing a 1×1 element produces garbage face
-      // landmarks → all predictions cluster at (0,0) → top-left cursor forever.
-      // Let WebGazer call its own getUserMedia. Camera permission is already
-      // granted so it gets a proper full-resolution stream silently.
+      // Share the camera stream with WebGazer so both face detection and hand
+      // tracking read from one getUserMedia stream. The videoRef element is
+      // 640×480 in the DOM (opacity:0) so TF.js face detection gets real pixel
+      // data. Previously it was 1×1px which produced garbage landmarks.
+      const wgAny2 = wg as unknown as Record<string, unknown>;
+      if (typeof wgAny2.setVideoElement === "function" && videoRef.current) {
+        (wgAny2.setVideoElement as (el: HTMLVideoElement) => void)(
+          videoRef.current,
+        );
+      }
+      // Explicit regression and tracker — TFFacemesh is the highest-accuracy
+      // face landmark model; ridgeReg is the best regression for gaze mapping
+      if (typeof wgAny2.setRegression === "function") {
+        (wgAny2.setRegression as (name: string) => unknown)("ridgeReg");
+      }
+      if (typeof wgAny2.setTracker === "function") {
+        (wgAny2.setTracker as (name: string) => unknown)("TFFacemesh");
+      }
 
       wg.setGazeListener((data) => {
         if (!data) return;
@@ -686,8 +699,8 @@ export default function VisionWeb() {
     // could pass wrong coordinates. Just let the natural click propagate.
     setCalibDots((prev) => {
       const next = [...prev];
-      next[idx] = true;
-      const allDone = next.every(Boolean);
+      next[idx] = Math.min(next[idx] + 1, CALIB_CLICKS_NEEDED);
+      const allDone = next.every((n) => n >= CALIB_CLICKS_NEEDED);
       if (allDone) {
         // Freeze the model — try every known WebGazer API variant for stopping
         // online learning. The API changed between versions.
@@ -813,7 +826,16 @@ export default function VisionWeb() {
         autoPlay
         playsInline
         muted
-        className="absolute -top-[9999px] -left-[9999px] w-px h-px"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: 640,
+          height: 480,
+          opacity: 0,
+          pointerEvents: "none",
+          zIndex: -10,
+        }}
       />
 
       {/* Splash — pure inline styles, no Tailwind dependency */}
@@ -1008,9 +1030,12 @@ export default function VisionWeb() {
       {calibrating &&
         ready &&
         (() => {
-          const doneCount = calibDots.filter(Boolean).length;
-          // Current active dot = first uncompleted one
-          const activeIdx = calibDots.findIndex((d) => !d);
+          const doneCount = calibDots.filter(
+            (n) => n >= CALIB_CLICKS_NEEDED,
+          ).length;
+          // Current active dot = first dot that hasn't reached CALIB_CLICKS_NEEDED
+          const activeIdx = calibDots.findIndex((n) => n < CALIB_CLICKS_NEEDED);
+          const circumference = 2 * Math.PI * 18; // radius=18
           return (
             <div
               style={{
@@ -1052,7 +1077,8 @@ export default function VisionWeb() {
                     lineHeight: 1.5,
                   }}
                 >
-                  Look directly at the glowing dot, then click it
+                  Look at the glowing dot and click it {CALIB_CLICKS_NEEDED}{" "}
+                  times
                 </p>
                 {/* Progress bar */}
                 <div
@@ -1065,11 +1091,12 @@ export default function VisionWeb() {
                         width: 24,
                         height: 4,
                         borderRadius: 2,
-                        background: calibDots[i]
-                          ? "#34d399"
-                          : i === activeIdx
-                            ? "#6366f1"
-                            : "rgba(255,255,255,0.1)",
+                        background:
+                          calibDots[i] >= CALIB_CLICKS_NEEDED
+                            ? "#34d399"
+                            : i === activeIdx
+                              ? "#6366f1"
+                              : "rgba(255,255,255,0.1)",
                         transition: "background 0.3s ease",
                       }}
                     />
@@ -1086,9 +1113,12 @@ export default function VisionWeb() {
 
               {/* Dots — only show completed ones + current active */}
               {CALIB_POSITIONS.map((pos, idx) => {
-                const isDone = calibDots[idx];
+                const isDone = calibDots[idx] >= CALIB_CLICKS_NEEDED;
                 const isActive = idx === activeIdx;
                 if (!isDone && !isActive) return null;
+                const clicks = calibDots[idx];
+                const fillFraction = clicks / CALIB_CLICKS_NEEDED;
+                const dashOffset = circumference * (1 - fillFraction);
                 return (
                   <button
                     key={idx}
@@ -1100,23 +1130,98 @@ export default function VisionWeb() {
                       left: pos.x,
                       top: pos.y,
                       transform: "translate(-50%, -50%)",
-                      width: isDone ? 14 : 32,
-                      height: isDone ? 14 : 32,
+                      width: isDone ? 24 : 48,
+                      height: isDone ? 24 : 48,
                       borderRadius: "50%",
                       border: "none",
-                      background: isDone
-                        ? "rgba(52,211,153,0.7)"
-                        : "rgba(99,102,241,1)",
-                      boxShadow: isDone
-                        ? "0 0 10px rgba(52,211,153,0.4)"
-                        : "0 0 0 0 rgba(99,102,241,0.7)",
+                      background: "transparent",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                       cursor: isActive ? "pointer" : "default",
                       transition: "all 0.25s ease",
-                      animation: isActive
-                        ? "calib-pulse 1.4s ease-in-out infinite"
-                        : "none",
+                      padding: 0,
                     }}
-                  />
+                  >
+                    {isDone ? (
+                      // Done state: solid green dot with checkmark
+                      <svg width={24} height={24} viewBox="0 0 24 24">
+                        <circle
+                          cx={12}
+                          cy={12}
+                          r={10}
+                          fill="rgba(52,211,153,0.8)"
+                        />
+                        <polyline
+                          points="7,12 10,15 17,9"
+                          fill="none"
+                          stroke="#fff"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    ) : (
+                      // Active state: pulsing dot with SVG progress ring + click count
+                      <svg
+                        width={48}
+                        height={48}
+                        viewBox="0 0 48 48"
+                        style={{
+                          animation: isActive
+                            ? "calib-pulse 1.4s ease-in-out infinite"
+                            : "none",
+                        }}
+                      >
+                        {/* Background track */}
+                        <circle
+                          cx={24}
+                          cy={24}
+                          r={18}
+                          fill="rgba(99,102,241,0.2)"
+                          stroke="rgba(99,102,241,0.3)"
+                          strokeWidth={2}
+                        />
+                        {/* Fill ring — progress arc */}
+                        {clicks > 0 && (
+                          <circle
+                            cx={24}
+                            cy={24}
+                            r={18}
+                            fill="none"
+                            stroke="#34d399"
+                            strokeWidth={3}
+                            strokeDasharray={circumference}
+                            strokeDashoffset={dashOffset}
+                            strokeLinecap="round"
+                            transform="rotate(-90 24 24)"
+                            style={{
+                              transition: "stroke-dashoffset 0.2s ease",
+                            }}
+                          />
+                        )}
+                        {/* Center dot */}
+                        <circle
+                          cx={24}
+                          cy={24}
+                          r={7}
+                          fill="rgba(99,102,241,1)"
+                        />
+                        {/* Click count label */}
+                        <text
+                          x={24}
+                          y={40}
+                          textAnchor="middle"
+                          fill="rgba(255,255,255,0.6)"
+                          fontSize={9}
+                          fontFamily="Inter, sans-serif"
+                          fontWeight={600}
+                        >
+                          {clicks}/{CALIB_CLICKS_NEEDED}
+                        </text>
+                      </svg>
+                    )}
+                  </button>
                 );
               })}
             </div>
