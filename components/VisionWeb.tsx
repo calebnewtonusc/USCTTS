@@ -218,11 +218,11 @@ function AboutContent() {
   );
 }
 
-// Calibration dot positions — 5x5 grid covering the viewport.
+// Calibration dot positions — 3x3 grid, matches official WebGazer demo config.
 // Module-level so handleCalibDot can reference it without stale closures.
 const CALIB_POSITIONS = (() => {
-  const xs = ["6%", "25%", "50%", "75%", "94%"];
-  const ys = ["6%", "25%", "50%", "75%", "94%"];
+  const xs = ["10%", "50%", "90%"];
+  const ys = ["15%", "50%", "85%"];
   return ys.flatMap((y) => xs.map((x) => ({ x, y })));
 })();
 
@@ -245,11 +245,11 @@ export default function VisionWeb() {
   const [cameraError, setCameraError] = useState(false);
   const [cameraErrorDetail, setCameraErrorDetail] = useState("");
   const [calibrating, setCalibrating] = useState(false);
-  const [calibDots, setCalibDots] = useState<number[]>(Array(25).fill(0));
-  const CALIB_CLICKS_NEEDED = 3;
+  const [calibDots, setCalibDots] = useState<number[]>(Array(9).fill(0));
+  const CALIB_CLICKS_NEEDED = 5;
   // Ref mirror of calibDots so handleCalibDot reads current counts without
   // stale closure — state setters are async, refs are always current
-  const calibDotsRef = useRef<number[]>(Array(25).fill(0));
+  const calibDotsRef = useRef<number[]>(Array(9).fill(0));
   const dwellFiredRef = useRef(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -1051,7 +1051,7 @@ export default function VisionWeb() {
                       <div
                         key={i}
                         style={{
-                          width: 12,
+                          width: 24,
                           height: 4,
                           borderRadius: 2,
                           background:
