@@ -236,7 +236,10 @@ export default function VisionWeb() {
   const [dwellMs, setDwellMs] = useState(1200);
   const [cameraError, setCameraError] = useState(false);
   const [cameraErrorDetail, setCameraErrorDetail] = useState("");
+  const [calibrating, setCalibrating] = useState(false);
+  const [calibDots, setCalibDots] = useState<boolean[]>(Array(9).fill(false));
   const dwellFiredRef = useRef(false);
+  const calibSamplesRef = useRef(0);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const pinchLeft = useRef(new PinchDetector());
@@ -333,13 +336,23 @@ export default function VisionWeb() {
       await wg
         .setGazeListener((data) => {
           if (!data) return;
+          // Filter out top-left junk — WebGazer outputs (0,0) or near-zero
+          // before it has any calibration data. Ignore these.
+          if (data.x < 20 && data.y < 20) return;
+          // Also clamp to viewport so cursor never goes off-screen
+          const clampedX = Math.max(0, Math.min(data.x, window.innerWidth));
+          const clampedY = Math.max(0, Math.min(data.y, window.innerHeight));
+
+          calibSamplesRef.current++;
+
           const now = performance.now();
-          // EMA smoothing — damps jitter without adding visible lag
-          const alpha = 0.25;
+          // EMA smoothing — alpha 0.12 gives a smooth, usable cursor
+          // (0.25 was too jumpy — every raw WebGazer jitter was visible)
+          const alpha = 0.12;
           gazeSmoothedRef.current.x +=
-            alpha * (data.x - gazeSmoothedRef.current.x);
+            alpha * (clampedX - gazeSmoothedRef.current.x);
           gazeSmoothedRef.current.y +=
-            alpha * (data.y - gazeSmoothedRef.current.y);
+            alpha * (clampedY - gazeSmoothedRef.current.y);
           const sx = gazeSmoothedRef.current.x;
           const sy = gazeSmoothedRef.current.y;
           setGazePos({ x: sx, y: sy });
@@ -574,9 +587,11 @@ export default function VisionWeb() {
       },
       { id: "focus", title: "System Status", x: 820, y: 100, content: "focus" },
     ]);
-    startGaze();
+    // Start hands immediately — no calibration needed
     startHands();
-  }, [startGaze, startHands]);
+    // Show calibration screen first, then start eye tracking after
+    setCalibrating(true);
+  }, [startHands]);
 
   // ── Check permission state on mount — show denied UI before user clicks ──
   useEffect(() => {
@@ -594,6 +609,42 @@ export default function VisionWeb() {
       })
       .catch(() => setPermState("unknown"));
   }, []);
+
+  // Calibration dot positions — 3x3 grid covering the viewport
+  const CALIB_POSITIONS = [
+    { x: "10%", y: "15%" },
+    { x: "50%", y: "15%" },
+    { x: "90%", y: "15%" },
+    { x: "10%", y: "50%" },
+    { x: "50%", y: "50%" },
+    { x: "90%", y: "50%" },
+    { x: "10%", y: "85%" },
+    { x: "50%", y: "85%" },
+    { x: "90%", y: "85%" },
+  ];
+
+  const handleCalibDot = useCallback(
+    (idx: number, e: React.MouseEvent) => {
+      // Record this click as a calibration sample for WebGazer
+      const wg = (window as unknown as Record<string, unknown>).webgazer as
+        | { recordScreenPosition?: (x: number, y: number) => void }
+        | undefined;
+      wg?.recordScreenPosition?.(e.clientX, e.clientY);
+
+      setCalibDots((prev) => {
+        const next = [...prev];
+        next[idx] = true;
+        const allDone = next.every(Boolean);
+        if (allDone) {
+          // All dots clicked — start WebGazer and enter main app
+          setCalibrating(false);
+          startGaze();
+        }
+        return next;
+      });
+    },
+    [startGaze],
+  );
 
   const closePanel = useCallback((id: string) => {
     setPanels((p) => p.filter((panel) => panel.id !== id));
@@ -868,8 +919,70 @@ export default function VisionWeb() {
         </div>
       )}
 
+      {/* Calibration screen — shown after camera starts, before main app */}
+      {calibrating && ready && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9000,
+            background:
+              "radial-gradient(ellipse at 50% 40%, rgba(99,102,241,0.15), transparent 65%), #09090b",
+            fontFamily: "Inter, sans-serif",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              textAlign: "center",
+              pointerEvents: "none",
+            }}
+          >
+            <p
+              style={{
+                color: "#a1a1aa",
+                fontSize: 13,
+                marginBottom: 8,
+              }}
+            >
+              Look at each dot and click it to calibrate eye tracking
+            </p>
+            <p style={{ color: "#52525b", fontSize: 11 }}>
+              {calibDots.filter(Boolean).length} / 9 complete
+            </p>
+          </div>
+          {CALIB_POSITIONS.map((pos, idx) => (
+            <button
+              key={idx}
+              onClick={(e) => handleCalibDot(idx, e)}
+              style={{
+                position: "absolute",
+                left: pos.x,
+                top: pos.y,
+                transform: "translate(-50%, -50%)",
+                width: calibDots[idx] ? 18 : 26,
+                height: calibDots[idx] ? 18 : 26,
+                borderRadius: "50%",
+                border: "none",
+                background: calibDots[idx]
+                  ? "rgba(52,211,153,0.9)"
+                  : "rgba(99,102,241,0.9)",
+                boxShadow: calibDots[idx]
+                  ? "0 0 16px rgba(52,211,153,0.5)"
+                  : "0 0 20px rgba(99,102,241,0.6)",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Main app */}
-      {ready && (
+      {ready && !calibrating && (
         <>
           {/* Nav */}
           <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-zinc-950/80 border-b border-zinc-800/50 px-6 py-3 flex items-center justify-between">
