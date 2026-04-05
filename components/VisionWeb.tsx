@@ -400,14 +400,18 @@ export default function VisionWeb() {
         }
 
         const now = performance.now();
-        // Adaptive alpha: stable when barely moving, responsive when looking far
+        // Two-pass smoothing for stability + responsiveness:
+        // Pass 1 — tight EMA (alpha 0.04–0.10) keeps the cursor stable at rest
+        // Pass 2 — hard maxStep cap (12px/frame) prevents jitter spikes from
+        //           landing. At 30fps that's 360px/sec max travel — enough to
+        //           track intentional saccades, too slow for noise artifacts.
         const dist = Math.hypot(
           clampedX - gazeSmoothedRef.current.x,
           clampedY - gazeSmoothedRef.current.y,
         );
-        const t = Math.min(Math.max((dist - 40) / 110, 0), 1);
-        const alpha = 0.06 + t * 0.12;
-        const maxStep = 40;
+        const t = Math.min(Math.max((dist - 50) / 150, 0), 1);
+        const alpha = 0.04 + t * 0.06; // 0.04 (still) → 0.10 (large saccade)
+        const maxStep = 12; // was 40 — primary jitter source
         const rawDx = alpha * (clampedX - gazeSmoothedRef.current.x);
         const rawDy = alpha * (clampedY - gazeSmoothedRef.current.y);
         const stepDist = Math.hypot(rawDx, rawDy);
@@ -1073,12 +1077,22 @@ export default function VisionWeb() {
                   style={{
                     color: "#a1a1aa",
                     fontSize: 13,
+                    margin: "0 0 4px",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Stare at the dot. Hold still. Then click it.
+                </p>
+                <p
+                  style={{
+                    color: "#52525b",
+                    fontSize: 11,
                     margin: "0 0 16px",
                     lineHeight: 1.5,
                   }}
                 >
-                  Look at the glowing dot and click it {CALIB_CLICKS_NEEDED}{" "}
-                  times
+                  Click {CALIB_CLICKS_NEEDED}× per dot — eyes on the dot the
+                  whole time, not on your cursor
                 </p>
                 {/* Progress bar */}
                 <div
