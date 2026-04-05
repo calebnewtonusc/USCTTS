@@ -340,14 +340,12 @@ export default function VisionWeb() {
         // localStorage blocked (private mode) — continue anyway
       }
 
-      // If this CDN build has setVideoElement (v2.1+), use it to share our
-      // existing stream so WebGazer doesn't call getUserMedia a second time.
-      const wgAny = wg as unknown as Record<string, unknown>;
-      if (typeof wgAny.setVideoElement === "function" && videoRef.current) {
-        (wgAny.setVideoElement as (v: HTMLVideoElement) => void)(
-          videoRef.current,
-        );
-      }
+      // DO NOT call setVideoElement — our videoRef is 1×1px off-screen.
+      // WebGazer's TensorFlow face detection reads actual pixel data from the
+      // video element dimensions. Passing a 1×1 element produces garbage face
+      // landmarks → all predictions cluster at (0,0) → top-left cursor forever.
+      // Let WebGazer call its own getUserMedia. Camera permission is already
+      // granted so it gets a proper full-resolution stream silently.
 
       wg.setGazeListener((data) => {
         if (!data) return;
@@ -420,7 +418,7 @@ export default function VisionWeb() {
         }
       }).begin();
 
-      // Hide WebGazer's injected UI elements AFTER begin() — they don't exist before
+      // Hide WebGazer's injected UI elements AFTER begin()
       wg.showVideo(false);
       wg.showFaceOverlay(false);
       wg.showFaceFeedbackBox(false);
@@ -637,10 +635,18 @@ export default function VisionWeb() {
     ]);
     // Start hands immediately — no calibration needed
     startHands();
-    // Start WebGazer NOW so its built-in click listeners are active during
-    // calibration. Each dot click will be captured as training data automatically.
-    setCalibrating(true);
-    startGaze();
+    // Start WebGazer — wait 1.5s before showing calibration dots so TF.js
+    // face detection fully initializes. Then call clearData() to wipe any
+    // garbage auto-collected samples from the init period (all near 0,0).
+    startGaze().then(() => {
+      const wgAny = (window as unknown as Record<string, unknown>).webgazer as
+        | Record<string, unknown>
+        | undefined;
+      // clearData wipes any zero-biased samples collected before face lock
+      if (typeof wgAny?.clearData === "function")
+        (wgAny.clearData as () => void)();
+      setCalibrating(true);
+    });
   }, [startHands, startGaze]);
 
   // ── Check permission state on mount — show denied UI before user clicks ──
