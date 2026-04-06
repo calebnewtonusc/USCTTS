@@ -784,7 +784,7 @@ export default function TTSSite() {
                         "translateY(0)";
                     }}
                   >
-                    Apply Now <ArrowRight size={15} />
+                    Join Now <ArrowRight size={15} />
                   </a>
                   <button
                     onClick={() => scrollTo("tracks")}
@@ -2646,7 +2646,7 @@ export default function TTSSite() {
                   >
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 700 }}>
-                        Apply to TTS
+                        Join TTS
                       </div>
                       <div
                         style={{
