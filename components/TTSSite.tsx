@@ -366,6 +366,7 @@ export default function TTSSite() {
   const rafRef = useRef(0);
   const trackScrollRef = useRef<HTMLElement>(null);
   const trackInnerRef = useRef<HTMLDivElement>(null);
+  const trackTitleRef = useRef<HTMLDivElement>(null);
   const floatRefs = useRef<HTMLDivElement[]>([]);
   // Custom cursor
   useEffect(() => {
@@ -457,17 +458,51 @@ export default function TTSSite() {
     return () => obs.disconnect();
   }, []);
 
-  // Horizontal pinned track scroll
+  // Tracks: title shifts center-to-left, cards stagger in from right with gravity bounce
   useEffect(() => {
+    const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+    // Spring bounce: starts above (-68px), falls through, bounces slightly below, settles at 0
+    const gravityY = (t: number): number => {
+      if (t <= 0) return -68;
+      if (t >= 1) return 0;
+      return -68 * Math.exp(-5.5 * t) * Math.cos(3.5 * Math.PI * t);
+    };
+
     const handle = () => {
-      if (!trackScrollRef.current || !trackInnerRef.current) return;
+      if (!trackScrollRef.current) return;
       const rect = trackScrollRef.current.getBoundingClientRect();
       const scrolled = -rect.top;
       const total = trackScrollRef.current.offsetHeight - window.innerHeight;
       const p = Math.max(0, Math.min(1, scrolled / total));
-      const inner = trackInnerRef.current;
-      const maxX = inner.scrollWidth - window.innerWidth;
-      inner.style.transform = `translateX(${-p * maxX}px)`;
+
+      // Title: slides from horizontally centered to left-aligned
+      if (trackTitleRef.current) {
+        const titleEl = trackTitleRef.current;
+        const titleW = titleEl.offsetWidth;
+        const centerOffset = window.innerWidth / 2 - 80 - titleW / 2;
+        const titleP = easeOut(Math.max(0, Math.min(1, p / 0.38)));
+        titleEl.style.transform = `translateY(-50%) translateX(${centerOffset * (1 - titleP)}px)`;
+        const sub = titleEl.querySelector<HTMLElement>(".track-title-sub");
+        if (sub)
+          sub.style.opacity = String(
+            Math.max(0, Math.min(1, (p - 0.18) / 0.22)),
+          );
+      }
+
+      // Cards: stagger slide-in from right with gravity bounce Y
+      if (trackInnerRef.current) {
+        const cards =
+          trackInnerRef.current.querySelectorAll<HTMLElement>(".track-card");
+        cards.forEach((card, i) => {
+          const start = 0.18 + i * 0.18;
+          const rawP = Math.max(0, Math.min(1, (p - start) / 0.34));
+          const xP = easeOut(rawP);
+          const xOffset = (1 - xP) * (window.innerWidth + 400);
+          const yOffset = gravityY(rawP);
+          card.style.transform = `translateX(${xOffset}px) translateY(${yOffset}px)`;
+          card.style.opacity = String(Math.min(1, rawP * 2));
+        });
+      }
     };
     window.addEventListener("scroll", handle, { passive: true });
     handle();
@@ -539,7 +574,8 @@ export default function TTSSite() {
 
   // Reverse-scroll reveal derived values
   const revealSlide = Math.max(0, (revealProgress - 0.25) / 0.65);
-  const panelBY = -100 + revealSlide * 100;
+  // Panel A exits downward, Panel B slides in from the right
+  const panelBX = 100 - revealSlide * 100;
   const panelAExitY = revealSlide * 100;
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -1127,13 +1163,13 @@ export default function TTSSite() {
           ]}
         />
 
-        {/* ── TRACKS — horizontal pinned scroll ── */}
+        {/* ── TRACKS — center-to-left title + gravity card reveal ── */}
         <section
           ref={trackScrollRef}
           id="tracks"
           style={{
             background: "#09090b",
-            height: "300vh",
+            height: "320vh",
             position: "relative",
           }}
         >
@@ -1143,17 +1179,26 @@ export default function TTSSite() {
               top: 0,
               height: "100vh",
               overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
             }}
           >
+            {/* Background dot grid */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                backgroundImage:
+                  "radial-gradient(rgba(255,255,255,0.018) 1px, transparent 1px)",
+                backgroundSize: "40px 40px",
+                pointerEvents: "none",
+              }}
+            />
+
             {/* Scroll hint */}
             <div
               style={{
                 position: "absolute",
                 top: 36,
-                left: 80,
+                right: 60,
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
@@ -1164,76 +1209,80 @@ export default function TTSSite() {
                 style={{
                   fontSize: 10,
                   fontWeight: 700,
-                  color: "rgba(255,255,255,0.35)",
+                  color: "rgba(255,255,255,0.3)",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                 }}
               >
                 Scroll to explore
               </div>
-              <ArrowRight size={10} color="rgba(255,255,255,0.35)" />
+              <ArrowRight size={10} color="rgba(255,255,255,0.3)" />
             </div>
 
-            {/* Horizontal strip */}
+            {/* Title — absolutely positioned, JS shifts it center → left */}
             <div
-              ref={trackInnerRef}
+              ref={trackTitleRef}
               style={{
-                display: "flex",
-                alignItems: "stretch",
-                gap: 24,
-                paddingLeft: 80,
-                paddingRight: 80,
+                position: "absolute",
+                left: 80,
+                top: "50%",
+                width: "clamp(220px, 24vw, 360px)",
+                zIndex: 2,
                 willChange: "transform",
               }}
             >
-              {/* Title panel */}
-              <div
+              <h2
                 style={{
-                  width: "clamp(280px, 30vw, 420px)",
-                  flexShrink: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  paddingRight: 48,
-                  borderRight: "1px solid rgba(255,255,255,0.1)",
-                  marginRight: 8,
+                  fontSize: "clamp(44px, 6vw, 88px)",
+                  fontWeight: 900,
+                  color: "#fff",
+                  letterSpacing: "-0.04em",
+                  lineHeight: 0.93,
+                  marginBottom: 20,
                 }}
               >
-                <h2
-                  style={{
-                    fontSize: "clamp(40px, 5.5vw, 80px)",
-                    fontWeight: 900,
-                    color: "#fff",
-                    letterSpacing: "-0.04em",
-                    lineHeight: 0.95,
-                    marginBottom: 24,
-                  }}
-                >
-                  <SplitText text="Three" style={{ display: "block" }} />
-                  <SplitText
-                    text="ways"
-                    baseDelay={0.12}
-                    style={{ display: "block" }}
-                  />
-                  <SplitText
-                    text="in."
-                    baseDelay={0.2}
-                    style={{ display: "block", color: "#CC0000" }}
-                  />
-                </h2>
-                <p
-                  style={{
-                    fontSize: 14,
-                    color: "#71717a",
-                    lineHeight: 1.7,
-                    maxWidth: 260,
-                  }}
-                >
-                  Pick one or drift across all three. Most people do both.
-                </p>
-              </div>
+                <SplitText text="Three" style={{ display: "block" }} />
+                <SplitText
+                  text="ways"
+                  baseDelay={0.1}
+                  style={{ display: "block" }}
+                />
+                <SplitText
+                  text="in."
+                  baseDelay={0.18}
+                  style={{ display: "block", color: "#CC0000" }}
+                />
+              </h2>
+              <p
+                className="track-title-sub"
+                style={{
+                  fontSize: 14,
+                  color: "#71717a",
+                  lineHeight: 1.7,
+                  maxWidth: 240,
+                  opacity: 0,
+                  transition: "opacity 0.3s ease",
+                }}
+              >
+                Pick one or drift across all three. Most people do both.
+              </p>
+            </div>
 
-              {/* Track cards */}
+            {/* Cards — flex row, each slides in from right with gravity bounce */}
+            <div
+              ref={trackInnerRef}
+              style={{
+                position: "absolute",
+                left: "clamp(300px, 28vw, 460px)",
+                right: 60,
+                top: 0,
+                bottom: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 16,
+                overflow: "visible",
+              }}
+            >
               {TRACKS.map(
                 ({
                   num,
@@ -1248,23 +1297,26 @@ export default function TTSSite() {
                 }) => (
                   <div
                     key={num}
+                    className="track-card"
                     style={{
-                      width: "clamp(340px, 42vw, 560px)",
-                      flexShrink: 0,
-                      height: "calc(100vh - 140px)",
+                      flex: 1,
+                      minWidth: 0,
+                      height: "calc(100vh - 120px)",
                       background: featured ? "#141416" : "#111113",
                       borderRadius: 20,
                       border: featured
-                        ? `1px solid ${accent}30`
+                        ? `1px solid ${accent}35`
                         : "1px solid rgba(255,255,255,0.1)",
                       borderTop: `4px solid ${accent}`,
-                      padding: "44px 40px 36px",
+                      padding: "32px 28px 28px",
                       display: "flex",
                       flexDirection: "column",
                       position: "relative",
                       overflow: "hidden",
+                      opacity: 0,
+                      willChange: "transform, opacity",
                       boxShadow: featured
-                        ? `0 0 80px ${accent}15, 0 32px 80px rgba(0,0,0,0.5)`
+                        ? `0 0 80px ${accent}12, 0 32px 80px rgba(0,0,0,0.5)`
                         : "0 16px 48px rgba(0,0,0,0.4)",
                     }}
                   >
@@ -1275,7 +1327,7 @@ export default function TTSSite() {
                         position: "absolute",
                         bottom: -40,
                         right: -20,
-                        fontSize: 280,
+                        fontSize: 240,
                         fontWeight: 900,
                         lineHeight: 1,
                         color: accent,
@@ -1292,8 +1344,8 @@ export default function TTSSite() {
                       <div
                         style={{
                           position: "absolute",
-                          top: 20,
-                          right: 20,
+                          top: 16,
+                          right: 16,
                           background: accent,
                           color: "#09090b",
                           fontSize: 9,
@@ -1314,12 +1366,12 @@ export default function TTSSite() {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        marginBottom: 36,
+                        marginBottom: 28,
                       }}
                     >
                       <div
                         style={{
-                          fontSize: 80,
+                          fontSize: 64,
                           fontWeight: 900,
                           color: "rgba(255,255,255,0.08)",
                           letterSpacing: "-0.06em",
@@ -1331,9 +1383,9 @@ export default function TTSSite() {
                       </div>
                       <div
                         style={{
-                          width: 52,
-                          height: 52,
-                          borderRadius: 14,
+                          width: 48,
+                          height: 48,
+                          borderRadius: 13,
                           background: hexToRgba(accent, 0.15),
                           border: `1px solid ${hexToRgba(accent, 0.4)}`,
                           display: "flex",
@@ -1341,40 +1393,40 @@ export default function TTSSite() {
                           justifyContent: "center",
                         }}
                       >
-                        <Icon size={22} color={accent} />
+                        <Icon size={20} color={accent} />
                       </div>
                     </div>
 
                     <div
                       style={{
-                        fontSize: 11,
+                        fontSize: 10,
                         fontWeight: 700,
                         color: accent,
-                        letterSpacing: "0.12em",
+                        letterSpacing: "0.14em",
                         textTransform: "uppercase",
-                        marginBottom: 8,
+                        marginBottom: 6,
                       }}
                     >
                       {sub}
                     </div>
                     <h3
                       style={{
-                        fontSize: 32,
+                        fontSize: 26,
                         fontWeight: 900,
                         color: "#fff",
                         letterSpacing: "-0.03em",
                         lineHeight: 1.05,
-                        marginBottom: 12,
+                        marginBottom: 10,
                       }}
                     >
                       {title}
                     </h3>
                     <p
                       style={{
-                        fontSize: 15,
+                        fontSize: 13,
                         color: "#a1a1aa",
                         lineHeight: 1.65,
-                        marginBottom: 28,
+                        marginBottom: 20,
                       }}
                     >
                       {tagline}
@@ -1384,7 +1436,7 @@ export default function TTSSite() {
                       style={{
                         height: 1,
                         background: "rgba(255,255,255,0.1)",
-                        marginBottom: 20,
+                        marginBottom: 16,
                       }}
                     />
 
@@ -1395,7 +1447,7 @@ export default function TTSSite() {
                         padding: 0,
                         display: "flex",
                         flexDirection: "column",
-                        gap: 12,
+                        gap: 10,
                         flex: 1,
                       }}
                     >
@@ -1405,13 +1457,13 @@ export default function TTSSite() {
                           style={{
                             display: "flex",
                             alignItems: "flex-start",
-                            gap: 10,
-                            fontSize: 14,
+                            gap: 9,
+                            fontSize: 13,
                             color: "#d4d4d8",
                           }}
                         >
                           <Check
-                            size={14}
+                            size={13}
                             color={accent}
                             strokeWidth={2.5}
                             style={{ flexShrink: 0, marginTop: 2 }}
@@ -1423,8 +1475,8 @@ export default function TTSSite() {
 
                     <div
                       style={{
-                        marginTop: 28,
-                        paddingTop: 20,
+                        marginTop: 20,
+                        paddingTop: 16,
                         borderTop: "1px solid rgba(255,255,255,0.1)",
                         display: "flex",
                         alignItems: "center",
@@ -1433,9 +1485,9 @@ export default function TTSSite() {
                     >
                       <div
                         style={{
-                          fontSize: 13,
+                          fontSize: 12,
                           color: "#71717a",
-                          maxWidth: 220,
+                          maxWidth: 180,
                         }}
                       >
                         {forText}
@@ -1446,14 +1498,14 @@ export default function TTSSite() {
                           display: "inline-flex",
                           alignItems: "center",
                           gap: 6,
-                          fontSize: 13,
+                          fontSize: 12,
                           fontWeight: 700,
                           color: accent,
                           background: hexToRgba(accent, 0.1),
                           border: `1px solid ${hexToRgba(accent, 0.3)}`,
                           borderRadius: 8,
                           cursor: "pointer",
-                          padding: "8px 14px",
+                          padding: "7px 12px",
                           flexShrink: 0,
                           transition: "background 0.15s",
                           whiteSpace: "nowrap",
@@ -1469,7 +1521,7 @@ export default function TTSSite() {
                           ).style.background = hexToRgba(accent, 0.1);
                         }}
                       >
-                        Join <ArrowRight size={13} />
+                        Join <ArrowRight size={12} />
                       </button>
                     </div>
                   </div>
@@ -1581,14 +1633,14 @@ export default function TTSSite() {
               </div>
             </div>
 
-            {/* Panel B: slides in from above — brand new content */}
+            {/* Panel B: slides in from the right side */}
             <div
-              aria-hidden={panelBY < -5}
+              aria-hidden={panelBX > 5}
               style={{
                 position: "absolute",
                 inset: 0,
                 background: "#0d0d10",
-                transform: `translateY(${panelBY}%)`,
+                transform: `translateX(${panelBX}%)`,
                 zIndex: 2,
                 display: "flex",
                 alignItems: "center",
