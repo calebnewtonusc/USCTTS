@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
 
 const schema = z.object({
   orgName: z.string().min(1).max(200),
@@ -15,6 +16,13 @@ const schema = z.object({
   description: z.string().min(10).max(2000),
 });
 
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = schema.safeParse(await req.json());
@@ -26,27 +34,23 @@ export async function POST(req: NextRequest) {
     }
 
     const { orgName, contactName, email, partnerType, description } = body.data;
+    const supabase = getSupabase();
 
-    // Wire to Supabase: set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
-    // then uncomment:
-    //
-    // const { createClient } = await import("@supabase/supabase-js");
-    // const supabase = createClient(
-    //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    //   process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    // );
-    // const { error } = await supabase
-    //   .from("partnerships")
-    //   .insert({ org_name: orgName, contact_name: contactName, email, partner_type: partnerType, description });
-    // if (error) throw new Error(error.message);
-
-    console.log("[partner] new inquiry:", {
-      orgName,
-      contactName,
+    const { error } = await supabase.from("partnerships").insert({
+      org_name: orgName,
+      contact_name: contactName,
       email,
-      partnerType,
+      partner_type: partnerType,
+      description,
     });
-    void description;
+
+    if (error) {
+      console.error("[partner] supabase error:", error.message);
+      return NextResponse.json(
+        { error: "Failed to save inquiry" },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch {

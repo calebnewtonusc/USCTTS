@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
 
 const schema = z.object({
   email: z.string().email(),
 });
+
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,9 +24,21 @@ export async function POST(req: NextRequest) {
     }
 
     const { email } = body.data;
+    const supabase = getSupabase();
 
-    // Log for now — wire to Mailchimp, Resend, or Supabase in production
-    console.log("[notify] email signup:", email);
+    const { error } = await supabase.from("email_signups").insert({ email });
+
+    if (error) {
+      // Unique constraint violation means already signed up
+      if (error.code === "23505") {
+        return NextResponse.json({ ok: true }, { status: 200 });
+      }
+      console.error("[notify] supabase error:", error.message);
+      return NextResponse.json(
+        { error: "Failed to save email" },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch {

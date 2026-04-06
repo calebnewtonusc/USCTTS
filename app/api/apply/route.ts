@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
 
 const schema = z.object({
   name: z.string().min(1).max(100),
@@ -9,6 +10,13 @@ const schema = z.object({
   track: z.enum(["Building", "Consulting", "Growing", "Unsure"]),
   why: z.string().min(10).max(1000),
 });
+
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,28 +29,19 @@ export async function POST(req: NextRequest) {
     }
 
     const { name, email, major, year, track, why } = body.data;
+    const supabase = getSupabase();
 
-    // Wire to Supabase: set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
-    // then uncomment:
-    //
-    // const { createClient } = await import("@supabase/supabase-js");
-    // const supabase = createClient(
-    //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    //   process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    // );
-    // const { error } = await supabase
-    //   .from("applications")
-    //   .insert({ name, email, major, year, track, why });
-    // if (error) throw new Error(error.message);
+    const { error } = await supabase
+      .from("applications")
+      .insert({ name, email, major, year, track, why });
 
-    console.log("[apply] new application:", {
-      name,
-      email,
-      major,
-      year,
-      track,
-    });
-    void why;
+    if (error) {
+      console.error("[apply] supabase error:", error.message);
+      return NextResponse.json(
+        { error: "Failed to save application" },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch {
