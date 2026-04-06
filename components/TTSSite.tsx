@@ -869,8 +869,8 @@ export default function TTSSite() {
                 }}
               >
                 SEP, BTG, BPX: great clubs. All have applications, waitlists,
-                and cuts. TTS has none of that. Walk in any week. No form, no
-                interview, no rejection email.
+                and cuts. TTS has none of that. Walk in any week. No
+                application, no interview, no rejection email.
               </p>
               <p
                 className="tts-fade"
@@ -1423,7 +1423,7 @@ export default function TTSSite() {
                     {
                       stat: "0",
                       label: "Applications required",
-                      sub: "Walk in any week. No form, no waitlist, no rejection.",
+                      sub: "Walk in any week. No application, no waitlist, no rejection.",
                     },
                     {
                       stat: "7+",
