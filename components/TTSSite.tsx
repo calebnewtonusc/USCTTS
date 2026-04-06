@@ -202,6 +202,15 @@ const CABINET: {
     position: "center top",
   },
   {
+    name: "Malakai Carey",
+    role: "Lead of Music",
+    initials: "MC",
+    accent: "#ec4899",
+    link: "https://www.linkedin.com/in/malakai-carey-11187038a/",
+    headshot: "/img/malakai_shot.jpeg",
+    position: "center top",
+  },
+  {
     name: "Coming Soon",
     role: "TBD",
     initials: "?",
