@@ -868,7 +868,7 @@ export default function TTSSite() {
                   transitionDelay: "0.08s",
                 }}
               >
-                SEP, LAVA, BPX — great clubs. All have applications, waitlists,
+                SEP, BTG, BPX: great clubs. All have applications, waitlists,
                 and cuts. TTS has none of that. Walk in any week. No form, no
                 interview, no rejection email.
               </p>
@@ -883,9 +883,9 @@ export default function TTSSite() {
                 }}
               >
                 We run tracks across consulting, engineering, biotech, music
-                tech, and Web3 — because AI is reshaping every field, not just
-                software. Show up once and get value. Or join four project teams
-                and go deep. Both work.
+                tech, and Web3. AI is reshaping every field, not just software.
+                Show up once and get value. Or join four project teams and go
+                deep. Both work.
               </p>
               <p
                 className="tts-fade"
