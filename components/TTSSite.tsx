@@ -107,8 +107,7 @@ const FOUNDERS = [
     accent: "#FFCC00",
     owns: [
       "Consulting curriculum and client pipeline",
-      "E-board building and people operations",
-      "Partnerships and cross-club ecosystem",
+      "E-board, partnerships, and cross-club ecosystem",
       "Community culture and recruiting",
     ],
   },
@@ -125,8 +124,7 @@ const FOUNDERS = [
     owns: [
       "Product curriculum and AI systems",
       "Website, codebase, and internal tooling",
-      "Startup relationships and builder culture",
-      "Technical execution and live demos",
+      "Startup relationships, demos, and builder culture",
     ],
   },
 ];
@@ -430,8 +428,10 @@ export default function TTSSite() {
   const [revealProgress, setRevealProgress] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [joinActive, setJoinActive] = useState(false);
+  const [joinScrollProg, setJoinScrollProg] = useState(0);
   const [missionActive, setMissionActive] = useState(false);
   const joinSectionRef = useRef<HTMLElement>(null);
+  const joinScrollRef = useRef<HTMLElement>(null);
   const missionSectionRef = useRef<HTMLElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
   const cursorRingRef = useRef<HTMLDivElement>(null);
@@ -487,6 +487,12 @@ export default function TTSSite() {
         const scrolled = scrollY - sect.offsetTop;
         const maxScroll = sect.offsetHeight - winH;
         setRevealProgress(Math.max(0, Math.min(1, scrolled / maxScroll)));
+      }
+      if (joinScrollRef.current) {
+        const sect = joinScrollRef.current;
+        const scrolled = scrollY - sect.offsetTop;
+        const maxScroll = sect.offsetHeight - winH;
+        setJoinScrollProg(Math.max(0, Math.min(1, scrolled / maxScroll)));
       }
     };
     window.addEventListener("scroll", handle, { passive: true });
@@ -692,6 +698,10 @@ export default function TTSSite() {
   // Phase 2 (0.42→0.56): simultaneous swap — A exits down, B enters from top (touching)
   // Phase 3 (0.56→1.0): Panel B DWELLS
   const revealSlide = revealProgress;
+  // Panel A: enters from RIGHT (0→0.15), then exits DOWN (0.42→0.56)
+  const enterP = Math.max(0, Math.min(1, revealSlide / 0.15));
+  const enterEased = 1 - Math.pow(1 - enterP, 3);
+  const panelRealWorkX = (1 - enterEased) * 100;
   const transP = Math.max(0, Math.min(1, (revealSlide - 0.42) / 0.14));
   const panelRealWorkY = transP * 100;
   const panelWalkInY = (-1 + transP) * 100;
@@ -836,6 +846,7 @@ export default function TTSSite() {
           cursor: "none",
           background: "#09090b",
           minHeight: "100vh",
+          overflow: "hidden",
           fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         }}
       >
@@ -872,24 +883,24 @@ export default function TTSSite() {
 
             {/* Floating parallax icons — hero (3 depth layers) */}
             {[
-              // FOREGROUND — large, fast, wide x-drift
+              // FOREGROUND — large, natural parallax
               {
                 Icon: Code,
                 top: "8%",
                 left: "5%",
                 size: 120,
-                speed: "1.00",
-                speedx: "0.36",
+                speed: "0.14",
+                speedx: "0.05",
                 rotate: -12,
                 color: "#CC0000",
               },
               {
                 Icon: Globe,
                 top: "30%",
-                right: "3%",
+                right: "5%",
                 size: 100,
-                speed: "0.90",
-                speedx: "-0.40",
+                speed: "0.14",
+                speedx: "-0.05",
                 rotate: -25,
                 color: "#FFCC00",
               },
@@ -898,19 +909,19 @@ export default function TTSSite() {
                 bottom: "8%",
                 left: "12%",
                 size: 90,
-                speed: "0.96",
-                speedx: "0.30",
+                speed: "0.14",
+                speedx: "0.04",
                 rotate: -10,
                 color: "#CC0000",
               },
-              // MIDGROUND — medium, moderate drift
+              // MIDGROUND — medium icons
               {
                 Icon: Rocket,
                 top: "12%",
                 right: "8%",
                 size: 70,
-                speed: "0.56",
-                speedx: "-0.18",
+                speed: "0.10",
+                speedx: "-0.03",
                 rotate: 14,
                 color: "rgba(255,255,255,0.65)",
               },
@@ -919,8 +930,8 @@ export default function TTSSite() {
                 bottom: "22%",
                 left: "7%",
                 size: 65,
-                speed: "0.50",
-                speedx: "0.16",
+                speed: "0.07",
+                speedx: "0.03",
                 rotate: 8,
                 color: "rgba(255,204,0,0.7)",
               },
@@ -929,49 +940,49 @@ export default function TTSSite() {
                 bottom: "12%",
                 right: "10%",
                 size: 60,
-                speed: "0.44",
-                speedx: "-0.14",
+                speed: "0.07",
+                speedx: "-0.02",
                 rotate: 20,
                 color: "rgba(255,255,255,0.55)",
               },
-              // BACKGROUND — small, slow, minimal x-drift
+              // BACKGROUND — small icons
               {
                 Icon: Cpu,
                 top: "52%",
-                right: "1.5%",
+                right: "5%",
                 size: 40,
-                speed: "0.16",
-                speedx: "-0.06",
+                speed: "0.05",
+                speedx: "-0.02",
                 rotate: -6,
                 color: "rgba(204,0,0,0.45)",
               },
               {
                 Icon: Terminal,
                 top: "35%",
-                left: "1.5%",
+                left: "5%",
                 size: 35,
-                speed: "0.12",
-                speedx: "0.04",
+                speed: "0.05",
+                speedx: "0.02",
                 rotate: 30,
                 color: "rgba(255,255,255,0.25)",
               },
               {
                 Icon: Zap,
                 top: "68%",
-                left: "2%",
+                left: "5%",
                 size: 30,
-                speed: "0.10",
-                speedx: "-0.04",
+                speed: "0.03",
+                speedx: "-0.01",
                 rotate: -18,
                 color: "rgba(255,204,0,0.35)",
               },
               {
                 Icon: Layers,
                 bottom: "40%",
-                right: "2%",
+                right: "5%",
                 size: 28,
-                speed: "0.08",
-                speedx: "0.04",
+                speed: "0.03",
+                speedx: "0.01",
                 rotate: 15,
                 color: "rgba(255,255,255,0.2)",
               },
@@ -1007,7 +1018,10 @@ export default function TTSSite() {
                     right,
                     bottom,
                     color,
-                    opacity: Math.min(1, heroSlideProgress * 5),
+                    opacity: Math.max(
+                      0.15,
+                      Math.min(1, heroSlideProgress * 3 + 0.15),
+                    ),
                     transition: "opacity 0.4s ease",
                   }}
                 >
@@ -1306,76 +1320,76 @@ export default function TTSSite() {
 
           {/* Floating parallax icons — mission section (3 depth layers) */}
           {[
-            // FOREGROUND — large, fast, wide x-drift
+            // FOREGROUND — large, natural parallax
             {
               Icon: Lightbulb,
               top: "10%",
-              right: "3%",
+              right: "5%",
               size: 110,
-              speed: "1.04",
-              speedx: "-0.40",
+              speed: "0.14",
+              speedx: "-0.05",
               rotate: -8,
               color: "#FFCC00",
             },
             {
               Icon: Compass,
               bottom: "14%",
-              left: "3%",
+              left: "5%",
               size: 95,
-              speed: "0.92",
-              speedx: "0.34",
+              speed: "0.14",
+              speedx: "0.04",
               rotate: -14,
               color: "#CC0000",
             },
-            // MIDGROUND — medium, moderate drift
+            // MIDGROUND — medium icons
             {
               Icon: BookOpen,
               top: "8%",
-              left: "2%",
+              left: "5%",
               size: 68,
-              speed: "0.54",
-              speedx: "0.18",
+              speed: "0.10",
+              speedx: "0.03",
               rotate: 12,
               color: "rgba(255,255,255,0.6)",
             },
             {
               Icon: Target,
               bottom: "18%",
-              right: "4%",
+              right: "5%",
               size: 62,
-              speed: "0.48",
-              speedx: "-0.16",
+              speed: "0.07",
+              speedx: "-0.02",
               rotate: 20,
               color: "rgba(255,255,255,0.5)",
             },
             {
               Icon: Network,
               top: "55%",
-              right: "2%",
+              right: "5%",
               size: 58,
-              speed: "0.60",
-              speedx: "-0.20",
+              speed: "0.07",
+              speedx: "-0.02",
               rotate: 18,
               color: "rgba(255,204,0,0.65)",
             },
-            // BACKGROUND — small, slow, minimal x-drift
+            // BACKGROUND — small icons
             {
               Icon: Globe,
               top: "48%",
-              left: "1%",
+              left: "5%",
               size: 38,
-              speed: "0.14",
-              speedx: "0.06",
+              speed: "0.05",
+              speedx: "0.02",
               rotate: 6,
               color: "rgba(255,255,255,0.22)",
             },
             {
               Icon: Zap,
               top: "28%",
-              right: "1%",
+              right: "5%",
               size: 32,
-              speed: "0.10",
-              speedx: "-0.04",
+              speed: "0.03",
+              speedx: "-0.01",
               rotate: -22,
               color: "rgba(204,0,0,0.35)",
             },
@@ -1568,32 +1582,6 @@ export default function TTSSite() {
               }}
             />
 
-            {/* Scroll hint */}
-            <div
-              style={{
-                position: "absolute",
-                top: 36,
-                right: 60,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                zIndex: 2,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: "rgba(255,255,255,0.3)",
-                  letterSpacing: "0.16em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Scroll to explore
-              </div>
-              <ArrowRight size={10} color="rgba(255,255,255,0.3)" />
-            </div>
-
             {/* Title — absolutely positioned, JS shifts it center → left */}
             <div
               ref={trackTitleRef}
@@ -1608,7 +1596,7 @@ export default function TTSSite() {
             >
               <h2
                 style={{
-                  fontSize: "clamp(44px, 6vw, 88px)",
+                  fontSize: "clamp(56px, 7.5vw, 108px)",
                   fontWeight: 900,
                   color: "#fff",
                   letterSpacing: "-0.04em",
@@ -1616,14 +1604,14 @@ export default function TTSSite() {
                   marginBottom: 20,
                 }}
               >
-                <SplitText text="Three" style={{ display: "block" }} />
+                <SplitText text="Pick" style={{ display: "block" }} />
                 <SplitText
-                  text="ways"
+                  text="your"
                   baseDelay={0.1}
                   style={{ display: "block" }}
                 />
                 <SplitText
-                  text="in."
+                  text="track."
                   baseDelay={0.18}
                   style={{ display: "block", color: "#CC0000" }}
                 />
@@ -1930,7 +1918,7 @@ export default function TTSSite() {
                 background: "#0d0d10",
                 display: "flex",
                 alignItems: "center",
-                transform: `translateY(${panelRealWorkY}%)`,
+                transform: `translateX(${panelRealWorkX}%) translateY(${panelRealWorkY}%)`,
                 zIndex: 1,
                 overflow: "hidden",
               }}
@@ -1941,40 +1929,40 @@ export default function TTSSite() {
                   {
                     Icon: Rocket,
                     top: "12%",
-                    right: "4%",
+                    right: "5%",
                     size: 80,
-                    speed: "0.75",
-                    speedx: "-0.28",
+                    speed: "0.10",
+                    speedx: "-0.03",
                     rotate: 20,
                     color: "rgba(204,0,0,0.65)",
                   },
                   {
                     Icon: GitBranch,
                     bottom: "18%",
-                    left: "3%",
+                    left: "5%",
                     size: 64,
-                    speed: "0.55",
-                    speedx: "0.18",
+                    speed: "0.07",
+                    speedx: "0.02",
                     rotate: -14,
                     color: "rgba(255,255,255,0.40)",
                   },
                   {
                     Icon: Trophy,
                     top: "55%",
-                    right: "2%",
+                    right: "5%",
                     size: 52,
-                    speed: "0.40",
-                    speedx: "-0.14",
+                    speed: "0.07",
+                    speedx: "-0.02",
                     rotate: 8,
                     color: "rgba(255,204,0,0.50)",
                   },
                   {
                     Icon: Globe,
                     top: "25%",
-                    left: "2%",
+                    left: "5%",
                     size: 44,
-                    speed: "0.28",
-                    speedx: "0.10",
+                    speed: "0.05",
+                    speedx: "0.02",
                     rotate: 30,
                     color: "rgba(255,255,255,0.28)",
                   },
@@ -1983,8 +1971,8 @@ export default function TTSSite() {
                     bottom: "10%",
                     right: "12%",
                     size: 38,
-                    speed: "0.18",
-                    speedx: "-0.08",
+                    speed: "0.05",
+                    speedx: "-0.02",
                     rotate: -22,
                     color: "rgba(204,0,0,0.35)",
                   },
@@ -2278,20 +2266,20 @@ export default function TTSSite() {
               {
                 Icon: Briefcase,
                 top: "22%",
-                left: "4%",
+                left: "5%",
                 size: 84,
-                speed: "0.88",
-                speedx: "0.32",
+                speed: "0.10",
+                speedx: "0.03",
                 rotate: -12,
                 color: "rgba(255,204,0,0.68)",
               },
               {
                 Icon: TrendingUp,
                 top: "62%",
-                left: "2%",
+                left: "5%",
                 size: 58,
-                speed: "0.58",
-                speedx: "-0.20",
+                speed: "0.07",
+                speedx: "-0.02",
                 rotate: 14,
                 color: "rgba(255,204,0,0.52)",
               },
@@ -2300,8 +2288,8 @@ export default function TTSSite() {
                 bottom: "12%",
                 left: "10%",
                 size: 46,
-                speed: "0.38",
-                speedx: "0.14",
+                speed: "0.05",
+                speedx: "0.02",
                 rotate: -8,
                 color: "rgba(255,204,0,0.42)",
               },
@@ -2310,8 +2298,8 @@ export default function TTSSite() {
                 top: "42%",
                 left: "20%",
                 size: 36,
-                speed: "0.18",
-                speedx: "-0.08",
+                speed: "0.05",
+                speedx: "-0.02",
                 rotate: 22,
                 color: "rgba(255,204,0,0.28)",
               },
@@ -2354,20 +2342,20 @@ export default function TTSSite() {
               {
                 Icon: Cpu,
                 top: "18%",
-                right: "3%",
+                right: "5%",
                 size: 92,
-                speed: "0.95",
-                speedx: "-0.35",
+                speed: "0.14",
+                speedx: "-0.05",
                 rotate: 8,
                 color: "rgba(204,0,0,0.72)",
               },
               {
                 Icon: Code,
                 top: "58%",
-                right: "2%",
+                right: "5%",
                 size: 62,
-                speed: "0.62",
-                speedx: "0.22",
+                speed: "0.07",
+                speedx: "0.02",
                 rotate: -16,
                 color: "rgba(204,0,0,0.58)",
               },
@@ -2376,8 +2364,8 @@ export default function TTSSite() {
                 bottom: "14%",
                 right: "8%",
                 size: 50,
-                speed: "0.42",
-                speedx: "-0.16",
+                speed: "0.07",
+                speedx: "-0.02",
                 rotate: 24,
                 color: "rgba(204,0,0,0.44)",
               },
@@ -2386,8 +2374,8 @@ export default function TTSSite() {
                 top: "38%",
                 right: "21%",
                 size: 38,
-                speed: "0.20",
-                speedx: "0.10",
+                speed: "0.05",
+                speedx: "0.02",
                 rotate: -28,
                 color: "rgba(204,0,0,0.30)",
               },
@@ -2724,35 +2712,35 @@ export default function TTSSite() {
           />
           {/* Floating parallax icons — cabinet section (3 depth layers) */}
           {[
-            // FOREGROUND — large, fast, wide x-drift
+            // FOREGROUND — large, natural parallax
             {
               Icon: Zap,
               top: "52%",
-              right: "3%",
+              right: "5%",
               size: 105,
-              speed: "1.00",
-              speedx: "-0.38",
+              speed: "0.14",
+              speedx: "-0.05",
               rotate: -10,
               color: "#CC0000",
             },
             {
               Icon: Award,
               top: "10%",
-              left: "4%",
+              left: "5%",
               size: 95,
-              speed: "0.92",
-              speedx: "0.34",
+              speed: "0.14",
+              speedx: "0.04",
               rotate: -28,
               color: "#FFCC00",
             },
-            // MIDGROUND — medium, moderate drift
+            // MIDGROUND — medium icons
             {
               Icon: Hammer,
               top: "12%",
               right: "6%",
               size: 70,
-              speed: "0.52",
-              speedx: "-0.18",
+              speed: "0.10",
+              speedx: "-0.03",
               rotate: -18,
               color: "rgba(204,0,0,0.65)",
             },
@@ -2761,8 +2749,8 @@ export default function TTSSite() {
               bottom: "14%",
               left: "7%",
               size: 64,
-              speed: "0.48",
-              speedx: "0.16",
+              speed: "0.07",
+              speedx: "0.02",
               rotate: 12,
               color: "rgba(255,204,0,0.65)",
             },
@@ -2771,29 +2759,29 @@ export default function TTSSite() {
               bottom: "12%",
               right: "12%",
               size: 60,
-              speed: "0.56",
-              speedx: "-0.18",
+              speed: "0.07",
+              speedx: "-0.02",
               rotate: 22,
               color: "rgba(255,204,0,0.6)",
             },
-            // BACKGROUND — small, slow, minimal x-drift
+            // BACKGROUND — small icons
             {
               Icon: TrendingUp,
               bottom: "18%",
-              right: "2%",
+              right: "5%",
               size: 38,
-              speed: "0.14",
-              speedx: "-0.04",
+              speed: "0.05",
+              speedx: "-0.02",
               rotate: 8,
               color: "rgba(255,255,255,0.25)",
             },
             {
               Icon: Star,
               bottom: "35%",
-              left: "1.5%",
+              left: "5%",
               size: 32,
-              speed: "0.10",
-              speedx: "0.04",
+              speed: "0.03",
+              speedx: "0.01",
               rotate: 16,
               color: "rgba(255,204,0,0.3)",
             },
@@ -3055,6 +3043,16 @@ export default function TTSSite() {
           </div>
         </section>
 
+        {/* Gradient: Cabinet → Alumni */}
+        <div
+          aria-hidden="true"
+          style={{
+            height: 60,
+            background: "linear-gradient(to bottom, #09090b 0%, #0c0c0f 100%)",
+            pointerEvents: "none",
+          }}
+        />
+
         {/* ── ALUMNI / BOARD ── */}
         <section
           id="alumni"
@@ -3161,307 +3159,320 @@ export default function TTSSite() {
               </p>
             </div>
 
-            {/* Board of Advisors */}
-            <div style={{ marginBottom: 48 }}>
-              <p
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: "#71717a",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  marginBottom: 20,
-                }}
-              >
-                Board of Advisors
-              </p>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                  gap: 20,
-                  maxWidth: 560,
-                }}
-              >
-                {BOARD.map((person, i) => (
-                  <a
-                    key={person.name}
-                    href={person.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${person.name}, ${person.role}`}
-                    className={i === 0 ? "tts-from-left" : "tts-from-right"}
-                    style={{
-                      transitionDelay: `${i * 0.12}s`,
-                      display: "block",
-                      textDecoration: "none",
-                      borderRadius: 16,
-                      overflow: "hidden",
-                      background: "#111113",
-                      border: "1px solid rgba(255,204,0,0.1)",
-                      transition:
-                        "transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease, border-color 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.transform =
-                        "translateY(-6px) scale(1.02)";
-                      (e.currentTarget as HTMLAnchorElement).style.boxShadow =
-                        "0 20px 60px rgba(255,204,0,0.15)";
-                      (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                        "rgba(255,204,0,0.4)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.transform =
-                        "translateY(0) scale(1)";
-                      (e.currentTarget as HTMLAnchorElement).style.boxShadow =
-                        "none";
-                      (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                        "rgba(255,204,0,0.1)";
-                    }}
-                  >
-                    {/* Portrait photo */}
-                    <div
+            {/* Board of Advisors + Alumni — side by side */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(280px, 500px) 1fr",
+                gap: 64,
+                alignItems: "start",
+              }}
+            >
+              {/* Board of Advisors */}
+              <div>
+                <p
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: "#71717a",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    marginBottom: 20,
+                  }}
+                >
+                  Board of Advisors
+                </p>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(220px, 1fr))",
+                    gap: 20,
+                  }}
+                >
+                  {BOARD.map((person, i) => (
+                    <a
+                      key={person.name}
+                      href={person.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${person.name}, ${person.role}`}
+                      className={i === 0 ? "tts-from-left" : "tts-from-right"}
                       style={{
-                        position: "relative",
-                        width: "100%",
-                        aspectRatio: "3/4",
+                        transitionDelay: `${i * 0.12}s`,
+                        display: "block",
+                        textDecoration: "none",
+                        borderRadius: 16,
                         overflow: "hidden",
+                        background: "#111113",
+                        border: "1px solid rgba(255,204,0,0.1)",
+                        transition:
+                          "transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease, border-color 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLAnchorElement).style.transform =
+                          "translateY(-6px) scale(1.02)";
+                        (e.currentTarget as HTMLAnchorElement).style.boxShadow =
+                          "0 20px 60px rgba(255,204,0,0.15)";
+                        (
+                          e.currentTarget as HTMLAnchorElement
+                        ).style.borderColor = "rgba(255,204,0,0.4)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLAnchorElement).style.transform =
+                          "translateY(0) scale(1)";
+                        (e.currentTarget as HTMLAnchorElement).style.boxShadow =
+                          "none";
+                        (
+                          e.currentTarget as HTMLAnchorElement
+                        ).style.borderColor = "rgba(255,204,0,0.1)";
                       }}
                     >
-                      {/* Accent bar */}
+                      {/* Portrait photo */}
                       <div
                         style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          height: 3,
-                          background: "#FFCC00",
-                          zIndex: 2,
+                          position: "relative",
+                          width: "100%",
+                          aspectRatio: "3/4",
+                          overflow: "hidden",
                         }}
-                      />
-                      {person.headshot ? (
-                        <Image
-                          src={person.headshot}
-                          alt={person.name}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 280px"
+                      >
+                        {/* Accent bar */}
+                        <div
                           style={{
-                            objectFit: "cover",
-                            objectPosition: person.position ?? "center top",
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: 3,
+                            background: "#FFCC00",
+                            zIndex: 2,
                           }}
                         />
-                      ) : (
+                        {person.headshot ? (
+                          <Image
+                            src={person.headshot}
+                            alt={person.name}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 280px"
+                            style={{
+                              objectFit: "cover",
+                              objectPosition: person.position ?? "center top",
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              position: "absolute",
+                              inset: 0,
+                              background: "rgba(255,204,0,0.05)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: 48,
+                                fontWeight: 900,
+                                color: "rgba(255,204,0,0.2)",
+                              }}
+                            >
+                              {person.initials}
+                            </span>
+                          </div>
+                        )}
+                        {/* Gradient overlay */}
                         <div
                           style={{
                             position: "absolute",
                             inset: 0,
-                            background: "rgba(255,204,0,0.05)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
+                            background:
+                              "linear-gradient(to top, rgba(9,9,11,0.95) 0%, rgba(9,9,11,0.3) 45%, transparent 70%)",
+                          }}
+                        />
+                        {/* Name pinned to bottom */}
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            padding: "18px 18px 16px",
                           }}
                         >
-                          <span
+                          <div
                             style={{
-                              fontSize: 48,
-                              fontWeight: 900,
-                              color: "rgba(255,204,0,0.2)",
+                              fontSize: 16,
+                              fontWeight: 800,
+                              color: "#fff",
+                              letterSpacing: "-0.02em",
+                              lineHeight: 1.2,
+                              marginBottom: 4,
                             }}
                           >
-                            {person.initials}
-                          </span>
-                        </div>
-                      )}
-                      {/* Gradient overlay */}
-                      <div
-                        style={{
-                          position: "absolute",
-                          inset: 0,
-                          background:
-                            "linear-gradient(to top, rgba(9,9,11,0.95) 0%, rgba(9,9,11,0.3) 45%, transparent 70%)",
-                        }}
-                      />
-                      {/* Name pinned to bottom */}
-                      <div
-                        style={{
-                          position: "absolute",
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          padding: "18px 18px 16px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: 16,
-                            fontWeight: 800,
-                            color: "#fff",
-                            letterSpacing: "-0.02em",
-                            lineHeight: 1.2,
-                            marginBottom: 4,
-                          }}
-                        >
-                          {person.name}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: 11,
-                            fontWeight: 700,
-                            color: "#FFCC00",
-                            letterSpacing: "0.06em",
-                            textTransform: "uppercase",
-                          }}
-                        >
-                          {person.role}
+                            {person.name}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 700,
+                              color: "#FFCC00",
+                              letterSpacing: "0.06em",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            {person.role}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Company logo strip */}
-                    <div
-                      style={{
-                        padding: "12px 18px",
-                        borderTop: "1px solid rgba(255,204,0,0.07)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        minHeight: 48,
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      {person.companies.map((co) => (
-                        <span
-                          key={co}
-                          style={{
-                            fontSize: 11,
-                            fontWeight: 700,
-                            color: "#a1a1aa",
-                            background: "rgba(255,255,255,0.07)",
-                            border: "1px solid rgba(255,255,255,0.15)",
-                            borderRadius: 6,
-                            padding: "3px 8px",
-                            letterSpacing: "0.04em",
-                          }}
-                        >
-                          {co}
-                        </span>
-                      ))}
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Alumni placeholders */}
-            <div>
-              <p
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: "#71717a",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  marginBottom: 20,
-                }}
-              >
-                Alumni
-              </p>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                  gap: 12,
-                }}
-              >
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className="tts-fade"
-                    style={{ transitionDelay: `${i * 0.05}s` }}
-                  >
-                    <div
-                      style={{
-                        background: "rgba(255,255,255,0.04)",
-                        borderRadius: 14,
-                        border: "1px dashed rgba(255,255,255,0.25)",
-                        padding: "20px",
-                      }}
-                    >
+                      {/* Company logo strip */}
                       <div
                         style={{
+                          padding: "12px 18px",
+                          borderTop: "1px solid rgba(255,204,0,0.07)",
                           display: "flex",
                           alignItems: "center",
-                          gap: 12,
-                          marginBottom: 14,
+                          gap: 8,
+                          minHeight: 48,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        {person.companies.map((co) => (
+                          <span
+                            key={co}
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 700,
+                              color: "#a1a1aa",
+                              background: "rgba(255,255,255,0.07)",
+                              border: "1px solid rgba(255,255,255,0.15)",
+                              borderRadius: 6,
+                              padding: "3px 8px",
+                              letterSpacing: "0.04em",
+                            }}
+                          >
+                            {co}
+                          </span>
+                        ))}
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* Alumni */}
+              <div>
+                <p
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: "#71717a",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    marginBottom: 20,
+                  }}
+                >
+                  Alumni
+                </p>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(220px, 1fr))",
+                    gap: 12,
+                  }}
+                >
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      className="tts-fade"
+                      style={{ transitionDelay: `${i * 0.05}s` }}
+                    >
+                      <div
+                        style={{
+                          background: "rgba(255,255,255,0.04)",
+                          borderRadius: 14,
+                          border: "1px dashed rgba(255,255,255,0.25)",
+                          padding: "20px",
                         }}
                       >
                         <div
                           style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 10,
-                            border: "1px dashed rgba(255,255,255,0.3)",
-                            background: "rgba(255,255,255,0.06)",
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "center",
-                            flexShrink: 0,
+                            gap: 12,
+                            marginBottom: 14,
                           }}
                         >
-                          <span style={{ fontSize: 14, color: "#a1a1aa" }}>
-                            ?
-                          </span>
-                        </div>
-                        <div>
                           <div
                             style={{
-                              width: 80,
-                              height: 10,
-                              background: "rgba(255,255,255,0.2)",
-                              borderRadius: 4,
-                              marginBottom: 6,
-                            }}
-                          />
-                          <div
-                            style={{
-                              width: 56,
-                              height: 8,
-                              background: "rgba(255,255,255,0.1)",
-                              borderRadius: 4,
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", gap: 6 }}>
-                        {[0, 1, 2].map((j) => (
-                          <div
-                            key={j}
-                            style={{
-                              width: 28,
-                              height: 28,
-                              borderRadius: 6,
+                              width: 40,
+                              height: 40,
+                              borderRadius: 10,
+                              border: "1px dashed rgba(255,255,255,0.3)",
                               background: "rgba(255,255,255,0.06)",
-                              border: "1px dashed rgba(255,255,255,0.2)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
                             }}
-                          />
-                        ))}
+                          >
+                            <span style={{ fontSize: 14, color: "#a1a1aa" }}>
+                              ?
+                            </span>
+                          </div>
+                          <div>
+                            <div
+                              style={{
+                                width: 80,
+                                height: 10,
+                                background: "rgba(255,255,255,0.2)",
+                                borderRadius: 4,
+                                marginBottom: 6,
+                              }}
+                            />
+                            <div
+                              style={{
+                                width: 56,
+                                height: 8,
+                                background: "rgba(255,255,255,0.1)",
+                                borderRadius: 4,
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          {[0, 1, 2].map((j) => (
+                            <div
+                              key={j}
+                              style={{
+                                width: 28,
+                                height: 28,
+                                borderRadius: 6,
+                                background: "rgba(255,255,255,0.06)",
+                                border: "1px dashed rgba(255,255,255,0.2)",
+                              }}
+                            />
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                <p
+                  className="tts-fade"
+                  style={{
+                    fontSize: 13,
+                    color: "#71717a",
+                    marginTop: 20,
+                    fontStyle: "italic",
+                  }}
+                >
+                  Alumni profiles coming soon. Reach out to add yours.
+                </p>
               </div>
-              <p
-                className="tts-fade"
-                style={{
-                  fontSize: 13,
-                  color: "#71717a",
-                  marginTop: 20,
-                  fontStyle: "italic",
-                }}
-              >
-                Alumni profiles coming soon. Reach out to add yours.
-              </p>
             </div>
           </div>
         </section>
@@ -3482,66 +3493,66 @@ export default function TTSSite() {
         >
           {/* Floating parallax icons — FAQ section (3 depth layers) */}
           {[
-            // FOREGROUND — large, fast, wide x-drift
+            // FOREGROUND — large, natural parallax
             {
               Icon: HelpCircle,
               top: "8%",
-              left: "2%",
+              left: "5%",
               size: 108,
-              speed: "1.04",
-              speedx: "0.40",
+              speed: "0.14",
+              speedx: "0.05",
               rotate: 15,
               color: "rgba(255,255,255,0.55)",
             },
             {
               Icon: HelpCircle,
               bottom: "18%",
-              right: "2.5%",
+              right: "5%",
               size: 96,
-              speed: "0.92",
-              speedx: "-0.36",
+              speed: "0.14",
+              speedx: "-0.04",
               rotate: -18,
               color: "rgba(255,204,0,0.65)",
             },
-            // MIDGROUND — medium, moderate drift
+            // MIDGROUND — medium icons
             {
               Icon: HelpCircle,
               top: "16%",
-              right: "3%",
+              right: "5%",
               size: 70,
-              speed: "0.56",
-              speedx: "-0.18",
+              speed: "0.10",
+              speedx: "-0.03",
               rotate: -10,
               color: "rgba(204,0,0,0.65)",
             },
             {
               Icon: HelpCircle,
               bottom: "10%",
-              left: "3%",
+              left: "5%",
               size: 64,
-              speed: "0.48",
-              speedx: "0.16",
+              speed: "0.07",
+              speedx: "0.02",
               rotate: 8,
               color: "rgba(255,255,255,0.5)",
             },
-            // BACKGROUND — small, slow, minimal x-drift
+            // BACKGROUND — small icons
             {
               Icon: HelpCircle,
               top: "48%",
-              left: "1%",
+              left: "5%",
               size: 38,
-              speed: "0.14",
-              speedx: "0.04",
+              speed: "0.05",
+              speedx: "0.02",
               rotate: 25,
               color: "rgba(255,255,255,0.22)",
             },
             {
               Icon: HelpCircle,
               top: "33%",
-              right: "1%",
+              right: "5%",
               size: 30,
-              speed: "0.10",
-              speedx: "-0.04",
+              speed: "0.03",
+              speedx: "-0.01",
               rotate: -30,
               color: "rgba(204,0,0,0.3)",
             },
@@ -3870,559 +3881,740 @@ export default function TTSSite() {
         {/* Wave 5 — before join */}
         <WaveDivider amplitude={28} speed={9} />
 
-        {/* ── JOIN ── */}
+        {/* ── JOIN — scroll-driven cinematic ── */}
         <section
-          ref={joinSectionRef}
+          ref={joinScrollRef}
           id="join"
-          className="tts-section-pad"
           style={{
-            background: "#0a0508",
-            padding: "100px 40px 120px",
+            height: "240vh",
             position: "relative",
-            overflow: "visible",
+            background: "#0a0508",
+            overflow: "hidden",
           }}
         >
-          {/* Pulsing glow */}
-          <div className="tts-join-glow" aria-hidden="true" />
-
-          {/* Epic entrance rings — wrapped so nth-child applies correctly */}
-          <div aria-hidden="true">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <div
-                key={`ring-${i}`}
-                className={`tts-join-ring${joinActive ? " tts-active" : ""}`}
-                style={{ animationDelay: `${i * 0.3}s` }}
-              />
-            ))}
-          </div>
-
-          {/* Floating parallax icons — join section (3 depth layers) */}
-          {[
-            // FOREGROUND — large, fast, wide x-drift
-            {
-              Icon: Zap,
-              top: "10%",
-              left: "3%",
-              size: 118,
-              speed: "1.04",
-              speedx: "0.40",
-              rotate: -16,
-              color: "#CC0000",
-            },
-            {
-              Icon: Rocket,
-              bottom: "10%",
-              left: "4%",
-              size: 104,
-              speed: "0.92",
-              speedx: "0.36",
-              rotate: 22,
-              color: "#FFCC00",
-            },
-            {
-              Icon: Globe,
-              bottom: "16%",
-              right: "4%",
-              size: 92,
-              speed: "0.98",
-              speedx: "-0.42",
-              rotate: -8,
-              color: "#CC0000",
-            },
-            // MIDGROUND — medium, moderate drift
-            {
-              Icon: Users,
-              top: "15%",
-              right: "5%",
-              size: 70,
-              speed: "0.54",
-              speedx: "-0.20",
-              rotate: 10,
-              color: "rgba(255,255,255,0.6)",
-            },
-            {
-              Icon: Award,
-              top: "45%",
-              right: "2%",
-              size: 64,
-              speed: "0.48",
-              speedx: "-0.16",
-              rotate: -20,
-              color: "rgba(255,204,0,0.65)",
-            },
-            {
-              Icon: Flame,
-              top: "30%",
-              left: "1.5%",
-              size: 60,
-              speed: "0.60",
-              speedx: "0.18",
-              rotate: -30,
-              color: "rgba(204,0,0,0.65)",
-            },
-            // BACKGROUND — small, slow, minimal x-drift
-            {
-              Icon: Star,
-              top: "60%",
-              left: "1%",
-              size: 36,
-              speed: "0.14",
-              speedx: "0.04",
-              rotate: 14,
-              color: "rgba(255,255,255,0.25)",
-            },
-            {
-              Icon: Brain,
-              bottom: "38%",
-              right: "1%",
-              size: 30,
-              speed: "0.10",
-              speedx: "-0.04",
-              rotate: 25,
-              color: "rgba(255,255,255,0.2)",
-            },
-          ].map(
-            (
-              {
-                Icon,
-                top,
-                left,
-                right,
-                bottom,
-                size,
-                speed,
-                speedx,
-                rotate,
-                color,
-              },
-              idx,
-            ) => (
-              <div
-                key={`join-float-${idx}`}
-                ref={(el) => {
-                  if (el) floatRefs.current[idx + 30] = el;
-                }}
-                className="tts-float-icon"
-                data-speed={speed}
-                data-speedx={speedx}
-                data-rotate={rotate}
-                aria-hidden="true"
-                style={{ top, left, right, bottom, color }}
-              >
-                <Icon size={size} />
-              </div>
-            ),
-          )}
-
           <div
             style={{
-              maxWidth: 1200,
-              margin: "0 auto",
-              position: "relative",
-              zIndex: 1,
+              position: "sticky",
+              top: 0,
+              height: "100vh",
+              overflow: "hidden",
             }}
           >
+            {/* Deep red glow — intensifies through scroll */}
             <div
-              className="tts-join-grid"
+              aria-hidden="true"
               style={{
-                display: "grid",
-                gridTemplateColumns: "1fr minmax(300px, 420px)",
-                gap: 80,
-                alignItems: "start",
+                position: "absolute",
+                bottom: "-20%",
+                left: "50%",
+                transform: `translate(-50%, 0) scale(${1 + joinScrollProg * 0.6})`,
+                width: "140%",
+                height: "80%",
+                borderRadius: "50%",
+                background:
+                  "radial-gradient(ellipse at 50% 100%, rgba(204,0,0,0.22) 0%, transparent 65%)",
+                pointerEvents: "none",
+                transition: "none",
               }}
+            />
+            {/* Entrance rings — still triggered by intersection */}
+            <div
+              ref={joinSectionRef as React.RefObject<HTMLDivElement>}
+              aria-hidden="true"
+              style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
             >
-              <div>
-                <h2
-                  style={{
-                    fontSize: "clamp(28px, 4vw, 52px)",
-                    fontWeight: 900,
-                    color: "#fff",
-                    letterSpacing: "-0.03em",
-                    lineHeight: 1.15,
-                    marginBottom: 20,
-                  }}
-                >
-                  <span className="tts-line-reveal">
-                    <span>Start this</span>
-                  </span>
-                  <span
-                    className="tts-line-reveal"
-                    style={{ transitionDelay: "0.12s" }}
-                  >
-                    <span style={{ color: "#CC0000" }}>semester.</span>
-                  </span>
-                </h2>
-                <p
-                  className="tts-fade"
-                  style={{
-                    fontSize: 16,
-                    color: "#d4d4d8",
-                    lineHeight: 1.8,
-                    marginBottom: 44,
-                    maxWidth: 480,
-                    transitionDelay: "0.08s",
-                  }}
-                >
-                  Walk in any week. No application, no waitlist, no interview.
-                  Pick a direction and start building, consulting, or learning
-                  AI tools right away.
-                </p>
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div
+                  key={`ring-${i}`}
+                  className={`tts-join-ring${joinActive ? " tts-active" : ""}`}
+                  style={{ animationDelay: `${i * 0.3}s` }}
+                />
+              ))}
+            </div>
 
+            {/* Floating parallax icons — join section */}
+            {[
+              {
+                Icon: Zap,
+                top: "8%",
+                left: "5%",
+                size: 118,
+                speed: "0.14",
+                speedx: "0.05",
+                rotate: -16,
+                color: "#CC0000",
+              },
+              {
+                Icon: Rocket,
+                bottom: "12%",
+                left: "6%",
+                size: 104,
+                speed: "0.13",
+                speedx: "0.04",
+                rotate: 22,
+                color: "#FFCC00",
+              },
+              {
+                Icon: Globe,
+                top: "28%",
+                left: "5%",
+                size: 80,
+                speed: "0.10",
+                speedx: "0.03",
+                rotate: 10,
+                color: "rgba(204,0,0,0.5)",
+              },
+              {
+                Icon: Globe,
+                bottom: "18%",
+                right: "5%",
+                size: 92,
+                speed: "0.12",
+                speedx: "-0.04",
+                rotate: -8,
+                color: "#CC0000",
+              },
+              {
+                Icon: Users,
+                top: "15%",
+                right: "6%",
+                size: 70,
+                speed: "0.09",
+                speedx: "-0.03",
+                rotate: 10,
+                color: "rgba(255,255,255,0.6)",
+              },
+              {
+                Icon: Award,
+                top: "48%",
+                right: "5%",
+                size: 64,
+                speed: "0.07",
+                speedx: "-0.025",
+                rotate: -20,
+                color: "rgba(255,204,0,0.65)",
+              },
+              {
+                Icon: Flame,
+                top: "65%",
+                left: "5%",
+                size: 60,
+                speed: "0.08",
+                speedx: "0.025",
+                rotate: -30,
+                color: "rgba(204,0,0,0.65)",
+              },
+              {
+                Icon: Star,
+                top: "38%",
+                left: "8%",
+                size: 36,
+                speed: "0.04",
+                speedx: "0.015",
+                rotate: 14,
+                color: "rgba(255,255,255,0.25)",
+              },
+              {
+                Icon: Brain,
+                bottom: "40%",
+                right: "8%",
+                size: 30,
+                speed: "0.03",
+                speedx: "-0.01",
+                rotate: 25,
+                color: "rgba(255,255,255,0.2)",
+              },
+            ].map(
+              (
+                {
+                  Icon,
+                  top,
+                  left,
+                  right,
+                  bottom,
+                  size,
+                  speed,
+                  speedx,
+                  rotate,
+                  color,
+                },
+                idx,
+              ) => (
+                <div
+                  key={`join-float-${idx}`}
+                  ref={(el) => {
+                    if (el) floatRefs.current[idx + 30] = el;
+                  }}
+                  className="tts-float-icon"
+                  data-speed={speed}
+                  data-speedx={speedx}
+                  data-rotate={rotate}
+                  aria-hidden="true"
+                  style={{ top, left, right, bottom, color }}
+                >
+                  <Icon size={size} />
+                </div>
+              ),
+            )}
+
+            {/* ── PHASE 1: Zero stat (progress 0 → 0.35) ── */}
+            {(() => {
+              const p = joinScrollProg;
+              const inP = Math.max(0, Math.min(1, p / 0.08));
+              const inEased = 1 - Math.pow(1 - inP, 3);
+              const outP = Math.max(0, Math.min(1, (p - 0.28) / 0.12));
+              const outEased = 1 - Math.pow(1 - outP, 3);
+              const op = inEased * (1 - outEased);
+              const scale = 0.85 + inEased * 0.15 - outEased * 0.06;
+              return (
                 <div
                   style={{
+                    position: "absolute",
+                    inset: 0,
                     display: "flex",
                     flexDirection: "column",
-                    gap: 12,
-                    marginBottom: 48,
-                    maxWidth: 420,
-                  }}
-                >
-                  <a
-                    href="/apply"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "16px 20px",
-                      borderRadius: 12,
-                      background: "#CC0000",
-                      color: "#fff",
-                      fontSize: 14,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      transition: "all 0.15s",
-                      boxShadow: "0 4px 20px rgba(204,0,0,0.25)",
-                      textDecoration: "none",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.background =
-                        "#aa0000";
-                      (e.currentTarget as HTMLAnchorElement).style.transform =
-                        "translateY(-1px)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.background =
-                        "#CC0000";
-                      (e.currentTarget as HTMLAnchorElement).style.transform =
-                        "translateY(0)";
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 700 }}>
-                        Join TTS
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 12,
-                          color: "rgba(255,255,255,0.7)",
-                          marginTop: 1,
-                        }}
-                      >
-                        Short form · Any major, any year
-                      </div>
-                    </div>
-                    <ArrowRight size={16} />
-                  </a>
-
-                  <a
-                    href="/partner"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "16px 20px",
-                      borderRadius: 12,
-                      background: "transparent",
-                      border: "1px solid rgba(255,255,255,0.15)",
-                      color: "#e4e4e7",
-                      fontSize: 14,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      transition: "all 0.15s",
-                      textDecoration: "none",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                        "rgba(255,255,255,0.3)";
-                      (e.currentTarget as HTMLAnchorElement).style.color =
-                        "#fff";
-                      (e.currentTarget as HTMLAnchorElement).style.background =
-                        "rgba(255,255,255,0.04)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                        "rgba(255,255,255,0.15)";
-                      (e.currentTarget as HTMLAnchorElement).style.color =
-                        "#e4e4e7";
-                      (e.currentTarget as HTMLAnchorElement).style.background =
-                        "transparent";
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 700 }}>
-                        Partner with TTS
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 12,
-                          color: "#a1a1aa",
-                          marginTop: 1,
-                        }}
-                      >
-                        Clients, sponsors, and organizations
-                      </div>
-                    </div>
-                    <ArrowRight size={16} />
-                  </a>
-                </div>
-              </div>
-
-              {/* Email capture */}
-              <div
-                className="tts-fade"
-                style={{ paddingTop: 8, transitionDelay: "0.15s" }}
-              >
-                <div
-                  style={{
-                    background: "#111113",
-                    borderRadius: 16,
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    padding: "32px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: op,
+                    transform: `scale(${scale})`,
+                    pointerEvents: "none",
                   }}
                 >
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      marginBottom: 20,
+                      fontSize: "clamp(140px, 24vw, 300px)",
+                      fontWeight: 900,
+                      color: "#fff",
+                      letterSpacing: "-0.06em",
+                      lineHeight: 0.85,
+                      textAlign: "center",
+                      background:
+                        "linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
                     }}
                   >
+                    0
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "clamp(18px, 2.8vw, 36px)",
+                      fontWeight: 800,
+                      color: "#CC0000",
+                      letterSpacing: "0.24em",
+                      textTransform: "uppercase",
+                      marginTop: 16,
+                      textAlign: "center",
+                    }}
+                  >
+                    Applications required
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "clamp(13px, 1.4vw, 18px)",
+                      color: "rgba(255,255,255,0.35)",
+                      marginTop: 12,
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    Any major · Any year · Walk in any week
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* ── PHASE 2: Track trio (progress 0.3 → 0.65) ── */}
+            {(() => {
+              const p = joinScrollProg;
+              const inP = Math.max(0, Math.min(1, (p - 0.28) / 0.12));
+              const inEased = 1 - Math.pow(1 - inP, 3);
+              const outP = Math.max(0, Math.min(1, (p - 0.57) / 0.12));
+              const outEased = 1 - Math.pow(1 - outP, 3);
+              const op = inEased * (1 - outEased);
+              return (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: op,
+                    transform: `translateY(${(1 - inEased) * 40 - outEased * 40}px)`,
+                    pointerEvents: "none",
+                    gap: 0,
+                  }}
+                >
+                  {[
+                    { word: "Build.", color: "#CC0000", delay: 0 },
+                    { word: "Consult.", color: "#FFCC00", delay: 0.04 },
+                    { word: "Grow.", color: "#10b981", delay: 0.08 },
+                  ].map(({ word, color, delay }) => (
                     <div
+                      key={word}
                       style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 10,
-                        background: "rgba(204,0,0,0.1)",
-                        border: "1px solid rgba(204,0,0,0.2)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
+                        fontSize: "clamp(60px, 11vw, 130px)",
+                        fontWeight: 900,
+                        color,
+                        letterSpacing: "-0.04em",
+                        lineHeight: 0.95,
+                        opacity: Math.max(
+                          0,
+                          Math.min(1, (p - 0.28 - delay) / 0.1),
+                        ),
+                        transform: `translateX(${(1 - Math.max(0, Math.min(1, (p - 0.28 - delay) / 0.1))) * 60}px)`,
                       }}
                     >
-                      <Mail size={16} color="#CC0000" />
+                      {word}
                     </div>
+                  ))}
+                  <div
+                    style={{
+                      marginTop: 28,
+                      fontSize: "clamp(13px, 1.4vw, 18px)",
+                      color: "rgba(255,255,255,0.35)",
+                      letterSpacing: "0.1em",
+                      opacity: Math.max(0, Math.min(1, (p - 0.38) / 0.1)),
+                    }}
+                  >
+                    Three tracks · One club · Zero gatekeeping
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* ── PHASE 3: Full CTA (progress 0.62 → 1.0) ── */}
+            {(() => {
+              const p = joinScrollProg;
+              const inP = Math.max(0, Math.min(1, (p - 0.6) / 0.18));
+              const inEased = 1 - Math.pow(1 - inP, 3);
+              const op = inEased;
+              const yShift = (1 - inEased) * 80;
+              return (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: op,
+                    transform: `translateY(${yShift}px)`,
+                    pointerEvents: op > 0.5 ? "auto" : "none",
+                    padding: "0 40px",
+                  }}
+                >
+                  <div
+                    style={{
+                      maxWidth: 1200,
+                      width: "100%",
+                      display: "grid",
+                      gridTemplateColumns: "1fr minmax(300px, 420px)",
+                      gap: 80,
+                      alignItems: "start",
+                    }}
+                  >
                     <div>
-                      <h3
+                      <h2
                         style={{
-                          fontSize: 14,
-                          fontWeight: 700,
+                          fontSize: "clamp(36px, 5vw, 72px)",
+                          fontWeight: 900,
                           color: "#fff",
-                          margin: 0,
+                          letterSpacing: "-0.03em",
+                          lineHeight: 1.1,
+                          marginBottom: 20,
                         }}
                       >
-                        Get session updates
-                      </h3>
+                        <span style={{ display: "block" }}>Start this</span>
+                        <span style={{ display: "block", color: "#CC0000" }}>
+                          semester.
+                        </span>
+                      </h2>
+                      <p
+                        style={{
+                          fontSize: 16,
+                          color: "#d4d4d8",
+                          lineHeight: 1.8,
+                          marginBottom: 44,
+                          maxWidth: 480,
+                        }}
+                      >
+                        Walk in any week. No application, no waitlist, no
+                        interview. Pick a direction and start building,
+                        consulting, or learning AI tools right away.
+                      </p>
+
                       <div
                         style={{
-                          fontSize: 12,
-                          color: "#a1a1aa",
-                          marginTop: 2,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 12,
+                          marginBottom: 48,
+                          maxWidth: 420,
                         }}
                       >
-                        We email when a new session opens. That&apos;s it.
+                        <a
+                          href="/apply"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "16px 20px",
+                            borderRadius: 12,
+                            background: "#CC0000",
+                            color: "#fff",
+                            fontSize: 14,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            transition: "all 0.15s",
+                            boxShadow: "0 4px 20px rgba(204,0,0,0.25)",
+                            textDecoration: "none",
+                          }}
+                          onMouseEnter={(e) => {
+                            (
+                              e.currentTarget as HTMLAnchorElement
+                            ).style.background = "#aa0000";
+                            (
+                              e.currentTarget as HTMLAnchorElement
+                            ).style.transform = "translateY(-1px)";
+                          }}
+                          onMouseLeave={(e) => {
+                            (
+                              e.currentTarget as HTMLAnchorElement
+                            ).style.background = "#CC0000";
+                            (
+                              e.currentTarget as HTMLAnchorElement
+                            ).style.transform = "translateY(0)";
+                          }}
+                        >
+                          <div>
+                            <div style={{ fontSize: 13, fontWeight: 700 }}>
+                              Join TTS
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 12,
+                                color: "rgba(255,255,255,0.7)",
+                                marginTop: 1,
+                              }}
+                            >
+                              Short form · Any major, any year
+                            </div>
+                          </div>
+                          <ArrowRight size={16} />
+                        </a>
+
+                        <a
+                          href="/partner"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "16px 20px",
+                            borderRadius: 12,
+                            background: "transparent",
+                            border: "1px solid rgba(255,255,255,0.15)",
+                            color: "#e4e4e7",
+                            fontSize: 14,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            transition: "all 0.15s",
+                            textDecoration: "none",
+                          }}
+                          onMouseEnter={(e) => {
+                            (
+                              e.currentTarget as HTMLAnchorElement
+                            ).style.borderColor = "rgba(255,255,255,0.3)";
+                            (e.currentTarget as HTMLAnchorElement).style.color =
+                              "#fff";
+                            (
+                              e.currentTarget as HTMLAnchorElement
+                            ).style.background = "rgba(255,255,255,0.04)";
+                          }}
+                          onMouseLeave={(e) => {
+                            (
+                              e.currentTarget as HTMLAnchorElement
+                            ).style.borderColor = "rgba(255,255,255,0.15)";
+                            (e.currentTarget as HTMLAnchorElement).style.color =
+                              "#e4e4e7";
+                            (
+                              e.currentTarget as HTMLAnchorElement
+                            ).style.background = "transparent";
+                          }}
+                        >
+                          <div>
+                            <div style={{ fontSize: 13, fontWeight: 700 }}>
+                              Partner with TTS
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 12,
+                                color: "#a1a1aa",
+                                marginTop: 1,
+                              }}
+                            >
+                              Clients, sponsors, and organizations
+                            </div>
+                          </div>
+                          <ArrowRight size={16} />
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Email capture */}
+                    <div>
+                      <div
+                        style={{
+                          background: "#111113",
+                          borderRadius: 16,
+                          border: "1px solid rgba(255,255,255,0.12)",
+                          padding: "32px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            marginBottom: 20,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 36,
+                              height: 36,
+                              borderRadius: 10,
+                              background: "rgba(204,0,0,0.1)",
+                              border: "1px solid rgba(204,0,0,0.2)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <Mail size={16} color="#CC0000" />
+                          </div>
+                          <div>
+                            <h3
+                              style={{
+                                fontSize: 14,
+                                fontWeight: 700,
+                                color: "#fff",
+                                margin: 0,
+                              }}
+                            >
+                              Get session updates
+                            </h3>
+                            <div
+                              style={{
+                                fontSize: 12,
+                                color: "#a1a1aa",
+                                marginTop: 2,
+                              }}
+                            >
+                              We email when a new session opens. That&apos;s it.
+                            </div>
+                          </div>
+                        </div>
+
+                        {!emailSubmitted ? (
+                          <form
+                            onSubmit={handleEmailSubmit}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 8,
+                            }}
+                          >
+                            <label
+                              htmlFor="notify-email"
+                              style={{
+                                fontSize: 12,
+                                color: "#a1a1aa",
+                                marginBottom: 2,
+                              }}
+                            >
+                              Your email address
+                            </label>
+                            <input
+                              id="notify-email"
+                              type="email"
+                              autoComplete="email"
+                              value={email}
+                              onChange={(e) => {
+                                setEmail(e.target.value);
+                                if (emailError) setEmailError(null);
+                              }}
+                              placeholder="your@email.com"
+                              required
+                              disabled={emailLoading}
+                              aria-label="Email address for TTS session notifications"
+                              aria-describedby={
+                                emailError ? "email-error" : undefined
+                              }
+                              style={{
+                                width: "100%",
+                                padding: "11px 14px",
+                                borderRadius: 10,
+                                background: "#0d0d10",
+                                border: emailError
+                                  ? "1px solid rgba(204,0,0,0.5)"
+                                  : "1px solid rgba(255,255,255,0.08)",
+                                color: "#fff",
+                                fontSize: 14,
+                                outline: "none",
+                                boxSizing: "border-box",
+                                transition: "border-color 0.15s",
+                              }}
+                              onFocus={(e) => {
+                                if (!emailError)
+                                  (
+                                    e.currentTarget as HTMLInputElement
+                                  ).style.borderColor = "rgba(204,0,0,0.4)";
+                              }}
+                              onBlur={(e) => {
+                                if (!emailError)
+                                  (
+                                    e.currentTarget as HTMLInputElement
+                                  ).style.borderColor =
+                                    "rgba(255,255,255,0.08)";
+                              }}
+                            />
+                            {emailError && (
+                              <p
+                                id="email-error"
+                                role="alert"
+                                style={{
+                                  fontSize: 12,
+                                  color: "#f87171",
+                                  margin: "2px 0 0",
+                                  lineHeight: 1.5,
+                                }}
+                              >
+                                {emailError}
+                              </p>
+                            )}
+                            <button
+                              type="submit"
+                              disabled={emailLoading}
+                              style={{
+                                padding: "11px",
+                                borderRadius: 10,
+                                background: emailLoading
+                                  ? "rgba(204,0,0,0.5)"
+                                  : "#CC0000",
+                                border: "none",
+                                color: "#fff",
+                                fontSize: 14,
+                                fontWeight: 600,
+                                cursor: emailLoading
+                                  ? "not-allowed"
+                                  : "pointer",
+                                transition: "background 0.15s",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 7,
+                                minHeight: 44,
+                                marginTop: emailError ? 4 : 0,
+                              }}
+                              onMouseEnter={(e) => {
+                                if (!emailLoading)
+                                  (
+                                    e.currentTarget as HTMLButtonElement
+                                  ).style.background = "#aa0000";
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!emailLoading)
+                                  (
+                                    e.currentTarget as HTMLButtonElement
+                                  ).style.background = "#CC0000";
+                              }}
+                            >
+                              {emailLoading ? (
+                                <>
+                                  <div
+                                    style={{
+                                      width: 12,
+                                      height: 12,
+                                      borderRadius: "50%",
+                                      border: "2px solid rgba(255,255,255,0.3)",
+                                      borderTopColor: "#fff",
+                                      animation: "spin 0.7s linear infinite",
+                                    }}
+                                  />
+                                  Signing up...
+                                </>
+                              ) : (
+                                "Notify me"
+                              )}
+                            </button>
+                            <p
+                              style={{
+                                fontSize: 11,
+                                color: "#6b7280",
+                                margin: "4px 0 0",
+                                lineHeight: 1.5,
+                              }}
+                            >
+                              We&apos;ll only use your email to notify you about
+                              TTS sessions. No spam, ever.
+                            </p>
+                          </form>
+                        ) : (
+                          <div
+                            role="status"
+                            aria-live="polite"
+                            style={{
+                              padding: "20px 16px",
+                              borderRadius: 10,
+                              background: "rgba(16,185,129,0.05)",
+                              border: "1px solid rgba(16,185,129,0.2)",
+                              textAlign: "center",
+                            }}
+                          >
+                            <Check
+                              size={20}
+                              color="#10b981"
+                              className="tts-check-appear"
+                              style={{
+                                margin: "0 auto 10px",
+                                display: "block",
+                              }}
+                            />
+                            <div
+                              style={{
+                                fontSize: 14,
+                                fontWeight: 700,
+                                color: "#fff",
+                                marginBottom: 4,
+                              }}
+                            >
+                              You&apos;re on the list.
+                            </div>
+                            <div style={{ fontSize: 12, color: "#a1a1aa" }}>
+                              We&apos;ll email you when the next session opens.
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-
-                  {!emailSubmitted ? (
-                    <form
-                      onSubmit={handleEmailSubmit}
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 8,
-                      }}
-                    >
-                      <label
-                        htmlFor="notify-email"
-                        style={{
-                          fontSize: 12,
-                          color: "#a1a1aa",
-                          marginBottom: 2,
-                        }}
-                      >
-                        Your email address
-                      </label>
-                      <input
-                        id="notify-email"
-                        type="email"
-                        autoComplete="email"
-                        value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value);
-                          if (emailError) setEmailError(null);
-                        }}
-                        placeholder="your@email.com"
-                        required
-                        disabled={emailLoading}
-                        aria-label="Email address for TTS session notifications"
-                        aria-describedby={
-                          emailError ? "email-error" : undefined
-                        }
-                        style={{
-                          width: "100%",
-                          padding: "11px 14px",
-                          borderRadius: 10,
-                          background: "#0d0d10",
-                          border: emailError
-                            ? "1px solid rgba(204,0,0,0.5)"
-                            : "1px solid rgba(255,255,255,0.08)",
-                          color: "#fff",
-                          fontSize: 14,
-                          outline: "none",
-                          boxSizing: "border-box",
-                          transition: "border-color 0.15s",
-                        }}
-                        onFocus={(e) => {
-                          if (!emailError)
-                            (
-                              e.currentTarget as HTMLInputElement
-                            ).style.borderColor = "rgba(204,0,0,0.4)";
-                        }}
-                        onBlur={(e) => {
-                          if (!emailError)
-                            (
-                              e.currentTarget as HTMLInputElement
-                            ).style.borderColor = "rgba(255,255,255,0.08)";
-                        }}
-                      />
-                      {emailError && (
-                        <p
-                          id="email-error"
-                          role="alert"
-                          style={{
-                            fontSize: 12,
-                            color: "#f87171",
-                            margin: "2px 0 0",
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {emailError}
-                        </p>
-                      )}
-                      <button
-                        type="submit"
-                        disabled={emailLoading}
-                        style={{
-                          padding: "11px",
-                          borderRadius: 10,
-                          background: emailLoading
-                            ? "rgba(204,0,0,0.5)"
-                            : "#CC0000",
-                          border: "none",
-                          color: "#fff",
-                          fontSize: 14,
-                          fontWeight: 600,
-                          cursor: emailLoading ? "not-allowed" : "pointer",
-                          transition: "background 0.15s",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 7,
-                          minHeight: 44,
-                          marginTop: emailError ? 4 : 0,
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!emailLoading)
-                            (
-                              e.currentTarget as HTMLButtonElement
-                            ).style.background = "#aa0000";
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!emailLoading)
-                            (
-                              e.currentTarget as HTMLButtonElement
-                            ).style.background = "#CC0000";
-                        }}
-                      >
-                        {emailLoading ? (
-                          <>
-                            <div
-                              style={{
-                                width: 12,
-                                height: 12,
-                                borderRadius: "50%",
-                                border: "2px solid rgba(255,255,255,0.3)",
-                                borderTopColor: "#fff",
-                                animation: "spin 0.7s linear infinite",
-                              }}
-                            />
-                            Signing up...
-                          </>
-                        ) : (
-                          "Notify me"
-                        )}
-                      </button>
-                      <p
-                        style={{
-                          fontSize: 11,
-                          color: "#6b7280",
-                          margin: "4px 0 0",
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        We&apos;ll only use your email to notify you about TTS
-                        sessions. No spam, ever.
-                      </p>
-                    </form>
-                  ) : (
-                    <div
-                      role="status"
-                      aria-live="polite"
-                      style={{
-                        padding: "20px 16px",
-                        borderRadius: 10,
-                        background: "rgba(16,185,129,0.05)",
-                        border: "1px solid rgba(16,185,129,0.2)",
-                        textAlign: "center",
-                      }}
-                    >
-                      <Check
-                        size={20}
-                        color="#10b981"
-                        className="tts-check-appear"
-                        style={{ margin: "0 auto 10px", display: "block" }}
-                      />
-                      <div
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 700,
-                          color: "#fff",
-                          marginBottom: 4,
-                        }}
-                      >
-                        You&apos;re on the list.
-                      </div>
-                      <div style={{ fontSize: 12, color: "#a1a1aa" }}>
-                        We&apos;ll email you when the next session opens.
-                      </div>
-                    </div>
-                  )}
                 </div>
-              </div>
-            </div>
+              );
+            })()}
           </div>
         </section>
 
         {/* ── FOOTER ── */}
         <footer
           style={{
-            background:
-              "linear-gradient(to top, rgba(204,0,0,0.04) 0%, #060608 100%)",
-            borderTop: "1px solid rgba(255,255,255,0.05)",
-            padding: "40px 40px 28px",
+            background: "transparent",
+            padding: "32px 40px 24px",
+            position: "relative",
+            zIndex: 2,
           }}
         >
           {/* Floating nav pills */}
