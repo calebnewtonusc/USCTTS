@@ -12,6 +12,16 @@ import {
   ExternalLink,
   Mail,
   ChevronDown,
+  Code,
+  Cpu,
+  Globe,
+  GitBranch,
+  Terminal,
+  Rocket,
+  Brain,
+  BarChart2,
+  Music,
+  Network,
 } from "lucide-react";
 // ── Utilities ────────────────────────────────────────────────────────────────
 function hexToRgba(hex: string, alpha: number): string {
@@ -1202,6 +1212,107 @@ export default function TTSSite() {
               }}
             />
 
+            {/* Floating parallax icons — tracks section */}
+            {[
+              {
+                Icon: Code,
+                top: "8%",
+                left: "4%",
+                size: 44,
+                speed: "0.07",
+                rotate: -14,
+                color: "#CC0000",
+              },
+              {
+                Icon: Terminal,
+                top: "14%",
+                right: "4%",
+                size: 36,
+                speed: "0.11",
+                rotate: 10,
+                color: "#FFCC00",
+              },
+              {
+                Icon: Cpu,
+                top: "62%",
+                left: "3%",
+                size: 52,
+                speed: "0.05",
+                rotate: 8,
+                color: "#CC0000",
+              },
+              {
+                Icon: Brain,
+                bottom: "8%",
+                right: "5%",
+                size: 40,
+                speed: "0.13",
+                rotate: -18,
+                color: "#FFCC00",
+              },
+              {
+                Icon: Rocket,
+                top: "38%",
+                left: "1.5%",
+                size: 32,
+                speed: "0.09",
+                rotate: 20,
+                color: "#10b981",
+              },
+              {
+                Icon: GitBranch,
+                bottom: "22%",
+                right: "3%",
+                size: 38,
+                speed: "0.08",
+                rotate: -8,
+                color: "#10b981",
+              },
+              {
+                Icon: Globe,
+                top: "82%",
+                left: "8%",
+                size: 28,
+                speed: "0.15",
+                rotate: 6,
+                color: "#FFCC00",
+              },
+              {
+                Icon: Music,
+                top: "28%",
+                right: "2%",
+                size: 30,
+                speed: "0.10",
+                rotate: -22,
+                color: "#CC0000",
+              },
+            ].map(
+              (
+                { Icon, top, left, right, bottom, size, speed, rotate, color },
+                idx,
+              ) => (
+                <div
+                  key={`track-float-${idx}`}
+                  ref={(el) => {
+                    if (el) floatRefs.current[idx + 10] = el;
+                  }}
+                  className="tts-float-icon"
+                  data-speed={speed}
+                  aria-hidden="true"
+                  style={{
+                    top,
+                    left,
+                    right,
+                    bottom,
+                    transform: `rotate(${rotate}deg)`,
+                    color,
+                  }}
+                >
+                  <Icon size={size} />
+                </div>
+              ),
+            )}
+
             {/* Scroll hint */}
             <div
               style={{
@@ -1329,18 +1440,18 @@ export default function TTSSite() {
                         : "0 16px 48px rgba(0,0,0,0.4)",
                     }}
                   >
-                    {/* Giant ghost number */}
+                    {/* Giant ghost number — outlined with accent color */}
                     <div
                       aria-hidden="true"
                       style={{
                         position: "absolute",
-                        bottom: -40,
-                        right: -20,
-                        fontSize: 240,
+                        bottom: -50,
+                        right: -16,
+                        fontSize: 260,
                         fontWeight: 900,
                         lineHeight: 1,
-                        color: accent,
-                        opacity: 0.04,
+                        color: "transparent",
+                        WebkitTextStroke: `1.5px ${accent}45`,
                         letterSpacing: "-0.08em",
                         pointerEvents: "none",
                         userSelect: "none",
@@ -1375,14 +1486,15 @@ export default function TTSSite() {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        marginBottom: 28,
+                        marginBottom: 24,
                       }}
                     >
                       <div
                         style={{
-                          fontSize: 64,
+                          fontSize: 72,
                           fontWeight: 900,
-                          color: "rgba(255,255,255,0.08)",
+                          color: "transparent",
+                          WebkitTextStroke: `1px rgba(255,255,255,0.12)`,
                           letterSpacing: "-0.06em",
                           lineHeight: 1,
                           userSelect: "none",
@@ -1392,9 +1504,9 @@ export default function TTSSite() {
                       </div>
                       <div
                         style={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: 13,
+                          width: 52,
+                          height: 52,
+                          borderRadius: 14,
                           background: hexToRgba(accent, 0.15),
                           border: `1px solid ${hexToRgba(accent, 0.4)}`,
                           display: "flex",
@@ -1402,40 +1514,40 @@ export default function TTSSite() {
                           justifyContent: "center",
                         }}
                       >
-                        <Icon size={20} color={accent} />
+                        <Icon size={22} color={accent} />
                       </div>
                     </div>
 
                     <div
                       style={{
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: 700,
                         color: accent,
                         letterSpacing: "0.14em",
                         textTransform: "uppercase",
-                        marginBottom: 6,
+                        marginBottom: 8,
                       }}
                     >
                       {sub}
                     </div>
                     <h3
                       style={{
-                        fontSize: 26,
+                        fontSize: 32,
                         fontWeight: 900,
                         color: "#fff",
                         letterSpacing: "-0.03em",
                         lineHeight: 1.05,
-                        marginBottom: 10,
+                        marginBottom: 12,
                       }}
                     >
                       {title}
                     </h3>
                     <p
                       style={{
-                        fontSize: 13,
+                        fontSize: 15,
                         color: "#a1a1aa",
                         lineHeight: 1.65,
-                        marginBottom: 20,
+                        marginBottom: 24,
                       }}
                     >
                       {tagline}
@@ -1445,7 +1557,7 @@ export default function TTSSite() {
                       style={{
                         height: 1,
                         background: "rgba(255,255,255,0.1)",
-                        marginBottom: 16,
+                        marginBottom: 20,
                       }}
                     />
 
@@ -1456,7 +1568,7 @@ export default function TTSSite() {
                         padding: 0,
                         display: "flex",
                         flexDirection: "column",
-                        gap: 10,
+                        gap: 14,
                         flex: 1,
                       }}
                     >
@@ -1466,13 +1578,14 @@ export default function TTSSite() {
                           style={{
                             display: "flex",
                             alignItems: "flex-start",
-                            gap: 9,
-                            fontSize: 13,
+                            gap: 10,
+                            fontSize: 14,
                             color: "#d4d4d8",
+                            lineHeight: 1.5,
                           }}
                         >
                           <Check
-                            size={13}
+                            size={14}
                             color={accent}
                             strokeWidth={2.5}
                             style={{ flexShrink: 0, marginTop: 2 }}
@@ -1484,8 +1597,8 @@ export default function TTSSite() {
 
                     <div
                       style={{
-                        marginTop: 20,
-                        paddingTop: 16,
+                        marginTop: 24,
+                        paddingTop: 18,
                         borderTop: "1px solid rgba(255,255,255,0.1)",
                         display: "flex",
                         alignItems: "center",
@@ -1494,9 +1607,10 @@ export default function TTSSite() {
                     >
                       <div
                         style={{
-                          fontSize: 12,
+                          fontSize: 13,
                           color: "#71717a",
-                          maxWidth: 180,
+                          maxWidth: 200,
+                          lineHeight: 1.5,
                         }}
                       >
                         {forText}
@@ -1507,14 +1621,14 @@ export default function TTSSite() {
                           display: "inline-flex",
                           alignItems: "center",
                           gap: 6,
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: 700,
                           color: accent,
                           background: hexToRgba(accent, 0.1),
                           border: `1px solid ${hexToRgba(accent, 0.3)}`,
                           borderRadius: 8,
                           cursor: "pointer",
-                          padding: "7px 12px",
+                          padding: "9px 16px",
                           flexShrink: 0,
                           transition: "background 0.15s",
                           whiteSpace: "nowrap",
