@@ -357,7 +357,9 @@ function WaveDivider({
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    const scrollRate = (reverse ? -1 : 1) * (0.08 / speed) * 10;
+    // rate: px of SVG travel per px of page scroll.
+    // At speed=10 default: 0.4 → one full wave cycle (2560px) every 6400px of scroll.
+    const scrollRate = (reverse ? -1 : 1) * (4 / speed);
     const handle = () => {
       if (!svgRef.current) return;
       const offset = (((window.scrollY * scrollRate) % 2560) + 2560) % 2560;
