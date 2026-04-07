@@ -6177,7 +6177,8 @@ export default function TTSSite() {
               const p = joinScrollProg;
               const inP = Math.max(0, Math.min(1, (p - 0.54) / 0.09));
               const inEased = 1 - Math.pow(1 - inP, 3);
-              const outP = Math.max(0, Math.min(1, (p - 0.66) / 0.07));
+              // Last item fully visible at 0.73 — hold until 0.76 before fading
+              const outP = Math.max(0, Math.min(1, (p - 0.76) / 0.08));
               const outEased = 1 - Math.pow(1 - outP, 3);
               const op = inEased * (1 - outEased);
               return (
@@ -6300,10 +6301,10 @@ export default function TTSSite() {
               );
             })()}
 
-            {/* ── PHASE 5: Full CTA (progress 0.73 → 1.0) ── */}
+            {/* ── PHASE 5: Full CTA (progress 0.80 → 1.0) ── */}
             {(() => {
               const p = joinScrollProg;
-              const inP = Math.max(0, Math.min(1, (p - 0.73) / 0.14));
+              const inP = Math.max(0, Math.min(1, (p - 0.8) / 0.12));
               const inEased = 1 - Math.pow(1 - inP, 3);
               const op = inEased;
               const yShift = (1 - inEased) * 80;
