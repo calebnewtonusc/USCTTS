@@ -846,7 +846,7 @@ export default function TTSSite() {
           cursor: "none",
           background: "#09090b",
           minHeight: "100vh",
-          overflow: "hidden",
+          overflow: "clip",
           fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         }}
       >
