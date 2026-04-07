@@ -720,6 +720,16 @@ function ScanLineDivider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reverse]);
 
+  // CSS keyframes — scroll-driven translateX fails at large scrollY values
+  // (lines end up hundreds of px off-screen). Always-animating keyframes fix this.
+  const ANIMS = [
+    { name: "scanA", dur: "4.2s", dir: reverse ? "reverse" : "normal" },
+    { name: "scanB", dur: "3.1s", dir: reverse ? "normal" : "reverse" },
+    { name: "scanA", dur: "5.0s", dir: reverse ? "reverse" : "normal" },
+    { name: "scanB", dur: "2.8s", dir: reverse ? "normal" : "reverse" },
+    { name: "scanA", dur: "3.7s", dir: reverse ? "reverse" : "normal" },
+  ];
+
   return (
     <div
       aria-hidden="true"
@@ -731,22 +741,29 @@ function ScanLineDivider({
         flexShrink: 0,
       }}
     >
-      {/* Red center glow for depth */}
+      <style>{`
+        @keyframes scanA {
+          0%   { transform: translateX(-55%); }
+          100% { transform: translateX(55%); }
+        }
+        @keyframes scanB {
+          0%   { transform: translateX(55%); }
+          100% { transform: translateX(-55%); }
+        }
+      `}</style>
+      {/* Red center glow */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           background:
-            "radial-gradient(ellipse 60% 100% at 50% 50%, rgba(204,0,0,0.06) 0%, transparent 70%)",
+            "radial-gradient(ellipse 60% 100% at 50% 50%, rgba(204,0,0,0.08) 0%, transparent 70%)",
           pointerEvents: "none",
         }}
       />
       {LINES.map((line, i) => (
         <div
           key={i}
-          ref={(el) => {
-            lineRefs.current[i] = el;
-          }}
           style={{
             position: "absolute",
             top: line.top,
@@ -755,10 +772,11 @@ function ScanLineDivider({
             height: line.h,
             background: `linear-gradient(90deg, transparent 0%, rgba(${line.color},${line.opacity}) 10%, rgba(${line.color},${line.opacity}) 90%, transparent 100%)`,
             borderRadius: 2,
+            animation: `${ANIMS[i].name} ${ANIMS[i].dur} linear infinite ${ANIMS[i].dir}`,
             willChange: "transform",
             boxShadow:
               line.color === "204,0,0"
-                ? `0 0 8px rgba(204,0,0,${line.opacity * 0.6})`
+                ? `0 0 10px rgba(204,0,0,${line.opacity * 0.7})`
                 : "none",
           }}
         />
@@ -3196,88 +3214,219 @@ export default function TTSSite() {
               style={{
                 position: "absolute",
                 inset: 0,
-                background: "#09090b",
+                background: "#040404",
                 transform: `translateY(${panelWalkInY}%)`,
                 zIndex: 2,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                overflow: "hidden",
               }}
             >
-              {/* dot grid */}
+              {/* Noise grain overlay */}
               <div
                 style={{
                   position: "absolute",
                   inset: 0,
                   backgroundImage:
-                    "radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px)",
-                  backgroundSize: "36px 36px",
+                    "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E\")",
+                  backgroundSize: "200px 200px",
                   pointerEvents: "none",
+                  opacity: 0.6,
                 }}
               />
-              {/* red glow */}
+              {/* Strong red bloom — intensifies as user dwells */}
               <div
                 style={{
                   position: "absolute",
                   top: "50%",
                   left: "50%",
-                  transform: "translate(-50%,-50%)",
-                  width: 700,
-                  height: 700,
+                  transform: `translate(-50%,-50%) scale(${1 + Math.max(0, revealProgress - 0.74) * 0.4})`,
+                  width: 900,
+                  height: 900,
                   borderRadius: "50%",
                   background:
-                    "radial-gradient(circle, rgba(204,0,0,0.1) 0%, transparent 65%)",
+                    "radial-gradient(circle, rgba(204,0,0,0.18) 0%, rgba(204,0,0,0.06) 45%, transparent 70%)",
+                  pointerEvents: "none",
+                  willChange: "transform",
+                }}
+              />
+              {/* Dot grid */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  backgroundImage:
+                    "radial-gradient(rgba(255,255,255,0.018) 1px, transparent 1px)",
+                  backgroundSize: "32px 32px",
                   pointerEvents: "none",
                 }}
               />
-              <div
-                style={{
-                  padding: "0 40px",
-                  maxWidth: 900,
-                  textAlign: "center",
-                  position: "relative",
-                  zIndex: 1,
-                }}
-              >
-                <p
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: "#CC0000",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    marginBottom: 28,
-                  }}
-                >
-                  USC · Any major · Every semester
-                </p>
-                <h2
-                  style={{
-                    fontSize: "clamp(52px, 9vw, 112px)",
-                    fontWeight: 900,
-                    color: "#fff",
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.0,
-                    marginBottom: 36,
-                  }}
-                >
-                  Walk in.
-                  <br />
-                  <span style={{ color: "#CC0000" }}>Walk out different.</span>
-                </h2>
-                <p
-                  style={{
-                    fontSize: 16,
-                    color: "#71717a",
-                    lineHeight: 1.7,
-                    maxWidth: 520,
-                    margin: "0 auto",
-                  }}
-                >
-                  Most clubs gatekeep. TTS hands you the keys. One semester here
-                  changes how you think about what you&apos;re capable of.
-                </p>
-              </div>
+              {/* Content — staggered by transP */}
+              {(() => {
+                const ease = (t: number) =>
+                  t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+                const ep = (start: number, len: number) =>
+                  ease(Math.max(0, Math.min(1, (transP - start) / len)));
+                const eyebrowP = ep(0.1, 0.25);
+                const walkInP = ep(0.28, 0.28);
+                const dividerP = ep(0.38, 0.25);
+                const walkOutP = ep(0.45, 0.3);
+                const subtitleP = ep(0.68, 0.28);
+                const pillsP = ep(0.78, 0.2);
+                return (
+                  <div
+                    style={{
+                      padding: "0 48px",
+                      maxWidth: 1000,
+                      width: "100%",
+                      position: "relative",
+                      zIndex: 1,
+                      textAlign: "center",
+                    }}
+                  >
+                    {/* Eyebrow */}
+                    <div
+                      style={{
+                        opacity: eyebrowP,
+                        transform: `translateY(${(1 - eyebrowP) * 20}px)`,
+                        marginBottom: 32,
+                      }}
+                    >
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 10,
+                          border: "1px solid rgba(204,0,0,0.35)",
+                          borderRadius: 999,
+                          padding: "6px 18px",
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: "#CC0000",
+                          letterSpacing: "0.14em",
+                          textTransform: "uppercase",
+                          background: "rgba(204,0,0,0.06)",
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 5,
+                            height: 5,
+                            borderRadius: "50%",
+                            background: "#CC0000",
+                            display: "inline-block",
+                            boxShadow: "0 0 6px #CC0000",
+                          }}
+                        />
+                        USC · Any major · Every semester
+                      </span>
+                    </div>
+
+                    {/* "Walk in." — small, white */}
+                    <p
+                      style={{
+                        opacity: walkInP,
+                        transform: `translateY(${(1 - walkInP) * 28}px)`,
+                        fontSize: "clamp(22px, 3vw, 38px)",
+                        fontWeight: 700,
+                        color: "rgba(255,255,255,0.55)",
+                        letterSpacing: "-0.02em",
+                        marginBottom: 16,
+                        lineHeight: 1,
+                      }}
+                    >
+                      Walk in.
+                    </p>
+
+                    {/* Red expanding divider line */}
+                    <div
+                      style={{
+                        height: 2,
+                        background:
+                          "linear-gradient(90deg, transparent, #CC0000, transparent)",
+                        width: `${dividerP * 100}%`,
+                        margin: "0 auto 20px",
+                        boxShadow: "0 0 12px rgba(204,0,0,0.6)",
+                      }}
+                    />
+
+                    {/* "Walk out different." — massive, split coloring */}
+                    <h2
+                      style={{
+                        opacity: walkOutP,
+                        transform: `translateY(${(1 - walkOutP) * 40}px) scale(${0.94 + walkOutP * 0.06})`,
+                        fontSize: "clamp(58px, 10vw, 130px)",
+                        fontWeight: 900,
+                        color: "#fff",
+                        letterSpacing: "-0.05em",
+                        lineHeight: 0.92,
+                        marginBottom: 40,
+                      }}
+                    >
+                      Walk out{" "}
+                      <span
+                        style={{
+                          color: "#CC0000",
+                          textShadow: "0 0 60px rgba(204,0,0,0.35)",
+                        }}
+                      >
+                        different.
+                      </span>
+                    </h2>
+
+                    {/* Subtitle */}
+                    <p
+                      style={{
+                        opacity: subtitleP,
+                        transform: `translateY(${(1 - subtitleP) * 20}px)`,
+                        fontSize: 16,
+                        color: "#52525b",
+                        lineHeight: 1.75,
+                        maxWidth: 480,
+                        margin: "0 auto 32px",
+                      }}
+                    >
+                      Most clubs gatekeep. TTS hands you the keys. One semester
+                      here changes how you think about what you&apos;re capable
+                      of.
+                    </p>
+
+                    {/* Fact pills */}
+                    <div
+                      style={{
+                        opacity: pillsP,
+                        transform: `translateY(${(1 - pillsP) * 16}px)`,
+                        display: "flex",
+                        gap: 10,
+                        justifyContent: "center",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {[
+                        "No application",
+                        "No waitlist",
+                        "No rejection email",
+                      ].map((t) => (
+                        <span
+                          key={t}
+                          style={{
+                            border: "1px solid rgba(255,255,255,0.10)",
+                            borderRadius: 999,
+                            padding: "6px 16px",
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: "#71717a",
+                            letterSpacing: "0.04em",
+                          }}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>
