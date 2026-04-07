@@ -1397,9 +1397,9 @@ export default function TTSSite() {
                 ref={h1WrapperRef}
                 style={{
                   display: "inline-block",
-                  transform: `translateX(${slideX}px) scale(${heroScaleVal})`,
-                  transformOrigin: "right center",
-                  willChange: "transform",
+                  transform: `translateX(${slideX}px)`,
+                  opacity: Math.max(0, 1 - heroScaleProgress / 0.3),
+                  willChange: "transform, opacity",
                 }}
               >
                 {/* Morph h1 */}
@@ -1539,12 +1539,12 @@ export default function TTSSite() {
                   top: 0,
                   left: 40,
                   maxWidth: 480,
-                  opacity: heroContentShown
-                    ? Math.max(0, 1 - heroScaleProgress / 0.25)
-                    : 0,
+                  opacity: heroContentShown ? 1 : 0,
                   transform: heroContentShown
-                    ? "translateY(0)"
+                    ? `translateY(0) scale(${heroScaleVal})`
                     : "translateY(20px)",
+                  transformOrigin: "left center",
+                  willChange: "transform",
                   transition:
                     heroScaleProgress > 0
                       ? "none"
