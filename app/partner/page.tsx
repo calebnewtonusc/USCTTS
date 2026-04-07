@@ -1,7 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Check, ArrowRight, Handshake } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  ArrowRight,
+  Zap,
+  Hammer,
+  Star,
+  Mic2,
+  Users2,
+} from "lucide-react";
 import Link from "next/link";
 
 type PartnerType =
@@ -49,6 +58,62 @@ const PARTNER_TYPES: {
   },
 ];
 
+const LEFT_CARDS: {
+  id: PartnerType;
+  label: string;
+  sub: string;
+  icon: React.ReactNode;
+}[] = [
+  {
+    id: "Client Project",
+    label: "Client Work",
+    sub: "Build something with our members",
+    icon: <Hammer size={14} color="#CC0000" />,
+  },
+  {
+    id: "Sponsor",
+    label: "Sponsor",
+    sub: "Support the org, get visibility",
+    icon: <Star size={14} color="#CC0000" />,
+  },
+  {
+    id: "Speaker",
+    label: "Speaker",
+    sub: "Share your story with our builders",
+    icon: <Mic2 size={14} color="#CC0000" />,
+  },
+  {
+    id: "Recruiting",
+    label: "Recruiting",
+    sub: "Find talent before graduation",
+    icon: <Users2 size={14} color="#CC0000" />,
+  },
+];
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "13px 16px",
+  borderRadius: 12,
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  color: "#fff",
+  fontSize: 14,
+  outline: "none",
+  boxSizing: "border-box",
+  transition: "border-color 0.15s",
+  fontFamily: "inherit",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 12,
+  fontWeight: 600,
+  color: "#71717a",
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  marginBottom: 8,
+};
+
 export default function PartnerPage() {
   const [form, setForm] = useState({
     orgName: "",
@@ -88,38 +153,183 @@ export default function PartnerPage() {
     }
   };
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "11px 14px",
-    borderRadius: 10,
-    background: "#111113",
-    border: "1px solid rgba(255,255,255,0.08)",
-    color: "#fff",
-    fontSize: 14,
-    outline: "none",
-    boxSizing: "border-box",
-    transition: "border-color 0.15s",
-    fontFamily: "inherit",
-  };
-
   return (
     <div
+      className="tts-page-enter"
       style={{
         minHeight: "100vh",
         background: "#09090b",
         fontFamily: "'Inter', -apple-system, sans-serif",
-        padding: "0 20px",
+        display: "flex",
       }}
     >
+      <style>{`
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .form-animate { animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+        .form-animate-delay { animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
+        @media (max-width: 768px) {
+          .apply-split { flex-direction: column !important; }
+          .apply-left { position: relative !important; height: auto !important; min-height: 260px !important; padding: 40px 24px !important; }
+          .apply-right { padding: 40px 24px !important; }
+        }
+        select option { background: #111113; }
+      `}</style>
+
+      {/* Left column */}
       <div
+        className="apply-left"
         style={{
-          maxWidth: 600,
-          margin: "0 auto",
-          paddingTop: 60,
-          paddingBottom: 80,
+          width: "42%",
+          position: "sticky",
+          top: 0,
+          height: "100vh",
+          background:
+            "radial-gradient(ellipse at 20% 20%, rgba(204,0,0,0.10) 0%, transparent 55%), #09090b",
+          borderRight: "1px solid rgba(255,255,255,0.06)",
+          padding: "56px 48px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          boxSizing: "border-box",
+          flexShrink: 0,
         }}
       >
-        {/* Back */}
+        {/* Logo */}
+        <div>
+          <Link
+            href="/"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              textDecoration: "none",
+              marginBottom: 56,
+            }}
+          >
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: "#CC0000",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Zap size={18} color="#fff" fill="#fff" />
+            </div>
+            <span
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                color: "#fff",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              TTS
+            </span>
+          </Link>
+
+          {/* Headline */}
+          <h1
+            style={{
+              fontSize: "clamp(40px, 5vw, 68px)",
+              fontWeight: 900,
+              color: "#fff",
+              letterSpacing: "-0.04em",
+              lineHeight: 1.0,
+              marginBottom: 20,
+            }}
+          >
+            Partner with TTS.
+          </h1>
+          <p
+            style={{
+              fontSize: 15,
+              color: "#a1a1aa",
+              lineHeight: 1.65,
+              marginBottom: 40,
+              maxWidth: 320,
+            }}
+          >
+            Access USC&apos;s sharpest builders. Bring us a project, a cause, or
+            a seat at your table.
+          </p>
+
+          {/* 2x2 partnership type cards */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 10,
+            }}
+          >
+            {LEFT_CARDS.map(({ id, label, sub, icon }) => (
+              <div
+                key={id}
+                style={{
+                  padding: "14px",
+                  borderRadius: 10,
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
+              >
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 8,
+                    background: "rgba(204,0,0,0.12)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 10,
+                  }}
+                >
+                  {icon}
+                </div>
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: "#fff",
+                    marginBottom: 3,
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  {label}
+                </div>
+                <div
+                  style={{ fontSize: 11, color: "#52525b", lineHeight: 1.4 }}
+                >
+                  {sub}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <p style={{ fontSize: 13, color: "#52525b", marginTop: 40 }}>
+          We respond within 2 business days.
+        </p>
+      </div>
+
+      {/* Right column */}
+      <div
+        className="apply-right"
+        style={{
+          flex: 1,
+          padding: "60px 48px",
+          overflowY: "auto",
+          boxSizing: "border-box",
+        }}
+      >
+        {/* Back link */}
         <Link
           href="/"
           style={{
@@ -127,7 +337,7 @@ export default function PartnerPage() {
             alignItems: "center",
             gap: 6,
             fontSize: 13,
-            color: "#6b7280",
+            color: "#52525b",
             textDecoration: "none",
             marginBottom: 48,
             transition: "color 0.15s",
@@ -136,32 +346,40 @@ export default function PartnerPage() {
             (e.currentTarget as HTMLAnchorElement).style.color = "#a1a1aa";
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLAnchorElement).style.color = "#6b7280";
+            (e.currentTarget as HTMLAnchorElement).style.color = "#52525b";
           }}
         >
           <ArrowLeft size={14} /> Back to TTS
         </Link>
 
         {submitted ? (
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
+          <div
+            className="form-animate"
+            style={{
+              textAlign: "center",
+              paddingTop: 40,
+              maxWidth: 480,
+              margin: "0 auto",
+            }}
+          >
             <div
               style={{
-                width: 56,
-                height: 56,
+                width: 64,
+                height: 64,
                 borderRadius: "50%",
                 background: "rgba(16,185,129,0.1)",
                 border: "1px solid rgba(16,185,129,0.3)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                margin: "0 auto 24px",
+                margin: "0 auto 28px",
               }}
             >
-              <Check size={24} color="#10b981" />
+              <Check size={28} color="#10b981" />
             </div>
-            <h1
+            <h2
               style={{
-                fontSize: 28,
+                fontSize: 32,
                 fontWeight: 800,
                 color: "#fff",
                 letterSpacing: "-0.03em",
@@ -169,7 +387,7 @@ export default function PartnerPage() {
               }}
             >
               Message received.
-            </h1>
+            </h2>
             <p
               style={{
                 fontSize: 15,
@@ -188,7 +406,7 @@ export default function PartnerPage() {
                 alignItems: "center",
                 gap: 6,
                 padding: "10px 20px",
-                borderRadius: 10,
+                borderRadius: 12,
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(255,255,255,0.1)",
                 color: "#e4e4e7",
@@ -202,85 +420,59 @@ export default function PartnerPage() {
             </Link>
           </div>
         ) : (
-          <>
-            {/* Header */}
-            <div style={{ marginBottom: 40 }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 16,
-                }}
-              >
-                <div
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 7,
-                    background: "rgba(204,0,0,0.1)",
-                    border: "1px solid rgba(204,0,0,0.25)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Handshake size={11} color="#CC0000" />
-                </div>
-                <span
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "#6b7280",
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Trojan Technology Solutions
-                </span>
-              </div>
-              <h1
-                style={{
-                  fontSize: "clamp(28px, 5vw, 40px)",
-                  fontWeight: 900,
-                  color: "#fff",
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1.1,
-                  marginBottom: 12,
-                }}
-              >
-                Partner with TTS
-              </h1>
-              <p style={{ fontSize: 15, color: "#a1a1aa", lineHeight: 1.7 }}>
-                Whether you have a project, want to sponsor, or just want to get
-                in front of USC&apos;s best builders — we&apos;d love to hear
-                from you.
-              </p>
-            </div>
+          <div className="form-animate" style={{ maxWidth: 540 }}>
+            {/* Form header */}
+            <p
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: "#52525b",
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                marginBottom: 16,
+              }}
+            >
+              We respond to all inquiries within a few business days
+            </p>
+            <h2
+              style={{
+                fontSize: "clamp(24px, 4vw, 36px)",
+                fontWeight: 900,
+                color: "#fff",
+                letterSpacing: "-0.03em",
+                lineHeight: 1.1,
+                marginBottom: 10,
+              }}
+            >
+              Let&apos;s work together
+            </h2>
+            <p
+              style={{
+                fontSize: 14,
+                color: "#71717a",
+                lineHeight: 1.6,
+                marginBottom: 36,
+              }}
+            >
+              Whether you have a project, want to sponsor, or want to get in
+              front of USC&apos;s best builders.
+            </p>
 
             <form
               onSubmit={handleSubmit}
-              style={{ display: "flex", flexDirection: "column", gap: 20 }}
+              style={{ display: "flex", flexDirection: "column", gap: 22 }}
             >
               {/* Org + Contact Name */}
               <div
+                className="form-animate-delay apply-two-col"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",
-                  gap: 12,
+                  gap: 14,
                 }}
               >
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: 12,
-                      color: "#a1a1aa",
-                      marginBottom: 6,
-                    }}
-                  >
-                    Organization name
-                  </label>
+                  <label style={labelStyle}>Organization name</label>
                   <input
                     required
                     value={form.orgName}
@@ -289,25 +481,16 @@ export default function PartnerPage() {
                     style={inputStyle}
                     onFocus={(e) => {
                       (e.currentTarget as HTMLInputElement).style.borderColor =
-                        "rgba(204,0,0,0.4)";
+                        "rgba(204,0,0,0.5)";
                     }}
                     onBlur={(e) => {
                       (e.currentTarget as HTMLInputElement).style.borderColor =
-                        "rgba(255,255,255,0.08)";
+                        "rgba(255,255,255,0.1)";
                     }}
                   />
                 </div>
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: 12,
-                      color: "#a1a1aa",
-                      marginBottom: 6,
-                    }}
-                  >
-                    Your name
-                  </label>
+                  <label style={labelStyle}>Your name</label>
                   <input
                     required
                     value={form.contactName}
@@ -316,11 +499,11 @@ export default function PartnerPage() {
                     style={inputStyle}
                     onFocus={(e) => {
                       (e.currentTarget as HTMLInputElement).style.borderColor =
-                        "rgba(204,0,0,0.4)";
+                        "rgba(204,0,0,0.5)";
                     }}
                     onBlur={(e) => {
                       (e.currentTarget as HTMLInputElement).style.borderColor =
-                        "rgba(255,255,255,0.08)";
+                        "rgba(255,255,255,0.1)";
                     }}
                   />
                 </div>
@@ -328,16 +511,7 @@ export default function PartnerPage() {
 
               {/* Email */}
               <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: 12,
-                    color: "#a1a1aa",
-                    marginBottom: 6,
-                  }}
-                >
-                  Work email
-                </label>
+                <label style={labelStyle}>Work email</label>
                 <input
                   required
                   type="email"
@@ -347,32 +521,25 @@ export default function PartnerPage() {
                   style={inputStyle}
                   onFocus={(e) => {
                     (e.currentTarget as HTMLInputElement).style.borderColor =
-                      "rgba(204,0,0,0.4)";
+                      "rgba(204,0,0,0.5)";
                   }}
                   onBlur={(e) => {
                     (e.currentTarget as HTMLInputElement).style.borderColor =
-                      "rgba(255,255,255,0.08)";
+                      "rgba(255,255,255,0.1)";
                   }}
                 />
               </div>
 
               {/* Partner type picker */}
               <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: 12,
-                    color: "#a1a1aa",
-                    marginBottom: 10,
-                  }}
-                >
+                <label style={labelStyle}>
                   What best describes this inquiry?
                 </label>
                 <div
                   style={{
                     display: "grid",
                     gridTemplateColumns: "1fr 1fr",
-                    gap: 8,
+                    gap: 10,
                   }}
                 >
                   {PARTNER_TYPES.map(({ id, label, sub, color }) => {
@@ -384,11 +551,15 @@ export default function PartnerPage() {
                         aria-pressed={selected}
                         onClick={() => set("partnerType", id)}
                         style={{
-                          padding: "14px 16px",
-                          borderRadius: 10,
-                          background: selected ? `${color}10` : "#111113",
-                          border: `1px solid ${selected ? color + "40" : "rgba(255,255,255,0.07)"}`,
-                          borderTop: `2px solid ${selected ? color : "transparent"}`,
+                          padding: "20px",
+                          borderRadius: 14,
+                          background: selected
+                            ? `${color}13`
+                            : "rgba(255,255,255,0.02)",
+                          border: selected
+                            ? `1px solid ${color}50`
+                            : "1px solid rgba(255,255,255,0.07)",
+                          borderLeft: `4px solid ${selected ? color : "transparent"}`,
                           cursor: "pointer",
                           textAlign: "left",
                           transition: "all 0.15s",
@@ -396,15 +567,21 @@ export default function PartnerPage() {
                       >
                         <div
                           style={{
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: 700,
                             color: selected ? color : "#e4e4e7",
-                            marginBottom: 2,
+                            marginBottom: 4,
+                            letterSpacing: "-0.01em",
                           }}
                         >
                           {label}
                         </div>
-                        <div style={{ fontSize: 11, color: "#6b7280" }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: selected ? "#a1a1aa" : "#52525b",
+                          }}
+                        >
                           {sub}
                         </div>
                       </button>
@@ -415,16 +592,18 @@ export default function PartnerPage() {
 
               {/* Description */}
               <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: 12,
-                    color: "#a1a1aa",
-                    marginBottom: 6,
-                  }}
-                >
+                <label style={labelStyle}>
                   Tell us more{" "}
-                  <span style={{ color: "#71717a" }}>(min 10 characters)</span>
+                  <span
+                    style={{
+                      color: "#3f3f46",
+                      fontWeight: 400,
+                      textTransform: "none",
+                      letterSpacing: 0,
+                    }}
+                  >
+                    (min 10 characters)
+                  </span>
                 </label>
                 <textarea
                   required
@@ -432,14 +611,14 @@ export default function PartnerPage() {
                   onChange={(e) => set("description", e.target.value)}
                   placeholder="What are you looking to do? The more detail, the faster we can respond."
                   rows={4}
-                  style={{ ...inputStyle, resize: "vertical", minHeight: 100 }}
+                  style={{ ...inputStyle, resize: "vertical", minHeight: 110 }}
                   onFocus={(e) => {
                     (e.currentTarget as HTMLTextAreaElement).style.borderColor =
-                      "rgba(204,0,0,0.4)";
+                      "rgba(204,0,0,0.5)";
                   }}
                   onBlur={(e) => {
                     (e.currentTarget as HTMLTextAreaElement).style.borderColor =
-                      "rgba(255,255,255,0.08)";
+                      "rgba(255,255,255,0.1)";
                   }}
                 />
               </div>
@@ -457,50 +636,56 @@ export default function PartnerPage() {
                 type="submit"
                 disabled={loading || !form.partnerType}
                 style={{
-                  padding: "13px",
-                  borderRadius: 10,
+                  width: "100%",
+                  height: 56,
+                  borderRadius: 14,
                   background:
                     loading || !form.partnerType
-                      ? "rgba(204,0,0,0.4)"
+                      ? "rgba(204,0,0,0.35)"
                       : "#CC0000",
                   border: "none",
                   color: "#fff",
-                  fontSize: 14,
-                  fontWeight: 700,
+                  fontSize: 15,
+                  fontWeight: 800,
+                  letterSpacing: "-0.01em",
                   cursor:
                     loading || !form.partnerType ? "not-allowed" : "pointer",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  gap: 7,
-                  transition: "background 0.15s",
-                  minHeight: 48,
-                  boxShadow: "0 4px 20px rgba(204,0,0,0.2)",
+                  gap: 8,
+                  transition: "background 0.15s, transform 0.1s",
+                  boxShadow:
+                    loading || !form.partnerType
+                      ? "none"
+                      : "0 4px 24px rgba(204,0,0,0.28)",
                 }}
                 onMouseEnter={(e) => {
-                  if (!loading && form.partnerType)
+                  if (!loading && form.partnerType) {
                     (e.currentTarget as HTMLButtonElement).style.background =
                       "#aa0000";
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  if (!loading && form.partnerType)
+                  if (!loading && form.partnerType) {
                     (e.currentTarget as HTMLButtonElement).style.background =
                       "#CC0000";
+                  }
                 }}
               >
                 {loading ? (
                   "Sending..."
                 ) : (
                   <>
-                    Send inquiry <ArrowRight size={15} />
+                    Send inquiry <ArrowRight size={16} />
                   </>
                 )}
               </button>
 
               <p
                 style={{
-                  fontSize: 11,
-                  color: "#52525b",
+                  fontSize: 12,
+                  color: "#3f3f46",
                   textAlign: "center",
                   margin: 0,
                 }}
@@ -508,7 +693,7 @@ export default function PartnerPage() {
                 We respond to all inquiries within a few business days.
               </p>
             </form>
-          </>
+          </div>
         )}
       </div>
     </div>

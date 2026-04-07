@@ -36,6 +36,30 @@ const TRACKS: { id: Track; label: string; sub: string; color: string }[] = [
 
 const YEARS: Year[] = ["Freshman", "Sophomore", "Junior", "Senior", "Graduate"];
 
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "13px 16px",
+  borderRadius: 12,
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  color: "#fff",
+  fontSize: 14,
+  outline: "none",
+  boxSizing: "border-box",
+  transition: "border-color 0.15s",
+  fontFamily: "inherit",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 12,
+  fontWeight: 600,
+  color: "#71717a",
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  marginBottom: 8,
+};
+
 export default function ApplyPage() {
   const [form, setForm] = useState({
     name: "",
@@ -76,43 +100,171 @@ export default function ApplyPage() {
     }
   };
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "11px 14px",
-    borderRadius: 10,
-    background: "#111113",
-    border: "1px solid rgba(255,255,255,0.08)",
-    color: "#fff",
-    fontSize: 14,
-    outline: "none",
-    boxSizing: "border-box",
-    transition: "border-color 0.15s",
-    fontFamily: "inherit",
-  };
-
   return (
     <div
+      className="tts-page-enter"
       style={{
         minHeight: "100vh",
         background: "#09090b",
         fontFamily: "'Inter', -apple-system, sans-serif",
-        padding: "0 20px",
+        display: "flex",
       }}
     >
       <style>{`
-        @media (max-width: 480px) {
-          .apply-two-col { grid-template-columns: 1fr !important; }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to { opacity: 1; transform: translateY(0); }
         }
+        .form-animate { animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+        .form-animate-delay { animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
+        @media (max-width: 768px) {
+          .apply-split { flex-direction: column !important; }
+          .apply-left { position: relative !important; height: auto !important; min-height: 260px !important; padding: 40px 24px !important; }
+          .apply-right { padding: 40px 24px !important; }
+        }
+        select option { background: #111113; }
       `}</style>
+
+      {/* Left column */}
       <div
+        className="apply-left"
         style={{
-          maxWidth: 600,
-          margin: "0 auto",
-          paddingTop: 60,
-          paddingBottom: 80,
+          width: "42%",
+          position: "sticky",
+          top: 0,
+          height: "100vh",
+          background:
+            "radial-gradient(ellipse at 20% 80%, rgba(204,0,0,0.12) 0%, transparent 60%), #09090b",
+          borderRight: "1px solid rgba(255,255,255,0.06)",
+          padding: "56px 48px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          boxSizing: "border-box",
+          flexShrink: 0,
         }}
       >
-        {/* Back */}
+        {/* Logo */}
+        <div>
+          <Link
+            href="/"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              textDecoration: "none",
+              marginBottom: 56,
+            }}
+          >
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: "#CC0000",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Zap size={18} color="#fff" fill="#fff" />
+            </div>
+            <span
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                color: "#fff",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              TTS
+            </span>
+          </Link>
+
+          {/* Headline */}
+          <h1
+            style={{
+              fontSize: "clamp(48px, 6vw, 80px)",
+              fontWeight: 900,
+              color: "#fff",
+              letterSpacing: "-0.04em",
+              lineHeight: 1.0,
+              marginBottom: 20,
+            }}
+          >
+            Join TTS.
+          </h1>
+          <p
+            style={{
+              fontSize: 16,
+              color: "#a1a1aa",
+              lineHeight: 1.6,
+              marginBottom: 48,
+              maxWidth: 320,
+            }}
+          >
+            USC&apos;s AI builder club. No prerequisites. No gatekeeping.
+          </p>
+
+          {/* Reason pills */}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {[
+              "Ship a live product in Week 1",
+              "Real client work with Consulting track",
+              "Access to YC founders and operators",
+            ].map((reason) => (
+              <div
+                key={reason}
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  alignItems: "center",
+                  padding: "12px 0",
+                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                }}
+              >
+                <div
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: "50%",
+                    background: "rgba(204,0,0,0.15)",
+                    border: "1px solid rgba(204,0,0,0.3)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Check size={11} color="#CC0000" />
+                </div>
+                <span
+                  style={{ fontSize: 14, color: "#d4d4d8", lineHeight: 1.4 }}
+                >
+                  {reason}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <p style={{ fontSize: 13, color: "#52525b", marginTop: 40 }}>
+          Spring 2026 · Open enrollment
+        </p>
+      </div>
+
+      {/* Right column */}
+      <div
+        className="apply-right"
+        style={{
+          flex: 1,
+          padding: "60px 48px",
+          overflowY: "auto",
+          boxSizing: "border-box",
+        }}
+      >
+        {/* Back link */}
         <Link
           href="/"
           style={{
@@ -120,7 +272,7 @@ export default function ApplyPage() {
             alignItems: "center",
             gap: 6,
             fontSize: 13,
-            color: "#6b7280",
+            color: "#52525b",
             textDecoration: "none",
             marginBottom: 48,
             transition: "color 0.15s",
@@ -129,32 +281,40 @@ export default function ApplyPage() {
             (e.currentTarget as HTMLAnchorElement).style.color = "#a1a1aa";
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLAnchorElement).style.color = "#6b7280";
+            (e.currentTarget as HTMLAnchorElement).style.color = "#52525b";
           }}
         >
           <ArrowLeft size={14} /> Back to TTS
         </Link>
 
         {submitted ? (
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
+          <div
+            className="form-animate"
+            style={{
+              textAlign: "center",
+              paddingTop: 40,
+              maxWidth: 480,
+              margin: "0 auto",
+            }}
+          >
             <div
               style={{
-                width: 56,
-                height: 56,
+                width: 64,
+                height: 64,
                 borderRadius: "50%",
                 background: "rgba(16,185,129,0.1)",
                 border: "1px solid rgba(16,185,129,0.3)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                margin: "0 auto 24px",
+                margin: "0 auto 28px",
               }}
             >
-              <Check size={24} color="#10b981" />
+              <Check size={28} color="#10b981" />
             </div>
-            <h1
+            <h2
               style={{
-                fontSize: 28,
+                fontSize: 32,
                 fontWeight: 800,
                 color: "#fff",
                 letterSpacing: "-0.03em",
@@ -162,7 +322,7 @@ export default function ApplyPage() {
               }}
             >
               We got it.
-            </h1>
+            </h2>
             <p
               style={{
                 fontSize: 15,
@@ -190,7 +350,7 @@ export default function ApplyPage() {
                 alignItems: "center",
                 gap: 6,
                 padding: "10px 20px",
-                borderRadius: 10,
+                borderRadius: 12,
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(255,255,255,0.1)",
                 color: "#e4e4e7",
@@ -204,84 +364,58 @@ export default function ApplyPage() {
             </Link>
           </div>
         ) : (
-          <>
-            {/* Header */}
-            <div style={{ marginBottom: 40 }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 16,
-                }}
-              >
-                <div
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 7,
-                    background: "rgba(204,0,0,0.1)",
-                    border: "1px solid rgba(204,0,0,0.25)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Zap size={11} color="#CC0000" />
-                </div>
-                <span
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "#6b7280",
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Trojan Technology Solutions
-                </span>
-              </div>
-              <h1
-                style={{
-                  fontSize: "clamp(28px, 5vw, 40px)",
-                  fontWeight: 900,
-                  color: "#fff",
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1.1,
-                  marginBottom: 12,
-                }}
-              >
-                Join TTS
-              </h1>
-              <p style={{ fontSize: 15, color: "#a1a1aa", lineHeight: 1.7 }}>
-                No prerequisites. No experience required. Show up, pick a track,
-                and ship something real.
-              </p>
-            </div>
+          <div className="form-animate" style={{ maxWidth: 540 }}>
+            {/* Form header */}
+            <p
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: "#52525b",
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                marginBottom: 16,
+              }}
+            >
+              No application required — just submit your interest
+            </p>
+            <h2
+              style={{
+                fontSize: "clamp(24px, 4vw, 36px)",
+                fontWeight: 900,
+                color: "#fff",
+                letterSpacing: "-0.03em",
+                lineHeight: 1.1,
+                marginBottom: 10,
+              }}
+            >
+              Tell us about yourself
+            </h2>
+            <p
+              style={{
+                fontSize: 14,
+                color: "#71717a",
+                lineHeight: 1.6,
+                marginBottom: 36,
+              }}
+            >
+              Show up, pick a track, and ship something real.
+            </p>
 
             <form
               onSubmit={handleSubmit}
-              style={{ display: "flex", flexDirection: "column", gap: 20 }}
+              style={{ display: "flex", flexDirection: "column", gap: 22 }}
             >
               {/* Name + Email */}
               <div
+                className="form-animate-delay apply-two-col"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",
-                  gap: 12,
+                  gap: 14,
                 }}
               >
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: 12,
-                      color: "#a1a1aa",
-                      marginBottom: 6,
-                    }}
-                  >
-                    Full name
-                  </label>
+                  <label style={labelStyle}>Full name</label>
                   <input
                     required
                     value={form.name}
@@ -290,25 +424,16 @@ export default function ApplyPage() {
                     style={inputStyle}
                     onFocus={(e) => {
                       (e.currentTarget as HTMLInputElement).style.borderColor =
-                        "rgba(204,0,0,0.4)";
+                        "rgba(204,0,0,0.5)";
                     }}
                     onBlur={(e) => {
                       (e.currentTarget as HTMLInputElement).style.borderColor =
-                        "rgba(255,255,255,0.08)";
+                        "rgba(255,255,255,0.1)";
                     }}
                   />
                 </div>
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: 12,
-                      color: "#a1a1aa",
-                      marginBottom: 6,
-                    }}
-                  >
-                    USC email
-                  </label>
+                  <label style={labelStyle}>USC email</label>
                   <input
                     required
                     type="email"
@@ -318,11 +443,11 @@ export default function ApplyPage() {
                     style={inputStyle}
                     onFocus={(e) => {
                       (e.currentTarget as HTMLInputElement).style.borderColor =
-                        "rgba(204,0,0,0.4)";
+                        "rgba(204,0,0,0.5)";
                     }}
                     onBlur={(e) => {
                       (e.currentTarget as HTMLInputElement).style.borderColor =
-                        "rgba(255,255,255,0.08)";
+                        "rgba(255,255,255,0.1)";
                     }}
                   />
                 </div>
@@ -330,23 +455,15 @@ export default function ApplyPage() {
 
               {/* Major + Year */}
               <div
+                className="apply-two-col"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",
-                  gap: 12,
+                  gap: 14,
                 }}
               >
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: 12,
-                      color: "#a1a1aa",
-                      marginBottom: 6,
-                    }}
-                  >
-                    Major
-                  </label>
+                  <label style={labelStyle}>Major</label>
                   <input
                     required
                     value={form.major}
@@ -355,25 +472,16 @@ export default function ApplyPage() {
                     style={inputStyle}
                     onFocus={(e) => {
                       (e.currentTarget as HTMLInputElement).style.borderColor =
-                        "rgba(204,0,0,0.4)";
+                        "rgba(204,0,0,0.5)";
                     }}
                     onBlur={(e) => {
                       (e.currentTarget as HTMLInputElement).style.borderColor =
-                        "rgba(255,255,255,0.08)";
+                        "rgba(255,255,255,0.1)";
                     }}
                   />
                 </div>
                 <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: 12,
-                      color: "#a1a1aa",
-                      marginBottom: 6,
-                    }}
-                  >
-                    Year
-                  </label>
+                  <label style={labelStyle}>Year</label>
                   <select
                     required
                     value={form.year}
@@ -381,22 +489,18 @@ export default function ApplyPage() {
                     style={{ ...inputStyle, cursor: "pointer" }}
                     onFocus={(e) => {
                       (e.currentTarget as HTMLSelectElement).style.borderColor =
-                        "rgba(204,0,0,0.4)";
+                        "rgba(204,0,0,0.5)";
                     }}
                     onBlur={(e) => {
                       (e.currentTarget as HTMLSelectElement).style.borderColor =
-                        "rgba(255,255,255,0.08)";
+                        "rgba(255,255,255,0.1)";
                     }}
                   >
-                    <option value="" disabled style={{ background: "#111113" }}>
+                    <option value="" disabled>
                       Select year
                     </option>
                     {YEARS.map((y) => (
-                      <option
-                        key={y}
-                        value={y}
-                        style={{ background: "#111113" }}
-                      >
+                      <option key={y} value={y}>
                         {y}
                       </option>
                     ))}
@@ -406,22 +510,13 @@ export default function ApplyPage() {
 
               {/* Track picker */}
               <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: 12,
-                    color: "#a1a1aa",
-                    marginBottom: 10,
-                  }}
-                >
-                  Which track are you interested in?
-                </label>
+                <label style={labelStyle}>Which track interests you?</label>
                 <div
                   className="apply-two-col"
                   style={{
                     display: "grid",
                     gridTemplateColumns: "1fr 1fr",
-                    gap: 8,
+                    gap: 10,
                   }}
                 >
                   {TRACKS.map(({ id, label, sub, color }) => {
@@ -433,11 +528,15 @@ export default function ApplyPage() {
                         aria-pressed={selected}
                         onClick={() => set("track", id)}
                         style={{
-                          padding: "14px 16px",
-                          borderRadius: 10,
-                          background: selected ? `${color}10` : "#111113",
-                          border: `1px solid ${selected ? color + "40" : "rgba(255,255,255,0.07)"}`,
-                          borderTop: `2px solid ${selected ? color : "transparent"}`,
+                          padding: "20px",
+                          borderRadius: 14,
+                          background: selected
+                            ? `${color}13`
+                            : "rgba(255,255,255,0.02)",
+                          border: selected
+                            ? `1px solid ${color}50`
+                            : "1px solid rgba(255,255,255,0.07)",
+                          borderLeft: `4px solid ${selected ? color : "transparent"}`,
                           cursor: "pointer",
                           textAlign: "left",
                           transition: "all 0.15s",
@@ -445,15 +544,21 @@ export default function ApplyPage() {
                       >
                         <div
                           style={{
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: 700,
                             color: selected ? color : "#e4e4e7",
-                            marginBottom: 2,
+                            marginBottom: 4,
+                            letterSpacing: "-0.01em",
                           }}
                         >
                           {label}
                         </div>
-                        <div style={{ fontSize: 11, color: "#6b7280" }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: selected ? "#a1a1aa" : "#52525b",
+                          }}
+                        >
                           {sub}
                         </div>
                       </button>
@@ -464,16 +569,18 @@ export default function ApplyPage() {
 
               {/* Why */}
               <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: 12,
-                    color: "#a1a1aa",
-                    marginBottom: 6,
-                  }}
-                >
+                <label style={labelStyle}>
                   Why do you want to join TTS?{" "}
-                  <span style={{ color: "#71717a" }}>(min 10 characters)</span>
+                  <span
+                    style={{
+                      color: "#3f3f46",
+                      fontWeight: 400,
+                      textTransform: "none",
+                      letterSpacing: 0,
+                    }}
+                  >
+                    (min 10 characters)
+                  </span>
                 </label>
                 <textarea
                   required
@@ -481,14 +588,14 @@ export default function ApplyPage() {
                   onChange={(e) => set("why", e.target.value)}
                   placeholder="What are you trying to build, learn, or do before you graduate?"
                   rows={4}
-                  style={{ ...inputStyle, resize: "vertical", minHeight: 100 }}
+                  style={{ ...inputStyle, resize: "vertical", minHeight: 110 }}
                   onFocus={(e) => {
                     (e.currentTarget as HTMLTextAreaElement).style.borderColor =
-                      "rgba(204,0,0,0.4)";
+                      "rgba(204,0,0,0.5)";
                   }}
                   onBlur={(e) => {
                     (e.currentTarget as HTMLTextAreaElement).style.borderColor =
-                      "rgba(255,255,255,0.08)";
+                      "rgba(255,255,255,0.1)";
                   }}
                 />
               </div>
@@ -506,16 +613,18 @@ export default function ApplyPage() {
                 type="submit"
                 disabled={loading || !form.track || !form.year}
                 style={{
-                  padding: "13px",
-                  borderRadius: 10,
+                  width: "100%",
+                  height: 56,
+                  borderRadius: 14,
                   background:
                     loading || !form.track || !form.year
-                      ? "rgba(204,0,0,0.4)"
+                      ? "rgba(204,0,0,0.35)"
                       : "#CC0000",
                   border: "none",
                   color: "#fff",
-                  fontSize: 14,
-                  fontWeight: 700,
+                  fontSize: 15,
+                  fontWeight: 800,
+                  letterSpacing: "-0.01em",
                   cursor:
                     loading || !form.track || !form.year
                       ? "not-allowed"
@@ -523,35 +632,39 @@ export default function ApplyPage() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  gap: 7,
-                  transition: "background 0.15s",
-                  minHeight: 48,
-                  boxShadow: "0 4px 20px rgba(204,0,0,0.2)",
+                  gap: 8,
+                  transition: "background 0.15s, transform 0.1s",
+                  boxShadow:
+                    loading || !form.track || !form.year
+                      ? "none"
+                      : "0 4px 24px rgba(204,0,0,0.28)",
                 }}
                 onMouseEnter={(e) => {
-                  if (!loading && form.track && form.year)
+                  if (!loading && form.track && form.year) {
                     (e.currentTarget as HTMLButtonElement).style.background =
                       "#aa0000";
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  if (!loading && form.track && form.year)
+                  if (!loading && form.track && form.year) {
                     (e.currentTarget as HTMLButtonElement).style.background =
                       "#CC0000";
+                  }
                 }}
               >
                 {loading ? (
                   "Submitting..."
                 ) : (
                   <>
-                    Submit application <ArrowRight size={15} />
+                    Submit application <ArrowRight size={16} />
                   </>
                 )}
               </button>
 
               <p
                 style={{
-                  fontSize: 11,
-                  color: "#52525b",
+                  fontSize: 12,
+                  color: "#3f3f46",
                   textAlign: "center",
                   margin: 0,
                 }}
@@ -559,7 +672,7 @@ export default function ApplyPage() {
                 We&apos;ll get back to you within a few days. No spam, ever.
               </p>
             </form>
-          </>
+          </div>
         )}
       </div>
     </div>

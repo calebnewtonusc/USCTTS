@@ -504,23 +504,11 @@ video[id^="webgazer"] {
     transparent
   );
 }
-@keyframes tts-ocean-flow {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
 .tts-ocean-track {
   position: absolute;
   top: 0;
   left: 0;
-  animation: tts-ocean-flow 10s linear infinite;
   will-change: transform;
-}
-.tts-ocean-reverse {
-  animation-direction: reverse;
 }
 
 /* ── Join section pulsing glow ───────────────────────────────────────────── */
@@ -650,8 +638,14 @@ video[id^="webgazer"] {
 }
 
 @keyframes tts-faq-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .tts-faq-content {
   animation: tts-faq-in 0.3s ease forwards;
@@ -663,5 +657,23 @@ video[id^="webgazer"] {
   align-items: start;
 }
 @media (max-width: 768px) {
-  .tts-faq-split { grid-template-columns: 1fr; gap: 32px; }
+  .tts-faq-split {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+/* Page transition — fade up in */
+@keyframes tts-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.tts-page-enter {
+  animation: tts-page-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
