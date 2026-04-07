@@ -482,38 +482,34 @@ function MarqueeDivider({
 }) {
   const row1Ref = useRef<HTMLDivElement>(null);
   const row2Ref = useRef<HTMLDivElement>(null);
-  const TILE = 2400;
+  // Strip is ~6000px at 13px font — no fixed tile width, just direct scrollY drive
   const TEXT = "BUILD · SHIP · CONSULT · DEPLOY · TROJAN TECH SOLUTIONS · ";
+  const strip = TEXT.repeat(10);
 
   useEffect(() => {
     const handle = () => {
       const y = window.scrollY;
-      if (row1Ref.current) {
-        const off = (y * 0.14) % TILE;
-        row1Ref.current.style.transform = `translateX(${-off}px)`;
-      }
-      if (row2Ref.current) {
-        const off = (y * 0.1) % TILE;
-        row2Ref.current.style.transform = `translateX(${off - TILE}px)`;
-      }
+      // Row 1 slides left with scroll
+      if (row1Ref.current)
+        row1Ref.current.style.transform = `translateX(${-y * 0.16}px)`;
+      // Row 2 starts 2800px into the strip, slides right — always visible
+      if (row2Ref.current)
+        row2Ref.current.style.transform = `translateX(${-2800 + y * 0.1}px)`;
     };
     window.addEventListener("scroll", handle, { passive: true });
     handle();
     return () => window.removeEventListener("scroll", handle);
   }, []);
 
-  const tileStyle: React.CSSProperties = {
-    width: TILE,
-    flexShrink: 0,
+  const rowStyle: React.CSSProperties = {
     whiteSpace: "nowrap",
     fontFamily: "var(--font-geist-sans, Inter, sans-serif)",
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 700,
-    letterSpacing: "0.22em",
+    letterSpacing: "0.18em",
     textTransform: "uppercase",
+    willChange: "transform",
   };
-
-  const repeated = TEXT.repeat(6);
 
   return (
     <div
@@ -521,36 +517,29 @@ function MarqueeDivider({
       style={{
         position: "relative",
         overflow: "hidden",
-        background: `linear-gradient(to bottom, ${topColor} 0%, ${bottomColor} 100%)`,
-        padding: "18px 0",
+        background: `linear-gradient(to bottom, ${topColor}, ${bottomColor})`,
+        padding: "20px 0",
         flexShrink: 0,
       }}
     >
-      <div style={{ overflow: "hidden", marginBottom: 10 }}>
-        <div ref={row1Ref} style={{ display: "flex", willChange: "transform" }}>
-          <span style={{ ...tileStyle, color: "rgba(255,255,255,0.10)" }}>
-            {repeated}
-          </span>
-          <span style={{ ...tileStyle, color: "rgba(255,255,255,0.10)" }}>
-            {repeated}
-          </span>
+      <div style={{ overflow: "hidden", marginBottom: 14 }}>
+        <div
+          ref={row1Ref}
+          style={{ ...rowStyle, color: "rgba(255,255,255,0.28)" }}
+        >
+          {strip}
         </div>
       </div>
       <div style={{ overflow: "hidden" }}>
-        <div ref={row2Ref} style={{ display: "flex", willChange: "transform" }}>
-          <span style={{ ...tileStyle, color: "rgba(204,0,0,0.28)" }}>
-            {repeated}
-          </span>
-          <span style={{ ...tileStyle, color: "rgba(204,0,0,0.28)" }}>
-            {repeated}
-          </span>
+        <div ref={row2Ref} style={{ ...rowStyle, color: "rgba(204,0,0,0.60)" }}>
+          {strip}
         </div>
       </div>
     </div>
   );
 }
 
-// ── Diagonal slash divider — angled geometric cut with scroll parallax ─────────
+// ── Diagonal slash divider — SVG diagonal line with scroll parallax ───────────
 function DiagonalSlashDivider({
   topColor = "#09090b",
   bottomColor = "#09090b",
@@ -558,19 +547,17 @@ function DiagonalSlashDivider({
   topColor?: string;
   bottomColor?: string;
 }) {
-  const line1Ref = useRef<HTMLDivElement>(null);
-  const line2Ref = useRef<HTMLDivElement>(null);
-  const line3Ref = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handle = () => {
       const y = window.scrollY;
-      if (line1Ref.current)
-        line1Ref.current.style.transform = `rotate(-2.8deg) translateX(${y * 0.08}px) translateY(-50%)`;
-      if (line2Ref.current)
-        line2Ref.current.style.transform = `rotate(-2.8deg) translateX(${-y * 0.05}px) translateY(-50%)`;
-      if (line3Ref.current)
-        line3Ref.current.style.transform = `rotate(-2.8deg) translateX(${y * 0.12}px) translateY(-50%)`;
+      // Shift the SVG horizontally so the line scrolls across
+      if (svgRef.current)
+        svgRef.current.style.transform = `translateX(${y * 0.07}px)`;
+      if (glowRef.current)
+        glowRef.current.style.transform = `translateX(${-y * 0.04}px)`;
     };
     window.addEventListener("scroll", handle, { passive: true });
     handle();
@@ -588,53 +575,74 @@ function DiagonalSlashDivider({
         flexShrink: 0,
       }}
     >
+      {/* bottomColor wedge — diagonal cut */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           background: bottomColor,
-          clipPath: "polygon(0 65%, 100% 22%, 100% 100%, 0 100%)",
+          clipPath: "polygon(0 68%, 100% 20%, 100% 100%, 0 100%)",
         }}
       />
+      {/* Glow layer behind the line */}
       <div
-        ref={line1Ref}
+        ref={glowRef}
         style={{
           position: "absolute",
-          top: "50%",
-          left: "-20%",
-          width: "140%",
-          height: 1.5,
+          top: 0,
+          left: "-10%",
+          width: "120%",
+          height: "100%",
           background:
-            "linear-gradient(90deg, transparent 0%, rgba(204,0,0,0.75) 35%, rgba(204,0,0,0.75) 65%, transparent 100%)",
+            "linear-gradient(180deg, transparent 20%, rgba(204,0,0,0.08) 44%, rgba(204,0,0,0.08) 56%, transparent 80%)",
+          filter: "blur(6px)",
           willChange: "transform",
         }}
       />
-      <div
-        ref={line2Ref}
+      {/* SVG diagonal line — spans 120% width so it never clips while shifting */}
+      <svg
+        ref={svgRef}
         style={{
           position: "absolute",
-          top: "36%",
-          left: "-20%",
-          width: "140%",
-          height: 1,
-          background:
-            "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.07) 40%, rgba(255,255,255,0.07) 60%, transparent 100%)",
+          top: 0,
+          left: "-10%",
+          width: "120%",
+          height: "100%",
+          overflow: "visible",
           willChange: "transform",
         }}
-      />
-      <div
-        ref={line3Ref}
-        style={{
-          position: "absolute",
-          top: "65%",
-          left: "-20%",
-          width: "140%",
-          height: 1,
-          background:
-            "linear-gradient(90deg, transparent 0%, rgba(255,204,0,0.18) 40%, rgba(255,204,0,0.18) 60%, transparent 100%)",
-          willChange: "transform",
-        }}
-      />
+        preserveAspectRatio="none"
+        viewBox="0 0 1200 80"
+      >
+        {/* Red glow stroke */}
+        <line
+          x1="0"
+          y1="55"
+          x2="1200"
+          y2="15"
+          stroke="rgba(204,0,0,0.25)"
+          strokeWidth="12"
+          strokeLinecap="round"
+        />
+        {/* Sharp red line */}
+        <line
+          x1="0"
+          y1="55"
+          x2="1200"
+          y2="15"
+          stroke="rgba(204,0,0,0.90)"
+          strokeWidth="1.5"
+        />
+        {/* Faint white parallel line */}
+        <line
+          x1="0"
+          y1="62"
+          x2="1200"
+          y2="22"
+          stroke="rgba(255,255,255,0.10)"
+          strokeWidth="1"
+        />
+      </svg>
     </div>
   );
 }
@@ -649,61 +657,14 @@ function ScanLineDivider({
   topColor?: string;
   bottomColor?: string;
 }) {
-  type LineConfig = {
-    top: string;
-    w: string;
-    left: string;
-    opacity: number;
-    color: string;
-    speed: number;
-    h: number;
-  };
-  const LINES: LineConfig[] = [
-    {
-      top: "15%",
-      w: "70%",
-      left: "15%",
-      opacity: 0.06,
-      color: "#fff",
-      speed: 0.1,
-      h: 1,
-    },
-    {
-      top: "33%",
-      w: "45%",
-      left: "28%",
-      opacity: 0.5,
-      color: "#CC0000",
-      speed: 0.07,
-      h: 2,
-    },
-    {
-      top: "50%",
-      w: "85%",
-      left: "7.5%",
-      opacity: 0.04,
-      color: "#fff",
-      speed: 0.13,
-      h: 1,
-    },
-    {
-      top: "66%",
-      w: "55%",
-      left: "20%",
-      opacity: 0.3,
-      color: "#CC0000",
-      speed: 0.06,
-      h: 1,
-    },
-    {
-      top: "82%",
-      w: "62%",
-      left: "19%",
-      opacity: 0.05,
-      color: "#fff",
-      speed: 0.09,
-      h: 1,
-    },
+  // Lines span 140% width with edge-fading gradient so translateX never reveals
+  // a raw endpoint. Each bar shifts at a different speed, alternating direction.
+  const LINES = [
+    { top: "14%", speed: 0.1, color: "255,255,255", opacity: 0.14, h: 1 },
+    { top: "32%", speed: 0.07, color: "204,0,0", opacity: 0.7, h: 2 },
+    { top: "50%", speed: 0.13, color: "255,255,255", opacity: 0.08, h: 1 },
+    { top: "68%", speed: 0.06, color: "204,0,0", opacity: 0.45, h: 1.5 },
+    { top: "84%", speed: 0.09, color: "255,255,255", opacity: 0.1, h: 1 },
   ];
 
   const lineRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -715,8 +676,7 @@ function ScanLineDivider({
         const el = lineRefs.current[i];
         if (!el) return;
         const alt = i % 2 === 0 ? 1 : -1;
-        const off = dir * alt * window.scrollY * line.speed;
-        el.style.transform = `translateX(${off}px)`;
+        el.style.transform = `translateX(${dir * alt * window.scrollY * line.speed}px)`;
       });
     };
     window.addEventListener("scroll", handle, { passive: true });
@@ -745,11 +705,10 @@ function ScanLineDivider({
           style={{
             position: "absolute",
             top: line.top,
-            left: line.left,
-            width: line.w,
+            left: "-20%",
+            width: "140%",
             height: line.h,
-            background: line.color,
-            opacity: line.opacity,
+            background: `linear-gradient(90deg, transparent 0%, rgba(${line.color},${line.opacity}) 12%, rgba(${line.color},${line.opacity}) 88%, transparent 100%)`,
             borderRadius: 1,
             willChange: "transform",
           }}
@@ -768,9 +727,12 @@ function DotRowDivider({
   bottomColor?: string;
 }) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const COLS = 64;
-  const ROWS = 4;
-  const GAP = 30;
+  // GAP drives the seamless loop: SVG is 2×GAP wider than needed,
+  // offset wraps at GAP so the dot pattern tiles seamlessly
+  const COLS = 70;
+  const ROWS = 5;
+  const GAP = 28;
+  const H = 88;
   const W = (COLS + 2) * GAP;
 
   useEffect(() => {
@@ -788,15 +750,19 @@ function DotRowDivider({
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS + 2; col++) {
       const x = col * GAP;
-      const y = 10 + row * 20;
-      const isRed = (row + col) % 7 === 0;
-      const isGold = (row + col) % 11 === 0;
+      const y = 10 + row * ((H - 20) / (ROWS - 1));
+      const sum = row + col;
+      const isRed = sum % 7 === 0;
+      const isGold = sum % 13 === 0;
+      const isBright = sum % 19 === 0;
       const fill = isRed
-        ? "rgba(204,0,0,0.55)"
+        ? "rgba(204,0,0,0.75)"
         : isGold
-          ? "rgba(255,204,0,0.30)"
-          : "rgba(255,255,255,0.07)";
-      const r = isRed ? 2.5 : isGold ? 2 : 1.5;
+          ? "rgba(255,204,0,0.50)"
+          : isBright
+            ? "rgba(255,255,255,0.28)"
+            : "rgba(255,255,255,0.09)";
+      const r = isRed ? 3 : isGold ? 2.5 : isBright ? 2 : 1.5;
       dots.push(
         <circle key={`${row}-${col}`} cx={x} cy={y} r={r} fill={fill} />,
       );
@@ -808,7 +774,7 @@ function DotRowDivider({
       aria-hidden="true"
       style={{
         position: "relative",
-        height: 80,
+        height: H,
         background: `linear-gradient(to bottom, ${topColor}, ${bottomColor})`,
         overflow: "hidden",
         flexShrink: 0,
@@ -823,11 +789,20 @@ function DotRowDivider({
           willChange: "transform",
         }}
         width={W}
-        height={80}
-        viewBox={`0 0 ${W} 80`}
+        height={H}
+        viewBox={`0 0 ${W} ${H}`}
       >
         {dots}
       </svg>
+      {/* Left/right fade so dots dissolve at edges rather than hard-clipping */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `linear-gradient(90deg, ${topColor} 0%, transparent 8%, transparent 92%, ${bottomColor} 100%)`,
+          pointerEvents: "none",
+        }}
+      />
     </div>
   );
 }
