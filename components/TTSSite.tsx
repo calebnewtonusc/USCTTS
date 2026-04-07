@@ -926,14 +926,14 @@ export default function TTSSite() {
             background: "#0d0d10",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
             overflow: "hidden",
             transform: `translateX(${(1 - trackExitProg) * 100}%)`,
             opacity: Math.max(0, 1 - revealProgress / 0.06),
             pointerEvents: "none",
           }}
         >
-          {/* Floating icons — matches real Panel A exactly */}
+          {/* Floating icons — frozen at the revealProgress=0 position of the real Panel A
+              drift = 0 - 0.3 = -0.3; yOff = drift * speed * 800; xOff = drift * speedx * 800 */}
           {(
             [
               {
@@ -943,6 +943,8 @@ export default function TTSSite() {
                 size: 80,
                 rotate: 20,
                 color: "rgba(204,0,0,0.65)",
+                yOff: -24,
+                xOff: 7.2,
               },
               {
                 Icon: GitBranch,
@@ -951,6 +953,8 @@ export default function TTSSite() {
                 size: 64,
                 rotate: -14,
                 color: "rgba(255,255,255,0.40)",
+                yOff: -16.8,
+                xOff: -4.8,
               },
               {
                 Icon: Trophy,
@@ -959,6 +963,8 @@ export default function TTSSite() {
                 size: 52,
                 rotate: 8,
                 color: "rgba(255,204,0,0.50)",
+                yOff: -16.8,
+                xOff: 4.8,
               },
               {
                 Icon: Globe,
@@ -967,6 +973,8 @@ export default function TTSSite() {
                 size: 44,
                 rotate: 30,
                 color: "rgba(255,255,255,0.28)",
+                yOff: -12,
+                xOff: -4.8,
               },
               {
                 Icon: Layers,
@@ -975,6 +983,8 @@ export default function TTSSite() {
                 size: 38,
                 rotate: -22,
                 color: "rgba(204,0,0,0.35)",
+                yOff: -12,
+                xOff: 4.8,
               },
             ] as {
               Icon: React.FC<{ size: number }>;
@@ -985,9 +995,25 @@ export default function TTSSite() {
               size: number;
               rotate: number;
               color: string;
+              yOff: number;
+              xOff: number;
             }[]
           ).map(
-            ({ Icon, top, left, right, bottom, size, rotate, color }, idx) => (
+            (
+              {
+                Icon,
+                top,
+                left,
+                right,
+                bottom,
+                size,
+                rotate,
+                color,
+                yOff,
+                xOff,
+              },
+              idx,
+            ) => (
               <div
                 key={`ov-icon-${idx}`}
                 className="tts-float-icon"
@@ -998,7 +1024,7 @@ export default function TTSSite() {
                   right,
                   bottom,
                   color,
-                  transform: `rotate(${rotate}deg)`,
+                  transform: `translateY(${yOff}px) translateX(${xOff}px) rotate(${rotate}deg)`,
                 }}
               >
                 <Icon size={size} />
@@ -1006,16 +1032,16 @@ export default function TTSSite() {
             ),
           )}
           <div
+            className="tts-panel-b-grid tts-panel-b-inner"
             style={{
               maxWidth: 1200,
+              margin: "0 auto",
               width: "100%",
               padding: "0 40px",
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
               gap: 80,
               alignItems: "center",
-              position: "relative",
-              zIndex: 1,
             }}
           >
             <div>
