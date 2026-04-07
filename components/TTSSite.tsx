@@ -580,16 +580,20 @@ function DiagonalSlashDivider({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const H = 80; // container height
     const handle = () => {
       if (!containerRef.current) return;
-      // Use viewport-relative top — always a small number regardless of page depth.
-      // scrollY * coefficient breaks when the divider is far down the page.
-      const rect = containerRef.current.getBoundingClientRect();
-      const vt = rect.top; // +winH (not yet on screen) → 0 (top of viewport) → negative (scrolled past)
+      const winH = window.innerHeight;
+      const vt = containerRef.current.getBoundingClientRect().top;
+      // Only animate while the divider is actually on screen.
+      // Map vt: winH (entering) → -H (fully exited) to translateX: -900 → +900
+      const clamped = Math.max(-H, Math.min(winH, vt));
+      const progress = 1 - (clamped + H) / (winH + H); // 0 when entering, 1 when exited
+      const tx = -900 + progress * 1800; // full sweep across container
       if (svgRef.current)
-        svgRef.current.style.transform = `translateX(${-vt * 1.8}px)`;
+        svgRef.current.style.transform = `translateX(${tx}px)`;
       if (glowRef.current)
-        glowRef.current.style.transform = `translateX(${vt * 1.1}px)`;
+        glowRef.current.style.transform = `translateX(${-tx * 0.6}px)`;
     };
     window.addEventListener("scroll", handle, { passive: true });
     handle();
@@ -722,7 +726,7 @@ function ScanLineDivider({
         const el = lineRefs.current[i];
         if (!el) return;
         const alt = i % 2 === 0 ? 1 : -1;
-        el.style.transform = `translateX(${flip * alt * vt * line.speed * 3.5}px)`;
+        el.style.transform = `translateX(${flip * alt * vt * line.speed * 8.0}px)`;
       });
     };
     window.addEventListener("scroll", handle, { passive: true });
@@ -787,11 +791,11 @@ function DotRowDivider({
   topColor?: string;
   bottomColor?: string;
 }) {
-  const COLS = 80;
+  const COLS = 220;
   const ROWS = 5;
   const GAP = 26;
   const H = 96;
-  const W = (COLS + 2) * GAP; // ~2132px
+  const W = (COLS + 2) * GAP; // ~5772px — wider than any realistic viewport
 
   const dots: React.ReactNode[] = [];
   for (let row = 0; row < ROWS; row++) {
@@ -1393,9 +1397,16 @@ export default function TTSSite() {
           alignItems: "center",
           overflow: "hidden",
           transform: `translateX(${(1 - trackExitProg) * 100}%)`,
-          // Stay fully opaque until Panel B fully lands (revealProgress=0.56),
-          // then snap to 0 — Panel B covers the cut completely, zero double-content.
-          opacity: trackExitProg > 0 && revealProgress < 0.56 ? 1 : 0,
+          // Fade out gradually 0.32→0.44 so real Panel A right-side stats can
+          // be seen animating in beneath it, then snap to 0 once Panel B takes over.
+          opacity:
+            trackExitProg > 0
+              ? revealProgress < 0.32
+                ? 1
+                : revealProgress < 0.56
+                  ? Math.max(0, 1 - (revealProgress - 0.32) / 0.14)
+                  : 0
+              : 0,
           pointerEvents: "none",
           willChange: "transform, opacity",
         }}
@@ -1500,169 +1511,84 @@ export default function TTSSite() {
           const ulScale = eraseP > 0 ? 1 - eraseP : drawP;
           const ulOrigin = eraseP > 0 ? "right" : "left";
           return (
+            /* Overlay: left-side ONLY — underline draws/erases here.
+               Right-side stats live on the real Panel A beneath, visible as this fades. */
             <div
-              className="tts-panel-b-grid tts-panel-b-inner"
+              className="tts-panel-b-inner"
               style={{
                 maxWidth: 1400,
                 margin: "0 auto",
                 width: "100%",
                 padding: "0 80px",
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 100,
-                alignItems: "center",
               }}
             >
-              <div>
-                <p
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "#CC0000",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    marginBottom: 24,
-                  }}
-                >
-                  Why it works
-                </p>
-                <h2
-                  style={{
-                    fontSize: "clamp(48px, 6vw, 88px)",
-                    fontWeight: 900,
-                    color: "#fff",
-                    letterSpacing: "-0.03em",
-                    lineHeight: 1.0,
-                    marginBottom: 32,
-                  }}
-                >
-                  Real work.
-                  <br />
-                  <span style={{ color: "#CC0000" }}>
-                    <span
-                      style={{ position: "relative", display: "inline-block" }}
-                    >
-                      Not
-                      <span
-                        style={{
-                          position: "absolute",
-                          bottom: -4,
-                          left: 0,
-                          right: 0,
-                          height: 4,
-                          background: "#CC0000",
-                          boxShadow: "0 0 10px rgba(204,0,0,0.7)",
-                          borderRadius: 2,
-                          transformOrigin: ulOrigin,
-                          transform: `scaleX(${ulScale})`,
-                        }}
-                      />
-                    </span>{" "}
-                    <span
-                      style={{
-                        color: "transparent",
-                        WebkitTextStroke: "2px #fff",
-                      }}
-                    >
-                      just
-                    </span>{" "}
-                    classes.
-                  </span>
-                </h2>
-                <p
-                  style={{
-                    fontSize: 18,
-                    color: "#71717a",
-                    lineHeight: 1.8,
-                    maxWidth: 480,
-                  }}
-                >
-                  Build the portfolio and skills here, then use them to land
-                  SEP, BTG, BPX, or whatever comes next. TTS is the rep room
-                  those clubs assume you already have.
-                </p>
-              </div>
-              <div
+              <p
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 0,
-                  borderLeft: "1px solid rgba(255,255,255,0.12)",
-                  paddingLeft: 56,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "#CC0000",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  marginBottom: 24,
                 }}
               >
-                {[
-                  {
-                    stat: "Week 1",
-                    label: "You ship something",
-                    sub: "Building track members deploy a live product in the first session. Not the end of the semester.",
-                    revealStart: 0.36,
-                  },
-                  {
-                    stat: "Real",
-                    label: "Client work every semester",
-                    sub: "Live engagements with actual organizations. Consulting track delivers real decks.",
-                    revealStart: 0.39,
-                  },
-                  {
-                    stat: "Yours",
-                    label: "Everything you build",
-                    sub: "Goes on your resume. Never stays in a classroom.",
-                    revealStart: 0.42,
-                  },
-                ].map(({ stat, label, sub, revealStart }, i) => {
-                  const itemP = Math.max(
-                    0,
-                    Math.min(1, (revealProgress - revealStart) / 0.09),
-                  );
-                  return (
-                    <div
-                      key={label}
+                Why it works
+              </p>
+              <h2
+                style={{
+                  fontSize: "clamp(48px, 6vw, 88px)",
+                  fontWeight: 900,
+                  color: "#fff",
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1.0,
+                  marginBottom: 32,
+                }}
+              >
+                Real work.
+                <br />
+                <span style={{ color: "#CC0000" }}>
+                  <span
+                    style={{ position: "relative", display: "inline-block" }}
+                  >
+                    Not
+                    <span
                       style={{
-                        padding: "32px 0",
-                        borderBottom:
-                          i < 2 ? "1px solid rgba(255,255,255,0.1)" : "none",
-                        opacity: itemP,
-                        transform: `translateY(${(1 - itemP) * 28}px)`,
+                        position: "absolute",
+                        bottom: -4,
+                        left: 0,
+                        right: 0,
+                        height: 4,
+                        background: "#CC0000",
+                        boxShadow: "0 0 10px rgba(204,0,0,0.7)",
+                        borderRadius: 2,
+                        transformOrigin: ulOrigin,
+                        transform: `scaleX(${ulScale})`,
                       }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "clamp(56px, 7vw, 100px)",
-                          fontWeight: 900,
-                          color: "#fff",
-                          letterSpacing: "-0.04em",
-                          lineHeight: 1,
-                          marginBottom: 8,
-                        }}
-                      >
-                        {stat}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 15,
-                          fontWeight: 700,
-                          color: "#CC0000",
-                          marginBottom: 8,
-                          letterSpacing: "0.02em",
-                        }}
-                      >
-                        {label}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 15,
-                          color: "#71717a",
-                          lineHeight: 1.6,
-                          maxWidth: 360,
-                        }}
-                      >
-                        {sub}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    />
+                  </span>{" "}
+                  <span
+                    style={{
+                      color: "transparent",
+                      WebkitTextStroke: "2px #fff",
+                    }}
+                  >
+                    just
+                  </span>{" "}
+                  classes.
+                </span>
+              </h2>
+              <p
+                style={{
+                  fontSize: 18,
+                  color: "#71717a",
+                  lineHeight: 1.8,
+                  maxWidth: 480,
+                }}
+              >
+                Build the portfolio and skills here, then use them to land SEP,
+                BTG, BPX, or whatever comes next. TTS is the rep room those
+                clubs assume you already have.
+              </p>
             </div>
           );
         })()}
@@ -3378,37 +3304,39 @@ export default function TTSSite() {
                 const sp = (start: number, len: number) =>
                   spring(Math.max(0, Math.min(1, (transP - start) / len)));
 
-                // Entrance stagger
-                const eyebrowP = ep(0.05, 0.22);
-                const walkInP = sp(0.2, 0.25);
-                const dividerP = ep(0.32, 0.22);
-                // Word-split: "Walk out" from left, "different." from right
-                const walkWordP = sp(0.42, 0.28);
-                const diffWordP = sp(0.52, 0.28);
-                const subtitleP = ep(0.65, 0.25);
+                // Entrance stagger — tighter timing so impact hits faster
+                const eyebrowP = ep(0.04, 0.18);
+                const walkInP = sp(0.16, 0.2);
+                const dividerP = ep(0.28, 0.18);
+                // Word-split: "Walk out" from far left, "different." from far right
+                const walkWordP = sp(0.36, 0.22);
+                const diffWordP = sp(0.44, 0.22);
+                const subtitleP = ep(0.6, 0.2);
 
                 // Per-pill stagger
-                const pill0 = ep(0.75, 0.18);
-                const pill1 = ep(0.8, 0.18);
-                const pill2 = ep(0.85, 0.18);
+                const pill0 = ep(0.7, 0.15);
+                const pill1 = ep(0.76, 0.15);
+                const pill2 = ep(0.82, 0.15);
                 const pillPs = [pill0, pill1, pill2];
 
-                // Dwell parallax — fires after everything is in (transP ≈ 1)
-                // Uses raw revealProgress 0.74→1.0 so motion is continuous
+                // Dwell parallax
                 const dwellP = Math.max(
                   0,
                   Math.min(1, (revealProgress - 0.74) / 0.26),
                 );
-                const contentDrift = dwellP * -70;
-                const eyebrowDrift = dwellP * -24;
-                const walkInDrift = dwellP * -18;
-                const diffGlow = 60 + dwellP * 90;
+                // Much larger travel amounts — content floats dramatically upward on dwell
+                const contentDrift = dwellP * -200;
+                const eyebrowDrift = dwellP * -80;
+                const walkInDrift = dwellP * -60;
+                // "different." glow intensifies massively as you dwell
+                const diffGlow = 80 + dwellP * 280;
+                const diffGlowOpacity = 0.3 + dwellP * 0.55;
 
                 return (
                   <div
                     style={{
                       padding: "0 48px",
-                      maxWidth: 1000,
+                      maxWidth: 1100,
                       width: "100%",
                       position: "relative",
                       zIndex: 1,
@@ -3416,12 +3344,12 @@ export default function TTSSite() {
                       transform: `translateY(${contentDrift}px)`,
                     }}
                   >
-                    {/* Eyebrow */}
+                    {/* Eyebrow — rockets up from far below */}
                     <div
                       style={{
                         opacity: eyebrowP,
-                        transform: `translateY(${(1 - eyebrowP) * 24 + eyebrowDrift}px)`,
-                        marginBottom: 32,
+                        transform: `translateY(${(1 - eyebrowP) * 100 + eyebrowDrift}px) scale(${0.7 + eyebrowP * 0.3})`,
+                        marginBottom: 36,
                       }}
                     >
                       <span
@@ -3454,33 +3382,32 @@ export default function TTSSite() {
                       </span>
                     </div>
 
-                    {/* "Walk in." — springs in, drifts up on dwell */}
+                    {/* "Walk in." — springs from below, vanishes aggressively on dwell */}
                     <p
                       style={{
-                        opacity: walkInP * (1 - dwellP * 0.4),
-                        transform: `translateY(${(1 - walkInP) * -32 + walkInDrift}px) scale(${0.88 + walkInP * 0.12})`,
+                        opacity: walkInP * (1 - dwellP * 0.85),
+                        transform: `translateY(${(1 - walkInP) * 120 + walkInDrift}px) scale(${0.65 + walkInP * 0.35})`,
                         fontSize: "clamp(22px, 3vw, 38px)",
                         fontWeight: 700,
                         color: "rgba(255,255,255,0.55)",
                         letterSpacing: "-0.02em",
-                        marginBottom: 16,
+                        marginBottom: 20,
                         lineHeight: 1,
                       }}
                     >
                       Walk in.
                     </p>
 
-                    {/* Red divider — draws from center outward */}
+                    {/* Red divider — draws from center outward, thicker glow */}
                     <div
                       style={{
                         position: "relative",
-                        height: 2,
-                        margin: "0 auto 20px",
+                        height: 3,
+                        margin: "0 auto 28px",
                         width: "100%",
                         overflow: "hidden",
                       }}
                     >
-                      {/* Left half */}
                       <div
                         style={{
                           position: "absolute",
@@ -3490,10 +3417,9 @@ export default function TTSSite() {
                           width: `${dividerP * 50}%`,
                           background:
                             "linear-gradient(90deg, transparent, #CC0000)",
-                          boxShadow: "0 0 12px rgba(204,0,0,0.6)",
+                          boxShadow: "0 0 24px rgba(204,0,0,0.9)",
                         }}
                       />
-                      {/* Right half */}
                       <div
                         style={{
                           position: "absolute",
@@ -3503,45 +3429,45 @@ export default function TTSSite() {
                           width: `${dividerP * 50}%`,
                           background:
                             "linear-gradient(90deg, #CC0000, transparent)",
-                          boxShadow: "0 0 12px rgba(204,0,0,0.6)",
+                          boxShadow: "0 0 24px rgba(204,0,0,0.9)",
                         }}
                       />
                     </div>
 
-                    {/* "Walk out different." — word-split entrance */}
+                    {/* "Walk out different." — dramatic word-split */}
                     <h2
                       style={{
-                        fontSize: "clamp(58px, 10vw, 130px)",
+                        fontSize: "clamp(64px, 12vw, 150px)",
                         fontWeight: 900,
                         letterSpacing: "-0.05em",
-                        lineHeight: 0.92,
-                        marginBottom: 40,
+                        lineHeight: 0.88,
+                        marginBottom: 48,
                         display: "flex",
                         flexWrap: "wrap",
                         justifyContent: "center",
-                        gap: "0.18em",
-                        overflow: "hidden",
+                        gap: "0.14em",
+                        overflow: "visible",
                       }}
                     >
-                      {/* "Walk out" slides in from left */}
+                      {/* "Walk out" — screams in from far left, rises from below */}
                       <span
                         style={{
                           color: "#fff",
-                          opacity: walkWordP,
+                          opacity: Math.min(1, walkWordP * 1.4),
                           display: "inline-block",
-                          transform: `translateX(${(1 - walkWordP) * -80}px) scale(${0.92 + walkWordP * 0.08})`,
+                          transform: `translateX(${(1 - walkWordP) * -400}px) translateY(${(1 - walkWordP) * 80}px) scale(${0.55 + walkWordP * 0.45})`,
                         }}
                       >
                         Walk out
                       </span>
-                      {/* "different." slides in from right with glow */}
+                      {/* "different." — slams in from far right, rises from below */}
                       <span
                         style={{
                           color: "#CC0000",
-                          opacity: diffWordP,
+                          opacity: Math.min(1, diffWordP * 1.4),
                           display: "inline-block",
-                          transform: `translateX(${(1 - diffWordP) * 80}px) scale(${0.92 + diffWordP * 0.08})`,
-                          textShadow: `0 0 ${diffGlow}px rgba(204,0,0,${0.25 + dwellP * 0.35})`,
+                          transform: `translateX(${(1 - diffWordP) * 400}px) translateY(${(1 - diffWordP) * 80}px) scale(${0.55 + diffWordP * 0.45})`,
+                          textShadow: `0 0 ${diffGlow}px rgba(204,0,0,${diffGlowOpacity})`,
                         }}
                       >
                         different.
@@ -3552,12 +3478,12 @@ export default function TTSSite() {
                     <p
                       style={{
                         opacity: subtitleP,
-                        transform: `translateY(${(1 - subtitleP) * 24}px)`,
-                        fontSize: 16,
+                        transform: `translateY(${(1 - subtitleP) * 60}px)`,
+                        fontSize: 17,
                         color: "#52525b",
                         lineHeight: 1.75,
-                        maxWidth: 480,
-                        margin: "0 auto 32px",
+                        maxWidth: 500,
+                        margin: "0 auto 36px",
                       }}
                     >
                       Most clubs gatekeep. TTS hands you the keys. One semester
@@ -4683,6 +4609,86 @@ export default function TTSSite() {
               rotate: 17,
               color: "rgba(255,255,255,0.10)",
             },
+            {
+              Icon: Network,
+              top: "15%",
+              left: "48%",
+              size: 50,
+              speed: "0.14",
+              speedx: "0.054",
+              rotate: -43,
+              color: "rgba(255,204,0,0.22)",
+            },
+            {
+              Icon: BarChart2,
+              bottom: "30%",
+              left: "48%",
+              size: 42,
+              speed: "0.10",
+              speedx: "-0.036",
+              rotate: 71,
+              color: "rgba(204,0,0,0.28)",
+            },
+            {
+              Icon: Medal,
+              top: "40%",
+              left: "6%",
+              size: 58,
+              speed: "0.14",
+              speedx: "0.054",
+              rotate: -27,
+              color: "rgba(255,204,0,0.35)",
+            },
+            {
+              Icon: Layers,
+              top: "70%",
+              right: "20%",
+              size: 44,
+              speed: "0.10",
+              speedx: "-0.036",
+              rotate: 53,
+              color: "rgba(255,255,255,0.12)",
+            },
+            {
+              Icon: Sparkles,
+              top: "8%",
+              left: "60%",
+              size: 34,
+              speed: "0.07",
+              speedx: "0.025",
+              rotate: -67,
+              color: "rgba(255,204,0,0.25)",
+            },
+            {
+              Icon: Target,
+              bottom: "10%",
+              left: "22%",
+              size: 46,
+              speed: "0.10",
+              speedx: "0.036",
+              rotate: 37,
+              color: "rgba(255,255,255,0.10)",
+            },
+            {
+              Icon: Flame,
+              top: "35%",
+              right: "46%",
+              size: 40,
+              speed: "0.07",
+              speedx: "-0.025",
+              rotate: -19,
+              color: "rgba(204,0,0,0.22)",
+            },
+            {
+              Icon: Crown,
+              top: "75%",
+              left: "58%",
+              size: 32,
+              speed: "0.04",
+              speedx: "0.018",
+              rotate: 79,
+              color: "rgba(255,204,0,0.20)",
+            },
           ].map(
             (
               {
@@ -5277,8 +5283,8 @@ export default function TTSSite() {
           </div>
         </section>
 
-        {/* Divider 4 — scan lines */}
-        <ScanLineDivider reverse topColor="#0c0c0f" bottomColor="#09090b" />
+        {/* Divider 4 — dot matrix */}
+        <DotRowDivider topColor="#0c0c0f" bottomColor="#09090b" />
 
         {/* ── FAQ ── */}
         <section
@@ -5687,8 +5693,8 @@ export default function TTSSite() {
           </div>
         </section>
 
-        {/* Divider 5 — dot matrix */}
-        <DotRowDivider topColor="#09090b" bottomColor="#0a0508" />
+        {/* Divider 5 — scan lines */}
+        <ScanLineDivider topColor="#09090b" bottomColor="#0a0508" />
 
         {/* ── JOIN — scroll-driven cinematic ── */}
         <section
