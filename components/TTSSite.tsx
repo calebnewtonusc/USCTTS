@@ -228,7 +228,7 @@ const CABINET: {
     initials: "GO",
     accent: "#CC0000",
     link: "https://www.linkedin.com/in/gabriel-oliveri/",
-    headshot: "/img/gabriel_shot.jpeg",
+    headshot: "/img/gabriel_shot.png",
     position: "center top",
   },
   {
