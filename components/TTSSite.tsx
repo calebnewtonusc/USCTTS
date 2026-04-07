@@ -938,10 +938,9 @@ export default function TTSSite() {
           alignItems: "center",
           overflow: "hidden",
           transform: `translateX(${(1 - trackExitProg) * 100}%)`,
-          // Fade out under the cover of Panel B sliding in (0.42→0.56).
-          // The switch is invisible because Panel B physically covers it.
-          opacity:
-            trackExitProg > 0 ? Math.max(0, (0.56 - revealProgress) / 0.14) : 0,
+          // Stay fully opaque until Panel B fully lands (revealProgress=0.56),
+          // then snap to 0 — Panel B covers the cut completely, zero double-content.
+          opacity: trackExitProg > 0 && revealProgress < 0.56 ? 1 : 0,
           pointerEvents: "none",
           willChange: "transform, opacity",
         }}
@@ -1112,61 +1111,72 @@ export default function TTSSite() {
                 stat: "Week 1",
                 label: "You ship something",
                 sub: "Building track members deploy a live product in the first session. Not the end of the semester.",
+                revealStart: 0.04,
               },
               {
                 stat: "Real",
                 label: "Client work every semester",
                 sub: "Live engagements with actual organizations. Consulting track delivers real decks.",
+                revealStart: 0.13,
               },
               {
                 stat: "Yours",
                 label: "Everything you build",
                 sub: "Goes on your resume. Never stays in a classroom.",
+                revealStart: 0.22,
               },
-            ].map(({ stat, label, sub }, i) => (
-              <div
-                key={label}
-                style={{
-                  padding: "28px 0",
-                  borderBottom:
-                    i < 2 ? "1px solid rgba(255,255,255,0.1)" : "none",
-                }}
-              >
+            ].map(({ stat, label, sub, revealStart }, i) => {
+              const itemP = Math.max(
+                0,
+                Math.min(1, (revealProgress - revealStart) / 0.09),
+              );
+              return (
                 <div
+                  key={label}
                   style={{
-                    fontSize: "clamp(40px, 5vw, 64px)",
-                    fontWeight: 900,
-                    color: "#fff",
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1,
-                    marginBottom: 6,
+                    padding: "28px 0",
+                    borderBottom:
+                      i < 2 ? "1px solid rgba(255,255,255,0.1)" : "none",
+                    opacity: itemP,
+                    transform: `translateY(${(1 - itemP) * 28}px)`,
                   }}
                 >
-                  {stat}
+                  <div
+                    style={{
+                      fontSize: "clamp(40px, 5vw, 64px)",
+                      fontWeight: 900,
+                      color: "#fff",
+                      letterSpacing: "-0.04em",
+                      lineHeight: 1,
+                      marginBottom: 6,
+                    }}
+                  >
+                    {stat}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: "#CC0000",
+                      marginBottom: 6,
+                      letterSpacing: "0.02em",
+                    }}
+                  >
+                    {label}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      color: "#71717a",
+                      lineHeight: 1.6,
+                      maxWidth: 320,
+                    }}
+                  >
+                    {sub}
+                  </div>
                 </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 700,
-                    color: "#CC0000",
-                    marginBottom: 6,
-                    letterSpacing: "0.02em",
-                  }}
-                >
-                  {label}
-                </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: "#71717a",
-                    lineHeight: 1.6,
-                    maxWidth: 320,
-                  }}
-                >
-                  {sub}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
