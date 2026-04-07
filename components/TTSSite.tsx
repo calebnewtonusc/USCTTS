@@ -3898,7 +3898,7 @@ export default function TTSSite() {
             height: "clamp(160vh, 200vh, 240vh)",
             position: "relative",
             background: "#0a0508",
-            overflow: "hidden",
+            overflow: "clip",
           }}
         >
           <div
