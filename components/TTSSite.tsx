@@ -241,6 +241,15 @@ const CABINET: {
     position: "center top",
   },
   {
+    name: "Sophie Chuang",
+    role: "Lead of Design",
+    initials: "SC",
+    accent: "#CC0000",
+    link: "https://www.linkedin.com/in/sophie-c-3147bb25b/",
+    headshot: "/img/sophie_shot.jpeg",
+    position: "center top",
+  },
+  {
     name: "Coming Soon",
     role: "TBD",
     initials: "?",
