@@ -3060,7 +3060,7 @@ export default function TTSSite() {
             >
               Questions? Reach either of them directly at{" "}
               <a
-                href="mailto:trojantechsolutions@gmail.com"
+                href="mailto:hello@usctts.com"
                 style={{ color: "#CC0000", textDecoration: "none" }}
               >
                 trojantechsolutions@gmail.com
@@ -4256,7 +4256,7 @@ export default function TTSSite() {
                     We&apos;re a real club with real people. Just reach out.
                   </div>
                   <a
-                    href="mailto:trojantechsolutions@gmail.com"
+                    href="mailto:hello@usctts.com"
                     style={{
                       display: "inline-flex",
                       alignItems: "center",

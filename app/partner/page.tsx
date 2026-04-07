@@ -256,7 +256,7 @@ export default function PartnerPage() {
         </div>
 
         <p style={{ fontSize: 12, color: "#3f3f46", letterSpacing: "0.02em" }}>
-          Spring 2026 · trojantechsolutions@gmail.com
+          Spring 2026 · hello@usctts.com
         </p>
       </div>
 
