@@ -759,6 +759,17 @@ export default function TTSSite() {
   );
   const wordsMorphing = heroProgress > 0.62;
   const heroContentShown = heroProgress > 0.76;
+  // Scale phase: heading grows from its slid position to fill the screen
+  const heroScaleProgress = Math.max(
+    0,
+    Math.min(1, (heroProgress - 0.82) / 0.18),
+  );
+  // Ease in-out for scale
+  const heroScaleEased =
+    heroScaleProgress < 0.5
+      ? 2 * heroScaleProgress * heroScaleProgress
+      : -1 + (4 - 2 * heroScaleProgress) * heroScaleProgress;
+  const heroScaleVal = 1 + heroScaleEased * 3.5;
   const h1WrapperW = h1WrapperRef.current?.offsetWidth ?? 0;
   const heroContainerW = heroContentRef.current?.clientWidth ?? 0;
   const slideX =
@@ -1338,11 +1349,13 @@ export default function TTSSite() {
                     right,
                     bottom,
                     color,
-                    opacity: Math.max(
-                      0.15,
-                      Math.min(1, heroSlideProgress * 3 + 0.15),
-                    ),
-                    transition: "opacity 0.4s ease",
+                    opacity:
+                      Math.max(
+                        0.15,
+                        Math.min(1, heroSlideProgress * 3 + 0.15),
+                      ) * Math.max(0, 1 - heroScaleProgress / 0.3),
+                    transition:
+                      heroScaleProgress > 0 ? "none" : "opacity 0.4s ease",
                   }}
                 >
                   <Icon size={size} />
@@ -1384,7 +1397,9 @@ export default function TTSSite() {
                 ref={h1WrapperRef}
                 style={{
                   display: "inline-block",
-                  transform: `translateX(${slideX}px)`,
+                  transform: `translateX(${slideX}px) scale(${heroScaleVal})`,
+                  transformOrigin: "right center",
+                  willChange: "transform",
                 }}
               >
                 {/* Morph h1 */}
@@ -1524,13 +1539,20 @@ export default function TTSSite() {
                   top: 0,
                   left: 40,
                   maxWidth: 480,
-                  opacity: heroContentShown ? 1 : 0,
+                  opacity: heroContentShown
+                    ? Math.max(0, 1 - heroScaleProgress / 0.25)
+                    : 0,
                   transform: heroContentShown
                     ? "translateY(0)"
                     : "translateY(20px)",
                   transition:
-                    "opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1)",
-                  pointerEvents: heroContentShown ? "auto" : "none",
+                    heroScaleProgress > 0
+                      ? "none"
+                      : "opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1)",
+                  pointerEvents:
+                    heroContentShown && heroScaleProgress < 0.1
+                      ? "auto"
+                      : "none",
                 }}
               >
                 <p
