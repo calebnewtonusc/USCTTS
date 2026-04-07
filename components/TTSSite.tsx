@@ -762,7 +762,7 @@ export default function TTSSite() {
   const revealSlide = revealProgress;
   // Panel A: slides in from RIGHT locked to tracks exit (same exitP = no gap)
   // then exits DOWN (0.42→0.56)
-  const panelRealWorkX = (1 - trackExitProg) * 100;
+
   const transP = Math.max(0, Math.min(1, (revealSlide - 0.42) / 0.14));
   const panelRealWorkY = transP * 100;
   const panelWalkInY = (-1 + transP) * 100;
@@ -905,6 +905,186 @@ export default function TTSSite() {
           zIndex: 9998,
         }}
       />
+
+      {/* Panel A fixed overlay — slides in from right as tracks exit, then crossfades to reveal Panel A */}
+      {trackExitProg > 0 && (
+        <div
+          aria-hidden="true"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 200,
+            background: "#0d0d10",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            overflow: "hidden",
+            transform: `translateX(${(1 - trackExitProg) * 100}%)`,
+            opacity: Math.max(0, 1 - revealProgress / 0.06),
+            pointerEvents: "none",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: "12%",
+              right: "5%",
+              color: "rgba(204,0,0,0.65)",
+              transform: "rotate(20deg)",
+              pointerEvents: "none",
+            }}
+          >
+            <Rocket size={80} />
+          </div>
+          <div
+            style={{
+              position: "absolute",
+              bottom: "18%",
+              left: "5%",
+              color: "rgba(255,255,255,0.40)",
+              transform: "rotate(-14deg)",
+              pointerEvents: "none",
+            }}
+          >
+            <GitBranch size={64} />
+          </div>
+          <div
+            style={{
+              position: "absolute",
+              top: "55%",
+              right: "5%",
+              color: "rgba(255,204,0,0.50)",
+              transform: "rotate(8deg)",
+              pointerEvents: "none",
+            }}
+          >
+            <Trophy size={52} />
+          </div>
+          <div
+            style={{
+              position: "absolute",
+              top: "25%",
+              left: "5%",
+              color: "rgba(255,255,255,0.28)",
+              transform: "rotate(30deg)",
+              pointerEvents: "none",
+            }}
+          >
+            <Globe size={44} />
+          </div>
+          <div
+            style={{
+              maxWidth: 1200,
+              width: "100%",
+              padding: "0 40px",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 80,
+              alignItems: "center",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            <div>
+              <p
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "#CC0000",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  marginBottom: 20,
+                }}
+              >
+                Why it works
+              </p>
+              <h2
+                style={{
+                  fontSize: "clamp(32px, 4vw, 60px)",
+                  fontWeight: 900,
+                  color: "#fff",
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1.0,
+                  marginBottom: 24,
+                }}
+              >
+                Real work.
+                <br />
+                <span style={{ color: "#CC0000" }}>
+                  Not{" "}
+                  <span
+                    style={{
+                      color: "transparent",
+                      WebkitTextStroke: "2px #fff",
+                    }}
+                  >
+                    just
+                  </span>{" "}
+                  classes.
+                </span>
+              </h2>
+              <p
+                style={{
+                  fontSize: 15,
+                  color: "#71717a",
+                  lineHeight: 1.8,
+                  maxWidth: 400,
+                }}
+              >
+                Build the portfolio and skills here, then use them to land SEP,
+                BTG, BPX, or whatever comes next. TTS is the rep room those
+                clubs assume you already have.
+              </p>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 0,
+                borderLeft: "1px solid rgba(255,255,255,0.12)",
+                paddingLeft: 48,
+              }}
+            >
+              {[
+                { stat: "Week 1", label: "You ship something" },
+                { stat: "Real", label: "Client work every semester" },
+                { stat: "Yours", label: "Everything you build" },
+              ].map(({ stat, label }, i) => (
+                <div
+                  key={label}
+                  style={{
+                    padding: "28px 0",
+                    borderBottom:
+                      i < 2 ? "1px solid rgba(255,255,255,0.1)" : "none",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "clamp(40px, 5vw, 64px)",
+                      fontWeight: 900,
+                      color: "#fff",
+                      letterSpacing: "-0.04em",
+                      lineHeight: 1,
+                      marginBottom: 6,
+                    }}
+                  >
+                    {stat}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: "#d4d4d8",
+                    }}
+                  >
+                    {label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div
         className="tts-main"
@@ -2018,189 +2198,6 @@ export default function TTSSite() {
                 ),
               )}
             </div>
-
-            {/* Panel A proxy — sits at left:100% of the sticky container so it slides into view as trackStickyRef translates left.
-                Crossfades out in the last 15% of exit so the real Panel A takes over seamlessly. */}
-            <div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                left: "100%",
-                top: 0,
-                width: "100%",
-                height: "100%",
-                background: "#0d0d10",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                overflow: "hidden",
-                opacity: Math.max(
-                  0,
-                  1 - Math.max(0, (trackExitProg - 0.85) / 0.15),
-                ),
-                pointerEvents: "none",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  top: "12%",
-                  right: "5%",
-                  color: "rgba(204,0,0,0.65)",
-                  transform: "rotate(20deg)",
-                  pointerEvents: "none",
-                }}
-              >
-                <Rocket size={80} />
-              </div>
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "18%",
-                  left: "5%",
-                  color: "rgba(255,255,255,0.40)",
-                  transform: "rotate(-14deg)",
-                  pointerEvents: "none",
-                }}
-              >
-                <GitBranch size={64} />
-              </div>
-              <div
-                style={{
-                  position: "absolute",
-                  top: "55%",
-                  right: "5%",
-                  color: "rgba(255,204,0,0.50)",
-                  transform: "rotate(8deg)",
-                  pointerEvents: "none",
-                }}
-              >
-                <Trophy size={52} />
-              </div>
-              <div
-                style={{
-                  position: "absolute",
-                  top: "25%",
-                  left: "5%",
-                  color: "rgba(255,255,255,0.28)",
-                  transform: "rotate(30deg)",
-                  pointerEvents: "none",
-                }}
-              >
-                <Globe size={44} />
-              </div>
-              <div
-                style={{
-                  maxWidth: 1200,
-                  width: "100%",
-                  padding: "0 40px",
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 80,
-                  alignItems: "center",
-                  position: "relative",
-                  zIndex: 1,
-                }}
-              >
-                <div>
-                  <p
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: "#CC0000",
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      marginBottom: 20,
-                    }}
-                  >
-                    Why it works
-                  </p>
-                  <h2
-                    style={{
-                      fontSize: "clamp(32px, 4vw, 60px)",
-                      fontWeight: 900,
-                      color: "#fff",
-                      letterSpacing: "-0.03em",
-                      lineHeight: 1.0,
-                      marginBottom: 24,
-                    }}
-                  >
-                    Real work.
-                    <br />
-                    <span style={{ color: "#CC0000" }}>
-                      Not{" "}
-                      <span
-                        style={{
-                          color: "transparent",
-                          WebkitTextStroke: "2px #fff",
-                        }}
-                      >
-                        just
-                      </span>{" "}
-                      classes.
-                    </span>
-                  </h2>
-                  <p
-                    style={{
-                      fontSize: 15,
-                      color: "#71717a",
-                      lineHeight: 1.8,
-                      maxWidth: 400,
-                    }}
-                  >
-                    Build the portfolio and skills here, then use them to land
-                    SEP, BTG, BPX, or whatever comes next. TTS is the rep room
-                    those clubs assume you already have.
-                  </p>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 0,
-                    borderLeft: "1px solid rgba(255,255,255,0.12)",
-                    paddingLeft: 48,
-                  }}
-                >
-                  {[
-                    { stat: "Week 1", label: "You ship something" },
-                    { stat: "Real", label: "Client work every semester" },
-                    { stat: "Yours", label: "Everything you build" },
-                  ].map(({ stat, label }, i) => (
-                    <div
-                      key={label}
-                      style={{
-                        padding: "28px 0",
-                        borderBottom:
-                          i < 2 ? "1px solid rgba(255,255,255,0.1)" : "none",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "clamp(40px, 5vw, 64px)",
-                          fontWeight: 900,
-                          color: "#fff",
-                          letterSpacing: "-0.04em",
-                          lineHeight: 1,
-                          marginBottom: 6,
-                        }}
-                      >
-                        {stat}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 600,
-                          color: "#d4d4d8",
-                        }}
-                      >
-                        {label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -2217,7 +2214,7 @@ export default function TTSSite() {
               overflow: "hidden",
             }}
           >
-            {/* Panel A: "Real work" — proxy handles slide-in, this fades in after proxy crossfades out */}
+            {/* Panel A: "Real work" — fixed overlay handles slide-in, this crossfades in as overlay fades out */}
             <div
               style={{
                 position: "absolute",
@@ -2226,7 +2223,7 @@ export default function TTSSite() {
                 display: "flex",
                 alignItems: "center",
                 transform: `translateY(${panelRealWorkY}%)`,
-                opacity: Math.max(0, (trackExitProg - 0.85) / 0.15),
+                opacity: Math.min(1, revealProgress / 0.06),
                 zIndex: 1,
                 overflow: "hidden",
               }}
