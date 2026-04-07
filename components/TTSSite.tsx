@@ -3100,17 +3100,9 @@ export default function TTSSite() {
                       alignItems: "center",
                     }}
                   >
-                    {/* Left column waits until overlay is fully gone (0.46) before appearing.
-                        Right-side stats are visible through the fading overlay; left side only
-                        appears after overlay opacity reaches 0, eliminating all ghost overlap. */}
-                    <div
-                      style={{
-                        opacity: Math.max(
-                          0,
-                          Math.min(1, (revealProgress - 0.46) / 0.1),
-                        ),
-                      }}
-                    >
+                    {/* Left column always at full opacity — overlay left column is
+                        pixel-identical (same grid), so the overlay fade is invisible. */}
+                    <div>
                       <p
                         style={{
                           fontSize: 12,
@@ -4540,7 +4532,8 @@ export default function TTSSite() {
             position: "relative",
             height: 220,
             marginTop: -200,
-            background: "transparent",
+            background:
+              "linear-gradient(to bottom, #09090b 0%, #0b0b0e 50%, #0c0c0f 100%)",
             overflow: "visible",
             flexShrink: 0,
           }}
