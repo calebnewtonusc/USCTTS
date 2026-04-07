@@ -958,13 +958,10 @@ export default function TTSSite() {
         setJoinScrollProg(Math.max(0, Math.min(1, scrolled / maxScroll)));
       }
       if (missionSectionRef.current) {
-        const rect = missionSectionRef.current.getBoundingClientRect();
-        // 0 when section top at viewport bottom, 1 when ~70% of section has entered
-        const p = Math.max(
-          0,
-          Math.min(1, (winH - rect.top) / (rect.height * 0.65)),
-        );
-        setMissionProgress(p);
+        const sect = missionSectionRef.current;
+        const scrolled = scrollY - sect.offsetTop;
+        const maxScroll = sect.offsetHeight - winH;
+        setMissionProgress(Math.max(0, Math.min(1, scrolled / maxScroll)));
       }
       const docH = document.documentElement.scrollHeight;
       const nearBottom = scrollY + winH >= docH - 160;
@@ -1484,152 +1481,184 @@ export default function TTSSite() {
             </div>
           ),
         )}
-        <div
-          className="tts-panel-b-grid tts-panel-b-inner"
-          style={{
-            maxWidth: 1200,
-            margin: "0 auto",
-            width: "100%",
-            padding: "0 40px",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 80,
-            alignItems: "center",
-          }}
-        >
-          <div>
-            <p
+        {(() => {
+          const drawP = Math.max(
+            0,
+            Math.min(1, (revealProgress - 0.02) / 0.12),
+          );
+          const eraseP = Math.max(
+            0,
+            Math.min(1, (revealProgress - 0.22) / 0.12),
+          );
+          const ulScale = eraseP > 0 ? 1 - eraseP : drawP;
+          const ulOrigin = eraseP > 0 ? "right" : "left";
+          return (
+            <div
+              className="tts-panel-b-grid tts-panel-b-inner"
               style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color: "#CC0000",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                marginBottom: 20,
+                maxWidth: 1400,
+                margin: "0 auto",
+                width: "100%",
+                padding: "0 80px",
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 100,
+                alignItems: "center",
               }}
             >
-              Why it works
-            </p>
-            <h2
-              style={{
-                fontSize: "clamp(32px, 4vw, 60px)",
-                fontWeight: 900,
-                color: "#fff",
-                letterSpacing: "-0.03em",
-                lineHeight: 1.0,
-                marginBottom: 24,
-              }}
-            >
-              Real work.
-              <br />
-              <span style={{ color: "#CC0000" }}>
-                Not{" "}
-                <span
+              <div>
+                <p
                   style={{
-                    color: "transparent",
-                    WebkitTextStroke: "2px #fff",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#CC0000",
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    marginBottom: 24,
                   }}
                 >
-                  just
-                </span>{" "}
-                classes.
-              </span>
-            </h2>
-            <p
-              style={{
-                fontSize: 15,
-                color: "#71717a",
-                lineHeight: 1.8,
-                maxWidth: 400,
-              }}
-            >
-              Build the portfolio and skills here, then use them to land SEP,
-              BTG, BPX, or whatever comes next. TTS is the rep room those clubs
-              assume you already have.
-            </p>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 0,
-              borderLeft: "1px solid rgba(255,255,255,0.12)",
-              paddingLeft: 48,
-            }}
-          >
-            {[
-              {
-                stat: "Week 1",
-                label: "You ship something",
-                sub: "Building track members deploy a live product in the first session. Not the end of the semester.",
-                revealStart: 0.04,
-              },
-              {
-                stat: "Real",
-                label: "Client work every semester",
-                sub: "Live engagements with actual organizations. Consulting track delivers real decks.",
-                revealStart: 0.13,
-              },
-              {
-                stat: "Yours",
-                label: "Everything you build",
-                sub: "Goes on your resume. Never stays in a classroom.",
-                revealStart: 0.22,
-              },
-            ].map(({ stat, label, sub, revealStart }, i) => {
-              const itemP = Math.max(
-                0,
-                Math.min(1, (revealProgress - revealStart) / 0.09),
-              );
-              return (
-                <div
-                  key={label}
+                  Why it works
+                </p>
+                <h2
                   style={{
-                    padding: "28px 0",
-                    borderBottom:
-                      i < 2 ? "1px solid rgba(255,255,255,0.1)" : "none",
-                    opacity: itemP,
-                    transform: `translateY(${(1 - itemP) * 28}px)`,
+                    fontSize: "clamp(48px, 6vw, 88px)",
+                    fontWeight: 900,
+                    color: "#fff",
+                    letterSpacing: "-0.03em",
+                    lineHeight: 1.0,
+                    marginBottom: 32,
                   }}
                 >
-                  <div
-                    style={{
-                      fontSize: "clamp(40px, 5vw, 64px)",
-                      fontWeight: 900,
-                      color: "#fff",
-                      letterSpacing: "-0.04em",
-                      lineHeight: 1,
-                      marginBottom: 6,
-                    }}
-                  >
-                    {stat}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: "#CC0000",
-                      marginBottom: 6,
-                      letterSpacing: "0.02em",
-                    }}
-                  >
-                    {label}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 13,
-                      color: "#71717a",
-                      lineHeight: 1.6,
-                      maxWidth: 320,
-                    }}
-                  >
-                    {sub}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                  Real work.
+                  <br />
+                  <span style={{ color: "#CC0000" }}>
+                    <span
+                      style={{ position: "relative", display: "inline-block" }}
+                    >
+                      Not
+                      <span
+                        style={{
+                          position: "absolute",
+                          bottom: -4,
+                          left: 0,
+                          right: 0,
+                          height: 4,
+                          background: "#CC0000",
+                          boxShadow: "0 0 10px rgba(204,0,0,0.7)",
+                          borderRadius: 2,
+                          transformOrigin: ulOrigin,
+                          transform: `scaleX(${ulScale})`,
+                        }}
+                      />
+                    </span>{" "}
+                    <span
+                      style={{
+                        color: "transparent",
+                        WebkitTextStroke: "2px #fff",
+                      }}
+                    >
+                      just
+                    </span>{" "}
+                    classes.
+                  </span>
+                </h2>
+                <p
+                  style={{
+                    fontSize: 18,
+                    color: "#71717a",
+                    lineHeight: 1.8,
+                    maxWidth: 480,
+                  }}
+                >
+                  Build the portfolio and skills here, then use them to land
+                  SEP, BTG, BPX, or whatever comes next. TTS is the rep room
+                  those clubs assume you already have.
+                </p>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 0,
+                  borderLeft: "1px solid rgba(255,255,255,0.12)",
+                  paddingLeft: 56,
+                }}
+              >
+                {[
+                  {
+                    stat: "Week 1",
+                    label: "You ship something",
+                    sub: "Building track members deploy a live product in the first session. Not the end of the semester.",
+                    revealStart: 0.36,
+                  },
+                  {
+                    stat: "Real",
+                    label: "Client work every semester",
+                    sub: "Live engagements with actual organizations. Consulting track delivers real decks.",
+                    revealStart: 0.39,
+                  },
+                  {
+                    stat: "Yours",
+                    label: "Everything you build",
+                    sub: "Goes on your resume. Never stays in a classroom.",
+                    revealStart: 0.42,
+                  },
+                ].map(({ stat, label, sub, revealStart }, i) => {
+                  const itemP = Math.max(
+                    0,
+                    Math.min(1, (revealProgress - revealStart) / 0.09),
+                  );
+                  return (
+                    <div
+                      key={label}
+                      style={{
+                        padding: "32px 0",
+                        borderBottom:
+                          i < 2 ? "1px solid rgba(255,255,255,0.1)" : "none",
+                        opacity: itemP,
+                        transform: `translateY(${(1 - itemP) * 28}px)`,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "clamp(56px, 7vw, 100px)",
+                          fontWeight: 900,
+                          color: "#fff",
+                          letterSpacing: "-0.04em",
+                          lineHeight: 1,
+                          marginBottom: 8,
+                        }}
+                      >
+                        {stat}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 700,
+                          color: "#CC0000",
+                          marginBottom: 8,
+                          letterSpacing: "0.02em",
+                        }}
+                      >
+                        {label}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 15,
+                          color: "#71717a",
+                          lineHeight: 1.6,
+                          maxWidth: 360,
+                        }}
+                      >
+                        {sub}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       <div
@@ -1681,8 +1710,8 @@ export default function TTSSite() {
                 top: "8%",
                 left: "5%",
                 size: 120,
-                speed: "0.20",
-                speedx: "0.07",
+                speed: "0.28",
+                speedx: "0.126",
                 rotate: -12,
                 color: "#CC0000",
               },
@@ -1691,8 +1720,8 @@ export default function TTSSite() {
                 top: "30%",
                 right: "5%",
                 size: 100,
-                speed: "0.20",
-                speedx: "-0.07",
+                speed: "0.28",
+                speedx: "-0.126",
                 rotate: -25,
                 color: "#FFCC00",
               },
@@ -1701,8 +1730,8 @@ export default function TTSSite() {
                 bottom: "8%",
                 left: "12%",
                 size: 90,
-                speed: "0.20",
-                speedx: "0.06",
+                speed: "0.28",
+                speedx: "0.108",
                 rotate: -10,
                 color: "#CC0000",
               },
@@ -1712,8 +1741,8 @@ export default function TTSSite() {
                 top: "12%",
                 right: "8%",
                 size: 70,
-                speed: "0.14",
-                speedx: "-0.04",
+                speed: "0.20",
+                speedx: "-0.072",
                 rotate: 14,
                 color: "rgba(255,255,255,0.65)",
               },
@@ -1722,8 +1751,8 @@ export default function TTSSite() {
                 bottom: "22%",
                 left: "7%",
                 size: 65,
-                speed: "0.10",
-                speedx: "0.04",
+                speed: "0.14",
+                speedx: "0.072",
                 rotate: 8,
                 color: "rgba(255,204,0,0.7)",
               },
@@ -1732,8 +1761,8 @@ export default function TTSSite() {
                 bottom: "12%",
                 right: "10%",
                 size: 60,
-                speed: "0.10",
-                speedx: "-0.03",
+                speed: "0.14",
+                speedx: "-0.054",
                 rotate: 20,
                 color: "rgba(255,255,255,0.55)",
               },
@@ -1743,8 +1772,8 @@ export default function TTSSite() {
                 top: "52%",
                 right: "5%",
                 size: 40,
-                speed: "0.07",
-                speedx: "-0.03",
+                speed: "0.10",
+                speedx: "-0.054",
                 rotate: -6,
                 color: "rgba(204,0,0,0.45)",
               },
@@ -1753,8 +1782,8 @@ export default function TTSSite() {
                 top: "35%",
                 left: "5%",
                 size: 35,
-                speed: "0.07",
-                speedx: "0.03",
+                speed: "0.10",
+                speedx: "0.054",
                 rotate: 30,
                 color: "rgba(255,255,255,0.25)",
               },
@@ -1763,8 +1792,8 @@ export default function TTSSite() {
                 top: "68%",
                 left: "5%",
                 size: 30,
-                speed: "0.04",
-                speedx: "-0.01",
+                speed: "0.06",
+                speedx: "-0.018",
                 rotate: -18,
                 color: "rgba(255,204,0,0.35)",
               },
@@ -1773,8 +1802,8 @@ export default function TTSSite() {
                 bottom: "40%",
                 right: "5%",
                 size: 28,
-                speed: "0.04",
-                speedx: "0.01",
+                speed: "0.06",
+                speedx: "0.018",
                 rotate: 15,
                 color: "rgba(255,255,255,0.2)",
               },
@@ -1784,8 +1813,8 @@ export default function TTSSite() {
                 top: "22%",
                 left: "6%",
                 size: 36,
-                speed: "0.07",
-                speedx: "0.03",
+                speed: "0.10",
+                speedx: "0.054",
                 rotate: -8,
                 color: "rgba(204,0,0,0.38)",
               },
@@ -1794,8 +1823,8 @@ export default function TTSSite() {
                 bottom: "30%",
                 right: "7%",
                 size: 32,
-                speed: "0.07",
-                speedx: "-0.03",
+                speed: "0.10",
+                speedx: "-0.054",
                 rotate: 12,
                 color: "rgba(255,255,255,0.22)",
               },
@@ -1804,8 +1833,8 @@ export default function TTSSite() {
                 top: "18%",
                 right: "12%",
                 size: 34,
-                speed: "0.04",
-                speedx: "-0.01",
+                speed: "0.06",
+                speedx: "-0.018",
                 rotate: -5,
                 color: "rgba(99,102,241,0.35)",
               },
@@ -1814,8 +1843,8 @@ export default function TTSSite() {
                 top: "78%",
                 right: "6%",
                 size: 28,
-                speed: "0.04",
-                speedx: "-0.01",
+                speed: "0.06",
+                speedx: "-0.018",
                 rotate: 20,
                 color: "rgba(255,204,0,0.28)",
               },
@@ -2246,323 +2275,336 @@ export default function TTSSite() {
         <section
           ref={missionSectionRef}
           id="mission"
-          className="tts-section-pad"
           style={{
             background: "#0c0c0f",
-            padding: "130px 40px 160px",
+            height: "220vh",
             position: "relative",
-            overflow: "visible",
+            overflow: "clip",
           }}
         >
-          {/* Mission entrance flash */}
-          {missionActive && (
-            <div className="tts-mission-flash" aria-hidden="true" />
-          )}
+          <div
+            style={{
+              position: "sticky",
+              top: 0,
+              height: "100vh",
+              padding: "0 40px",
+              display: "flex",
+              alignItems: "center",
+              overflow: "visible",
+            }}
+          >
+            {/* Mission entrance flash */}
+            {missionActive && (
+              <div className="tts-mission-flash" aria-hidden="true" />
+            )}
 
-          {/* Floating parallax icons — mission section (3 depth layers) */}
-          {[
-            // FOREGROUND — large, natural parallax
-            {
-              Icon: Lightbulb,
-              top: "10%",
-              right: "5%",
-              size: 110,
-              speed: "0.20",
-              speedx: "-0.07",
-              rotate: -8,
-              color: "#FFCC00",
-            },
-            {
-              Icon: Compass,
-              bottom: "14%",
-              left: "5%",
-              size: 95,
-              speed: "0.20",
-              speedx: "0.06",
-              rotate: -14,
-              color: "#CC0000",
-            },
-            // MIDGROUND — medium icons
-            {
-              Icon: BookOpen,
-              top: "8%",
-              left: "5%",
-              size: 68,
-              speed: "0.14",
-              speedx: "0.04",
-              rotate: 12,
-              color: "rgba(255,255,255,0.6)",
-            },
-            {
-              Icon: Target,
-              bottom: "18%",
-              right: "5%",
-              size: 62,
-              speed: "0.10",
-              speedx: "-0.03",
-              rotate: 20,
-              color: "rgba(255,255,255,0.5)",
-            },
-            {
-              Icon: Network,
-              top: "55%",
-              right: "5%",
-              size: 58,
-              speed: "0.10",
-              speedx: "-0.03",
-              rotate: 18,
-              color: "rgba(255,204,0,0.65)",
-            },
-            // BACKGROUND — small icons
-            {
-              Icon: Globe,
-              top: "48%",
-              left: "5%",
-              size: 38,
-              speed: "0.07",
-              speedx: "0.03",
-              rotate: 6,
-              color: "rgba(255,255,255,0.22)",
-            },
-            {
-              Icon: Zap,
-              top: "28%",
-              right: "5%",
-              size: 32,
-              speed: "0.04",
-              speedx: "-0.01",
-              rotate: -22,
-              color: "rgba(204,0,0,0.35)",
-            },
-            // Additional mission icons
-            {
-              Icon: GraduationCap,
-              top: "15%",
-              left: "8%",
-              size: 44,
-              speed: "0.10",
-              speedx: "0.04",
-              rotate: -14,
-              color: "rgba(255,204,0,0.45)",
-            },
-            {
-              Icon: Heart,
-              bottom: "25%",
-              right: "8%",
-              size: 36,
-              speed: "0.07",
-              speedx: "-0.03",
-              rotate: 8,
-              color: "rgba(204,0,0,0.42)",
-            },
-            {
-              Icon: MapPin,
-              top: "70%",
-              right: "6%",
-              size: 30,
-              speed: "0.04",
-              speedx: "-0.01",
-              rotate: 10,
-              color: "rgba(255,255,255,0.22)",
-            },
-          ].map(
-            (
+            {/* Floating parallax icons — mission section (3 depth layers) */}
+            {[
+              // FOREGROUND — large, natural parallax
               {
-                Icon,
-                top,
-                left,
-                right,
-                bottom,
-                size,
-                speed,
-                speedx,
-                rotate,
-                color,
+                Icon: Lightbulb,
+                top: "10%",
+                right: "5%",
+                size: 110,
+                speed: "0.28",
+                speedx: "-0.126",
+                rotate: -8,
+                color: "#FFCC00",
               },
-              idx,
-            ) => (
-              <div
-                key={`mission-float-${idx}`}
-                ref={(el) => {
-                  if (el) floatRefs.current[idx + 60] = el;
-                }}
-                className="tts-float-icon"
-                data-speed={speed}
-                data-speedx={speedx}
-                data-rotate={rotate}
-                aria-hidden="true"
-                style={{ top, left, right, bottom, color }}
-              >
-                <Icon size={size} />
-              </div>
-            ),
-          )}
-
-          {/* Scroll-driven stagger — each element reveals at a different threshold */}
-          {(() => {
-            const mP = missionProgress;
-            const ease = (t: number) =>
-              t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-            const clamp = (v: number, s: number, len: number) =>
-              ease(Math.max(0, Math.min(1, (v - s) / len)));
-            const h1P = clamp(mP, 0, 0.22);
-            const h2P = clamp(mP, 0.14, 0.22);
-            const p1P = clamp(mP, 0.3, 0.22);
-            const p2P = clamp(mP, 0.48, 0.22);
-            const quoteP = clamp(mP, 0.38, 0.26);
-            const badgesP = clamp(mP, 0.64, 0.22);
-            const fadeStyle = (p: number, extraY = 32) => ({
-              opacity: p,
-              transform: `translateY(${(1 - p) * extraY}px)`,
-            });
-            return (
-              <div
-                className="tts-mission-grid"
-                style={{
-                  maxWidth: 1200,
-                  margin: "0 auto",
-                  display: "grid",
-                  gridTemplateColumns: "55fr 45fr",
-                  gap: 80,
-                  alignItems: "start",
-                }}
-              >
-                {/* Left column */}
-                <div>
-                  <h2
-                    style={{
-                      fontSize: "clamp(42px, 5.5vw, 76px)",
-                      fontWeight: 900,
-                      color: "#fff",
-                      letterSpacing: "-0.04em",
-                      lineHeight: 1.05,
-                      marginBottom: 40,
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div style={{ ...fadeStyle(h1P, 24), display: "block" }}>
-                      The club that
-                    </div>
-                    <div
-                      style={{
-                        ...fadeStyle(h2P, 28),
-                        display: "block",
-                        color: "#CC0000",
-                      }}
-                    >
-                      actually lets you in.
-                    </div>
-                  </h2>
-                  <p
-                    style={{
-                      ...fadeStyle(p1P),
-                      fontSize: 19,
-                      color: "#d4d4d8",
-                      lineHeight: 1.8,
-                      marginBottom: 20,
-                    }}
-                  >
-                    SEP, BTG, BPX: great clubs. All have applications,
-                    waitlists, and cuts. TTS has{" "}
-                    <span className="tts-highlight">none of that</span>. Walk in
-                    any week. No application, no interview, no rejection email.
-                  </p>
-                  <p
-                    style={{
-                      ...fadeStyle(p2P),
-                      fontSize: 19,
-                      color: "#d4d4d8",
-                      lineHeight: 1.8,
-                      marginBottom: 0,
-                    }}
-                  >
-                    We run tracks across consulting, engineering, biotech, music
-                    tech, and Web3. AI is reshaping every field, not just
-                    software. Show up once and get value. Or join four project
-                    teams and go deep. Both work.
-                  </p>
-                </div>
-
-                {/* Right column */}
+              {
+                Icon: Compass,
+                bottom: "14%",
+                left: "5%",
+                size: 95,
+                speed: "0.28",
+                speedx: "0.108",
+                rotate: -14,
+                color: "#CC0000",
+              },
+              // MIDGROUND — medium icons
+              {
+                Icon: BookOpen,
+                top: "8%",
+                left: "5%",
+                size: 68,
+                speed: "0.20",
+                speedx: "0.072",
+                rotate: 12,
+                color: "rgba(255,255,255,0.6)",
+              },
+              {
+                Icon: Target,
+                bottom: "18%",
+                right: "5%",
+                size: 62,
+                speed: "0.14",
+                speedx: "-0.054",
+                rotate: 20,
+                color: "rgba(255,255,255,0.5)",
+              },
+              {
+                Icon: Network,
+                top: "55%",
+                right: "5%",
+                size: 58,
+                speed: "0.14",
+                speedx: "-0.054",
+                rotate: 18,
+                color: "rgba(255,204,0,0.65)",
+              },
+              // BACKGROUND — small icons
+              {
+                Icon: Globe,
+                top: "48%",
+                left: "5%",
+                size: 38,
+                speed: "0.10",
+                speedx: "0.054",
+                rotate: 6,
+                color: "rgba(255,255,255,0.22)",
+              },
+              {
+                Icon: Zap,
+                top: "28%",
+                right: "5%",
+                size: 32,
+                speed: "0.06",
+                speedx: "-0.018",
+                rotate: -22,
+                color: "rgba(204,0,0,0.35)",
+              },
+              // Additional mission icons
+              {
+                Icon: GraduationCap,
+                top: "15%",
+                left: "8%",
+                size: 44,
+                speed: "0.14",
+                speedx: "0.072",
+                rotate: -14,
+                color: "rgba(255,204,0,0.45)",
+              },
+              {
+                Icon: Heart,
+                bottom: "25%",
+                right: "8%",
+                size: 36,
+                speed: "0.10",
+                speedx: "-0.054",
+                rotate: 8,
+                color: "rgba(204,0,0,0.42)",
+              },
+              {
+                Icon: MapPin,
+                top: "70%",
+                right: "6%",
+                size: 30,
+                speed: "0.06",
+                speedx: "-0.018",
+                rotate: 10,
+                color: "rgba(255,255,255,0.22)",
+              },
+            ].map(
+              (
+                {
+                  Icon,
+                  top,
+                  left,
+                  right,
+                  bottom,
+                  size,
+                  speed,
+                  speedx,
+                  rotate,
+                  color,
+                },
+                idx,
+              ) => (
                 <div
+                  key={`mission-float-${idx}`}
+                  ref={(el) => {
+                    if (el) floatRefs.current[idx + 60] = el;
+                  }}
+                  className="tts-float-icon"
+                  data-speed={speed}
+                  data-speedx={speedx}
+                  data-rotate={rotate}
+                  aria-hidden="true"
+                  style={{ top, left, right, bottom, color }}
+                >
+                  <Icon size={size} />
+                </div>
+              ),
+            )}
+
+            {/* Scroll-driven stagger — each element reveals at a different threshold */}
+            {(() => {
+              const mP = missionProgress;
+              const ease = (t: number) =>
+                t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+              const clamp = (v: number, s: number, len: number) =>
+                ease(Math.max(0, Math.min(1, (v - s) / len)));
+              const h1P = clamp(mP, 0, 0.22);
+              const h2P = clamp(mP, 0.14, 0.22);
+              const p1P = clamp(mP, 0.3, 0.22);
+              const p2P = clamp(mP, 0.48, 0.22);
+              const quoteP = clamp(mP, 0.38, 0.26);
+              const badgesP = clamp(mP, 0.64, 0.22);
+              const fadeStyle = (p: number, extraY = 32) => ({
+                opacity: p,
+                transform: `translateY(${(1 - p) * extraY}px)`,
+              });
+              return (
+                <div
+                  className="tts-mission-grid"
                   style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 20,
+                    maxWidth: 1200,
+                    margin: "0 auto",
+                    display: "grid",
+                    gridTemplateColumns: "55fr 45fr",
+                    gap: 80,
+                    alignItems: "start",
                   }}
                 >
-                  <div
-                    style={{
-                      ...fadeStyle(quoteP),
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      borderRadius: 20,
-                      padding: 32,
-                    }}
-                  >
-                    <div
+                  {/* Left column */}
+                  <div>
+                    <h2
                       style={{
-                        fontSize: 64,
-                        color: "#CC0000",
-                        lineHeight: 0.8,
-                        fontFamily: "Georgia, serif",
+                        fontSize: "clamp(42px, 5.5vw, 76px)",
                         fontWeight: 900,
-                        marginBottom: 16,
-                        userSelect: "none",
+                        color: "#fff",
+                        letterSpacing: "-0.04em",
+                        lineHeight: 1.05,
+                        marginBottom: 40,
+                        overflow: "hidden",
                       }}
                     >
-                      &ldquo;
-                    </div>
+                      <div style={{ ...fadeStyle(h1P, 24), display: "block" }}>
+                        The club that
+                      </div>
+                      <div
+                        style={{
+                          ...fadeStyle(h2P, 28),
+                          display: "block",
+                          color: "#CC0000",
+                        }}
+                      >
+                        actually lets you in.
+                      </div>
+                    </h2>
                     <p
                       style={{
-                        fontSize: 18,
-                        fontStyle: "italic",
+                        ...fadeStyle(p1P),
+                        fontSize: 19,
                         color: "#d4d4d8",
-                        lineHeight: 1.7,
-                        margin: 0,
+                        lineHeight: 1.8,
+                        marginBottom: 20,
                       }}
                     >
-                      Think the international student who can&apos;t land an
-                      interview. Or the pre-med with no idea how AI is reshaping
-                      their field. We&apos;re here for that student, and
-                      building them into someone who lands their dream program.
+                      SEP, BTG, BPX: great clubs. All have applications,
+                      waitlists, and cuts. TTS has{" "}
+                      <span className="tts-highlight">none of that</span>. Walk
+                      in any week. No application, no interview, no rejection
+                      email.
+                    </p>
+                    <p
+                      style={{
+                        ...fadeStyle(p2P),
+                        fontSize: 19,
+                        color: "#d4d4d8",
+                        lineHeight: 1.8,
+                        marginBottom: 0,
+                      }}
+                    >
+                      We run tracks across consulting, engineering, biotech,
+                      music tech, and Web3. AI is reshaping every field, not
+                      just software. Show up once and get value. Or join four
+                      project teams and go deep. Both work.
                     </p>
                   </div>
 
+                  {/* Right column */}
                   <div
                     style={{
-                      ...fadeStyle(badgesP, 20),
                       display: "flex",
-                      flexWrap: "wrap",
-                      gap: 8,
+                      flexDirection: "column",
+                      gap: 20,
                     }}
                   >
-                    {["Any major", "Any year", "Zero gatekeeping"].map(
-                      (fact, i) => (
-                        <span
-                          key={fact}
-                          style={{
-                            opacity: clamp(mP, 0.64 + i * 0.06, 0.16),
-                            transform: `translateY(${(1 - clamp(mP, 0.64 + i * 0.06, 0.16)) * 16}px)`,
-                            background: "rgba(255,255,255,0.05)",
-                            border: "1px solid rgba(255,255,255,0.1)",
-                            borderRadius: 999,
-                            padding: "6px 16px",
-                            fontSize: 12,
-                            fontWeight: 600,
-                            color: "#a1a1aa",
-                            display: "inline-block",
-                          }}
-                        >
-                          {fact}
-                        </span>
-                      ),
-                    )}
+                    <div
+                      style={{
+                        ...fadeStyle(quoteP),
+                        background: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        borderRadius: 20,
+                        padding: 32,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 64,
+                          color: "#CC0000",
+                          lineHeight: 0.8,
+                          fontFamily: "Georgia, serif",
+                          fontWeight: 900,
+                          marginBottom: 16,
+                          userSelect: "none",
+                        }}
+                      >
+                        &ldquo;
+                      </div>
+                      <p
+                        style={{
+                          fontSize: 18,
+                          fontStyle: "italic",
+                          color: "#d4d4d8",
+                          lineHeight: 1.7,
+                          margin: 0,
+                        }}
+                      >
+                        Think the international student who can&apos;t land an
+                        interview. Or the pre-med with no idea how AI is
+                        reshaping their field. We&apos;re here for that student,
+                        and building them into someone who lands their dream
+                        program.
+                      </p>
+                    </div>
+
+                    <div
+                      style={{
+                        ...fadeStyle(badgesP, 20),
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 8,
+                      }}
+                    >
+                      {["Any major", "Any year", "Zero gatekeeping"].map(
+                        (fact, i) => (
+                          <span
+                            key={fact}
+                            style={{
+                              opacity: clamp(mP, 0.64 + i * 0.06, 0.16),
+                              transform: `translateY(${(1 - clamp(mP, 0.64 + i * 0.06, 0.16)) * 16}px)`,
+                              background: "rgba(255,255,255,0.05)",
+                              border: "1px solid rgba(255,255,255,0.1)",
+                              borderRadius: 999,
+                              padding: "6px 16px",
+                              fontSize: 12,
+                              fontWeight: 600,
+                              color: "#a1a1aa",
+                              display: "inline-block",
+                            }}
+                          >
+                            {fact}
+                          </span>
+                        ),
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })()}
+              );
+            })()}
+          </div>
         </section>
 
         {/* Gradient: Mission → Tracks */}
@@ -2972,8 +3014,8 @@ export default function TTSSite() {
                     top: "12%",
                     right: "5%",
                     size: 80,
-                    speed: "0.14",
-                    speedx: "-0.04",
+                    speed: "0.20",
+                    speedx: "-0.072",
                     rotate: 20,
                     color: "rgba(204,0,0,0.65)",
                   },
@@ -2982,8 +3024,8 @@ export default function TTSSite() {
                     bottom: "18%",
                     left: "5%",
                     size: 64,
-                    speed: "0.10",
-                    speedx: "0.03",
+                    speed: "0.14",
+                    speedx: "0.054",
                     rotate: -14,
                     color: "rgba(255,255,255,0.40)",
                   },
@@ -2992,8 +3034,8 @@ export default function TTSSite() {
                     top: "55%",
                     right: "5%",
                     size: 52,
-                    speed: "0.10",
-                    speedx: "-0.03",
+                    speed: "0.14",
+                    speedx: "-0.054",
                     rotate: 8,
                     color: "rgba(255,204,0,0.50)",
                   },
@@ -3002,8 +3044,8 @@ export default function TTSSite() {
                     top: "25%",
                     left: "5%",
                     size: 44,
-                    speed: "0.07",
-                    speedx: "0.03",
+                    speed: "0.10",
+                    speedx: "0.054",
                     rotate: 30,
                     color: "rgba(255,255,255,0.28)",
                   },
@@ -3012,8 +3054,8 @@ export default function TTSSite() {
                     bottom: "10%",
                     right: "12%",
                     size: 38,
-                    speed: "0.07",
-                    speedx: "-0.03",
+                    speed: "0.10",
+                    speedx: "-0.054",
                     rotate: -22,
                     color: "rgba(204,0,0,0.35)",
                   },
@@ -3070,142 +3112,190 @@ export default function TTSSite() {
                   );
                 },
               )}
-              <div
-                className="tts-panel-b-grid tts-panel-b-inner"
-                style={{
-                  maxWidth: 1200,
-                  margin: "0 auto",
-                  width: "100%",
-                  padding: "0 40px",
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 80,
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <p
+              {(() => {
+                const drawP = Math.max(
+                  0,
+                  Math.min(1, (revealProgress - 0.02) / 0.12),
+                );
+                const eraseP = Math.max(
+                  0,
+                  Math.min(1, (revealProgress - 0.22) / 0.12),
+                );
+                const ulScale = eraseP > 0 ? 1 - eraseP : drawP;
+                const ulOrigin = eraseP > 0 ? "right" : "left";
+                return (
+                  <div
+                    className="tts-panel-b-grid tts-panel-b-inner"
                     style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: "#CC0000",
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      marginBottom: 20,
+                      maxWidth: 1400,
+                      margin: "0 auto",
+                      width: "100%",
+                      padding: "0 80px",
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 100,
+                      alignItems: "center",
                     }}
                   >
-                    Why it works
-                  </p>
-                  <h2
-                    style={{
-                      fontSize: "clamp(32px, 4vw, 60px)",
-                      fontWeight: 900,
-                      color: "#fff",
-                      letterSpacing: "-0.03em",
-                      lineHeight: 1.0,
-                      marginBottom: 24,
-                    }}
-                  >
-                    Real work.
-                    <br />
-                    <span style={{ color: "#CC0000" }}>
-                      Not{" "}
-                      <span
+                    <div>
+                      <p
                         style={{
-                          color: "transparent",
-                          WebkitTextStroke: "2px #fff",
-                        }}
-                      >
-                        just
-                      </span>{" "}
-                      classes.
-                    </span>
-                  </h2>
-                  <p
-                    style={{
-                      fontSize: 15,
-                      color: "#71717a",
-                      lineHeight: 1.8,
-                      maxWidth: 400,
-                    }}
-                  >
-                    Build the portfolio and skills here, then use them to land
-                    SEP, BTG, BPX, or whatever comes next. TTS is the rep room
-                    those clubs assume you already have.
-                  </p>
-                </div>
-                <div
-                  className="tts-panel-b-stats"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 0,
-                    borderLeft: "1px solid rgba(255,255,255,0.12)",
-                    paddingLeft: 48,
-                  }}
-                >
-                  {[
-                    {
-                      stat: "Week 1",
-                      label: "You ship something",
-                      sub: "Building track members deploy a live product in the first session. Not the end of the semester.",
-                    },
-                    {
-                      stat: "Real",
-                      label: "Client work every semester",
-                      sub: "Live engagements with actual organizations. Consulting track delivers real decks.",
-                    },
-                    {
-                      stat: "Yours",
-                      label: "Everything you build",
-                      sub: "Goes on your resume. Never stays in a classroom.",
-                    },
-                  ].map(({ stat, label, sub }, i) => (
-                    <div
-                      key={label}
-                      style={{
-                        padding: "28px 0",
-                        borderBottom:
-                          i < 2 ? "1px solid rgba(255,255,255,0.1)" : "none",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "clamp(40px, 5vw, 64px)",
-                          fontWeight: 900,
-                          color: "#fff",
-                          letterSpacing: "-0.04em",
-                          lineHeight: 1,
-                          marginBottom: 6,
-                        }}
-                      >
-                        {stat}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 13,
+                          fontSize: 12,
                           fontWeight: 700,
                           color: "#CC0000",
-                          marginBottom: 6,
-                          letterSpacing: "0.02em",
+                          letterSpacing: "0.12em",
+                          textTransform: "uppercase",
+                          marginBottom: 24,
                         }}
                       >
-                        {label}
-                      </div>
-                      <div
+                        Why it works
+                      </p>
+                      <h2
                         style={{
-                          fontSize: 13,
-                          color: "#71717a",
-                          lineHeight: 1.6,
-                          maxWidth: 320,
+                          fontSize: "clamp(48px, 6vw, 88px)",
+                          fontWeight: 900,
+                          color: "#fff",
+                          letterSpacing: "-0.03em",
+                          lineHeight: 1.0,
+                          marginBottom: 32,
                         }}
                       >
-                        {sub}
-                      </div>
+                        Real work.
+                        <br />
+                        <span style={{ color: "#CC0000" }}>
+                          <span
+                            style={{
+                              position: "relative",
+                              display: "inline-block",
+                            }}
+                          >
+                            Not
+                            <span
+                              style={{
+                                position: "absolute",
+                                bottom: -4,
+                                left: 0,
+                                right: 0,
+                                height: 4,
+                                background: "#CC0000",
+                                boxShadow: "0 0 10px rgba(204,0,0,0.7)",
+                                borderRadius: 2,
+                                transformOrigin: ulOrigin,
+                                transform: `scaleX(${ulScale})`,
+                              }}
+                            />
+                          </span>{" "}
+                          <span
+                            style={{
+                              color: "transparent",
+                              WebkitTextStroke: "2px #fff",
+                            }}
+                          >
+                            just
+                          </span>{" "}
+                          classes.
+                        </span>
+                      </h2>
+                      <p
+                        style={{
+                          fontSize: 18,
+                          color: "#71717a",
+                          lineHeight: 1.8,
+                          maxWidth: 480,
+                        }}
+                      >
+                        Build the portfolio and skills here, then use them to
+                        land SEP, BTG, BPX, or whatever comes next. TTS is the
+                        rep room those clubs assume you already have.
+                      </p>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div
+                      className="tts-panel-b-stats"
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0,
+                        borderLeft: "1px solid rgba(255,255,255,0.12)",
+                        paddingLeft: 56,
+                      }}
+                    >
+                      {[
+                        {
+                          stat: "Week 1",
+                          label: "You ship something",
+                          sub: "Building track members deploy a live product in the first session. Not the end of the semester.",
+                          revealStart: 0.36,
+                        },
+                        {
+                          stat: "Real",
+                          label: "Client work every semester",
+                          sub: "Live engagements with actual organizations. Consulting track delivers real decks.",
+                          revealStart: 0.39,
+                        },
+                        {
+                          stat: "Yours",
+                          label: "Everything you build",
+                          sub: "Goes on your resume. Never stays in a classroom.",
+                          revealStart: 0.42,
+                        },
+                      ].map(({ stat, label, sub, revealStart }, i) => {
+                        const itemP = Math.max(
+                          0,
+                          Math.min(1, (revealProgress - revealStart) / 0.09),
+                        );
+                        return (
+                          <div
+                            key={label}
+                            style={{
+                              padding: "32px 0",
+                              borderBottom:
+                                i < 2
+                                  ? "1px solid rgba(255,255,255,0.1)"
+                                  : "none",
+                              opacity: itemP,
+                              transform: `translateY(${(1 - itemP) * 28}px)`,
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontSize: "clamp(56px, 7vw, 100px)",
+                                fontWeight: 900,
+                                color: "#fff",
+                                letterSpacing: "-0.04em",
+                                lineHeight: 1,
+                                marginBottom: 8,
+                              }}
+                            >
+                              {stat}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 15,
+                                fontWeight: 700,
+                                color: "#CC0000",
+                                marginBottom: 8,
+                                letterSpacing: "0.02em",
+                              }}
+                            >
+                              {label}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 15,
+                                color: "#71717a",
+                                lineHeight: 1.6,
+                                maxWidth: 360,
+                              }}
+                            >
+                              {sub}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Panel B: "Walk in. Walk out different." — enters from TOP */}
@@ -3453,8 +3543,8 @@ export default function TTSSite() {
                 top: "22%",
                 left: "5%",
                 size: 84,
-                speed: "0.14",
-                speedx: "0.04",
+                speed: "0.20",
+                speedx: "0.072",
                 rotate: -12,
                 color: "rgba(255,204,0,0.68)",
               },
@@ -3463,8 +3553,8 @@ export default function TTSSite() {
                 top: "62%",
                 left: "5%",
                 size: 58,
-                speed: "0.10",
-                speedx: "-0.03",
+                speed: "0.14",
+                speedx: "-0.054",
                 rotate: 14,
                 color: "rgba(255,204,0,0.52)",
               },
@@ -3473,8 +3563,8 @@ export default function TTSSite() {
                 bottom: "12%",
                 left: "10%",
                 size: 46,
-                speed: "0.07",
-                speedx: "0.03",
+                speed: "0.10",
+                speedx: "0.054",
                 rotate: -8,
                 color: "rgba(255,204,0,0.42)",
               },
@@ -3483,8 +3573,8 @@ export default function TTSSite() {
                 top: "42%",
                 left: "20%",
                 size: 36,
-                speed: "0.07",
-                speedx: "-0.03",
+                speed: "0.10",
+                speedx: "-0.054",
                 rotate: 22,
                 color: "rgba(255,204,0,0.28)",
               },
@@ -3493,8 +3583,8 @@ export default function TTSSite() {
                 top: "12%",
                 left: "18%",
                 size: 40,
-                speed: "0.10",
-                speedx: "0.03",
+                speed: "0.14",
+                speedx: "0.054",
                 rotate: -6,
                 color: "rgba(255,204,0,0.35)",
               },
@@ -3503,8 +3593,8 @@ export default function TTSSite() {
                 bottom: "30%",
                 left: "6%",
                 size: 44,
-                speed: "0.07",
-                speedx: "0.03",
+                speed: "0.10",
+                speedx: "0.054",
                 rotate: 10,
                 color: "rgba(255,255,255,0.20)",
               },
@@ -3513,8 +3603,8 @@ export default function TTSSite() {
                 top: "55%",
                 left: "18%",
                 size: 30,
-                speed: "0.04",
-                speedx: "-0.01",
+                speed: "0.06",
+                speedx: "-0.018",
                 rotate: 18,
                 color: "rgba(255,204,0,0.25)",
               },
@@ -3559,8 +3649,8 @@ export default function TTSSite() {
                 top: "18%",
                 right: "5%",
                 size: 92,
-                speed: "0.20",
-                speedx: "-0.07",
+                speed: "0.28",
+                speedx: "-0.126",
                 rotate: 8,
                 color: "rgba(204,0,0,0.72)",
               },
@@ -3569,8 +3659,8 @@ export default function TTSSite() {
                 top: "58%",
                 right: "5%",
                 size: 62,
-                speed: "0.10",
-                speedx: "0.03",
+                speed: "0.14",
+                speedx: "0.054",
                 rotate: -16,
                 color: "rgba(204,0,0,0.58)",
               },
@@ -3579,8 +3669,8 @@ export default function TTSSite() {
                 bottom: "14%",
                 right: "8%",
                 size: 50,
-                speed: "0.10",
-                speedx: "-0.03",
+                speed: "0.14",
+                speedx: "-0.054",
                 rotate: 24,
                 color: "rgba(204,0,0,0.44)",
               },
@@ -3589,8 +3679,8 @@ export default function TTSSite() {
                 top: "38%",
                 right: "21%",
                 size: 38,
-                speed: "0.07",
-                speedx: "0.03",
+                speed: "0.10",
+                speedx: "0.054",
                 rotate: -28,
                 color: "rgba(204,0,0,0.30)",
               },
@@ -3599,8 +3689,8 @@ export default function TTSSite() {
                 top: "12%",
                 right: "18%",
                 size: 42,
-                speed: "0.10",
-                speedx: "-0.03",
+                speed: "0.14",
+                speedx: "-0.054",
                 rotate: 15,
                 color: "rgba(204,0,0,0.38)",
               },
@@ -3609,8 +3699,8 @@ export default function TTSSite() {
                 bottom: "18%",
                 right: "20%",
                 size: 36,
-                speed: "0.07",
-                speedx: "0.03",
+                speed: "0.10",
+                speedx: "0.054",
                 rotate: -10,
                 color: "rgba(99,102,241,0.38)",
               },
@@ -3619,8 +3709,8 @@ export default function TTSSite() {
                 top: "60%",
                 right: "5%",
                 size: 30,
-                speed: "0.04",
-                speedx: "-0.01",
+                speed: "0.06",
+                speedx: "-0.018",
                 rotate: 22,
                 color: "rgba(255,255,255,0.18)",
               },
@@ -3964,8 +4054,8 @@ export default function TTSSite() {
               top: "52%",
               right: "5%",
               size: 105,
-              speed: "0.20",
-              speedx: "-0.07",
+              speed: "0.28",
+              speedx: "-0.126",
               rotate: -10,
               color: "#CC0000",
             },
@@ -3974,8 +4064,8 @@ export default function TTSSite() {
               top: "10%",
               left: "5%",
               size: 95,
-              speed: "0.20",
-              speedx: "0.06",
+              speed: "0.28",
+              speedx: "0.108",
               rotate: -28,
               color: "#FFCC00",
             },
@@ -3985,8 +4075,8 @@ export default function TTSSite() {
               top: "12%",
               right: "6%",
               size: 70,
-              speed: "0.14",
-              speedx: "-0.04",
+              speed: "0.20",
+              speedx: "-0.072",
               rotate: -18,
               color: "rgba(204,0,0,0.65)",
             },
@@ -3995,8 +4085,8 @@ export default function TTSSite() {
               bottom: "14%",
               left: "7%",
               size: 64,
-              speed: "0.10",
-              speedx: "0.03",
+              speed: "0.14",
+              speedx: "0.054",
               rotate: 12,
               color: "rgba(255,204,0,0.65)",
             },
@@ -4005,8 +4095,8 @@ export default function TTSSite() {
               bottom: "12%",
               right: "12%",
               size: 60,
-              speed: "0.10",
-              speedx: "-0.03",
+              speed: "0.14",
+              speedx: "-0.054",
               rotate: 22,
               color: "rgba(255,204,0,0.6)",
             },
@@ -4016,8 +4106,8 @@ export default function TTSSite() {
               bottom: "18%",
               right: "5%",
               size: 38,
-              speed: "0.07",
-              speedx: "-0.03",
+              speed: "0.10",
+              speedx: "-0.054",
               rotate: 8,
               color: "rgba(255,255,255,0.25)",
             },
@@ -4026,8 +4116,8 @@ export default function TTSSite() {
               bottom: "35%",
               left: "5%",
               size: 32,
-              speed: "0.04",
-              speedx: "0.01",
+              speed: "0.06",
+              speedx: "0.018",
               rotate: 16,
               color: "rgba(255,204,0,0.3)",
             },
@@ -4036,8 +4126,8 @@ export default function TTSSite() {
               bottom: "20%",
               left: "6%",
               size: 56,
-              speed: "0.09",
-              speedx: "0.04",
+              speed: "0.13",
+              speedx: "0.072",
               rotate: -25,
               color: "rgba(255,204,0,0.4)",
             },
@@ -4046,8 +4136,8 @@ export default function TTSSite() {
               top: "15%",
               right: "8%",
               size: 48,
-              speed: "0.10",
-              speedx: "-0.03",
+              speed: "0.14",
+              speedx: "-0.054",
               rotate: 15,
               color: "rgba(16,185,129,0.4)",
             },
@@ -4057,8 +4147,8 @@ export default function TTSSite() {
               top: "38%",
               right: "6%",
               size: 44,
-              speed: "0.07",
-              speedx: "-0.03",
+              speed: "0.10",
+              speedx: "-0.054",
               rotate: 10,
               color: "rgba(255,204,0,0.35)",
             },
@@ -4067,8 +4157,8 @@ export default function TTSSite() {
               top: "62%",
               left: "6%",
               size: 40,
-              speed: "0.07",
-              speedx: "0.03",
+              speed: "0.10",
+              speedx: "0.054",
               rotate: -20,
               color: "rgba(168,85,247,0.40)",
             },
@@ -4077,8 +4167,8 @@ export default function TTSSite() {
               bottom: "38%",
               right: "7%",
               size: 38,
-              speed: "0.04",
-              speedx: "-0.01",
+              speed: "0.06",
+              speedx: "-0.018",
               rotate: 25,
               color: "rgba(16,185,129,0.35)",
             },
@@ -4087,8 +4177,8 @@ export default function TTSSite() {
               top: "25%",
               left: "8%",
               size: 36,
-              speed: "0.04",
-              speedx: "0.01",
+              speed: "0.06",
+              speedx: "0.018",
               rotate: -12,
               color: "rgba(99,102,241,0.40)",
             },
@@ -4097,8 +4187,8 @@ export default function TTSSite() {
               top: "75%",
               right: "9%",
               size: 30,
-              speed: "0.04",
-              speedx: "-0.01",
+              speed: "0.06",
+              speedx: "-0.018",
               rotate: 18,
               color: "rgba(255,255,255,0.22)",
             },
@@ -4107,8 +4197,8 @@ export default function TTSSite() {
               bottom: "55%",
               left: "9%",
               size: 34,
-              speed: "0.04",
-              speedx: "0.01",
+              speed: "0.06",
+              speedx: "0.018",
               rotate: -8,
               color: "rgba(255,204,0,0.28)",
             },
@@ -4117,8 +4207,8 @@ export default function TTSSite() {
               top: "48%",
               left: "5%",
               size: 32,
-              speed: "0.04",
-              speedx: "0.01",
+              speed: "0.06",
+              speedx: "0.018",
               rotate: 12,
               color: "rgba(16,185,129,0.28)",
             },
@@ -4127,8 +4217,8 @@ export default function TTSSite() {
               bottom: "28%",
               right: "5%",
               size: 30,
-              speed: "0.04",
-              speedx: "-0.01",
+              speed: "0.06",
+              speedx: "-0.018",
               rotate: -30,
               color: "rgba(255,255,255,0.18)",
             },
@@ -4424,8 +4514,8 @@ export default function TTSSite() {
               top: "8%",
               right: "6%",
               size: 56,
-              speed: "0.08",
-              speedx: "-0.03",
+              speed: "0.11",
+              speedx: "-0.054",
               rotate: 20,
               color: "rgba(255,204,0,0.35)",
             },
@@ -4434,8 +4524,8 @@ export default function TTSSite() {
               top: "22%",
               left: "4%",
               size: 72,
-              speed: "0.14",
-              speedx: "0.04",
+              speed: "0.20",
+              speedx: "0.072",
               rotate: -15,
               color: "rgba(255,255,255,0.15)",
             },
@@ -4444,8 +4534,8 @@ export default function TTSSite() {
               bottom: "25%",
               right: "5%",
               size: 48,
-              speed: "0.06",
-              speedx: "-0.03",
+              speed: "0.08",
+              speedx: "-0.054",
               rotate: 8,
               color: "rgba(204,0,0,0.35)",
             },
@@ -4454,8 +4544,8 @@ export default function TTSSite() {
               bottom: "12%",
               left: "6%",
               size: 38,
-              speed: "0.07",
-              speedx: "0.03",
+              speed: "0.10",
+              speedx: "0.054",
               rotate: 30,
               color: "rgba(255,255,255,0.18)",
             },
@@ -4464,8 +4554,8 @@ export default function TTSSite() {
               top: "55%",
               right: "8%",
               size: 32,
-              speed: "0.04",
-              speedx: "-0.01",
+              speed: "0.06",
+              speedx: "-0.018",
               rotate: -10,
               color: "rgba(255,204,0,0.25)",
             },
@@ -4475,8 +4565,8 @@ export default function TTSSite() {
               top: "12%",
               left: "8%",
               size: 52,
-              speed: "0.10",
-              speedx: "0.04",
+              speed: "0.14",
+              speedx: "0.072",
               rotate: -18,
               color: "rgba(255,204,0,0.40)",
             },
@@ -4485,8 +4575,8 @@ export default function TTSSite() {
               bottom: "40%",
               right: "6%",
               size: 44,
-              speed: "0.07",
-              speedx: "-0.03",
+              speed: "0.10",
+              speedx: "-0.054",
               rotate: 14,
               color: "rgba(255,204,0,0.32)",
             },
@@ -4495,8 +4585,8 @@ export default function TTSSite() {
               top: "38%",
               left: "5%",
               size: 36,
-              speed: "0.07",
-              speedx: "0.03",
+              speed: "0.10",
+              speedx: "0.054",
               rotate: -8,
               color: "rgba(255,204,0,0.28)",
             },
@@ -4505,8 +4595,8 @@ export default function TTSSite() {
               bottom: "18%",
               right: "12%",
               size: 30,
-              speed: "0.04",
-              speedx: "-0.01",
+              speed: "0.06",
+              speedx: "-0.018",
               rotate: 20,
               color: "rgba(204,0,0,0.35)",
             },
@@ -4515,8 +4605,8 @@ export default function TTSSite() {
               top: "68%",
               left: "10%",
               size: 28,
-              speed: "0.04",
-              speedx: "0.01",
+              speed: "0.06",
+              speedx: "0.018",
               rotate: -15,
               color: "rgba(255,255,255,0.18)",
             },
@@ -4988,8 +5078,8 @@ export default function TTSSite() {
               top: "8%",
               left: "5%",
               size: 108,
-              speed: "0.20",
-              speedx: "0.07",
+              speed: "0.28",
+              speedx: "0.126",
               rotate: 15,
               color: "rgba(255,255,255,0.55)",
             },
@@ -4998,8 +5088,8 @@ export default function TTSSite() {
               bottom: "18%",
               right: "5%",
               size: 96,
-              speed: "0.20",
-              speedx: "-0.04",
+              speed: "0.28",
+              speedx: "-0.072",
               rotate: -18,
               color: "rgba(255,204,0,0.65)",
             },
@@ -5009,8 +5099,8 @@ export default function TTSSite() {
               top: "16%",
               right: "5%",
               size: 70,
-              speed: "0.14",
-              speedx: "-0.04",
+              speed: "0.20",
+              speedx: "-0.072",
               rotate: -10,
               color: "rgba(204,0,0,0.65)",
             },
@@ -5019,8 +5109,8 @@ export default function TTSSite() {
               bottom: "10%",
               left: "5%",
               size: 64,
-              speed: "0.10",
-              speedx: "0.03",
+              speed: "0.14",
+              speedx: "0.054",
               rotate: 8,
               color: "rgba(255,255,255,0.5)",
             },
@@ -5030,8 +5120,8 @@ export default function TTSSite() {
               top: "48%",
               left: "5%",
               size: 38,
-              speed: "0.07",
-              speedx: "0.03",
+              speed: "0.10",
+              speedx: "0.054",
               rotate: 25,
               color: "rgba(255,255,255,0.22)",
             },
@@ -5040,8 +5130,8 @@ export default function TTSSite() {
               top: "33%",
               right: "5%",
               size: 30,
-              speed: "0.04",
-              speedx: "-0.01",
+              speed: "0.06",
+              speedx: "-0.018",
               rotate: -30,
               color: "rgba(204,0,0,0.3)",
             },
@@ -5051,8 +5141,8 @@ export default function TTSSite() {
               top: "62%",
               left: "7%",
               size: 40,
-              speed: "0.07",
-              speedx: "0.03",
+              speed: "0.10",
+              speedx: "0.054",
               rotate: -12,
               color: "rgba(255,255,255,0.25)",
             },
@@ -5061,8 +5151,8 @@ export default function TTSSite() {
               top: "20%",
               left: "14%",
               size: 36,
-              speed: "0.07",
-              speedx: "0.03",
+              speed: "0.10",
+              speedx: "0.054",
               rotate: 8,
               color: "rgba(255,204,0,0.32)",
             },
@@ -5071,8 +5161,8 @@ export default function TTSSite() {
               bottom: "30%",
               right: "8%",
               size: 32,
-              speed: "0.04",
-              speedx: "-0.01",
+              speed: "0.06",
+              speedx: "-0.018",
               rotate: 16,
               color: "rgba(16,185,129,0.35)",
             },
@@ -5460,8 +5550,8 @@ export default function TTSSite() {
                 top: "8%",
                 left: "5%",
                 size: 118,
-                speed: "0.20",
-                speedx: "0.07",
+                speed: "0.28",
+                speedx: "0.126",
                 rotate: -16,
                 color: "#CC0000",
               },
@@ -5470,8 +5560,8 @@ export default function TTSSite() {
                 bottom: "12%",
                 left: "6%",
                 size: 104,
-                speed: "0.13",
-                speedx: "0.06",
+                speed: "0.18",
+                speedx: "0.108",
                 rotate: 22,
                 color: "#FFCC00",
               },
@@ -5480,8 +5570,8 @@ export default function TTSSite() {
                 top: "28%",
                 left: "5%",
                 size: 80,
-                speed: "0.14",
-                speedx: "0.04",
+                speed: "0.20",
+                speedx: "0.072",
                 rotate: 10,
                 color: "rgba(204,0,0,0.5)",
               },
@@ -5490,8 +5580,8 @@ export default function TTSSite() {
                 bottom: "18%",
                 right: "5%",
                 size: 92,
-                speed: "0.12",
-                speedx: "-0.04",
+                speed: "0.17",
+                speedx: "-0.072",
                 rotate: -8,
                 color: "#CC0000",
               },
@@ -5500,8 +5590,8 @@ export default function TTSSite() {
                 top: "15%",
                 right: "6%",
                 size: 70,
-                speed: "0.09",
-                speedx: "-0.04",
+                speed: "0.13",
+                speedx: "-0.072",
                 rotate: 10,
                 color: "rgba(255,255,255,0.6)",
               },
@@ -5510,8 +5600,8 @@ export default function TTSSite() {
                 top: "48%",
                 right: "5%",
                 size: 64,
-                speed: "0.10",
-                speedx: "-0.025",
+                speed: "0.14",
+                speedx: "-0.045",
                 rotate: -20,
                 color: "rgba(255,204,0,0.65)",
               },
@@ -5520,8 +5610,8 @@ export default function TTSSite() {
                 top: "65%",
                 left: "5%",
                 size: 60,
-                speed: "0.08",
-                speedx: "0.025",
+                speed: "0.11",
+                speedx: "0.045",
                 rotate: -30,
                 color: "rgba(204,0,0,0.65)",
               },
@@ -5530,8 +5620,8 @@ export default function TTSSite() {
                 top: "38%",
                 left: "8%",
                 size: 36,
-                speed: "0.04",
-                speedx: "0.015",
+                speed: "0.06",
+                speedx: "0.027",
                 rotate: 14,
                 color: "rgba(255,255,255,0.25)",
               },
@@ -5540,8 +5630,8 @@ export default function TTSSite() {
                 bottom: "40%",
                 right: "8%",
                 size: 30,
-                speed: "0.04",
-                speedx: "-0.01",
+                speed: "0.06",
+                speedx: "-0.018",
                 rotate: 25,
                 color: "rgba(255,255,255,0.2)",
               },
@@ -5551,8 +5641,8 @@ export default function TTSSite() {
                 top: "18%",
                 left: "6%",
                 size: 44,
-                speed: "0.10",
-                speedx: "0.04",
+                speed: "0.14",
+                speedx: "0.072",
                 rotate: -10,
                 color: "rgba(204,0,0,0.45)",
               },
@@ -5561,8 +5651,8 @@ export default function TTSSite() {
                 bottom: "22%",
                 left: "10%",
                 size: 38,
-                speed: "0.07",
-                speedx: "0.03",
+                speed: "0.10",
+                speedx: "0.054",
                 rotate: 12,
                 color: "rgba(255,204,0,0.38)",
               },
@@ -5571,8 +5661,8 @@ export default function TTSSite() {
                 top: "55%",
                 right: "6%",
                 size: 34,
-                speed: "0.07",
-                speedx: "-0.03",
+                speed: "0.10",
+                speedx: "-0.054",
                 rotate: -8,
                 color: "rgba(16,185,129,0.40)",
               },
@@ -5581,8 +5671,8 @@ export default function TTSSite() {
                 bottom: "12%",
                 right: "10%",
                 size: 28,
-                speed: "0.04",
-                speedx: "-0.01",
+                speed: "0.06",
+                speedx: "-0.018",
                 rotate: 20,
                 color: "rgba(255,255,255,0.18)",
               },
