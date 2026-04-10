@@ -1311,12 +1311,18 @@ export default function TTSSite() {
   return (
     <>
       <style>{`
+        /* FAQ two-panel layout - desktop */
+        .tts-faq-split {
+          display: grid;
+          grid-template-columns: 1fr 1.4fr;
+          gap: 80px;
+          align-items: start;
+        }
+
         @media (max-width: 900px) {
           .tts-mission-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
           .tts-join-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
-          .tts-leadership-grid { grid-template-columns: 1fr !important; }
           .tts-footer-cols { flex-direction: column !important; gap: 32px !important; align-items: flex-start !important; }
-          .tts-advisors-alumni-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
         }
         @media (max-width: 768px) {
           .tts-tracks-grid { grid-template-columns: 1fr !important; }
@@ -1335,6 +1341,8 @@ export default function TTSSite() {
           .tts-mission-inner { padding: 0 20px !important; }
           /* Presidents section header */
           .tts-presidents-header { padding: 0 20px 48px !important; }
+          /* Presidents grid: reduce padding/gap so 2-col fits at 375px */
+          .tts-leadership-grid { padding: 0 16px !important; gap: 12px !important; }
           /* Leadership contact tagline */
           .tts-leadership-contact { padding: 40px 20px 0 !important; }
           /* Floating footer pills bar */
@@ -1346,10 +1354,20 @@ export default function TTSSite() {
           .tts-float-icon { display: none !important; }
           /* "Walk out different" reveal section inner padding */
           .tts-panel-b-reveal { padding: 0 20px !important; }
+          /* E-Board cabinet: force 2 columns at mobile */
+          .tts-cabinet-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          /* Alumni/advisors: keep 2 cols with equal widths at mobile */
+          .tts-advisors-alumni-grid { grid-template-columns: 1fr 1fr !important; gap: 24px !important; }
+          /* FAQ: stack to single column on mobile */
+          .tts-faq-split { display: block !important; }
+          .tts-faq-split > div:first-child { margin-bottom: 40px; }
+          /* Join sticky: pad bottom so notify form clears fixed footer pills */
+          .tts-join-sticky { padding-bottom: 100px !important; box-sizing: border-box !important; }
         }
         @media (max-width: 480px) {
           .tts-stats-grid { grid-template-columns: 1fr 1fr !important; }
-          .tts-leadership-grid { grid-template-columns: 1fr !important; }
+          .tts-cabinet-grid { gap: 10px !important; }
+          .tts-leadership-grid { gap: 10px !important; padding: 0 12px !important; }
         }
         @media (hover: none), (pointer: coarse) {
           #tts-cursor-dot, #tts-cursor-ring { display: none !important; }
@@ -4549,6 +4567,7 @@ export default function TTSSite() {
             </div>
 
             <div
+              className="tts-cabinet-grid"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
@@ -5939,6 +5958,7 @@ export default function TTSSite() {
           }}
         >
           <div
+            className="tts-join-sticky"
             style={{
               position: "sticky",
               top: 0,
