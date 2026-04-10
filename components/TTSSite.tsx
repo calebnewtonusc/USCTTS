@@ -78,30 +78,31 @@ const TRACKS = [
     icon: Hammer,
     accent: "#CC0000",
     title: "Building",
-    sub: "Product & Startups",
-    tagline: "Come in with an idea. Leave with a live link.",
+    sub: "Product & Community Impact",
+    tagline:
+      "Come in with an idea. Leave with a live link that helps real people.",
     featured: false,
     items: [
-      "Build real apps and tools using AI",
-      "Deploy live products with real users",
-      "Learn by doing, not by watching",
+      "Build apps and tools that solve real community problems",
+      "Deploy live products with real users and real stakes",
+      "Work on projects for nonprofits, hospitals, and research orgs",
       "No CS background required",
     ],
-    for: "Anyone who wants to make something. Any major, any year.",
+    for: "Anyone who wants to make something that matters. Any major, any year.",
   },
   {
     num: "02",
     icon: Briefcase,
     accent: "#FFCC00",
     title: "Consulting",
-    sub: "Client Work & Strategy",
-    tagline: "Work on real problems for real organizations.",
+    sub: "Client Work & Social Impact",
+    tagline: "Work on real problems for organizations doing real good.",
     featured: true,
     items: [
-      "Live client engagements",
-      "AI-first research and analysis",
-      "Actual deliverables, not slide decks for class",
-      "Strategic reps before you graduate",
+      "Live engagements with nonprofits, research labs, and mission-driven orgs",
+      "AI-first strategy for cancer research, social services, and beyond",
+      "Actual deliverables that move the needle, not slide decks for class",
+      "Strategic reps that matter before you graduate",
     ],
     for: "Business, econ, poli-sci, and anyone going into strategy or ops.",
   },
@@ -111,12 +112,12 @@ const TRACKS = [
     accent: "#10b981",
     title: "Growing",
     sub: "Career & Network",
-    tagline: "Learn AI tools that apply to your actual field.",
+    tagline: "Learn AI tools that apply to your field and your community.",
     featured: false,
     items: [
-      "Apply AI directly to your major or career path",
-      "Access YC founders and working operators",
-      "Speaker series with real practitioners",
+      "Apply AI directly to your major, career path, and the causes you care about",
+      "Access YC founders, operators, and mission-driven leaders",
+      "Speaker series with practitioners doing work that actually matters",
       "Get ahead before everyone else catches up",
     ],
     for: "Pre-med, law, finance, architecture, any major.",
@@ -1640,9 +1641,8 @@ export default function TTSSite() {
                     maxWidth: 480,
                   }}
                 >
-                  Build the portfolio and skills here, then use them to land
-                  SEP, BTG, BPX, or whatever comes next. TTS is the rep room
-                  those clubs assume you already have.
+                  Build skills, ship real work, and help real organizations
+                  along the way. TTS is where AI meets community impact.
                 </p>
               </div>
               {/* Right column — intentionally empty; stats in real Panel A show through */}
@@ -2089,27 +2089,28 @@ export default function TTSSite() {
                       letterSpacing: "-0.01em",
                     }}
                   >
-                    A USC builder club where you{" "}
+                    A USC club that uses{" "}
                     <span
                       style={{
                         color: "transparent",
                         WebkitTextStroke: `${Math.max(1.5, (18 + heroScaleEased * 54) * 0.04).toFixed(1)}px #fff`,
                       }}
                     >
-                      actually
+                      AI
                     </span>{" "}
-                    use <span style={{ color: "#CC0000" }}>AI:</span> ship
-                    products, solve{" "}
+                    to help{" "}
+                    <span style={{ color: "#CC0000" }}>real people:</span> build
+                    for nonprofits, consult for{" "}
                     <span
                       style={{
                         color: "transparent",
                         WebkitTextStroke: `${Math.max(1.5, (18 + heroScaleEased * 54) * 0.04).toFixed(1)}px #d4d4d8`,
                       }}
                     >
-                      real
+                      research
                     </span>{" "}
-                    problems, and{" "}
-                    <span style={{ color: "#FFCC00" }}>get ahead.</span>
+                    orgs, and{" "}
+                    <span style={{ color: "#FFCC00" }}>make an impact.</span>
                   </p>
                   {/* Red outline — draws in when text reaches full size, holds, then erases */}
                   {heroOutlineDrawP > 0 &&
@@ -2470,7 +2471,7 @@ export default function TTSSite() {
                       }}
                     >
                       <div style={{ ...fadeStyle(h1P, 24), display: "block" }}>
-                        The club that
+                        The club that uses AI
                       </div>
                       <div
                         style={{
@@ -2479,7 +2480,7 @@ export default function TTSSite() {
                           color: "#CC0000",
                         }}
                       >
-                        actually lets you in.
+                        to actually help people.
                       </div>
                     </h2>
                     <p
@@ -2491,11 +2492,11 @@ export default function TTSSite() {
                         marginBottom: 20,
                       }}
                     >
-                      SEP, BTG, BPX: great clubs. All have applications,
-                      waitlists, and cuts. TTS has{" "}
-                      <span className="tts-highlight">none of that</span>. Walk
-                      in any week. No application, no interview, no rejection
-                      email.
+                      Build an app that helps the Red Cross get more blood.
+                      Consult for a cancer research org. Engineer a tool for
+                      Saint Jude. TTS members work on{" "}
+                      <span className="tts-highlight">real problems</span> for
+                      organizations that are actually changing lives.
                     </p>
                     <p
                       style={{
@@ -2506,10 +2507,10 @@ export default function TTSSite() {
                         marginBottom: 0,
                       }}
                     >
-                      We run tracks across consulting, engineering, biotech,
-                      music tech, and Web3. AI is reshaping every field, not
-                      just software. Show up once and get value. Or join four
-                      project teams and go deep. Both work.
+                      No application, no waitlist, no rejection email. Open to
+                      every major and every year. Build whatever project you
+                      want, or point your skills at something that matters. Both
+                      are welcome here.
                     </p>
                   </div>
 
@@ -2552,11 +2553,11 @@ export default function TTSSite() {
                           margin: 0,
                         }}
                       >
-                        Think the international student who can&apos;t land an
-                        interview. Or the pre-med with no idea how AI is
-                        reshaping their field. We&apos;re here for that student,
-                        and building them into someone who lands their dream
-                        program.
+                        The best ideas for helping people don&apos;t come from
+                        gatekept rooms. A pre-med who builds a tool for cancer
+                        research. A business major who consults for a homeless
+                        children&apos;s fund. An engineer who ships something
+                        for Saint Jude. That&apos;s who we&apos;re building.
                       </p>
                     </div>
 
@@ -2568,7 +2569,7 @@ export default function TTSSite() {
                         gap: 8,
                       }}
                     >
-                      {["Any major", "Any year", "Zero gatekeeping"].map(
+                      {["Any major", "Any year", "Real impact"].map(
                         (fact, i) => (
                           <span
                             key={fact}
@@ -3377,9 +3378,9 @@ export default function TTSSite() {
                           maxWidth: 480,
                         }}
                       >
-                        Build the portfolio and skills here, then use them to
-                        land SEP, BTG, BPX, or whatever comes next. TTS is the
-                        rep room those clubs assume you already have.
+                        Build skills, ship real work, and help real
+                        organizations along the way. TTS is where AI meets
+                        community impact.
                       </p>
                     </div>
                     <div
@@ -6224,7 +6225,7 @@ export default function TTSSite() {
                       letterSpacing: "0.08em",
                     }}
                   >
-                    Any major · Any year · Walk in any week
+                    Any major · Any year · Real impact
                   </div>
                 </div>
               );
@@ -6305,7 +6306,7 @@ export default function TTSSite() {
                       opacity: Math.max(0, Math.min(1, (p - 0.25) / 0.06)),
                     }}
                   >
-                    TTS is the rep room they assume you already have.
+                    TTS is where you use AI to help real people.
                   </div>
                 </div>
               );
@@ -6559,9 +6560,9 @@ export default function TTSSite() {
                         margin: "0 auto 40px",
                       }}
                     >
-                      This is the rep room that SEP, BTG, and BPX assume you
-                      already have. Show up with nothing and leave with a
-                      portfolio, a network, and a real deliverable.
+                      Show up with nothing and leave with a portfolio, a
+                      network, and work that actually helped someone.
+                      That&apos;s what TTS is built for.
                     </p>
 
                     <div
