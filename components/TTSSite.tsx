@@ -1369,10 +1369,7 @@ export default function TTSSite() {
           .tts-cabinet-grid { gap: 10px !important; }
           .tts-leadership-grid { gap: 10px !important; padding: 0 12px !important; }
         }
-        /* Mobile scroll-section overrides: collapse tall scroll-driven sections */
         @media (max-width: 768px) {
-          .tts-scroll-section { height: auto !important; min-height: 100vh !important; }
-          .tts-scroll-sticky { position: relative !important; height: auto !important; min-height: 100vh !important; overflow: visible !important; }
           /* Hero: prevent floating icons from causing horizontal scroll */
           #hero { overflow: hidden !important; }
           /* Footer pills: allow horizontal scroll if labels overflow */
@@ -1693,11 +1690,9 @@ export default function TTSSite() {
         <section
           id="hero"
           ref={heroSectionRef}
-          className="tts-scroll-section"
           style={{ height: "400vh", position: "relative" }}
         >
           <div
-            className="tts-scroll-sticky"
             style={{
               position: "sticky",
               top: 0,
@@ -2294,7 +2289,6 @@ export default function TTSSite() {
         <section
           ref={missionSectionRef}
           id="mission"
-          className="tts-scroll-section"
           style={{
             background: "#0c0c0f",
             height: "220vh",
@@ -2303,7 +2297,7 @@ export default function TTSSite() {
           }}
         >
           <div
-            className="tts-mission-inner tts-scroll-sticky"
+            className="tts-mission-inner"
             style={{
               position: "sticky",
               top: 0,
@@ -2831,7 +2825,6 @@ export default function TTSSite() {
           <section
             ref={trackScrollRef}
             id="tracks"
-            className="tts-scroll-section"
             style={{
               background: "#09090b",
               height: "clamp(200vh, 320vh, 320vh)",
@@ -2840,7 +2833,6 @@ export default function TTSSite() {
           >
             <div
               ref={trackStickyRef}
-              className="tts-scroll-sticky"
               style={{
                 position: "sticky",
                 top: 0,
@@ -3186,11 +3178,9 @@ export default function TTSSite() {
         {/* ── REVERSE SCROLL REVEAL ── */}
         <div
           ref={revealSectionRef}
-          className="tts-scroll-section"
           style={{ height: "230vh", position: "relative" }}
         >
           <div
-            className="tts-scroll-sticky"
             style={{
               position: "sticky",
               top: 0,
@@ -5967,7 +5957,6 @@ export default function TTSSite() {
         <section
           ref={joinScrollRef}
           id="join"
-          className="tts-scroll-section"
           style={{
             height: "clamp(300vh, 360vh, 420vh)",
             position: "relative",
@@ -5975,7 +5964,7 @@ export default function TTSSite() {
           }}
         >
           <div
-            className="tts-join-sticky tts-scroll-sticky"
+            className="tts-join-sticky"
             style={{
               position: "sticky",
               top: 0,
