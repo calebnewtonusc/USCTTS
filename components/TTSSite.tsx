@@ -315,26 +315,29 @@ const BOARD: {
   headshot: string | null;
   position?: string;
   companies: string[];
+  logo?: string;
 }[] = [
   {
     name: "Matthew Kim",
-    role: "OG Co-Founder",
+    role: "Incoming Analyst, McKinsey",
     title: "Board of Advisors",
     initials: "MK",
     link: "https://www.linkedin.com/in/matthewkiiim",
     headshot: "/img/matthew_shot.jpeg",
     position: "center top",
     companies: [],
+    logo: "/img/logos/mckinsey.png",
   },
   {
     name: "Kevin Sangmuah",
-    role: "OG Co-Founder",
+    role: "Software Engineer, Reddit",
     title: "Board of Advisors",
     initials: "KS",
     link: "https://www.linkedin.com/in/kevin-sangmuah-4a780a221",
     headshot: "/img/kevin_shot.jpeg",
     position: "center top",
     companies: [],
+    logo: "/img/logos/reddit.png",
   },
   {
     name: "Sagar Tiwari",
@@ -345,6 +348,7 @@ const BOARD: {
     headshot: "/img/sagar_shot.jpeg",
     position: "center center",
     companies: [],
+    logo: "/img/logos/stanford.png",
   },
   {
     name: "Duncan Inganji",
@@ -355,6 +359,7 @@ const BOARD: {
     headshot: "/img/duncan_shot.jpeg",
     position: "center center",
     companies: [],
+    logo: "/img/logos/google.png",
   },
   {
     name: "Catherine Newton, M.D.",
@@ -365,6 +370,7 @@ const BOARD: {
     headshot: "/img/catherine_shot.jpg",
     position: "center center",
     companies: [],
+    logo: "/img/logos/kaiser.png",
   },
   {
     name: "Andrew Laffoon",
@@ -375,6 +381,7 @@ const BOARD: {
     headshot: "/img/andrew_shot.jpeg",
     position: "center center",
     companies: [],
+    logo: "/img/logos/mixbook.png",
   },
 ];
 
@@ -5432,7 +5439,7 @@ export default function TTSSite() {
               className="tts-advisors-alumni-grid"
               style={{
                 display: "grid",
-                gridTemplateColumns: "minmax(280px, 500px) 1fr",
+                gridTemplateColumns: "minmax(520px, 760px) 1fr",
                 gap: 64,
                 alignItems: "start",
               }}
@@ -5454,9 +5461,8 @@ export default function TTSSite() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fill, minmax(220px, 1fr))",
-                    gap: 20,
+                    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                    gap: 16,
                   }}
                 >
                   {BOARD.map((person, i) => (
@@ -5599,32 +5605,35 @@ export default function TTSSite() {
                       {/* Company logo strip */}
                       <div
                         style={{
-                          padding: "12px 18px",
+                          padding: "14px 16px",
                           borderTop: "1px solid rgba(255,204,0,0.07)",
                           display: "flex",
                           alignItems: "center",
-                          gap: 8,
-                          minHeight: 48,
-                          flexWrap: "wrap",
+                          justifyContent: "center",
+                          minHeight: 64,
                         }}
                       >
-                        {person.companies.map((co) => (
-                          <span
-                            key={co}
+                        {person.logo ? (
+                          <div
                             style={{
-                              fontSize: 11,
-                              fontWeight: 700,
-                              color: "#a1a1aa",
-                              background: "rgba(255,255,255,0.07)",
-                              border: "1px solid rgba(255,255,255,0.15)",
-                              borderRadius: 6,
-                              padding: "3px 8px",
-                              letterSpacing: "0.04em",
+                              position: "relative",
+                              width: "100%",
+                              height: 40,
                             }}
                           >
-                            {co}
-                          </span>
-                        ))}
+                            <Image
+                              src={person.logo}
+                              alt=""
+                              fill
+                              sizes="120px"
+                              style={{
+                                objectFit: "contain",
+                                filter:
+                                  "drop-shadow(0 2px 8px rgba(0,0,0,0.45))",
+                              }}
+                            />
+                          </div>
+                        ) : null}
                       </div>
                     </a>
                   ))}

@@ -780,13 +780,19 @@ function SlideBody({ slide, accent }: { slide: Slide; accent: string }) {
   }
 
   if (slide.kind === "cabinet") {
+    const cabinetCount = slide.people.length;
+    // Larger lists (alumni, ~15) get 5 columns; standard (~9) stays at 3.
+    const cabinetCols =
+      cabinetCount >= 12
+        ? "grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+        : "grid-cols-2 sm:grid-cols-3";
     return (
       <div className={wrap}>
         <div className={`${innerFill} max-w-7xl`}>
           <div className="shrink-0">
             {slide.eyebrow && (
               <div
-                className="text-xs uppercase tracking-[0.25em] font-semibold mb-3"
+                className="text-xs uppercase tracking-[0.25em] font-semibold mb-2"
                 style={{ color: accent }}
               >
                 {slide.eyebrow}
@@ -794,20 +800,22 @@ function SlideBody({ slide, accent }: { slide: Slide; accent: string }) {
             )}
             <h2
               className="font-semibold tracking-tight leading-tight"
-              style={{ fontSize: "clamp(1.75rem, 5cqw, 3.25rem)" }}
+              style={{ fontSize: "clamp(1.5rem, 4cqw, 2.5rem)" }}
             >
               {slide.title}
             </h2>
             {slide.body && (
               <p
-                className="mt-4 text-zinc-400 leading-relaxed max-w-3xl"
-                style={{ fontSize: "clamp(1rem, 1.8cqw, 1.25rem)" }}
+                className="mt-2 text-zinc-400 leading-relaxed max-w-3xl"
+                style={{ fontSize: "clamp(0.9rem, 1.4cqw, 1.0625rem)" }}
               >
                 {slide.body}
               </p>
             )}
           </div>
-          <div className="mt-6 sm:mt-10 flex-1 min-h-0 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5 auto-rows-fr">
+          <div
+            className={`mt-4 sm:mt-5 flex-1 min-h-0 grid ${cabinetCols} gap-3 sm:gap-3 auto-rows-fr`}
+          >
             {slide.people.map((p, i) => (
               <CabinetCard key={i} person={p} />
             ))}
@@ -1167,15 +1175,14 @@ function PersonMeta({
         </div>
         {person.affiliationLogo ? (
           <div
-            className="relative shrink-0 rounded-xl overflow-hidden bg-white flex items-center justify-center"
+            className="relative shrink-0 flex items-center justify-center"
             style={{
               width: spotlight
-                ? "clamp(3rem, 4.5cqw, 4rem)"
-                : "clamp(2.5rem, 3.5cqw, 3.25rem)",
+                ? "clamp(4.5rem, 6.5cqw, 6rem)"
+                : "clamp(3.5rem, 5cqw, 5rem)",
               height: spotlight
-                ? "clamp(3rem, 4.5cqw, 4rem)"
-                : "clamp(2.5rem, 3.5cqw, 3.25rem)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
+                ? "clamp(4.5rem, 6.5cqw, 6rem)"
+                : "clamp(3.5rem, 5cqw, 5rem)",
             }}
             aria-label={person.affiliation}
           >
@@ -1183,8 +1190,11 @@ function PersonMeta({
               src={person.affiliationLogo}
               alt={person.affiliation ?? ""}
               fill
-              sizes="80px"
-              className="object-contain p-1.5"
+              sizes="120px"
+              className="object-contain"
+              style={{
+                filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.45))",
+              }}
             />
           </div>
         ) : person.affiliation ? (
@@ -1349,15 +1359,15 @@ function CabinetCard({ person }: { person: Person }) {
           }}
         />
       </div>
-      <div className="shrink-0 px-4 py-3 sm:px-5 sm:py-4 border-t border-white/5 bg-white/[0.02]">
+      <div className="shrink-0 px-3 py-2 sm:px-3.5 sm:py-2.5 border-t border-white/5 bg-white/[0.02]">
         <div
           className="font-semibold text-white leading-tight tracking-tight truncate"
-          style={{ fontSize: "clamp(1rem, 1.4cqw, 1.25rem)" }}
+          style={{ fontSize: "clamp(0.875rem, 1.2cqw, 1.125rem)" }}
         >
           {person.name}
         </div>
         <div
-          className="uppercase tracking-[0.16em] font-semibold leading-snug mt-1 truncate"
+          className="uppercase tracking-[0.14em] font-semibold leading-snug mt-0.5 truncate"
           style={{
             color: person.accent,
             fontSize: "clamp(0.625rem, 0.85cqw, 0.75rem)",
