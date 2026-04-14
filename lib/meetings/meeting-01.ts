@@ -84,6 +84,119 @@ export const meeting01: Meeting = {
     {
       kind: "section",
       number: "02",
+      title: "The people running TTS",
+      blurb:
+        "Leadership transferred roughly three weeks ago. Two co-presidents and nine cabinet leads now drive every function of the club.",
+    },
+    {
+      kind: "people",
+      eyebrow: "Co-Presidents",
+      title: "Running the club",
+      body: "Three weeks in. Building infrastructure, team, and an advisor network worth being part of.",
+      people: [
+        {
+          name: "Tyler Larsen",
+          role: "Co-President · Consulting & People",
+          photo: "/img/tyler_shot.jpeg",
+          position: "center center",
+          initials: "TL",
+          accent: COLOR.gold,
+          bullets: [
+            "Consulting curriculum and client pipeline",
+            "E-board, partnerships, cross-club ecosystem",
+            "Community culture and recruiting",
+          ],
+        },
+        {
+          name: "Caleb Newton",
+          role: "Co-President · Innovation & Building",
+          photo: "/img/caleb_shot.jpg",
+          position: "center 15%",
+          initials: "CN",
+          accent: COLOR.red,
+          bullets: [
+            "Product curriculum and AI systems",
+            "Website, internal tooling, and builder culture",
+            "Startup relationships, demos, investor access",
+          ],
+        },
+      ],
+    },
+    {
+      kind: "cabinet",
+      eyebrow: "Meet the cabinet",
+      title: "The nine who run the rest of TTS",
+      body: "Every team, every function. If you need something, one of these people owns it.",
+      people: [
+        {
+          name: "Ephrem Adugna",
+          role: "Co-President, Building Team",
+          photo: "/img/ephrem_shot.jpeg",
+          initials: "EA",
+          accent: COLOR.red,
+        },
+        {
+          name: "Austin Chen",
+          role: "President, Biotech Team",
+          photo: "/img/austin_shot.png",
+          initials: "AC",
+          accent: COLOR.emerald,
+        },
+        {
+          name: "Gabriel Oliveri",
+          role: "President, Engineering Team",
+          photo: "/img/gabriel_shot.png",
+          initials: "GO",
+          accent: COLOR.blue,
+        },
+        {
+          name: "Omniya Mohamed",
+          role: "Lead of Operations",
+          photo: "/img/omniya_shot.jpeg",
+          initials: "OM",
+          accent: COLOR.red,
+        },
+        {
+          name: "Mary Zewdie",
+          role: "Lead of Marketing",
+          photo: "/img/mary_shot.jpeg",
+          initials: "MZ",
+          accent: COLOR.red,
+        },
+        {
+          name: "Esrom Dawit",
+          role: "External Affairs",
+          photo: "/img/esrom_shot.jpeg",
+          initials: "ED",
+          accent: COLOR.red,
+        },
+        {
+          name: "Annabelle Forbes",
+          role: "Social Chair",
+          photo: "/img/annabelle_shot.jpeg",
+          initials: "AF",
+          accent: COLOR.red,
+        },
+        {
+          name: "Malakai Carey",
+          role: "Lead of Music",
+          photo: "/img/malakai_shot.jpeg",
+          initials: "MC",
+          accent: COLOR.red,
+        },
+        {
+          name: "Jet Jadeja",
+          role: "Lead of Web3",
+          photo: "/img/jet_shot.jpeg",
+          initials: "JJ",
+          accent: COLOR.red,
+        },
+      ],
+    },
+
+    {
+      kind: "section",
+      number: "03",
       title: "The professional advisors behind TTS",
       blurb:
         "Not guest speakers. Active mentors personally invested in TTS winning.",
@@ -122,6 +235,8 @@ export const meeting01: Meeting = {
         {
           name: "Sagar Tiwari",
           role: "Stanford MBA · Former McKinsey · Clay Co-Developer",
+          photo: "/img/sagar_shot.jpeg",
+          position: "center center",
           initials: "ST",
           accent: COLOR.emerald,
           affiliation: "Stanford GSB",
@@ -142,7 +257,7 @@ export const meeting01: Meeting = {
 
     {
       kind: "section",
-      number: "03",
+      number: "04",
       title: "The Consulting Team",
       blurb:
         "Consulting work for real nonprofits and charity organizations. Every project serves a real organization.",
@@ -173,7 +288,7 @@ export const meeting01: Meeting = {
 
     {
       kind: "section",
-      number: "04",
+      number: "05",
       title: "Clay",
       blurb:
         "The Consulting Team's secret weapon. A comprehensive data orchestration and AI agent platform.",
@@ -274,7 +389,7 @@ export const meeting01: Meeting = {
 
     {
       kind: "section",
-      number: "05",
+      number: "06",
       title: "Collaboration",
       blurb:
         "The verticals are not silos. They back each other, and that is the point.",
