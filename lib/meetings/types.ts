@@ -19,6 +19,9 @@ export type Person = {
   // Optional affiliation logo path (e.g. "/img/logos/mckinsey.png").
   // Renders next to the affiliation label if provided.
   affiliationLogo?: string;
+  // If the logo is dark-on-transparent, set this so the renderer inverts
+  // the colors for dark slide backgrounds (black becomes white).
+  affiliationLogoInvert?: boolean;
 };
 
 export type Slide =

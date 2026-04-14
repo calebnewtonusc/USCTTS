@@ -316,6 +316,7 @@ const BOARD: {
   position?: string;
   companies: string[];
   logo?: string;
+  logoInvert?: boolean;
 }[] = [
   {
     name: "Matthew Kim",
@@ -327,6 +328,7 @@ const BOARD: {
     position: "center top",
     companies: [],
     logo: "/img/logos/mckinsey.png",
+    logoInvert: true,
   },
   {
     name: "Kevin Sangmuah",
@@ -344,7 +346,7 @@ const BOARD: {
     role: "Stanford MBA · Clay Co-Developer",
     title: "Board of Advisors",
     initials: "ST",
-    link: "https://www.linkedin.com/in/sagar-tiwari-8aa4411b9/",
+    link: "https://www.linkedin.com/in/sagart851/",
     headshot: "/img/sagar_shot.jpeg",
     position: "center center",
     companies: [],
@@ -382,6 +384,7 @@ const BOARD: {
     position: "center center",
     companies: [],
     logo: "/img/logos/mixbook.png",
+    logoInvert: true,
   },
 ];
 
@@ -5618,18 +5621,19 @@ export default function TTSSite() {
                             style={{
                               position: "relative",
                               width: "100%",
-                              height: 40,
+                              height: 48,
                             }}
                           >
                             <Image
                               src={person.logo}
                               alt=""
                               fill
-                              sizes="120px"
+                              sizes="160px"
                               style={{
                                 objectFit: "contain",
-                                filter:
-                                  "drop-shadow(0 2px 8px rgba(0,0,0,0.45))",
+                                filter: person.logoInvert
+                                  ? "invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.65))"
+                                  : "drop-shadow(0 2px 8px rgba(0,0,0,0.45))",
                               }}
                             />
                           </div>
@@ -5657,8 +5661,7 @@ export default function TTSSite() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fill, minmax(220px, 1fr))",
+                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
                     gap: 12,
                   }}
                 >

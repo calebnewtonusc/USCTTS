@@ -1178,11 +1178,11 @@ function PersonMeta({
             className="relative shrink-0 flex items-center justify-center"
             style={{
               width: spotlight
-                ? "clamp(4.5rem, 6.5cqw, 6rem)"
-                : "clamp(3.5rem, 5cqw, 5rem)",
+                ? "clamp(6rem, 8.5cqw, 8rem)"
+                : "clamp(5rem, 7cqw, 7rem)",
               height: spotlight
-                ? "clamp(4.5rem, 6.5cqw, 6rem)"
-                : "clamp(3.5rem, 5cqw, 5rem)",
+                ? "clamp(6rem, 8.5cqw, 8rem)"
+                : "clamp(5rem, 7cqw, 7rem)",
             }}
             aria-label={person.affiliation}
           >
@@ -1190,10 +1190,12 @@ function PersonMeta({
               src={person.affiliationLogo}
               alt={person.affiliation ?? ""}
               fill
-              sizes="120px"
+              sizes="160px"
               className="object-contain"
               style={{
-                filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.45))",
+                filter: person.affiliationLogoInvert
+                  ? "invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.65))"
+                  : "drop-shadow(0 2px 8px rgba(0,0,0,0.45))",
               }}
             />
           </div>

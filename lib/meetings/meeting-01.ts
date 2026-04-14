@@ -237,6 +237,7 @@ export const meeting01: Meeting = {
           accent: COLOR.gold,
           affiliation: "McKinsey & Company",
           affiliationLogo: "/img/logos/mckinsey.png",
+          affiliationLogoInvert: true,
           bullets: [
             "Joins the top consulting firm in the world in eight months",
             "Using that runway to make TTS the strongest club on campus",
@@ -318,6 +319,7 @@ export const meeting01: Meeting = {
           accent: COLOR.gold,
           affiliation: "Mixbook",
           affiliationLogo: "/img/logos/mixbook.png",
+          affiliationLogoInvert: true,
           bullets: [
             "Founder and CEO of Mixbook, $100M+ in annual revenue",
             "Two decades scaling a consumer tech company end-to-end",
