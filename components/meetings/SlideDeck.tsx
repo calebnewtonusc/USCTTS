@@ -735,11 +735,9 @@ function SlideBody({ slide, accent }: { slide: Slide; accent: string }) {
           ? "sm:grid-cols-2 lg:grid-cols-4"
           : count === 5
             ? "sm:grid-cols-2 lg:grid-cols-5"
-            : count === 6
-              ? "sm:grid-cols-2 lg:grid-cols-3"
-              : count >= 3
-                ? "md:grid-cols-3"
-                : "";
+            : count >= 3
+              ? "md:grid-cols-3"
+              : "";
     return (
       <div className={wrap}>
         <div className={`${innerFill} max-w-7xl`}>
@@ -1288,9 +1286,9 @@ function PersonCard({
 function CabinetCard({ person }: { person: Person }) {
   const pos = person.position ?? "center top";
   return (
-    <div className="h-full bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden flex items-center gap-4 p-4 sm:p-5">
+    <div className="h-full bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden flex flex-col">
       <div
-        className="relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-xl overflow-hidden bg-zinc-900"
+        className="relative w-full aspect-[4/5] bg-zinc-900"
         style={{
           backgroundImage: person.photo
             ? undefined
@@ -1302,30 +1300,41 @@ function CabinetCard({ person }: { person: Person }) {
             src={person.photo}
             alt={person.name}
             fill
-            sizes="96px"
+            sizes="(max-width: 768px) 50vw, 33vw"
             className="object-cover"
             style={{ objectPosition: pos }}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <span
-              className="text-xl font-bold"
-              style={{ color: person.accent }}
+              className="font-bold"
+              style={{
+                color: person.accent,
+                fontSize: "clamp(2rem, 6vw, 4rem)",
+              }}
             >
               {person.initials}
             </span>
           </div>
         )}
-      </div>
-      <div className="min-w-0 flex-1">
+        {/* subtle gradient so text overlay is legible if we add one later */}
         <div
-          className="font-semibold text-white leading-tight"
-          style={{ fontSize: "clamp(0.95rem, 1.3vw, 1.125rem)" }}
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none"
+          style={{
+            background: "linear-gradient(180deg, transparent, rgba(0,0,0,0.6))",
+          }}
+        />
+      </div>
+      <div className="p-4 sm:p-5 flex flex-col gap-1">
+        <div
+          className="font-semibold text-white leading-tight tracking-tight"
+          style={{ fontSize: "clamp(1.0625rem, 1.55vw, 1.375rem)" }}
         >
           {person.name}
         </div>
         <div
-          className="text-[10px] sm:text-[11px] uppercase tracking-wider font-medium mt-1 leading-snug"
+          className="text-[10px] sm:text-[11px] uppercase tracking-[0.18em] font-semibold leading-snug"
           style={{ color: person.accent }}
         >
           {person.role}

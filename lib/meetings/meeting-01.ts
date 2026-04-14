@@ -202,9 +202,17 @@ export const meeting01: Meeting = {
         "Not guest speakers. Active mentors personally invested in TTS winning.",
     },
     {
-      kind: "people",
+      kind: "stat",
       eyebrow: "Board of Advisors",
-      title: "Six people with real runway to shape this club",
+      value: "6",
+      label: "advisors behind TTS",
+      context:
+        "McKinsey, Reddit, Google, Stanford, Kaiser, and a $100M-revenue founder. All personally committed to making TTS the strongest club on campus.",
+    },
+    {
+      kind: "people",
+      eyebrow: "Consulting & strategy",
+      title: "The advisors driving the Consulting Team",
       people: [
         {
           name: "Matthew Kim",
@@ -246,6 +254,13 @@ export const meeting01: Meeting = {
             "Recognized by senior McKinsey leadership",
           ],
         },
+      ],
+    },
+    {
+      kind: "people",
+      eyebrow: "Engineering, medical, startup",
+      title: "The advisors backing every other team",
+      people: [
         {
           name: "Duncan Inganji",
           role: "Software Engineer, Google",
@@ -257,7 +272,7 @@ export const meeting01: Meeting = {
           bullets: [
             "Software engineer at Google",
             "Active mentor to USC students through ACTS2 Fellowship",
-            "Deep engineering guidance and a tight line to the Building Team",
+            "Engineering guidance and a tight line to the Building Team",
           ],
         },
         {
@@ -271,7 +286,7 @@ export const meeting01: Meeting = {
           bullets: [
             "Practicing pediatrician in Southern California",
             "Former member of the Kaiser Med School admission board",
-            "Knows exactly what it takes for top pre-med students to stand out",
+            "Knows exactly what top pre-med students need to stand out",
           ],
         },
         {
@@ -284,8 +299,8 @@ export const meeting01: Meeting = {
           affiliation: "Mixbook",
           bullets: [
             "Founder and CEO of Mixbook, $100M+ in annual revenue",
-            "Two decades of founder-CEO experience scaling a consumer tech company",
-            "Real startup wisdom for the Building and Entrepreneurship tracks",
+            "Two decades scaling a consumer tech company end-to-end",
+            "Real startup wisdom for Building and Entrepreneurship",
           ],
         },
       ],
