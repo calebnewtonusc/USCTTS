@@ -51,12 +51,12 @@ export const meeting01: Meeting = {
       number: "01",
       title: "A team-based collective",
       blurb:
-        "TTS is composed of four specialized verticals. Each team focuses on high-level execution within a specific domain.",
+        "TTS is composed of five specialized verticals. Each team focuses on high-level execution within a specific domain.",
     },
     {
       kind: "bullets",
       eyebrow: "Organizational structure",
-      title: "Four verticals, one club",
+      title: "Five verticals, one club",
       items: [
         {
           label: "Consulting",
@@ -77,6 +77,11 @@ export const meeting01: Meeting = {
           label: "Biotech",
           detail:
             "Research and real-world project work across biotech and biomedical engineering.",
+        },
+        {
+          label: "Music",
+          detail:
+            "Scoring demos, events, and campaigns, and shipping original music tied to every other team.",
         },
       ],
     },
