@@ -227,6 +227,7 @@ export const meeting01: Meeting = {
           initials: "MK",
           accent: COLOR.gold,
           affiliation: "McKinsey & Company",
+          affiliationLogo: "/img/logos/mckinsey.png",
           bullets: [
             "Joins the top consulting firm in the world in eight months",
             "Using that runway to make TTS the strongest club on campus",
@@ -240,6 +241,7 @@ export const meeting01: Meeting = {
           initials: "KS",
           accent: COLOR.red,
           affiliation: "Reddit",
+          affiliationLogo: "/img/logos/reddit.png",
           bullets: [
             "Software engineer at Reddit",
             "Founder and current CFO of Retax 360",
@@ -254,6 +256,7 @@ export const meeting01: Meeting = {
           initials: "ST",
           accent: COLOR.emerald,
           affiliation: "Stanford GSB",
+          affiliationLogo: "/img/logos/stanford.png",
           bullets: [
             "Helped launch Clay, the AI tool TTS now uses",
             "Current Stanford MBA, one of the most competitive programs in the world",
@@ -275,6 +278,7 @@ export const meeting01: Meeting = {
           initials: "DI",
           accent: COLOR.blue,
           affiliation: "Google",
+          affiliationLogo: "/img/logos/google.png",
           bullets: [
             "Software engineer at Google",
             "Active mentor to USC students through ACTS2 Fellowship",
@@ -289,6 +293,7 @@ export const meeting01: Meeting = {
           initials: "CN",
           accent: COLOR.violet,
           affiliation: "Kaiser Permanente",
+          affiliationLogo: "/img/logos/kaiser.png",
           bullets: [
             "Practicing pediatrician in Southern California",
             "Former member of the Kaiser Med School admission board",
@@ -303,6 +308,7 @@ export const meeting01: Meeting = {
           initials: "AL",
           accent: COLOR.gold,
           affiliation: "Mixbook",
+          affiliationLogo: "/img/logos/mixbook.png",
           bullets: [
             "Founder and CEO of Mixbook, $100M+ in annual revenue",
             "Two decades scaling a consumer tech company end-to-end",

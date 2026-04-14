@@ -691,7 +691,7 @@ function SlideBody({ slide, accent }: { slide: Slide; accent: string }) {
             </div>
           )}
           <div
-            className="font-black tracking-tighter leading-[0.95]"
+            className="font-black tracking-tighter leading-[1.05] pb-2"
             style={{
               fontSize: "clamp(5rem, 14cqw, 13rem)",
               background: `linear-gradient(180deg, ${accent}, #FFCC00)`,
@@ -1101,7 +1101,7 @@ function PersonPhoto({
   sizes: string;
   initialsFontSize: string;
 }) {
-  const pos = person.position ?? "center top";
+  const pos = person.position ?? "center 25%";
   return (
     <div
       className={`relative ${className} bg-zinc-900`}
@@ -1164,18 +1164,38 @@ function PersonMeta({
       {person.affiliation && (
         <div className="mb-4">
           <span
-            className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-medium tracking-wide"
+            className="inline-flex items-center gap-2 pr-3 rounded-full text-[11px] sm:text-xs font-medium tracking-wide"
             style={{
-              background: `${person.accent}1a`,
-              color: person.accent,
-              border: `1px solid ${person.accent}33`,
+              background: person.affiliationLogo
+                ? "rgba(255,255,255,0.92)"
+                : `${person.accent}1a`,
+              color: person.affiliationLogo ? "#0a0a0a" : person.accent,
+              border: person.affiliationLogo
+                ? "1px solid rgba(255,255,255,0.15)"
+                : `1px solid ${person.accent}33`,
+              paddingLeft: person.affiliationLogo ? "0.375rem" : "0.625rem",
+              paddingTop: person.affiliationLogo ? "0.25rem" : "0.25rem",
+              paddingBottom: person.affiliationLogo ? "0.25rem" : "0.25rem",
             }}
           >
-            <span
-              className="w-1.5 h-1.5 rounded-full"
-              style={{ background: person.accent }}
-              aria-hidden
-            />
+            {person.affiliationLogo ? (
+              <span className="relative shrink-0 w-5 h-5 rounded-full overflow-hidden bg-white flex items-center justify-center">
+                <Image
+                  src={person.affiliationLogo}
+                  alt=""
+                  fill
+                  sizes="20px"
+                  className="object-contain p-0.5"
+                  aria-hidden
+                />
+              </span>
+            ) : (
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ background: person.accent }}
+                aria-hidden
+              />
+            )}
             {person.affiliation}
           </span>
         </div>
@@ -1264,15 +1284,17 @@ function PersonCard({
     );
   }
   // 2 or 3 people: card stretches to grid cell height. Photo top, content below.
+  // Photo is flex-1 so it fills available space AFTER the meta reserves what it
+  // needs. This prevents bullets from getting clipped when cards are tall.
   return (
-    <div className="bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden flex flex-col h-full">
+    <div className="bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden flex flex-col h-full min-h-0">
       <PersonPhoto
         person={person}
-        className="w-full aspect-[4/5] shrink-0"
+        className="w-full flex-1 min-h-0"
         sizes="(max-width: 768px) 100vw, 33vw"
         initialsFontSize="clamp(3rem, 7cqw, 5rem)"
       />
-      <div className="p-5 sm:p-6 flex-1 min-h-0">
+      <div className="p-5 sm:p-6 shrink-0 border-t border-white/5 bg-white/[0.02]">
         <PersonMeta person={person} />
       </div>
     </div>
@@ -1280,7 +1302,7 @@ function PersonCard({
 }
 
 function CabinetCard({ person }: { person: Person }) {
-  const pos = person.position ?? "center top";
+  const pos = person.position ?? "center 25%";
   return (
     <div className="h-full min-h-0 bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden flex flex-col">
       <div

@@ -16,6 +16,9 @@ export type Person = {
   // Optional affiliation chip (e.g. "McKinsey", "Reddit", "Stanford GSB").
   // Renders as a subtle pill below the role on people slides.
   affiliation?: string;
+  // Optional affiliation logo path (e.g. "/img/logos/mckinsey.png").
+  // Renders next to the affiliation label if provided.
+  affiliationLogo?: string;
 };
 
 export type Slide =
