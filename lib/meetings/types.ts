@@ -6,6 +6,10 @@ export type Person = {
   name: string;
   role: string;
   photo?: string;
+  // CSS object-position value for the photo. Defaults to "center top"
+  // because most TTS headshots frame the face near the top of the image.
+  // Examples: "center top", "center center", "center 15%".
+  position?: string;
   initials: string;
   accent: string;
   bullets?: string[];

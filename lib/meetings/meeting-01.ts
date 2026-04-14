@@ -43,6 +43,7 @@ export const meeting01: Meeting = {
           name: "Tyler Larsen",
           role: "Co-President · Consulting & People",
           photo: "/img/tyler_shot.jpeg",
+          position: "center center",
           initials: "TL",
           accent: COLOR.gold,
           bullets: [
@@ -55,6 +56,7 @@ export const meeting01: Meeting = {
           name: "Caleb Newton",
           role: "Co-President · Innovation & Building",
           photo: "/img/caleb_shot.jpg",
+          position: "center 15%",
           initials: "CN",
           accent: COLOR.red,
           bullets: [
@@ -394,6 +396,7 @@ export const meeting01: Meeting = {
           name: "Caleb Newton",
           role: "Co-President, Building Team",
           photo: "/img/caleb_shot.jpg",
+          position: "center 15%",
           initials: "CN",
           accent: COLOR.red,
           bullets: [

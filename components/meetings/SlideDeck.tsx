@@ -434,13 +434,8 @@ function SlideBody({ slide, accent }: { slide: Slide; accent: string }) {
 
   if (slide.kind === "people") {
     const count = slide.people.length;
-    // 1 person → side-by-side on desktop. 2 → duo. 3 → trio grid.
     const gridCols =
-      count === 1
-        ? "md:grid-cols-5"
-        : count === 2
-          ? "md:grid-cols-2"
-          : "md:grid-cols-3";
+      count === 2 ? "sm:grid-cols-2" : count >= 3 ? "md:grid-cols-3" : "";
     return (
       <div className={`${wrap} items-start sm:items-center`}>
         <div className="mx-auto max-w-6xl w-full">
@@ -463,13 +458,19 @@ function SlideBody({ slide, accent }: { slide: Slide; accent: string }) {
               {slide.body}
             </p>
           )}
-          <div
-            className={`mt-6 sm:mt-10 grid grid-cols-1 ${gridCols} gap-4 sm:gap-6`}
-          >
-            {slide.people.map((p, i) => (
-              <PersonCard key={i} person={p} spotlight={count === 1} />
-            ))}
-          </div>
+          {count === 1 ? (
+            <div className="mt-6 sm:mt-10 max-w-3xl">
+              <PersonCard person={slide.people[0]!} spotlight />
+            </div>
+          ) : (
+            <div
+              className={`mt-6 sm:mt-10 grid grid-cols-1 ${gridCols} gap-4 sm:gap-6`}
+            >
+              {slide.people.map((p, i) => (
+                <PersonCard key={i} person={p} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -642,6 +643,83 @@ function slideLabel(s: Slide): string {
   }
 }
 
+function PersonPhoto({
+  person,
+  className,
+  sizes,
+  initialsFontSize,
+}: {
+  person: Person;
+  className: string;
+  sizes: string;
+  initialsFontSize: string;
+}) {
+  const pos = person.position ?? "center top";
+  return (
+    <div
+      className={`relative ${className} bg-zinc-900`}
+      style={{
+        backgroundImage: person.photo
+          ? undefined
+          : `linear-gradient(135deg, ${person.accent}33, transparent 60%)`,
+      }}
+    >
+      {person.photo ? (
+        <Image
+          src={person.photo}
+          alt={person.name}
+          fill
+          sizes={sizes}
+          className="object-cover"
+          style={{ objectPosition: pos }}
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span
+            className="font-bold tracking-tight"
+            style={{ fontSize: initialsFontSize, color: person.accent }}
+          >
+            {person.initials}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PersonMeta({ person }: { person: Person }) {
+  return (
+    <>
+      <div
+        className="text-[11px] font-semibold uppercase tracking-[0.2em] mb-1.5"
+        style={{ color: person.accent }}
+      >
+        {person.role}
+      </div>
+      <div className="text-lg sm:text-2xl font-semibold tracking-tight mb-3">
+        {person.name}
+      </div>
+      {person.bullets && person.bullets.length > 0 && (
+        <ul className="space-y-2">
+          {person.bullets.map((b, i) => (
+            <li
+              key={i}
+              className="text-sm sm:text-base text-zinc-300 leading-relaxed flex gap-2.5"
+            >
+              <span
+                className="shrink-0 mt-1.5 w-1 h-1 rounded-full"
+                style={{ background: person.accent }}
+                aria-hidden
+              />
+              <span>{b}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
 function PersonCard({
   person,
   spotlight = false,
@@ -649,88 +727,48 @@ function PersonCard({
   person: Person;
   spotlight?: boolean;
 }) {
-  const photoWrap = spotlight
-    ? "md:col-span-2 aspect-square md:aspect-auto md:h-full"
-    : "aspect-square";
-  const contentWrap = spotlight ? "md:col-span-3" : "";
-
-  return (
-    <div
-      className={`${spotlight ? "md:col-span-5 grid md:grid-cols-5 gap-4 sm:gap-6" : ""} bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden`}
-    >
-      <div
-        className={`relative ${photoWrap} bg-zinc-900`}
-        style={{
-          backgroundImage: `linear-gradient(135deg, ${person.accent}1f, transparent 60%)`,
-        }}
-      >
-        {person.photo ? (
-          <Image
-            src={person.photo}
-            alt={person.name}
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span
-              className="font-bold tracking-tight"
-              style={{
-                fontSize: spotlight
-                  ? "clamp(3rem, 8vw, 6rem)"
-                  : "clamp(2.5rem, 6vw, 4rem)",
-                color: person.accent,
-              }}
-            >
-              {person.initials}
-            </span>
-          </div>
-        )}
-        <div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 to-transparent"
+  if (spotlight) {
+    // 1 person: image on left (fixed width on desktop), content on right.
+    return (
+      <div className="bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden flex flex-col md:flex-row">
+        <PersonPhoto
+          person={person}
+          className="w-full aspect-[4/5] md:w-64 md:aspect-auto md:self-stretch md:shrink-0"
+          sizes="(max-width: 768px) 100vw, 256px"
+          initialsFontSize="clamp(3.5rem, 10vw, 6rem)"
         />
+        <div className="p-5 sm:p-6 flex-1 min-w-0">
+          <PersonMeta person={person} />
+        </div>
       </div>
-      <div className={`${contentWrap} p-4 sm:p-5`}>
-        <div
-          className="text-[11px] font-semibold uppercase tracking-[0.2em] mb-1.5"
-          style={{ color: person.accent }}
-        >
-          {person.role}
-        </div>
-        <div className="text-lg sm:text-2xl font-semibold tracking-tight mb-3">
-          {person.name}
-        </div>
-        {person.bullets && person.bullets.length > 0 && (
-          <ul className="space-y-2">
-            {person.bullets.map((b, i) => (
-              <li
-                key={i}
-                className="text-sm sm:text-base text-zinc-300 leading-relaxed flex gap-2.5"
-              >
-                <span
-                  className="shrink-0 mt-1.5 w-1 h-1 rounded-full"
-                  style={{ background: person.accent }}
-                  aria-hidden
-                />
-                <span>{b}</span>
-              </li>
-            ))}
-          </ul>
-        )}
+    );
+  }
+  // 2 or 3 people: card with photo on top in portrait ratio.
+  return (
+    <div className="bg-white/[0.04] border border-white/10 rounded-2xl overflow-hidden flex flex-col">
+      <PersonPhoto
+        person={person}
+        className="w-full aspect-[4/5]"
+        sizes="(max-width: 768px) 100vw, 33vw"
+        initialsFontSize="clamp(3rem, 7vw, 5rem)"
+      />
+      <div className="p-4 sm:p-5 flex-1">
+        <PersonMeta person={person} />
       </div>
     </div>
   );
 }
 
 function CabinetCard({ person }: { person: Person }) {
+  const pos = person.position ?? "center top";
   return (
-    <div className="bg-white/[0.04] border border-white/10 rounded-xl overflow-hidden flex items-center gap-3 p-2.5 sm:p-3">
+    <div className="bg-white/[0.04] border border-white/10 rounded-xl overflow-hidden flex items-center gap-3 p-3">
       <div
-        className="relative shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden bg-zinc-900"
+        className="relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-zinc-900"
         style={{
-          backgroundImage: `linear-gradient(135deg, ${person.accent}2a, transparent 70%)`,
+          backgroundImage: person.photo
+            ? undefined
+            : `linear-gradient(135deg, ${person.accent}33, transparent 70%)`,
         }}
       >
         {person.photo ? (
@@ -738,8 +776,9 @@ function CabinetCard({ person }: { person: Person }) {
             src={person.photo}
             alt={person.name}
             fill
-            sizes="56px"
+            sizes="64px"
             className="object-cover"
+            style={{ objectPosition: pos }}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -753,11 +792,11 @@ function CabinetCard({ person }: { person: Person }) {
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-sm sm:text-base font-semibold text-white leading-tight truncate">
+        <div className="text-sm sm:text-base font-semibold text-white leading-tight">
           {person.name}
         </div>
         <div
-          className="text-[10px] sm:text-xs uppercase tracking-wider font-medium truncate mt-0.5"
+          className="text-[10px] sm:text-xs uppercase tracking-wider font-medium mt-0.5 leading-snug"
           style={{ color: person.accent }}
         >
           {person.role}
