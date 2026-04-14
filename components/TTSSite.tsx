@@ -378,6 +378,168 @@ const BOARD: {
   },
 ];
 
+const ALUMNI: {
+  name: string;
+  role: string;
+  company: string;
+  initials: string;
+  accent: string;
+  link: string;
+  headshot: string;
+  position?: string;
+}[] = [
+  {
+    name: "Elizabeth Abbey",
+    role: "Software Engineer",
+    company: "Reddit · ex-Microsoft",
+    initials: "EA",
+    accent: "#CC0000",
+    link: "https://www.linkedin.com/in/elizabeth-abbey-27418123b",
+    headshot: "/img/alumni/elizabethabbey.jpeg",
+    position: "center center",
+  },
+  {
+    name: "Susan Nyirenda",
+    role: "Software Engineer",
+    company: "Apple",
+    initials: "SN",
+    accent: "#10b981",
+    link: "https://www.linkedin.com/pub/dir/Susan/Nyirenda",
+    headshot: "/img/alumni/susannyirenda.jpeg",
+    position: "center center",
+  },
+  {
+    name: "Senai Assefa",
+    role: "Software Engineer",
+    company: "Bloomberg · ex-Microsoft",
+    initials: "SA",
+    accent: "#3b82f6",
+    link: "https://www.linkedin.com/in/senai-assefa",
+    headshot: "/img/alumni/senaiassefa.jpeg",
+    position: "center center",
+  },
+  {
+    name: "David Esquivel",
+    role: "Cybersecurity Engineer",
+    company: "Capital One",
+    initials: "DE",
+    accent: "#10b981",
+    link: "https://www.linkedin.com/in/davesq",
+    headshot: "/img/alumni/davidesquivel.jpeg",
+    position: "center center",
+  },
+  {
+    name: "Anthony Nasser",
+    role: "Software Engineer",
+    company: "NBC Universal",
+    initials: "AN",
+    accent: "#FFCC00",
+    link: "https://www.linkedin.com/in/anthony-nasser",
+    headshot: "/img/alumni/anthonynasser.jpeg",
+    position: "center center",
+  },
+  {
+    name: "Emerson Kahle",
+    role: "Software Development Engineer",
+    company: "Fastly",
+    initials: "EK",
+    accent: "#CC0000",
+    link: "https://www.linkedin.com/in/emerson-kahle-560315198",
+    headshot: "/img/alumni/emersonkahle.jpeg",
+    position: "center center",
+  },
+  {
+    name: "Albert Chung",
+    role: "Forward Deployed Engineer",
+    company: "Palantir Technologies",
+    initials: "AC",
+    accent: "#FFCC00",
+    link: "https://www.linkedin.com/in/albert-chung-70577821b",
+    headshot: "/img/alumni/albertchung.jpeg",
+    position: "center center",
+  },
+  {
+    name: "Kelly Kim",
+    role: "JD Candidate",
+    company: "USC Gould",
+    initials: "KK",
+    accent: "#CC0000",
+    link: "https://www.linkedin.com/in/kelly-kim-usc",
+    headshot: "/img/alumni/kellykim.jpeg",
+    position: "center center",
+  },
+  {
+    name: "Akshar Aiyer",
+    role: "Investment Banking",
+    company: "Citi",
+    initials: "AA",
+    accent: "#8b5cf6",
+    link: "https://www.linkedin.com/in/akshar-aiyer/",
+    headshot: "/img/alumni/aksharaiyer.jpeg",
+    position: "center center",
+  },
+  {
+    name: "Abhi Shah",
+    role: "Investment Banking",
+    company: "Jefferies",
+    initials: "AS",
+    accent: "#8b5cf6",
+    link: "https://www.linkedin.com/in/abhiiishah",
+    headshot: "/img/alumni/abhishah.jpeg",
+    position: "center center",
+  },
+  {
+    name: "Parth Juthani",
+    role: "Investment Banking",
+    company: "Nomura",
+    initials: "PJ",
+    accent: "#8b5cf6",
+    link: "https://www.linkedin.com/in/parthjuthani",
+    headshot: "/img/alumni/parthjuthani.jpeg",
+    position: "center center",
+  },
+  {
+    name: "James La",
+    role: "Technology Consulting",
+    company: "PwC",
+    initials: "JL",
+    accent: "#CC0000",
+    link: "https://www.linkedin.com/in/jbla-usc",
+    headshot: "/img/alumni/jamesla.jpeg",
+    position: "center center",
+  },
+  {
+    name: "Brandon McGowan",
+    role: "Product Manager",
+    company: "Epic",
+    initials: "BM",
+    accent: "#CC0000",
+    link: "https://www.linkedin.com/in/brandon-mcgowan-413724223",
+    headshot: "/img/alumni/brandonmcgowan.jpeg",
+    position: "center center",
+  },
+  {
+    name: "Rohan Singh",
+    role: "Sales & Analytics",
+    company: "Bloomberg",
+    initials: "RS",
+    accent: "#3b82f6",
+    link: "https://www.linkedin.com/in/rohansingh23/",
+    headshot: "/img/alumni/rohansingh.jpeg",
+    position: "center center",
+  },
+  {
+    name: "Joshua Kim",
+    role: "Analyst",
+    company: "Roxborough Group",
+    initials: "JK",
+    accent: "#8b5cf6",
+    link: "https://www.linkedin.com/in/joshuadkim",
+    headshot: "/img/alumni/joshuakim.jpeg",
+    position: "center center",
+  },
+];
+
 const INSTAGRAM_URL = "https://instagram.com/trojantechsolutions";
 
 // ── Split-text character reveal ───────────────────────────────────────────────
@@ -5491,94 +5653,122 @@ export default function TTSSite() {
                     gap: 12,
                   }}
                 >
-                  {[0, 1, 2, 3, 4, 5].map((i) => (
-                    <div
-                      key={i}
+                  {ALUMNI.map((person, i) => (
+                    <a
+                      key={person.name}
+                      href={person.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${person.name}, ${person.role} at ${person.company}`}
                       className="tts-fade"
-                      style={{ transitionDelay: `${i * 0.05}s` }}
+                      style={{
+                        transitionDelay: `${i * 0.03}s`,
+                        display: "block",
+                        textDecoration: "none",
+                        background: "rgba(255,255,255,0.04)",
+                        borderRadius: 14,
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        padding: "16px",
+                        transition:
+                          "transform 0.3s cubic-bezier(0.34,1.56,0.64,1), border-color 0.2s, box-shadow 0.3s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLAnchorElement).style.transform =
+                          "translateY(-4px)";
+                        (
+                          e.currentTarget as HTMLAnchorElement
+                        ).style.borderColor = `${person.accent}66`;
+                        (e.currentTarget as HTMLAnchorElement).style.boxShadow =
+                          `0 16px 40px ${person.accent}22`;
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLAnchorElement).style.transform =
+                          "translateY(0)";
+                        (
+                          e.currentTarget as HTMLAnchorElement
+                        ).style.borderColor = "rgba(255,255,255,0.08)";
+                        (e.currentTarget as HTMLAnchorElement).style.boxShadow =
+                          "none";
+                      }}
                     >
                       <div
                         style={{
-                          background: "rgba(255,255,255,0.04)",
-                          borderRadius: 14,
-                          border: "1px dashed rgba(255,255,255,0.25)",
-                          padding: "20px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
                         }}
                       >
                         <div
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 12,
-                            marginBottom: 14,
+                            position: "relative",
+                            width: 48,
+                            height: 48,
+                            borderRadius: 12,
+                            overflow: "hidden",
+                            background: `${person.accent}22`,
+                            flexShrink: 0,
                           }}
                         >
+                          <Image
+                            src={person.headshot}
+                            alt={person.name}
+                            fill
+                            sizes="48px"
+                            style={{
+                              objectFit: "cover",
+                              objectPosition:
+                                person.position ?? "center center",
+                            }}
+                          />
+                        </div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
                           <div
                             style={{
-                              width: 40,
-                              height: 40,
-                              borderRadius: 10,
-                              border: "1px dashed rgba(255,255,255,0.3)",
-                              background: "rgba(255,255,255,0.06)",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              flexShrink: 0,
+                              color: "#fff",
+                              fontWeight: 700,
+                              fontSize: 14,
+                              lineHeight: 1.2,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
                             }}
                           >
-                            <span style={{ fontSize: 14, color: "#a1a1aa" }}>
-                              ?
-                            </span>
+                            {person.name}
                           </div>
-                          <div>
-                            <div
-                              style={{
-                                width: 80,
-                                height: 10,
-                                background: "rgba(255,255,255,0.2)",
-                                borderRadius: 4,
-                                marginBottom: 6,
-                              }}
-                            />
-                            <div
-                              style={{
-                                width: 56,
-                                height: 8,
-                                background: "rgba(255,255,255,0.1)",
-                                borderRadius: 4,
-                              }}
-                            />
+                          <div
+                            style={{
+                              color: person.accent,
+                              fontWeight: 600,
+                              fontSize: 10,
+                              letterSpacing: "0.08em",
+                              textTransform: "uppercase",
+                              marginTop: 4,
+                              lineHeight: 1.3,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {person.role}
                           </div>
-                        </div>
-                        <div style={{ display: "flex", gap: 6 }}>
-                          {[0, 1, 2].map((j) => (
-                            <div
-                              key={j}
-                              style={{
-                                width: 28,
-                                height: 28,
-                                borderRadius: 6,
-                                background: "rgba(255,255,255,0.06)",
-                                border: "1px dashed rgba(255,255,255,0.2)",
-                              }}
-                            />
-                          ))}
+                          <div
+                            style={{
+                              color: "#a1a1aa",
+                              fontSize: 11,
+                              marginTop: 2,
+                              lineHeight: 1.3,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {person.company}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </a>
                   ))}
                 </div>
-                <p
-                  className="tts-fade"
-                  style={{
-                    fontSize: 13,
-                    color: "#71717a",
-                    marginTop: 20,
-                    fontStyle: "italic",
-                  }}
-                >
-                  Alumni profiles coming soon. Reach out to add yours.
-                </p>
               </div>
             </div>
           </div>
