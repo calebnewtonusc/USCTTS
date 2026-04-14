@@ -415,12 +415,35 @@ function SlideStage({
     const apply = () => {
       target.style.transform = "";
       target.style.transformOrigin = "center center";
-      const cw = root.clientWidth;
-      const ch = root.clientHeight;
-      const sw = target.scrollWidth;
-      const sh = target.scrollHeight;
-      if (!cw || !ch || !sw || !sh) return;
-      const s = Math.min(1, cw / sw, ch / sh);
+      const rr = root.getBoundingClientRect();
+      if (!rr.width || !rr.height) return;
+
+      // Measure real ink extent by scanning descendant bounding rects.
+      // scrollWidth/scrollHeight on the flex wrap misses some horizontal
+      // overflow cases (huge display text, etc.), so use the union of all
+      // descendant rects for a tighter bound.
+      let minL = Infinity;
+      let minT = Infinity;
+      let maxR = -Infinity;
+      let maxB = -Infinity;
+      const rects = [target, ...Array.from(target.querySelectorAll("*"))];
+      for (const el of rects) {
+        const r = (el as HTMLElement).getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) continue;
+        if (r.left < minL) minL = r.left;
+        if (r.top < minT) minT = r.top;
+        if (r.right > maxR) maxR = r.right;
+        if (r.bottom > maxB) maxB = r.bottom;
+      }
+      if (!isFinite(minL) || !isFinite(maxR)) return;
+
+      const contentW = maxR - minL;
+      const contentH = maxB - minT;
+      if (!contentW || !contentH) return;
+
+      const sx = rr.width / contentW;
+      const sy = rr.height / contentH;
+      const s = Math.min(1, sx, sy);
       if (s < 0.999) {
         target.style.transform = `scale(${s})`;
       }
@@ -436,6 +459,11 @@ function SlideStage({
     const raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(apply);
     });
+
+    // Re-apply once fonts load (big display text measures wrong pre-load).
+    if (typeof document !== "undefined" && document.fonts?.ready) {
+      document.fonts.ready.then(() => apply()).catch(() => {});
+    }
 
     // Catch late image loads (headshots).
     const imgs = Array.from(target.querySelectorAll("img"));
