@@ -513,54 +513,58 @@ function SlideBody({ slide, accent }: { slide: Slide; accent: string }) {
           )}
           <h2
             className="tts-neon-title font-semibold tracking-tight leading-tight"
-            style={{ fontSize: "clamp(1.75rem, 5cqw, 3rem)" }}
+            style={{ fontSize: "clamp(2rem, 5.5cqw, 3.5rem)" }}
           >
             {slide.title}
           </h2>
           {slide.body && (
             <p
-              className="mt-4 sm:mt-6 text-white leading-relaxed max-w-4xl"
-              style={{ fontSize: "clamp(0.95rem, 1.5cqw, 1.125rem)" }}
+              className="mt-3 sm:mt-4 text-white leading-relaxed max-w-4xl"
+              style={{ fontSize: "clamp(1rem, 1.6cqw, 1.25rem)" }}
             >
               {slide.body}
             </p>
           )}
-          <div className="mt-6 sm:mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 flex-1 min-h-0">
+          <div className="mt-5 sm:mt-6 grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 flex-1 min-h-0">
             {slide.columns.map((col, colIdx) => {
               const colAccent = col.accent ?? accent;
               return (
                 <div
                   key={colIdx}
-                  className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-5 sm:p-6 min-h-0"
+                  className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 sm:p-8 min-h-0"
                 >
                   {col.eyebrow && (
                     <div
-                      className="text-[10px] sm:text-xs uppercase tracking-[0.25em] font-semibold mb-1.5"
+                      className="text-xs sm:text-sm uppercase tracking-[0.25em] font-semibold mb-2"
                       style={{ color: colAccent }}
                     >
                       {col.eyebrow}
                     </div>
                   )}
                   <h3
-                    className="tts-neon-title font-semibold tracking-tight leading-tight mb-4 sm:mb-5"
-                    style={{ fontSize: "clamp(1.125rem, 2.2cqw, 1.5rem)" }}
+                    className="tts-neon-title font-semibold tracking-tight leading-tight mb-4 sm:mb-6"
+                    style={{ fontSize: "clamp(1.5rem, 3cqw, 2.25rem)" }}
                   >
                     {col.title}
                   </h3>
-                  <ul className="flex flex-col gap-3 sm:gap-4 min-h-0 overflow-auto">
+                  <ul className="flex flex-col flex-1 min-h-0 justify-between gap-3 sm:gap-4">
                     {col.items.map((item, i) => (
-                      <li key={i} className="flex gap-3">
+                      <li key={i} className="flex gap-4 flex-1 min-h-0">
                         <span
-                          className="font-mono text-[11px] shrink-0 pt-1 w-6"
-                          style={{ color: colAccent }}
+                          className="font-mono shrink-0 pt-1"
+                          style={{
+                            color: colAccent,
+                            fontSize: "clamp(0.75rem, 1.1cqw, 0.95rem)",
+                            width: "clamp(1.75rem, 2.5cqw, 2.5rem)",
+                          }}
                         >
                           {String(i + 1).padStart(2, "0")}
                         </span>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1 flex flex-col justify-center">
                           <div
                             className="font-semibold text-white leading-snug"
                             style={{
-                              fontSize: "clamp(0.95rem, 1.4cqw, 1.0625rem)",
+                              fontSize: "clamp(1.125rem, 1.9cqw, 1.5rem)",
                             }}
                           >
                             {item.label}
@@ -569,7 +573,7 @@ function SlideBody({ slide, accent }: { slide: Slide; accent: string }) {
                             <div
                               className="text-white leading-snug mt-1"
                               style={{
-                                fontSize: "clamp(0.85rem, 1.15cqw, 0.95rem)",
+                                fontSize: "clamp(0.95rem, 1.45cqw, 1.125rem)",
                               }}
                             >
                               {item.detail}
