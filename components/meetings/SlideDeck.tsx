@@ -745,35 +745,37 @@ function SlideBody({ slide, accent }: { slide: Slide; accent: string }) {
               {slide.title}
             </h2>
           </div>
-          <div className="mt-6 sm:mt-8 flex flex-col gap-3 sm:gap-4">
+          <div className="mt-6 sm:mt-8 flex-1 min-h-0 flex flex-col gap-4 sm:gap-5">
             {slide.cards.map((card, i) => (
               <div
                 key={i}
-                className="relative bg-white/[0.04] border border-white/10 rounded-2xl px-5 sm:px-7 py-4 sm:py-5 flex flex-col gap-2"
+                className="relative flex-1 min-h-0 bg-white/[0.04] border border-white/10 rounded-2xl px-7 sm:px-10 py-6 sm:py-8 flex flex-col justify-center gap-4"
               >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span
-                      className="font-mono text-xs sm:text-sm"
-                      style={{ color: card.accent }}
-                    >
-                      {card.label}
-                    </span>
-                    <span
-                      className="inline-block h-4 w-[3px] rounded-full"
-                      style={{ background: card.accent }}
-                    />
-                    <span
-                      className="font-semibold tracking-tight"
-                      style={{ fontSize: "clamp(1.125rem, 2.2cqw, 1.625rem)" }}
-                    >
-                      {card.heading}
-                    </span>
-                  </div>
+                <div className="flex items-center gap-4 sm:gap-5">
+                  <span
+                    className="font-mono text-sm sm:text-base shrink-0"
+                    style={{ color: card.accent }}
+                  >
+                    {card.label}
+                  </span>
+                  <span
+                    className="inline-block shrink-0 rounded-full"
+                    style={{
+                      background: card.accent,
+                      width: "4px",
+                      height: "clamp(2rem, 4cqw, 3.5rem)",
+                    }}
+                  />
+                  <span
+                    className="font-semibold tracking-tight leading-tight"
+                    style={{ fontSize: "clamp(1.75rem, 4.2cqw, 3.25rem)" }}
+                  >
+                    {card.heading}
+                  </span>
                 </div>
                 <p
                   className="text-white leading-snug"
-                  style={{ fontSize: "clamp(0.9rem, 1.35cqw, 1.0625rem)" }}
+                  style={{ fontSize: "clamp(1.0625rem, 1.9cqw, 1.5rem)" }}
                 >
                   {card.body}
                 </p>
