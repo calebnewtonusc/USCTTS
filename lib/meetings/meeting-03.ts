@@ -65,29 +65,5 @@ export const meeting03: Meeting = {
       title: "Build Team",
       blurb: "Let's build.",
     },
-
-    {
-      kind: "bullets",
-      eyebrow: "Tonight",
-      title: "How this works",
-      items: [
-        {
-          label: "General session",
-          detail: "Quick announcements. Then teams break off.",
-        },
-        {
-          label: "Build team",
-          detail: "Caleb runs the room.",
-        },
-        {
-          label: "Biotech team",
-          detail: "Running their own session.",
-        },
-        {
-          label: "Consulting team",
-          detail: "Tyler runs the room.",
-        },
-      ],
-    },
   ],
 };
