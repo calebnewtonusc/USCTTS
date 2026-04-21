@@ -29,6 +29,17 @@ export const meeting03: Meeting = {
       footer: "Monday, May 5, 2026",
     },
 
+    // ----------------------------------------------------------------
+    // BUILD TEAM BREAKOUT
+    // ----------------------------------------------------------------
+
+    {
+      kind: "section",
+      number: "01",
+      title: "Build Team",
+      blurb: "Let's build.",
+    },
+
     {
       kind: "bullets",
       eyebrow: "Tonight",
@@ -51,17 +62,6 @@ export const meeting03: Meeting = {
           detail: "Tyler runs the room.",
         },
       ],
-    },
-
-    // ----------------------------------------------------------------
-    // BUILD TEAM BREAKOUT
-    // ----------------------------------------------------------------
-
-    {
-      kind: "section",
-      number: "01",
-      title: "Build Team",
-      blurb: "Let's build.",
     },
   ],
 };
