@@ -8,7 +8,7 @@ import { COLOR } from "./types";
 export const meeting02: Meeting = {
   slug: "meeting-02",
   number: 2,
-  title: "Build. Build. Build.",
+  title: "Building Team 1st Meeting",
   date: "2026-04-28",
   dateLabel: "Tuesday, April 28",
   timeLabel: "7:00 PM PT",
