@@ -24,9 +24,35 @@ export const meeting03: Meeting = {
     {
       kind: "title",
       eyebrow: "Meeting 03",
-      title: "Team Build Session",
-      subtitle: "General kickoff. Then teams split.",
+      title: "Team Build Day",
+      subtitle: "Tonight we build. Teams split off after this.",
       footer: "Monday, May 5, 2026",
+    },
+
+    {
+      kind: "three-up",
+      eyebrow: "Tonight's teams",
+      title: "Where you're headed",
+      cards: [
+        {
+          label: "Building",
+          heading: "Build Team",
+          body: "Staying here. Caleb runs the room.",
+          accent: COLOR.red,
+        },
+        {
+          label: "Science",
+          heading: "Biotech Team",
+          body: "Breaking off to their own session.",
+          accent: COLOR.emerald,
+        },
+        {
+          label: "Strategy",
+          heading: "Consulting Team",
+          body: "Breaking off. Tyler runs the room.",
+          accent: COLOR.gold,
+        },
+      ],
     },
 
     // ----------------------------------------------------------------
