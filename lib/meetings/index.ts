@@ -10,15 +10,12 @@
 import type { Meeting } from "./types";
 import { meeting01 } from "./meeting-01";
 import { meeting02 } from "./meeting-02";
+import { meeting03 } from "./meeting-03";
 
 export type { Meeting, Slide, Person } from "./types";
 export { COLOR } from "./types";
 
-export const MEETINGS: Meeting[] = [
-  meeting01,
-  meeting02,
-  // meeting03,
-];
+export const MEETINGS: Meeting[] = [meeting01, meeting02, meeting03];
 
 export function getMeeting(slug: string): Meeting | undefined {
   return MEETINGS.find((m) => m.slug === slug);
