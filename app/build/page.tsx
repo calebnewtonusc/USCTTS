@@ -153,7 +153,7 @@ export default function BuildPage() {
         className="relative z-10 mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8"
       >
         <SectionHeader
-          eyebrow="Before Meeting 2"
+          eyebrow="Before Build Meeting 2"
           title="Pre-build checklist"
           body="This is the stuff that should also go in the email. If it is required before the meeting, it lives here too."
         />
