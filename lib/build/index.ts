@@ -239,123 +239,250 @@ export const buildMeeting02: BuildSession = {
     {
       kind: "title",
       eyebrow: "Build Meeting 02",
-      title: "Vibe Code Your First Web Page",
-      subtitle:
-        "Come set up. Leave with something real started.",
+      title: "Vibe Coding 101",
+      subtitle: "How ideas become live websites. No syntax required.",
       footer: "TTS Build Team",
     },
     {
-      kind: "section",
-      number: "01",
-      title: "Tonight is not a lecture",
-      blurb:
-        "We already covered the ecosystem. This time, we start building and use the room to get unstuck.",
+      kind: "bullets",
+      eyebrow: "Tonight",
+      title: "What we're covering",
+      items: [
+        {
+          label: "10 min video",
+          detail: "How Caleb got into building — problem space, resourcefulness, idea to launch",
+        },
+        {
+          label: "Vibe Coding 101",
+          detail: "Tech stacks, the ecosystem, GitHub basics, which tools to use",
+        },
+        {
+          label: "2 min form",
+          detail: "What you want to build and how the BUILD team should look",
+        },
+      ],
     },
     {
-      kind: "bullets",
-      eyebrow: "Before the meeting",
-      title: "Do the setup first",
-      body:
-        "If these are done before you arrive, we can spend the meeting making instead of installing.",
-      items: [
-        { label: "GitHub", detail: "Create or log into your account." },
-        { label: "Editor", detail: "Install Cursor or VS Code." },
-        { label: "AI tool", detail: "Have Claude, Gemini, Cursor, or similar ready." },
-        { label: "Vercel", detail: "Create or log into an account for deployment." },
-        { label: "Laptop", detail: "Bring it charged and ready." },
+      kind: "video",
+      eyebrow: "Part 1 — 10 min",
+      title: "How I got into building",
+      src: "/video/caleb-intro.mp4",
+    },
+    {
+      kind: "stat",
+      eyebrow: "Do you need to know how to code?",
+      value: "No.",
+      label: "Vibe coding = describe what you want. AI writes the code.",
+      context:
+        "Your job is to think clearly and direct the AI — not memorize syntax. Programming is still valuable, but it's shifting toward resourcefulness over syntax.",
+    },
+    {
+      kind: "split-bullets",
+      eyebrow: "The mindset shift",
+      title: "You are the PM. Claude is the engineer.",
+      columns: [
+        {
+          eyebrow: "You",
+          title: "Product Manager",
+          accent: COLOR.gold,
+          items: [
+            { label: "Know what you want to build" },
+            { label: "Describe it clearly" },
+            { label: "Test what gets built" },
+            { label: "Give feedback and iterate" },
+          ],
+        },
+        {
+          eyebrow: "Claude",
+          title: "Your Engineer",
+          accent: COLOR.blue,
+          items: [
+            { label: "Reads your entire codebase" },
+            { label: "Writes and edits code" },
+            { label: "Follows your direction" },
+            { label: "Handles all the syntax" },
+          ],
+        },
       ],
     },
     {
       kind: "three-up",
-      eyebrow: "Roles",
-      title: "Who helps with what",
+      eyebrow: "Tech stack",
+      title: "Every product has three layers",
       cards: [
         {
-          label: "Zoom",
-          heading: "Caleb",
-          body:
-            "Prompt engineering, resourceful prompting, finding references, and showing niche finessing tricks.",
-          accent: COLOR.gold,
+          label: "Frontend",
+          heading: "What users see",
+          body: "Webpages, buttons, forms — everything visible. Built with tools like Next.js and React.",
+          accent: COLOR.emerald,
         },
         {
-          label: "Room",
-          heading: "Kaitlyn",
-          body:
-            "In-person support for formatting, functionality, and getting websites unstuck.",
-          accent: COLOR.red,
-        },
-        {
-          label: "Later",
-          heading: "Product strategy",
-          body:
-            "Portfolio positioning and product strategy matter, but the next step is getting people building.",
+          label: "Backend",
+          heading: "Logic behind the scenes",
+          body: '"When they submit the form, save it." The rules that run when users do things.',
           accent: COLOR.blue,
+        },
+        {
+          label: "Database",
+          heading: "Where data lives",
+          body: "User accounts, orders, posts. Tools like Supabase and Firebase give you this out of the box.",
+          accent: COLOR.violet,
         },
       ],
     },
     {
       kind: "bullets",
-      eyebrow: "Resourceful prompting",
-      title: "Prompt like a builder",
+      eyebrow: "Common tools",
+      title: "Know what each tool is for",
+      body: "You don't need to master these — just know they exist so you can tell the AI what to use.",
       items: [
+        { label: "Next.js / React", detail: "Builds the frontend — what users see and interact with" },
+        { label: "Tailwind CSS", detail: "Makes it look good without writing much CSS" },
+        { label: "Supabase / Firebase", detail: "Database and login, ready out of the box" },
+        { label: "Stripe", detail: "Accepting payments" },
+        { label: "Vercel", detail: "Puts your site on the internet with a real URL" },
+        { label: "GitHub", detail: "Saves your code and tracks every change — push, pull, commit" },
+      ],
+    },
+    {
+      kind: "bullets",
+      eyebrow: "The ecosystem",
+      title: "How it all fits together",
+      body: "Before any of this — validate your idea first. Caleb covers this in the video.",
+      items: [
+        { label: "You", detail: "Describe what you want to build" },
+        { label: "Claude / AI", detail: "Writes and edits code. Free alternative: Gemini CLI." },
+        { label: "IDE — Cursor or VS Code", detail: "Where the code lives on your computer. You see and run it here." },
+        { label: "GitHub", detail: "Saves every version like Google Drive for code. Commit, push, pull." },
+        { label: "Vercel", detail: "One click to a live URL anyone can visit." },
+      ],
+    },
+    {
+      kind: "split-bullets",
+      eyebrow: "GitHub basics",
+      title: "Save, back up, and collaborate on code",
+      body: "Think of GitHub as Google Drive — but smarter. It saves every version of your code forever.",
+      columns: [
         {
-          label: "Name the outcome",
-          detail: "Say what the page should do and what should be visible.",
+          eyebrow: "The concepts",
+          title: "What you need to know",
+          accent: COLOR.emerald,
+          items: [
+            { label: "Repo", detail: "The folder holding your entire project on GitHub." },
+            { label: "Main", detail: "Your official branch — the finished, working copy everyone uses." },
+            { label: "Commit", detail: "A snapshot of your code at this moment. GitHub remembers every save." },
+          ],
         },
         {
-          label: "Bring references",
-          detail:
-            "Find a GitHub repo, portfolio, scroll effect, or product detail you want to learn from.",
-        },
-        {
-          label: "Ask for small steps",
-          detail:
-            "Generate the first version, run it, paste the error, then improve one thing at a time.",
-        },
-        {
-          label: "Steal the mechanic, not the identity",
-          detail:
-            "Use references to understand scroll effects, iPad frames, cards, and motion, then make it yours.",
+          eyebrow: "The actions",
+          title: "What you'll actually do",
+          accent: COLOR.gold,
+          items: [
+            { label: "Push", detail: "Upload your commits to GitHub — backed up in the cloud." },
+            { label: "Pull", detail: "Download the latest version to stay in sync with your team." },
+            { label: "Branch", detail: "A separate copy to try things without touching what works." },
+          ],
         },
       ],
     },
     {
-      kind: "quote",
-      quote:
-        "Good prompting is not magic. It is being specific, showing references, and staying resourceful when the first answer breaks.",
-      attribution: "Build Team",
+      kind: "split-bullets",
+      eyebrow: "The tools",
+      title: "Claude Chat vs Claude Code",
+      body: "Same AI. Very different levels of power.",
+      columns: [
+        {
+          eyebrow: "Claude Chat",
+          title: "claude.ai",
+          accent: COLOR.blue,
+          items: [
+            { label: "Browser-based", detail: "Nothing to install. Free tier available." },
+            { label: "You paste code in", detail: "It doesn't see your files automatically." },
+            { label: "Great for questions", detail: "Drafts, planning, and quick tasks." },
+          ],
+        },
+        {
+          eyebrow: "Claude Code",
+          title: "CLI — runs in your terminal",
+          accent: COLOR.violet,
+          items: [
+            { label: "Lives in your project", detail: "Reads your entire codebase automatically." },
+            { label: "Runs commands", detail: "Edits files, pushes to GitHub, deploys." },
+            { label: "Autonomous", detail: "Works while you describe. Idea to live URL." },
+          ],
+        },
+      ],
     },
     {
-      kind: "cta",
-      eyebrow: "Starter prompt",
-      title: "Build a personal webpage",
-      body:
-        "Paste this into your AI tool, then keep iterating: Build me a simple personal webpage with a hero, about section, projects section, and contact section. Keep it clean, modern, and easy to customize. Explain how to run it locally.",
-      actions: [
+      kind: "three-up",
+      eyebrow: "Which tool?",
+      title: "Start simple. Graduate up.",
+      cards: [
         {
-          label: "Run it",
-          detail: "Open the project and see the page.",
+          label: "Just exploring",
+          heading: "Lovable / Base44",
+          body: "Zero setup. No files on your computer. Great for prototypes and first experiments.",
+          accent: COLOR.emerald,
         },
         {
-          label: "Personalize it",
-          detail: "Change copy, colors, layout, and one interaction.",
+          label: "First real project",
+          heading: "Cursor + Claude",
+          body: "Build something real you own. Code lives on your machine. Medium effort.",
+          accent: COLOR.gold,
         },
         {
-          label: "Save it",
-          detail: "Commit and push your progress to GitHub.",
+          label: "Going deeper",
+          heading: "Claude Code",
+          body: "Claude runs commands, pushes to GitHub, and deploys — autonomously.",
+          accent: COLOR.violet,
         },
       ],
     },
     {
       kind: "cta",
-      eyebrow: "Walkaway",
-      title: "Leave with proof you can build",
-      body:
-        "By the end, you should have a first webpage started, a clearer project direction, and a GitHub repo you can keep improving.",
+      eyebrow: "Getting started",
+      title: "Start with Claude. Right now.",
+      body: "Go to claude.ai — free account. Describe your idea like you'd explain it to a smart friend. Be specific: vague prompts get vague results.",
       actions: [
-        { label: "Page", detail: "A simple website you can show." },
-        { label: "Repo", detail: "A saved place to continue building." },
-        { label: "Next idea", detail: "One direction for your portfolio." },
+        {
+          label: "Describe it",
+          detail: '"Build me a simple webpage with a header, a sign-up form, and a button."',
+        },
+        {
+          label: "Paste it",
+          detail: "Copy the code into Cursor or VS Code and run it.",
+        },
+        {
+          label: "Iterate",
+          detail: '"Make the button blue." / "Add a second page." Keep going.',
+        },
+      ],
+    },
+    {
+      kind: "bullets",
+      eyebrow: "Recap",
+      title: "What you just learned",
+      items: [
+        { label: "Tech stack", detail: "Frontend + backend + database — the tools your product runs on." },
+        { label: "IDE", detail: "Cursor or VS Code — where code lives on your computer." },
+        { label: "GitHub", detail: "Saves every version. Commit, push, pull, branch." },
+        { label: "Vercel", detail: "One click to a live URL." },
+        { label: "Claude", detail: "Your AI engineer. Describe it → it builds it." },
+        { label: "Start simple", detail: "Lovable / Base44 → Cursor → Claude Code. Graduate up." },
+      ],
+    },
+    {
+      kind: "cta",
+      eyebrow: "Before you leave",
+      title: "Fill out the form.",
+      body: "Two minutes. Helps us make every future meeting worth your time.",
+      actions: [
+        { label: "Background", detail: "Interest level + vibe coding confidence (1–10)" },
+        {
+          label: "What you want to build",
+          detail: "Web app, AI tool, mobile app, or marketplace — rate each 1–5",
+        },
+        { label: "Feedback", detail: "What do you think the BUILD team should look like?" },
       ],
     },
   ],
