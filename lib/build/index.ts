@@ -136,15 +136,18 @@ export const buildMeeting01: BuildSession = {
       items: [
         {
           label: "10 min video",
-          detail: "How Caleb got into building — problem space, resourcefulness, idea to launch",
+          detail:
+            "How Caleb got into building — problem space, resourcefulness, idea to launch",
         },
         {
           label: "Vibe Coding 101",
-          detail: "Tech stacks, the ecosystem, GitHub basics, which tools to use",
+          detail:
+            "Tech stacks, the ecosystem, GitHub basics, which tools to use",
         },
         {
           label: "Live demo",
-          detail: "Watch a webpage get built from a single prompt — start to running in the browser",
+          detail:
+            "Watch a webpage get built from a single prompt — start to running in the browser",
         },
         {
           label: "2 min form",
@@ -160,19 +163,23 @@ export const buildMeeting01: BuildSession = {
       items: [
         {
           label: "What vibe coding actually is",
-          detail: "Why describing what you want is now a real skill — and why syntax is no longer the bottleneck.",
+          detail:
+            "Why describing what you want is now a real skill — and why syntax is no longer the bottleneck.",
         },
         {
           label: "The builder ecosystem",
-          detail: "Frontend, backend, database, GitHub, Vercel — what each piece does and when you'd reach for it.",
+          detail:
+            "Frontend, backend, database, GitHub, Vercel — what each piece does and when you'd reach for it.",
         },
         {
           label: "How to prompt like a builder",
-          detail: "Be specific, bring references, iterate one step at a time, paste errors back in.",
+          detail:
+            "Be specific, bring references, iterate one step at a time, paste errors back in.",
         },
         {
           label: "Which tool to start with",
-          detail: "Lovable / Base44 → Cursor → Claude Code. You'll know which one fits where you are right now.",
+          detail:
+            "Lovable / Base44 → Cursor → Claude Code. You'll know which one fits where you are right now.",
         },
       ],
     },
@@ -182,9 +189,18 @@ export const buildMeeting01: BuildSession = {
       title: "Before tonight — the setup checklist",
       body: "These were assigned before Meeting 1. If you haven't done them yet, get them done now before we start.",
       actions: [
-        { label: "GitHub", detail: "Account created — able to make a repo and push code." },
-        { label: "Cursor or VS Code", detail: "Installed and opened at least once." },
-        { label: "Claude or Gemini", detail: "An AI coding tool you can access right now." },
+        {
+          label: "GitHub",
+          detail: "Account created — able to make a repo and push code.",
+        },
+        {
+          label: "Cursor or VS Code",
+          detail: "Installed and opened at least once.",
+        },
+        {
+          label: "Claude or Gemini",
+          detail: "An AI coding tool you can access right now.",
+        },
         { label: "Vercel", detail: "Account created for deployment." },
       ],
     },
@@ -262,12 +278,28 @@ export const buildMeeting01: BuildSession = {
       title: "Know what each tool is for",
       body: "You don't need to master these — just know they exist so you can tell the AI what to use.",
       items: [
-        { label: "Next.js / React", detail: "Builds the frontend — what users see and interact with" },
-        { label: "Tailwind CSS", detail: "Makes it look good without writing much CSS" },
-        { label: "Supabase / Firebase", detail: "Database and login, ready out of the box" },
+        {
+          label: "Next.js / React",
+          detail: "Builds the frontend — what users see and interact with",
+        },
+        {
+          label: "Tailwind CSS",
+          detail: "Makes it look good without writing much CSS",
+        },
+        {
+          label: "Supabase / Firebase",
+          detail: "Database and login, ready out of the box",
+        },
         { label: "Stripe", detail: "Accepting payments" },
-        { label: "Vercel", detail: "Puts your site on the internet with a real URL" },
-        { label: "GitHub", detail: "Saves your code and tracks every change — push, pull, commit" },
+        {
+          label: "Vercel",
+          detail: "Puts your site on the internet with a real URL",
+        },
+        {
+          label: "GitHub",
+          detail:
+            "Saves your code and tracks every change — push, pull, commit",
+        },
       ],
     },
     {
@@ -277,10 +309,24 @@ export const buildMeeting01: BuildSession = {
       body: "Before any of this — validate your idea first. Caleb covers this in the video.",
       items: [
         { label: "You", detail: "Describe what you want to build" },
-        { label: "Claude / AI", detail: "Writes and edits code. Free alternative: Gemini CLI." },
-        { label: "IDE — Cursor or VS Code", detail: "Where the code lives on your computer. You see and run it here." },
-        { label: "GitHub", detail: "Saves every version like Google Drive for code. Commit, push, pull." },
-        { label: "Vercel", detail: "One click to a live URL anyone can visit." },
+        {
+          label: "Claude / AI",
+          detail: "Writes and edits code. Free alternative: Gemini CLI.",
+        },
+        {
+          label: "IDE — Cursor or VS Code",
+          detail:
+            "Where the code lives on your computer. You see and run it here.",
+        },
+        {
+          label: "GitHub",
+          detail:
+            "Saves every version like Google Drive for code. Commit, push, pull.",
+        },
+        {
+          label: "Vercel",
+          detail: "One click to a live URL anyone can visit.",
+        },
       ],
     },
     {
@@ -294,9 +340,20 @@ export const buildMeeting01: BuildSession = {
           title: "What you need to know",
           accent: COLOR.emerald,
           items: [
-            { label: "Repo", detail: "The folder holding your entire project on GitHub." },
-            { label: "Main", detail: "Your official branch — the finished, working copy everyone uses." },
-            { label: "Commit", detail: "A snapshot of your code at this moment. GitHub remembers every save." },
+            {
+              label: "Repo",
+              detail: "The folder holding your entire project on GitHub.",
+            },
+            {
+              label: "Main",
+              detail:
+                "Your official branch — the finished, working copy everyone uses.",
+            },
+            {
+              label: "Commit",
+              detail:
+                "A snapshot of your code at this moment. GitHub remembers every save.",
+            },
           ],
         },
         {
@@ -304,9 +361,20 @@ export const buildMeeting01: BuildSession = {
           title: "What you'll actually do",
           accent: COLOR.gold,
           items: [
-            { label: "Push", detail: "Upload your commits to GitHub — backed up in the cloud." },
-            { label: "Pull", detail: "Download the latest version to stay in sync with your team." },
-            { label: "Branch", detail: "A separate copy to try things without touching what works." },
+            {
+              label: "Push",
+              detail: "Upload your commits to GitHub — backed up in the cloud.",
+            },
+            {
+              label: "Pull",
+              detail:
+                "Download the latest version to stay in sync with your team.",
+            },
+            {
+              label: "Branch",
+              detail:
+                "A separate copy to try things without touching what works.",
+            },
           ],
         },
       ],
@@ -322,9 +390,18 @@ export const buildMeeting01: BuildSession = {
           title: "claude.ai",
           accent: COLOR.blue,
           items: [
-            { label: "Browser-based", detail: "Nothing to install. Free tier available." },
-            { label: "You paste code in", detail: "It doesn't see your files automatically." },
-            { label: "Great for questions", detail: "Drafts, planning, and quick tasks." },
+            {
+              label: "Browser-based",
+              detail: "Nothing to install. Free tier available.",
+            },
+            {
+              label: "You paste code in",
+              detail: "It doesn't see your files automatically.",
+            },
+            {
+              label: "Great for questions",
+              detail: "Drafts, planning, and quick tasks.",
+            },
           ],
         },
         {
@@ -332,9 +409,18 @@ export const buildMeeting01: BuildSession = {
           title: "CLI — runs in your terminal",
           accent: COLOR.violet,
           items: [
-            { label: "Lives in your project", detail: "Reads your entire codebase automatically." },
-            { label: "Runs commands", detail: "Edits files, pushes to GitHub, deploys." },
-            { label: "Autonomous", detail: "Works while you describe. Idea to live URL." },
+            {
+              label: "Lives in your project",
+              detail: "Reads your entire codebase automatically.",
+            },
+            {
+              label: "Runs commands",
+              detail: "Edits files, pushes to GitHub, deploys.",
+            },
+            {
+              label: "Autonomous",
+              detail: "Works while you describe. Idea to live URL.",
+            },
           ],
         },
       ],
@@ -372,7 +458,8 @@ export const buildMeeting01: BuildSession = {
       actions: [
         {
           label: "Describe it",
-          detail: '"Build me a simple webpage with a header, a sign-up form, and a button."',
+          detail:
+            '"Build me a simple webpage with a header, a sign-up form, and a button."',
         },
         {
           label: "Paste it",
@@ -388,7 +475,8 @@ export const buildMeeting01: BuildSession = {
       kind: "section",
       number: "02",
       title: "Prompt like a builder",
-      blurb: "Vague prompts get vague pages. Specific prompts get pages you'd actually ship.",
+      blurb:
+        "Vague prompts get vague pages. Specific prompts get pages you'd actually ship.",
     },
     {
       kind: "bullets",
@@ -398,19 +486,23 @@ export const buildMeeting01: BuildSession = {
       items: [
         {
           label: "Name the outcome",
-          detail: "Say what the page should do, who it's for, and what should be visible. Outcomes beat instructions.",
+          detail:
+            "Say what the page should do, who it's for, and what should be visible. Outcomes beat instructions.",
         },
         {
           label: "Bring references",
-          detail: "Find a site, layout, or effect you like. Paste the URL or describe it exactly. AI is much better with examples.",
+          detail:
+            "Find a site, layout, or effect you like. Paste the URL or describe it exactly. AI is much better with examples.",
         },
         {
           label: "One step at a time",
-          detail: "Generate → run → notice one thing → fix one thing. Don't ask for ten changes at once.",
+          detail:
+            "Generate → run → notice one thing → fix one thing. Don't ask for ten changes at once.",
         },
         {
           label: "Paste errors back",
-          detail: "If something breaks, paste the exact error into Claude. Most bugs get solved on the first reply.",
+          detail:
+            "If something breaks, paste the exact error into Claude. Most bugs get solved on the first reply.",
         },
       ],
     },
@@ -425,9 +517,15 @@ export const buildMeeting01: BuildSession = {
           title: '"Make me a website"',
           accent: COLOR.zinc,
           items: [
-            { label: "No audience", detail: "Claude has to guess who it's for." },
+            {
+              label: "No audience",
+              detail: "Claude has to guess who it's for.",
+            },
             { label: "No structure", detail: "You'll get a generic template." },
-            { label: "No reference", detail: "Looks like every AI demo from 2024." },
+            {
+              label: "No reference",
+              detail: "Looks like every AI demo from 2024.",
+            },
           ],
         },
         {
@@ -435,9 +533,18 @@ export const buildMeeting01: BuildSession = {
           title: '"Personal site for a USC student"',
           accent: COLOR.gold,
           items: [
-            { label: "Audience named", detail: "Recruiters and founders skimming on a phone." },
-            { label: "Sections listed", detail: "Hero, about, three projects, contact — in that order." },
-            { label: "Reference attached", detail: '"Clean and modern, like linear.app or vercel.com."' },
+            {
+              label: "Audience named",
+              detail: "Recruiters and founders skimming on a phone.",
+            },
+            {
+              label: "Sections listed",
+              detail: "Hero, about, three projects, contact — in that order.",
+            },
+            {
+              label: "Reference attached",
+              detail: '"Clean and modern, like linear.app or vercel.com."',
+            },
           ],
         },
       ],
@@ -446,7 +553,8 @@ export const buildMeeting01: BuildSession = {
       kind: "section",
       number: "03",
       title: "Live demo — your first page",
-      blurb: "Watch one prompt go from idea to a real webpage running in a browser. Then we copy the same flow.",
+      blurb:
+        "Watch one prompt go from idea to a real webpage running in a browser. Then we copy the same flow.",
     },
     {
       kind: "cta",
@@ -460,7 +568,8 @@ export const buildMeeting01: BuildSession = {
         },
         {
           label: "Step 2 · Save the file",
-          detail: "Drop the generated HTML into a new file in Cursor or VS Code.",
+          detail:
+            "Drop the generated HTML into a new file in Cursor or VS Code.",
         },
         {
           label: "Step 3 · Open it",
@@ -468,7 +577,8 @@ export const buildMeeting01: BuildSession = {
         },
         {
           label: "Step 4 · Iterate",
-          detail: '"Change the headline to my name." "Make the hero darker." Watch it update.',
+          detail:
+            '"Change the headline to my name." "Make the hero darker." Watch it update.',
         },
       ],
     },
@@ -476,7 +586,7 @@ export const buildMeeting01: BuildSession = {
       kind: "cta",
       eyebrow: "The starter prompt",
       title: "Copy this — try it tonight",
-      body: 'Build me a single-file personal webpage. HTML and CSS only, no frameworks. Sections: hero with my name, short about, three project cards, contact. Clean, modern, dark background, gold accent. Tell me how to open the file in my browser.',
+      body: "Build me a single-file personal webpage. HTML and CSS only, no frameworks. Sections: hero with my name, short about, three project cards, contact. Clean, modern, dark background, gold accent. Tell me how to open the file in my browser.",
       actions: [
         {
           label: "Run it",
@@ -484,11 +594,13 @@ export const buildMeeting01: BuildSession = {
         },
         {
           label: "Make it yours",
-          detail: "Swap in your name, your projects, your colors. One change at a time.",
+          detail:
+            "Swap in your name, your projects, your colors. One change at a time.",
         },
         {
           label: "Push it",
-          detail: "Create a GitHub repo. Commit. Push. Now it lives somewhere safe.",
+          detail:
+            "Create a GitHub repo. Commit. Push. Now it lives somewhere safe.",
         },
       ],
     },
@@ -497,13 +609,32 @@ export const buildMeeting01: BuildSession = {
       eyebrow: "Recap",
       title: "What you just learned",
       items: [
-        { label: "Tech stack", detail: "Frontend + backend + database — the tools your product runs on." },
-        { label: "IDE", detail: "Cursor or VS Code — where code lives on your computer." },
-        { label: "GitHub", detail: "Saves every version. Commit, push, pull, branch." },
+        {
+          label: "Tech stack",
+          detail:
+            "Frontend + backend + database — the tools your product runs on.",
+        },
+        {
+          label: "IDE",
+          detail: "Cursor or VS Code — where code lives on your computer.",
+        },
+        {
+          label: "GitHub",
+          detail: "Saves every version. Commit, push, pull, branch.",
+        },
         { label: "Vercel", detail: "One click to a live URL." },
-        { label: "Claude", detail: "Your AI engineer. Describe it → it builds it." },
-        { label: "Prompt loop", detail: "Outcome → reference → one step → paste the error back." },
-        { label: "Start simple", detail: "Lovable / Base44 → Cursor → Claude Code. Graduate up." },
+        {
+          label: "Claude",
+          detail: "Your AI engineer. Describe it → it builds it.",
+        },
+        {
+          label: "Prompt loop",
+          detail: "Outcome → reference → one step → paste the error back.",
+        },
+        {
+          label: "Start simple",
+          detail: "Lovable / Base44 → Cursor → Claude Code. Graduate up.",
+        },
       ],
     },
     {
@@ -512,9 +643,18 @@ export const buildMeeting01: BuildSession = {
       title: "What we expect before next time",
       body: "Meeting 2 is hands-on. Show up with these done so we spend the time building, not installing.",
       actions: [
-        { label: "GitHub repo", detail: "Create a repo and push at least one commit." },
-        { label: "Editor working", detail: "Cursor or VS Code — open a folder, see some files." },
-        { label: "AI tool ready", detail: "Claude or Gemini — know how to open it and paste a prompt." },
+        {
+          label: "GitHub repo",
+          detail: "Create a repo and push at least one commit.",
+        },
+        {
+          label: "Editor working",
+          detail: "Cursor or VS Code — open a folder, see some files.",
+        },
+        {
+          label: "AI tool ready",
+          detail: "Claude or Gemini — know how to open it and paste a prompt.",
+        },
       ],
     },
     {
@@ -523,12 +663,19 @@ export const buildMeeting01: BuildSession = {
       title: "Fill out the form.",
       body: "Two minutes. Helps us make every future meeting worth your time.",
       actions: [
-        { label: "Background", detail: "Interest level + vibe coding confidence (1–10)" },
+        {
+          label: "Background",
+          detail: "Interest level + vibe coding confidence (1–10)",
+        },
         {
           label: "What you want to build",
-          detail: "Web app, AI tool, mobile app, or marketplace — rate each 1–5",
+          detail:
+            "Web app, AI tool, mobile app, or marketplace — rate each 1–5",
         },
-        { label: "Feedback", detail: "What do you think the BUILD team should look like?" },
+        {
+          label: "Feedback",
+          detail: "What do you think the BUILD team should look like?",
+        },
       ],
     },
   ],
@@ -552,12 +699,14 @@ export const buildMeeting02: BuildSession = {
   preBuild: [
     {
       title: "GitHub repo ready",
-      description: "Create a repo and push at least one commit before the meeting.",
+      description:
+        "Create a repo and push at least one commit before the meeting.",
       status: "before",
     },
     {
       title: "Cursor or VS Code working",
-      description: "Open your editor, open a folder, see some files. That's all.",
+      description:
+        "Open your editor, open a folder, see some files. That's all.",
       status: "before",
     },
     {
@@ -579,7 +728,8 @@ export const buildMeeting02: BuildSession = {
     },
     {
       title: "First commit pushed",
-      description: "Code saved to GitHub so you can keep building after the meeting.",
+      description:
+        "Code saved to GitHub so you can keep building after the meeting.",
       status: "after",
     },
     {
@@ -620,9 +770,15 @@ export const buildMeeting02: BuildSession = {
       title: "Tools check — do you have everything?",
       body: "Raise your hand if you still need to set something up. We'll sort it before we start.",
       actions: [
-        { label: "GitHub", detail: "Account ready, repo created, able to push." },
+        {
+          label: "GitHub",
+          detail: "Account ready, repo created, able to push.",
+        },
         { label: "Editor", detail: "Cursor or VS Code installed and open." },
-        { label: "AI tool", detail: "Claude or Gemini — open and ready to use." },
+        {
+          label: "AI tool",
+          detail: "Claude or Gemini — open and ready to use.",
+        },
       ],
     },
     {
@@ -631,10 +787,24 @@ export const buildMeeting02: BuildSession = {
       title: "Meeting 1 in 60 seconds",
       body: "The whole ecosystem in one slide before we build.",
       items: [
-        { label: "IDE", detail: "Cursor or VS Code — just how you see and run your code on your computer." },
-        { label: "Claude / AI", detail: "Describe what you want. It writes the code." },
-        { label: "GitHub", detail: "Saves every version. Commit → push → your code is backed up." },
-        { label: "Vercel", detail: "One click to a live URL anyone can visit." },
+        {
+          label: "IDE",
+          detail:
+            "Cursor or VS Code — just how you see and run your code on your computer.",
+        },
+        {
+          label: "Claude / AI",
+          detail: "Describe what you want. It writes the code.",
+        },
+        {
+          label: "GitHub",
+          detail:
+            "Saves every version. Commit → push → your code is backed up.",
+        },
+        {
+          label: "Vercel",
+          detail: "One click to a live URL anyone can visit.",
+        },
       ],
     },
     {
@@ -649,9 +819,18 @@ export const buildMeeting02: BuildSession = {
       title: "Paste this into Claude",
       body: "Build me a simple personal webpage with a hero section, an about section, a projects section, and a contact section. Keep it clean and modern. Use only HTML and CSS — no frameworks. Explain how to open it in my browser.",
       actions: [
-        { label: "Run it", detail: "Open the file in your browser and see the page." },
-        { label: "Break something", detail: "Change one line. See what happens." },
-        { label: "Fix it", detail: "Paste the error back into Claude. Watch it solve it." },
+        {
+          label: "Run it",
+          detail: "Open the file in your browser and see the page.",
+        },
+        {
+          label: "Break something",
+          detail: "Change one line. See what happens.",
+        },
+        {
+          label: "Fix it",
+          detail: "Paste the error back into Claude. Watch it solve it.",
+        },
       ],
     },
     {
@@ -659,18 +838,24 @@ export const buildMeeting02: BuildSession = {
       eyebrow: "Prompt like a builder",
       title: "How to get what you actually want",
       items: [
-        { label: "Name the outcome", detail: "Say what the page should do and what should be visible." },
+        {
+          label: "Name the outcome",
+          detail: "Say what the page should do and what should be visible.",
+        },
         {
           label: "Bring references",
-          detail: "Find a site or effect you want. Paste the URL or describe it exactly.",
+          detail:
+            "Find a site or effect you want. Paste the URL or describe it exactly.",
         },
         {
           label: "One step at a time",
-          detail: "Generate → run → paste the error → improve one thing. Repeat.",
+          detail:
+            "Generate → run → paste the error → improve one thing. Repeat.",
         },
         {
           label: "Steal the mechanic",
-          detail: "Use references to understand the pattern, then make it yours.",
+          detail:
+            "Use references to understand the pattern, then make it yours.",
         },
       ],
     },
@@ -694,15 +879,18 @@ export const buildMeeting02: BuildSession = {
       items: [
         {
           label: "Problem",
-          detail: "What does your portfolio need to do for you? Get a job? Show clients? Document your work?",
+          detail:
+            "What does your portfolio need to do for you? Get a job? Show clients? Document your work?",
         },
         {
           label: "User",
-          detail: "Who is actually going to look at it — recruiters, founders, collaborators?",
+          detail:
+            "Who is actually going to look at it — recruiters, founders, collaborators?",
         },
         {
           label: "MVP",
-          detail: "What is the minimum version that accomplishes the goal? One page? Three sections?",
+          detail:
+            "What is the minimum version that accomplishes the goal? One page? Three sections?",
         },
       ],
     },
@@ -712,10 +900,22 @@ export const buildMeeting02: BuildSession = {
       title: "Leave with proof you can build",
       body: "By the end of tonight you should have something real you made yourself.",
       actions: [
-        { label: "Working webpage", detail: "Built with Claude. Running in your browser." },
-        { label: "One personal change", detail: "Your name, colors, or layout — something that's yours." },
-        { label: "First commit pushed", detail: "Code on GitHub so you can keep building." },
-        { label: "Portfolio plan", detail: "What your site should become — written down." },
+        {
+          label: "Working webpage",
+          detail: "Built with Claude. Running in your browser.",
+        },
+        {
+          label: "One personal change",
+          detail: "Your name, colors, or layout — something that's yours.",
+        },
+        {
+          label: "First commit pushed",
+          detail: "Code on GitHub so you can keep building.",
+        },
+        {
+          label: "Portfolio plan",
+          detail: "What your site should become — written down.",
+        },
       ],
     },
   ],
@@ -731,4 +931,4 @@ export function buildSessionSlugs() {
   return BUILD_SESSIONS.map((session) => session.slug);
 }
 
-export const currentBuildSession = buildMeeting01;
+export const currentBuildSession = buildMeeting02;
