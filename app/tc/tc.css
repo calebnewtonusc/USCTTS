@@ -1,0 +1,129 @@
+/* T Combinator tokens.
+ *
+ * Warm dark, not the terminal black four other USC clubs already ship.
+ * Depth is a four-step surface ladder plus hairlines, never a shadow and never
+ * a gradient blob, which is what makes a dark page read expensive instead of
+ * generated. One accent, four places.
+ */
+
+.tc-root {
+  /* The surface ladder. Warm, following Cursor's #14120b rather than #000. */
+  --s0: #141210;
+  --s1: #1a1714;
+  --s2: #221e1a;
+  --s3: #2b2621;
+
+  /* Hairlines do the work shadows would. Three weights, no more. */
+  --line: #2e2823;
+  --line-strong: #3d352d;
+  --line-faint: #211d19;
+
+  --ink: #f4f0ea;
+  --ink-2: #b8ada0;
+  --ink-3: #8a7f73;
+
+  /* The one accent. Brand mark, primary CTA, focus ring, link emphasis. */
+  --accent: #ff6b35;
+  --accent-ink: #141210;
+
+  --radius: 7px;
+
+  --step--1: clamp(0.82rem, 0.8rem + 0.1vw, 0.88rem);
+  --step-0: clamp(1rem, 0.97rem + 0.15vw, 1.08rem);
+  --step-1: clamp(1.3rem, 1.2rem + 0.5vw, 1.6rem);
+  --step-2: clamp(1.8rem, 1.5rem + 1.4vw, 2.6rem);
+  --step-3: clamp(2.6rem, 1.9rem + 3.4vw, 5rem);
+  --step-4: clamp(3.4rem, 2rem + 6.4vw, 7.5rem);
+
+  --gutter: clamp(1.25rem, 5vw, 3rem);
+  --rhythm: clamp(4.5rem, 9vw, 8rem);
+
+  background: var(--s0);
+  color: var(--ink);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--step-0);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Display is serif at 400. Never 700: heavy display type is the loudest
+ * amateur tell, and every extracted system on the reference list says so. */
+.tc-display {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  line-height: 0.96;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+.tc-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.tc-wrap {
+  max-width: 78rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* 70ch or thereabouts, so prose never runs the full container. */
+.tc-prose { max-width: 62ch; }
+
+.tc-rule { height: 1px; background: var(--line); border: 0; margin: 0; }
+
+.tc-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 560;
+  padding: 0.85rem 1.4rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: transform 160ms ease, filter 160ms ease;
+}
+.tc-cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+.tc-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  background: var(--s1);
+  padding: 0.85rem 1.4rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+.tc-ghost:hover { background: var(--s2); border-color: var(--ink-3); }
+
+.tc-root :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* Entry motion. Transform and opacity only, under 300ms, and it renders its
+ * final state in static HTML so a crawler or a reader with JS off sees the
+ * finished page rather than an empty one. */
+@keyframes tc-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.tc-rise {
+  animation: tc-rise 280ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tc-root *, .tc-root *::before, .tc-root *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
