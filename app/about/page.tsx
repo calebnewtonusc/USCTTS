@@ -18,14 +18,14 @@ const PHILOSOPHY = [
   {
     prefix: "Everyone can",
     keyword: "enjoy",
-    body: "Technology should be used to uplift communities and create positive change. We work exclusively with social impact-oriented organizations and individuals to address their most pressing needs. Our pro bono consulting ensures that financial constraints never stand in the way of meaningful innovation.",
+    body: "We implement. A consulting engagement at USC almost always ends with a deck and a recommendation, and then everybody graduates. Ours ends with a tool that runs without us, the person on your team who owns it, the SOP written down, and a number measured before and after. If we cannot hand over those four things, we did not do the work.",
   },
 ];
 
 const VALUES = [
   {
     title: "Accessibility",
-    description: "We believe technology should be accessible to all organizations, regardless of budget. That's why all our work is 100% pro bono.",
+    description: "Our first cohort is free, because our builders want the work on their resume more than they want the money. That changes in the spring, and it does not change for anyone we have already started with.",
     accent: "linear-gradient(135deg, #99A6F9, #F07860)",
   },
   {

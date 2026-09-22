@@ -12,13 +12,13 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://usctts.com"),
-  title: "Trojan Technology Solutions | USC Builder Club",
+  title: "Trojan Tech Solutions | USC's applied AI implementation lab",
   description:
-    "USC's AI builder club. Workshops, client work, and speaker nights open to every major. No experience required. No gatekeeping.",
+    "USC's applied AI implementation lab. Every engagement ends with a working tool, a named owner, a written SOP, and a number that moved.",
   openGraph: {
     title: "Trojan Technology Solutions",
     description:
-      "USC's AI builder club. Open to every major. No experience required. No gatekeeping.",
+      "USC's applied AI implementation lab. Not a consulting club.",
     url: "https://usctts.com",
     siteName: "Trojan Technology Solutions",
     type: "website",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Trojan Technology Solutions",
     description:
-      "USC's AI builder club. Open to every major. No experience required.",
+      "USC's applied AI implementation lab. Not a consulting club.",
     images: ["/img/tts-logo.png"],
   },
   icons: {

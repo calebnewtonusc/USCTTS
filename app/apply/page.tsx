@@ -224,7 +224,7 @@ export default function ApplyPage() {
               maxWidth: 300,
             }}
           >
-            USC&apos;s AI builder club. No prerequisites. No gatekeeping.
+            USC&apos;s applied AI implementation lab. Every major, and we will teach you the stack.
           </p>
 
           {/* Value props — clean separator list */}

@@ -234,7 +234,7 @@ export default function WorkWithUs() {
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight mb-3">For Organizations</h2>
             <p className="text-base text-gray-900 max-w-md mx-auto leading-relaxed">
-              Partner with us to access high-quality tech consulting services, completely pro bono.
+              Hand us the thing that keeps sliding because it is nobody's first priority. Free for this cohort.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-0.5 border-2 border-gray-300 bg-gray-300">

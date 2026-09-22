@@ -323,7 +323,7 @@ export default function ClientIntakeForm() {
                 <>Submit Project Request <ArrowRight size={15} /></>
               )}
             </button>
-            <p className="text-xs text-gray-400 mt-3">We respond within 48 hours. All work is 100% pro bono.</p>
+            <p className="text-xs text-gray-400 mt-3">We respond within 48 hours. This cohort is free.</p>
           </form>
         </div>
       </section>
