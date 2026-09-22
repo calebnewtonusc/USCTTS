@@ -1,0 +1,136 @@
+/* TTS tokens.
+ *
+ * Deliberately not dark. TroyLabs, LavaLab, ProductSC and Blockchain@USC are
+ * all dark, and Blockchain@USC owns the terminal aesthetic outright, so a
+ * fifth black page would read as the fifth black page. Warm paper with a
+ * serif display is the only thing in the category nobody is doing.
+ *
+ * Not pure white either: #faf8f4 rather than #ffffff, following Cursor's
+ * cream floor. The old site was #ffffff with gradient blobs on top, which is
+ * the generated-page signature.
+ */
+
+.tts-root {
+  --p0: #faf8f4;
+  --p1: #f2eee7;
+  --p2: #e8e2d8;
+  --p3: #1a1714;
+
+  --line: #ddd5c8;
+  --line-strong: #c4b8a5;
+
+  --ink: #17140f;
+  --ink-2: #514a40;
+  --ink-3: #7d7366;
+
+  /* USC cardinal, warmed. One accent, four places: mark, CTA, focus, emphasis. */
+  --accent: #b5231f;
+
+  --radius: 7px;
+
+  --step--1: clamp(0.83rem, 0.81rem + 0.1vw, 0.89rem);
+  --step-0: clamp(1.02rem, 0.99rem + 0.15vw, 1.1rem);
+  --step-1: clamp(1.3rem, 1.2rem + 0.5vw, 1.65rem);
+  --step-2: clamp(1.85rem, 1.5rem + 1.5vw, 2.8rem);
+  --step-3: clamp(2.6rem, 1.8rem + 3.6vw, 5.2rem);
+  --step-4: clamp(2.9rem, 1.9rem + 4.2vw, 5.4rem);
+
+  --gutter: clamp(1.25rem, 5vw, 3rem);
+  --rhythm: clamp(4.5rem, 9vw, 8rem);
+
+  background: var(--p0);
+  color: var(--ink);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--step-0);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tts-display {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  line-height: 0.97;
+  letter-spacing: -0.026em;
+  text-wrap: balance;
+}
+
+.tts-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--step--1);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.tts-wrap { max-width: 78rem; margin-inline: auto; padding-inline: var(--gutter); }
+.tts-prose { max-width: 62ch; }
+.tts-rule { height: 1px; background: var(--line); border: 0; margin: 0; }
+
+.tts-cta {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: var(--accent); color: #fff; font-weight: 550;
+  padding: 0.85rem 1.4rem; border-radius: var(--radius); text-decoration: none;
+  transition: transform 160ms ease, filter 160ms ease;
+}
+.tts-cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+.tts-ghost {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  color: var(--ink); border: 1px solid var(--line-strong); background: transparent;
+  padding: 0.85rem 1.4rem; border-radius: var(--radius); text-decoration: none;
+  transition: background 160ms ease;
+}
+.tts-ghost:hover { background: var(--p1); }
+
+.tts-root :focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px;
+}
+
+/* The partner chips. Caleb's brief: show the valuations "non chalant", small,
+ * with the detail on hover. Hover alone strands touch users, so the detail is
+ * a <details> that is open by default below the breakpoint and collapses to a
+ * hover-and-focus reveal above it. */
+.tts-partner {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--p1);
+  padding: 1.1rem 1.25rem;
+}
+.tts-partner summary {
+  list-style: none; cursor: default; display: flex;
+  align-items: baseline; gap: 0.6rem; flex-wrap: wrap;
+}
+.tts-partner summary::-webkit-details-marker { display: none; }
+.tts-partner-name { font-weight: 560; font-size: var(--step-1); }
+.tts-partner-val {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--step--1); color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.tts-partner-body {
+  margin-top: 0.7rem; color: var(--ink-2);
+  font-size: var(--step--1); line-height: 1.6; max-width: 46ch;
+}
+
+@media (min-width: 48rem) {
+  .tts-partner-body {
+    opacity: 0.55;
+    transition: opacity 180ms ease;
+  }
+  .tts-partner:hover .tts-partner-body,
+  .tts-partner:focus-within .tts-partner-body { opacity: 1; }
+}
+
+@keyframes tts-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.tts-rise { animation: tts-rise 280ms cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tts-root *, .tts-root *::before, .tts-root *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .tts-partner-body { opacity: 1 !important; }
+}

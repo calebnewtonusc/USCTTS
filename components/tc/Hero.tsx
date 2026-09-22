@@ -5,16 +5,20 @@
  * crawler, a screen reader, or a link preview. The animation here is opacity
  * and transform on an element that already contains the words. */
 export default function Hero({ compact = false }: { compact?: boolean }) {
+  // On /tc/for/[slug] the company name is the h1, so the pitch headline steps
+  // down to h2. Two h1 elements on one page breaks the document outline for
+  // anyone navigating by heading.
+  const Heading = compact ? "h2" : "h1";
   return (
     <header className="tc-wrap" style={{ paddingBlock: compact ? "3.5rem" : "var(--rhythm)" }}>
       <p className="tc-mono tc-rise">Three companies a semester</p>
 
-      <h1
+      <Heading
         className="tc-display tc-rise"
         style={{ fontSize: compact ? "var(--step-2)" : "var(--step-4)", margin: "1.2rem 0 0" }}
       >
-        Hand off the thing<br />you keep not doing.
-      </h1>
+        Hand off the thing you keep not doing.
+      </Heading>
 
       <p
         className="tc-prose tc-rise"
