@@ -31,7 +31,11 @@ export interface YcCompany {
   ycUrl: string;
 }
 
-const INDEX = (ycIndex as { index: Record<string, string> }).index;
+// [batchSlug, name, oneLiner]
+type Entry = [string, string, string];
+// TypeScript widens the JSON tuples to string[], so this goes through unknown
+// rather than pretending the shapes overlap.
+const INDEX = (ycIndex as unknown as { index: Record<string, Entry> }).index;
 
 /** Every slug we can personalize for. Used by generateStaticParams. */
 export function knownSlugs(): string[] {
@@ -48,8 +52,9 @@ export function isKnownCompany(slug: string): boolean {
 const REVALIDATE_SECONDS = 86_400;
 
 export async function getCompany(slug: string): Promise<YcCompany | null> {
-  const batch = INDEX[slug];
-  if (!batch) return null;
+  const entry = INDEX[slug];
+  if (!entry) return null;
+  const [batch] = entry;
 
   const url = `https://yc-oss.github.io/api/batches/${batch}/${slug}.json`;
 
@@ -85,4 +90,56 @@ export async function getCompany(slug: string): Promise<YcCompany | null> {
     stage: str("stage"),
     ycUrl: str("url"),
   };
+}
+
+export interface YcHit {
+  slug: string;
+  name: string;
+  oneLiner: string;
+  batch: string;
+}
+
+/**
+ * Name search over the index, for the homepage lookup.
+ *
+ * Ranked so an exact name wins, then a prefix, then a substring. Without the
+ * ranking "ai" returns six thousand companies in insertion order and the one
+ * the person meant is never on screen.
+ */
+export function searchCompanies(query: string, limit = 6): YcHit[] {
+  const q = query.trim().toLowerCase();
+  if (q.length < 2) return [];
+
+  const scored: Array<{ hit: YcHit; score: number }> = [];
+
+  for (const slug in INDEX) {
+    const [batch, name, oneLiner] = INDEX[slug];
+    const n = name.toLowerCase();
+
+    let score: number;
+    if (n === q) score = 0;
+    else if (n.startsWith(q)) score = 1;
+    else if (slug.startsWith(q)) score = 2;
+    else if (n.includes(q)) score = 3;
+    else continue;
+
+    // Shorter names first inside a tier, so "clay" beats "Clay Sciences".
+    scored.push({ hit: { slug, name, oneLiner, batch }, score: score * 1000 + n.length });
+  }
+
+  scored.sort((a, b) => a.score - b.score);
+  return scored.slice(0, limit).map((s) => s.hit);
+}
+
+/** A spread of real company names, for ambient UI. Deterministic so the
+ *  server and the client agree and hydration does not warn. */
+export function sampleNames(count: number): string[] {
+  const slugs = Object.keys(INDEX);
+  const out: string[] = [];
+  const stride = Math.max(1, Math.floor(slugs.length / count));
+  for (let i = 0; i < slugs.length && out.length < count; i += stride) {
+    const name = INDEX[slugs[i]][1];
+    if (name && name.length <= 18) out.push(name);
+  }
+  return out;
 }

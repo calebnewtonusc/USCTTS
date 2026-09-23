@@ -134,3 +134,538 @@
   }
   .tts-partner-body { opacity: 1 !important; }
 }
+
+/* ===== The record motif =====
+ * A catalog-numbered plate whose fields resolve. This is the ownable shape:
+ * crop 400px of it with no logo and it is still recognizably this site.
+ */
+.rec {
+  border: 1px solid var(--line-strong);
+  background: var(--p0);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem 1.15rem;
+  position: relative;
+}
+.rec-ink { background: #1a1714; border-color: #3d352d; color: #f4f0ea; }
+
+.rec-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 0.7rem; margin-bottom: 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+.rec-ink .rec-head { border-color: #2e2823; }
+
+.rec-code {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3); font-variant-numeric: tabular-nums;
+}
+.rec-ink .rec-code { color: #8a7f73; }
+
+/* The live dot. The one looping animation on the page, and it earns the
+ * exception because it is the signal that this plate is reading something
+ * rather than displaying a picture of it. */
+.rec-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+  animation: rec-pulse 2.4s ease-in-out infinite;
+}
+@keyframes rec-pulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.rec-title-row { display: flex; gap: 0.8rem; align-items: center; margin-bottom: 1.1rem; }
+.rec-logo { border-radius: 6px; background: var(--p2); flex-shrink: 0; object-fit: contain; }
+.rec-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: var(--step-1); line-height: 1.1; margin: 0; letter-spacing: -0.02em;
+}
+.rec-sub {
+  margin: 0.2rem 0 0; font-size: var(--step--1); color: var(--ink-3);
+  max-width: 44ch;
+}
+.rec-ink .rec-sub { color: #b8ada0; }
+
+.rec-fields { margin: 0; display: grid; gap: 0; }
+.rec-row {
+  display: grid; grid-template-columns: minmax(7rem, 34%) 1fr;
+  gap: 1rem; padding: 0.52rem 0;
+  border-top: 1px solid var(--line-faint, var(--line));
+  font-size: var(--step--1);
+}
+.rec-row:first-child { border-top: 0; }
+.rec-ink .rec-row { border-color: #241f1b; }
+.rec-row dt {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-3); align-self: center;
+}
+.rec-ink .rec-row dt { color: #7d7366; }
+.rec-row dd { margin: 0; align-self: center; }
+.rec-hot { color: var(--accent); font-weight: 560; }
+
+/* Skeleton bar. Shown while a field has no value yet. */
+.rec-skel {
+  display: block; height: 0.62rem; width: 62%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--p2) 0%, var(--p1) 50%, var(--p2) 100%);
+  background-size: 200% 100%;
+  animation: rec-shimmer 1.15s ease-in-out infinite;
+}
+@keyframes rec-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ===== The live enrichment hero ===== */
+.enrich { display: grid; gap: 1.5rem; }
+@media (min-width: 60rem) {
+  .enrich { grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: start; }
+}
+
+.enrich-label {
+  display: block;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 0.6rem;
+}
+.enrich-input-wrap { position: relative; display: flex; align-items: center; }
+.enrich-input {
+  width: 100%;
+  /* 16px minimum or iOS zooms the viewport on focus. */
+  font-size: max(1rem, var(--step-1));
+  font-family: var(--font-display), Georgia, serif;
+  background: transparent; color: var(--ink);
+  border: 0; border-bottom: 2px solid var(--line-strong);
+  padding: 0.55rem 7rem 0.55rem 0;
+  border-radius: 0;
+  transition: border-color 160ms ease;
+}
+.enrich-input::placeholder { color: var(--ink-3); opacity: 0.6; }
+.enrich-input:focus { outline: none; border-bottom-color: var(--accent); }
+.enrich-count {
+  position: absolute; right: 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-3); font-variant-numeric: tabular-nums; pointer-events: none;
+}
+.enrich-help {
+  margin: 0.8rem 0 0; font-size: var(--step--1); color: var(--ink-2);
+  max-width: 42ch;
+}
+
+.enrich-hits {
+  list-style: none; margin: 0.75rem 0 0; padding: 0;
+  border: 1px solid var(--line-strong); border-radius: var(--radius);
+  overflow: hidden; background: var(--p0);
+}
+.enrich-hits li + li { border-top: 1px solid var(--line); }
+.enrich-hits button {
+  width: 100%; text-align: left; background: none; border: 0; cursor: pointer;
+  padding: 0.7rem 0.9rem; display: grid; gap: 0.15rem;
+  font: inherit; color: inherit;
+  transition: background 120ms ease;
+}
+.enrich-hits button:hover { background: var(--p1); }
+.enrich-hit-name { font-weight: 560; }
+.enrich-hit-one {
+  font-size: var(--step--1); color: var(--ink-3);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rec-dot, .rec-skel { animation: none; }
+}
+
+/* ===== Nav and topbar ===== */
+.topbar {
+  display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+  flex-wrap: wrap;
+  background: var(--p3); color: #f4f0ea;
+  font-size: var(--step--1); padding: 0.6rem var(--gutter);
+  text-align: center;
+}
+.topbar-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+  animation: rec-pulse 2.4s ease-in-out infinite; flex-shrink: 0;
+}
+.topbar-link { color: #f4f0ea; text-underline-offset: 3px; }
+
+.nav {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 0.85rem var(--gutter);
+  background: color-mix(in srgb, var(--p0) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+.nav-scrolled { border-bottom-color: var(--line); }
+
+.nav-mark { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: inherit; }
+.nav-mark-badge {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem; letter-spacing: 0.1em; font-weight: 700;
+  background: var(--p3); color: var(--p0);
+  padding: 0.3rem 0.45rem; border-radius: 4px;
+}
+.nav-mark-name { font-weight: 560; font-size: var(--step--1); white-space: nowrap; }
+@media (max-width: 40rem) { .nav-mark-name { display: none; } }
+
+.nav-links {
+  list-style: none; display: flex; gap: 1.2rem; margin: 0 auto 0 0; padding: 0;
+  font-size: var(--step--1); flex-wrap: wrap;
+}
+.nav-links a { color: var(--ink-2); text-decoration: none; position: relative; }
+.nav-links a::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px;
+  background: var(--accent); transform: scaleX(0); transform-origin: left;
+  transition: transform 180ms ease;
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-links a:hover::after { transform: scaleX(1); }
+@media (max-width: 52rem) { .nav-links { display: none; } }
+
+.nav-cta {
+  background: var(--accent); color: #fff; text-decoration: none;
+  font-size: var(--step--1); font-weight: 560;
+  padding: 0.5rem 0.95rem; border-radius: var(--radius);
+  transition: filter 150ms ease, transform 150ms ease;
+}
+.nav-cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+/* ===== The deliverable field ===== */
+.field {
+  display: grid; gap: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr));
+}
+.field-cell {
+  border: 1px solid var(--line); border-radius: 5px;
+  padding: 0.75rem 0.85rem; min-height: 4.1rem;
+  display: flex; flex-direction: column; justify-content: center; gap: 0.2rem;
+  background: var(--p0);
+}
+.field-ghost {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-3); opacity: 0.42;
+}
+.field-lit { background: var(--accent); border-color: var(--accent); }
+.field-tag {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: color-mix(in srgb, #fff 78%, transparent);
+}
+.field-val { color: #fff; font-size: var(--step--1); line-height: 1.35; font-weight: 500; }
+
+/* ===== Partner marks at scale ===== */
+.pmarks { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr)); }
+.pmark {
+  border: 1px solid var(--line-strong); border-radius: var(--radius);
+  background: var(--p0); padding: 1.5rem 1.5rem 1.3rem;
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+.pmark:hover { border-color: var(--accent); transform: translateY(-2px); }
+.pmark-logo { height: 30px; width: auto; object-fit: contain; object-position: left; margin-bottom: 1.1rem; display: block; }
+.pmark-val {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: var(--step-2); line-height: 1; letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums; display: block;
+}
+.pmark-as {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-3); display: block; margin-top: 0.4rem;
+}
+.pmark-body { font-size: var(--step--1); color: var(--ink-2); line-height: 1.6; margin: 1rem 0 0; max-width: 44ch; }
+
+/* ===== Ambient gizmo field ===== */
+.ambient { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+/* Below this width the hero text uses the full column and there is nowhere
+ * for a gizmo to sit without landing on top of it. */
+@media (max-width: 68rem) { .ambient { display: none; } }
+
+.ambient-giz {
+  position: absolute;
+  /* The frame accepts the cursor; the container does not, so the gizmos never
+   * eat a click meant for the text underneath. */
+  pointer-events: auto;
+  opacity: 0.9;
+}
+
+/* ===== Command palette ===== */
+.cmdk-trigger {
+  display: inline-flex; align-items: center; gap: 0.7rem;
+  background: var(--p0); border: 1px solid var(--line-strong);
+  border-radius: var(--radius); padding: 0.5rem 0.7rem;
+  font: inherit; font-size: var(--step--1); color: var(--ink-3);
+  cursor: pointer; transition: border-color 160ms ease, color 160ms ease;
+}
+.cmdk-trigger:hover { border-color: var(--accent); color: var(--ink); }
+.cmdk-trigger kbd {
+  font-family: var(--font-mono), monospace; font-size: 0.66rem;
+  border: 1px solid var(--line-strong); border-radius: 4px;
+  padding: 0.1rem 0.32rem; background: var(--p1);
+}
+
+.cmdk-scrim {
+  position: fixed; inset: 0; z-index: 90;
+  background: color-mix(in srgb, #17140f 42%, transparent);
+  backdrop-filter: blur(3px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 12vh 1rem 1rem;
+}
+.cmdk {
+  width: min(42rem, 100%);
+  background: var(--p0); border: 1px solid var(--line-strong);
+  border-radius: 10px; overflow: hidden;
+  box-shadow: 0 24px 60px -20px rgba(23, 20, 15, 0.35);
+}
+.cmdk-input {
+  width: 100%; border: 0; border-bottom: 1px solid var(--line);
+  padding: 1rem 1.1rem; font: inherit; font-size: max(1rem, var(--step-1));
+  font-family: var(--font-display), Georgia, serif;
+  background: transparent; color: var(--ink); border-radius: 0;
+}
+.cmdk-input:focus { outline: none; }
+.cmdk-input::placeholder { color: var(--ink-3); opacity: 0.55; }
+.cmdk-list { list-style: none; margin: 0; padding: 0.35rem; max-height: 46vh; overflow-y: auto; }
+.cmdk-hit {
+  width: 100%; text-align: left; border: 0; background: none; cursor: pointer;
+  font: inherit; color: inherit; padding: 0.6rem 0.75rem; border-radius: 6px;
+  display: grid; grid-template-columns: auto auto; gap: 0.1rem 0.6rem;
+}
+.cmdk-hit-on { background: var(--p1); }
+.cmdk-name { font-weight: 560; }
+.cmdk-batch {
+  font-family: var(--font-mono), monospace; font-size: 0.64rem;
+  text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-3);
+  align-self: center; justify-self: start;
+}
+.cmdk-one {
+  grid-column: 1 / -1; font-size: var(--step--1); color: var(--ink-3);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cmdk-foot {
+  display: flex; gap: 1.1rem; padding: 0.6rem 1.1rem;
+  border-top: 1px solid var(--line); background: var(--p1);
+  font-family: var(--font-mono), monospace; font-size: 0.62rem;
+  text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-3);
+}
+
+/* ===== Ticker ===== */
+.ticker {
+  overflow: hidden; border-block: 1px solid var(--line);
+  background: var(--p0); padding: 0.85rem 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.ticker-run {
+  display: flex; gap: 0; width: max-content;
+  animation: ticker-roll 42s linear infinite;
+}
+.ticker:hover .ticker-run { animation-play-state: paused; }
+.ticker-item {
+  display: inline-flex; align-items: center; gap: 1.6rem;
+  padding-right: 1.6rem; white-space: nowrap;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: var(--step-1); color: var(--ink-2);
+}
+.ticker-sep { color: var(--accent); opacity: 0.5; }
+@keyframes ticker-roll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plate-bar span, .ticker-run { animation: none; }
+}
+
+/* ===== Gizmos =====
+ * Frame system extracted from uselemma.ai's computed styles, 2026-09-23.
+ * No border, no radius, no background, no shadow, 18px padding. The visible
+ * rectangle is a stroked rect inside the svg, in the accent. Everything that
+ * would make this read as a card has been deliberately removed.
+ */
+.giz {
+  margin: 0;
+  padding: 18px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: crosshair;
+}
+
+.giz-stage {
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 0;
+  transition: transform 380ms cubic-bezier(0.22, 0.61, 0.36, 1), border-color 300ms ease;
+  will-change: transform;
+}
+.giz:hover .giz-stage { border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+
+.giz-svg {
+  display: block; width: 100%; height: auto; aspect-ratio: 1;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(transparent 0%, #000 16%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(transparent 0%, #000 16%, #000 84%, transparent 100%);
+}
+
+/* The frame, drawn. Same hairline weight as the art, same colour, and it
+ * draws itself in first so the plate arrives before its contents. */
+.giz-frame {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 0.22;
+  opacity: 0.45;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: giz-draw 0.7s linear forwards;
+}
+
+.giz-svg line {
+  stroke: var(--accent);
+  stroke-width: 0.16;
+  fill: none;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: giz-draw 0.7s linear forwards;
+  opacity: 0.4;
+}
+.giz-funnel .giz-svg line { stroke-width: 0.13; opacity: 0.3; }
+.giz-sphere .giz-svg line { stroke-width: 0.18; }
+.giz-svg .giz-edge { stroke-width: 0.12; opacity: 0.3; }
+
+@keyframes giz-draw { to { stroke-dashoffset: 0; } }
+
+.giz-svg circle { fill: var(--accent); stroke: none; }
+.giz-svg .giz-off { opacity: 0.14; }
+.giz-svg .giz-on { opacity: 0; animation: giz-pop 0.4s ease-out forwards; }
+.giz-svg .giz-node { opacity: 0; animation: giz-pop 0.38s ease-out forwards; }
+@keyframes giz-pop {
+  from { opacity: 0; transform: scale(0.2); transform-origin: center; }
+  to { opacity: 0.85; transform: scale(1); }
+}
+
+/* Their label spec exactly: 9px, weight 400, 0.32px tracking, lowercase, and
+ * coloured with the accent rather than a muted grey. The grey is what made
+ * the first version read as a caption under a figure instead of as part of
+ * the instrument. */
+.giz-cap {
+  display: flex; align-items: baseline; gap: 0.55rem;
+  margin-top: 0.55rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 9px; font-weight: 400; letter-spacing: 0.32px;
+  text-transform: none;
+  color: var(--accent);
+}
+.giz-code { opacity: 0.55; white-space: nowrap; }
+.giz-label { opacity: 0.8; }
+
+/* ===== Constant motion, after the spawn finishes =====
+ * Lemma's loader-orbit, spin and lemma-scroll-pulse all report
+ * iterations: null. These are the equivalent: slow enough to read as alive
+ * rather than as something demanding attention.
+ */
+
+/* The market sphere turns. transform-box + transform-origin because SVG
+ * defaults its origin to the viewport corner, not the shape. */
+.giz-orbit {
+  transform-box: view-box;
+  transform-origin: 50px 50px;
+  animation: giz-spin 28s linear infinite;
+}
+@keyframes giz-spin {
+  from { transform: rotateZ(0deg); }
+  to { transform: rotateZ(360deg); }
+}
+
+/* A light travels down the selection funnel, once per cycle, the way a real
+ * pipeline drains. */
+.giz-funnel .giz-svg::after { content: none; }
+.giz-funnel .giz-stage::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 22%;
+  top: -22%;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--accent) 22%, transparent), transparent);
+  animation: giz-sweep 4.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes giz-sweep {
+  0% { transform: translateY(0); opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(560%); opacity: 0; }
+}
+
+/* Warm-path nodes keep breathing, each on its own phase. */
+.giz-graph .giz-node {
+  animation: giz-pop 0.38s ease-out forwards, giz-breathe 3.4s ease-in-out infinite;
+}
+@keyframes giz-breathe {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.95; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .giz-orbit, .giz-graph .giz-node { animation: none; }
+  .giz-funnel .giz-stage::after { display: none; }
+  .giz-svg line { animation: none; stroke-dashoffset: 0; }
+  .giz-svg .giz-on, .giz-svg .giz-node { animation: none; opacity: 0.85; }
+  .giz-stage { transition: none; }
+  .giz-dot { animation: none; }
+}
+
+/* ===== Pinned scroll scenes =====
+ * Lemma's two sticky containers have parents of 10,800px and 3,600px against
+ * a 17,852px page, so 81% of their site is one screen held still while scroll
+ * swaps what is inside it. This is the same mechanism at a shorter length.
+ * 300vh gives three scenes a viewport each, which is enough to feel pinned
+ * without holding somebody hostage.
+ */
+.scenes { position: relative; height: 320vh; }
+.scenes-pin {
+  position: sticky; top: 0; height: 100vh;
+  display: grid; place-items: center;
+  overflow: hidden;
+}
+.scene {
+  grid-area: 1 / 1;
+  width: min(78rem, 100%);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  display: grid; gap: 1.2rem;
+  align-content: center;
+  will-change: opacity, transform, filter;
+}
+@media (min-width: 62rem) {
+  .scene { grid-template-columns: 1fr auto; column-gap: 3rem; align-items: center; }
+  .scene .tts-mono, .scene-h, .scene-p { grid-column: 1; }
+  .scene-art { grid-column: 2; grid-row: 1 / span 3; }
+  .scene-field { grid-column: 1 / -1; }
+}
+.scene-h { font-size: var(--step-2); margin: 0; }
+.scene-p { color: var(--ink-2); margin: 0; }
+.scene-art { display: flex; justify-content: center; }
+.scene-field { max-height: 46vh; overflow: hidden; }
+
+/* Progress ticks, so somebody knows how many beats are left. */
+.scenes-rail {
+  position: sticky; top: 50vh; left: 0;
+  margin-left: var(--gutter);
+  display: flex; flex-direction: column; gap: 0.4rem;
+  width: 0; height: 0;
+}
+.scenes-tick {
+  width: 2px; height: 18px; background: var(--accent);
+  transition: opacity 240ms ease;
+}
+@media (max-width: 62rem) { .scenes-rail { display: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .scenes { height: auto; }
+  .scenes-pin { position: static; height: auto; display: block; }
+  .scene { opacity: 1 !important; filter: none !important; transform: none !important;
+           padding-block: var(--rhythm); }
+}

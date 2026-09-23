@@ -19,10 +19,15 @@ const res = await fetch(ALL);
 if (!res.ok) throw new Error(`yc-oss returned ${res.status} for ${ALL}`);
 const companies = await res.json();
 
+// slug -> [batch, name, one-liner]. The name is here so the homepage search
+// can resolve "cursor" to a slug without a second round trip, and the
+// one-liner so a result can render something real before the full fetch
+// lands. Tuples rather than objects because this file ships to a lambda and
+// 6,245 repeated key names is 150KB of nothing.
 const index = {};
 for (const c of companies) {
   if (!c.slug || !c.batch) continue;
-  index[c.slug] = batchSlug(c.batch);
+  index[c.slug] = [batchSlug(c.batch), c.name ?? c.slug, c.one_liner ?? ""];
 }
 
 const out = {
