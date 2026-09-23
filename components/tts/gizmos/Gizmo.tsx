@@ -73,14 +73,14 @@ export default function Gizmo({
         <svg viewBox="0 0 100 100" className="giz-svg" role="img" aria-label={cap.label}>
           {kind === "funnel" && funnel().map((l, i) => (
             <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} pathLength={1}
-              style={{ animationDelay: `${(i % 44) * 0.018}s` }} />
+              style={{ animationDelay: `${(i % 44) * 0.009}s` }} />
           ))}
 
           {kind === "sphere" && (
             <g className="giz-orbit">
               {sphere().map((l, i) => (
                 <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} pathLength={1}
-                  style={{ animationDelay: `${(i % 60) * 0.015}s` }} />
+                  style={{ animationDelay: `${(i % 60) * 0.006}s` }} />
               ))}
             </g>
           )}
@@ -90,7 +90,7 @@ export default function Gizmo({
             return dots.map((d, i) => (
               <circle key={i} cx={d.cx} cy={d.cy} r={d.r}
                 className={filled[i] ? "giz-on" : "giz-off"}
-                style={{ animationDelay: `${((d.cx * 0.7 + d.cy) % 60) * 0.016}s` }} />
+                style={{ animationDelay: `${((d.cx * 0.7 + d.cy) % 60) * 0.006}s` }} />
             ));
           })()}
 
@@ -101,11 +101,11 @@ export default function Gizmo({
                 {edges.map((e, i) => (
                   <line key={`e${i}`} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2}
                     pathLength={1} className="giz-edge"
-                    style={{ animationDelay: `${(i % 30) * 0.02}s` }} />
+                    style={{ animationDelay: `${(i % 30) * 0.013}s` }} />
                 ))}
                 {dots.map((d, i) => (
                   <circle key={`n${i}`} cx={d.cx} cy={d.cy} r={d.r} className="giz-node"
-                    style={{ animationDelay: `${0.45 + (i % 20) * 0.03}s` }} />
+                    style={{ animationDelay: `${0.45 + (i % 20) * 0.02}s` }} />
                 ))}
               </>
             );

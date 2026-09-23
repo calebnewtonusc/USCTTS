@@ -1,0 +1,50 @@
+/* Shared by both sites, so it reads from neither token set and defines its
+ * own. Both roots sit under it, and it must look identical on the paper site
+ * and the warm-dark one or the two stop reading as siblings. */
+.sitetoggle {
+  background: #12100e;
+  padding: 0.5rem clamp(1.25rem, 5vw, 3rem);
+  display: flex;
+  justify-content: center;
+  font-family: var(--font-body, ui-sans-serif, system-ui, sans-serif);
+}
+
+.sitetoggle-track {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  background: #1e1a16;
+  border-radius: 6px;
+}
+
+.sitetoggle-opt {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #8a7f73;
+  /* Press feedback numbers from ux-engine/motion/press-feedback.md: colour
+   * transitions run 50 to 150ms, transform 100 to 160ms, ease-out always. */
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+/* Gated, or a touch device fires a false hover on every tap and the control
+ * flashes its hover state on press. Same file. */
+@media (hover: hover) and (pointer: fine) {
+  .sitetoggle-opt:hover { color: #f4f0ea; background: #272119; }
+}
+.sitetoggle-opt.is-on { background: #f4f0ea; color: #12100e; }
+
+.sitetoggle-mark {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.sitetoggle-name { font-size: 0.74rem; }
+@media (max-width: 30rem) { .sitetoggle-name { display: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sitetoggle-opt { transition-duration: 1ms; }
+}

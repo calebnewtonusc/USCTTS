@@ -18,7 +18,12 @@ const PLACED: Array<{ kind: GizmoKind; x: string; y: string; size: number; rot: 
 
 export default function AmbientField() {
   return (
-    <div className="ambient">
+    // Decoration arrives last. measured-motion.md read Lemma's cascade as
+    // badge, headline line one, headline line two, subhead, buttons, then the
+    // plots, and named the common failure: staggering by DOM position so the
+    // cascade fights the reading order instead of leading it. The hero text
+    // finishes around 500ms, so the gizmos start after it.
+    <div className="ambient ambient-late">
       {PLACED.map((p) => (
         <Gizmo
           key={p.kind}

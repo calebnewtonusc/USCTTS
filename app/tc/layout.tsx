@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import SiteToggle from "@/components/SiteToggle";
+import "@/components/site-toggle.css";
 import "./tc.css";
 
 // Three lanes, never crossed: serif display, tight grotesk for everything a
@@ -41,6 +43,7 @@ export const metadata: Metadata = {
 export default function TcLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className={`tc-root ${display.variable} ${body.variable} ${mono.variable}`}>
+      <SiteToggle />
       {children}
     </div>
   );

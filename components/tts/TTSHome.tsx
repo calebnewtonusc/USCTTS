@@ -1,6 +1,8 @@
 import { Instrument_Serif, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import { Hero, Partners, AlumniTicker, Bench, TCombinatorTeaser, Footer } from "./sections";
 import Nav from "./Nav";
+import SiteToggle from "@/components/SiteToggle";
+import "@/components/site-toggle.css";
 import ScrollScenes from "./ScrollScenes";
 import SmoothScroll from "./SmoothScroll";
 import "./tts.css";
@@ -13,6 +15,7 @@ export default function TTSHome() {
   return (
     <div className={`tts-root ${display.variable} ${body.variable} ${mono.variable}`}>
       <SmoothScroll />
+      <SiteToggle />
       <Nav />
       <main>
         <Hero />

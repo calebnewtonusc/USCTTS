@@ -135,7 +135,7 @@ export function Bench() {
             initial={still ? false : { opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-40px" }}
-            transition={{ duration: 0.3, delay: still ? 0 : i * 0.025 }}
+            transition={{ duration: 0.3, delay: still ? 0 : i * 0.019 }}
             style={{ background: "var(--p0)", padding: "1.1rem 1.2rem" }}
           >
             <div style={{ fontWeight: 560 }}>{p.name}</div>

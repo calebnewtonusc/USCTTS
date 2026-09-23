@@ -334,29 +334,90 @@
 }
 .nav-cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
 
-/* ===== The deliverable field ===== */
-.field {
-  display: grid; gap: 0.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr));
+/* ===== The trace field =====
+ * Three-phase spawn read off frames of uselemma.ai's trace grid: the empty
+ * outlines arrive first with no text at all, then the labels populate, then
+ * the flagged cells bloom. The whole field drifts afterwards, because their
+ * frames two and three carry identical content at a different offset.
+ */
+.tfield {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
 }
-.field-cell {
-  border: 1px solid var(--line); border-radius: 5px;
-  padding: 0.75rem 0.85rem; min-height: 4.1rem;
-  display: flex; flex-direction: column; justify-content: center; gap: 0.2rem;
-  background: var(--p0);
+
+/* Phase three: the slow drift. transform only, and it never returns to its
+ * start, so there is no visible snap. */
+.tfield-drift {
+  display: grid; gap: 0.45rem;
+  animation: tfield-drift 34s ease-in-out infinite alternate;
+  will-change: transform;
 }
-.field-ghost {
+@keyframes tfield-drift {
+  from { transform: translate3d(-1.2%, 0, 0); }
+  to { transform: translate3d(1.2%, 0, 0); }
+}
+
+.tfield-row { display: flex; gap: 0.45rem; }
+
+/* Phase one: the outline, with nothing in it. */
+.tcell {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 3.5rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
+  border-radius: 5px;
+  padding: 0.6rem 0.75rem;
+  display: flex; align-items: center;
+  opacity: 0;
+  animation: tcell-in 0.42s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+@keyframes tcell-in {
+  from { opacity: 0; transform: translateY(6px) scaleY(0.88); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Phase two: the text, once the outlines are all down. */
+.tcell-body {
+  display: grid; gap: 0.12rem; min-width: 0;
+  opacity: 0;
+  animation: tcell-text 0.34s ease-out forwards;
+}
+@keyframes tcell-text { to { opacity: 1; } }
+
+.tcell-code {
   font-family: var(--font-mono), monospace;
-  font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--ink-3); opacity: 0.42;
+  font-size: 0.66rem; letter-spacing: 0.07em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent) 55%, transparent);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.field-lit { background: var(--accent); border-color: var(--accent); }
-.field-tag {
+
+/* The lit cells. Solid fill, white text, two lines: a tag and a quote,
+ * matching the shape of the flagged rows in their grid. */
+.tcell-lit {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.tcell-tag {
   font-family: var(--font-mono), monospace;
-  font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: color-mix(in srgb, #fff 78%, transparent);
+  font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: color-mix(in srgb, #fff 76%, transparent);
 }
-.field-val { color: #fff; font-size: var(--step--1); line-height: 1.35; font-weight: 500; }
+.tcell-quote {
+  color: #fff; font-size: var(--step--1); line-height: 1.3;
+  overflow: hidden; text-overflow: ellipsis;
+}
+
+@media (max-width: 52rem) {
+  .tfield-row { gap: 0.35rem; }
+  .tcell { min-height: 2.9rem; padding: 0.45rem 0.55rem; }
+  .tcell-quote { font-size: 0.72rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tfield-drift { animation: none; }
+  .tcell, .tcell-body { animation: none; opacity: 1; transform: none; }
+}
 
 /* ===== Partner marks at scale ===== */
 .pmarks { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr)); }
@@ -669,3 +730,12 @@
   .scene { opacity: 1 !important; filter: none !important; transform: none !important;
            padding-block: var(--rhythm); }
 }
+
+/* Decoration arrives after the text it decorates. The hero cascade finishes
+ * near 500ms, so the gizmo field starts there rather than competing with the
+ * headline for the first frame. */
+.ambient-late .giz-svg line,
+.ambient-late .giz-svg circle { animation-delay: inherit; }
+.ambient-late { animation: ambient-hold 520ms steps(1) both; }
+@keyframes ambient-hold { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ambient-late { animation: none; } }
