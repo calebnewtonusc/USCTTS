@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Lock, ArrowRight } from "lucide-react";
+import Shell from "@/components/tts/Shell";
 
 const STORAGE_KEY = "tts-meetings-unlocked";
+// A speed bump for slides, not security: the slides themselves ship in the
+// bundle. Anything private does not belong under /meetings.
 const ANSWER = "gravity";
 
 export function PasswordGate({ children }: { children: React.ReactNode }) {
@@ -14,13 +16,11 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       try {
-        const stored = sessionStorage.getItem(STORAGE_KEY);
-        setUnlocked(stored === "1");
+        setUnlocked(sessionStorage.getItem(STORAGE_KEY) === "1");
       } catch {
         setUnlocked(false);
       }
     }, 0);
-
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -29,7 +29,9 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
     if (value.trim().toLowerCase() === ANSWER) {
       try {
         sessionStorage.setItem(STORAGE_KEY, "1");
-      } catch {}
+      } catch {
+        /* Private mode: the unlock lasts for this page only, which is fine. */
+      }
       setUnlocked(true);
       setError(false);
     } else {
@@ -37,81 +39,51 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
     }
   };
 
-  if (unlocked === null) {
-    return <div className="min-h-screen bg-zinc-950" aria-hidden />;
-  }
-
   if (unlocked) return <>{children}</>;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-4">
-      <div
-        aria-hidden
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse at top, rgba(204,0,0,0.18), transparent 60%), radial-gradient(ellipse at bottom, rgba(255,204,0,0.08), transparent 55%)",
-        }}
-      />
-      <form
-        onSubmit={attempt}
-        className="relative z-10 w-full max-w-md"
-        autoComplete="off"
-      >
-        <div className="flex items-center gap-2.5 mb-8">
-          <div className="p-2 bg-white/5 border border-white/10 rounded-xl">
-            <Lock className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <div className="text-xs uppercase tracking-[0.2em] text-white">
-              TTS Meetings
-            </div>
-            <div className="text-sm text-white">Members only</div>
-          </div>
-        </div>
-
-        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-3">
-          Enter the password
+    <Shell>
+      <section className="hero col section-head prose" aria-labelledby="gate-title">
+        <h1 id="gate-title" className="t-h2">
+          Members only.
         </h1>
-        <p className="text-white text-sm sm:text-base leading-relaxed mb-8">
-          Slides from every meeting live here. Ask a cabinet member if you need
-          the password.
-        </p>
-
-        <label htmlFor="pw" className="sr-only">
-          Password
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="pw"
-            type="password"
-            value={value}
-            onChange={(e) => {
-              setValue(e.target.value);
-              if (error) setError(false);
-            }}
-            placeholder="Password"
-            autoFocus
-            className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-red-500/60 focus:border-transparent transition"
-          />
-          <button
-            type="submit"
-            className="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-500 text-white font-semibold px-5 rounded-xl transition-all duration-200 shadow-lg shadow-red-600/25 cursor-pointer"
-          >
-            <span className="hidden sm:inline">Unlock</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-        {error && (
-          <p role="alert" className="mt-3 text-sm text-red-400">
-            Not quite. Try again.
+        <p className="t-lead">Meeting slides live behind a password. Ask anyone running the club if you need it.</p>
+      </section>
+      <section className="col mt-l" aria-label="Password">
+        {unlocked === null ? (
+          <p className="label" role="status">
+            Checking whether this tab is already unlocked.
           </p>
+        ) : (
+          <form className="form" onSubmit={attempt} autoComplete="off" noValidate>
+            <div className="field">
+              <label htmlFor="pw">Password</label>
+              <input
+                id="pw"
+                className="input"
+                type="password"
+                value={value}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? "pw-error" : undefined}
+                onChange={(e) => {
+                  setValue(e.target.value);
+                  if (error) setError(false);
+                }}
+              />
+              {error && (
+                <span className="field-error" id="pw-error" role="alert">
+                  That is not it. Check with someone running the club and try again.
+                </span>
+              )}
+            </div>
+            <div>
+              <button type="submit" className="btn btn-primary">
+                Unlock
+              </button>
+            </div>
+          </form>
         )}
-
-        <div className="mt-10 pt-6 border-t border-white/5 text-xs text-zinc-600">
-          Trojan Technology Solutions
-        </div>
-      </form>
-    </div>
+      </section>
+    </Shell>
   );
 }

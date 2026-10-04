@@ -2,48 +2,84 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const LINKS = [
   { href: "/about", label: "About" },
-  { href: "/members", label: "Team" },
+  { href: "/members", label: "People" },
+  { href: "/build", label: "Build team" },
   { href: "/work-with-us", label: "For companies" },
-  { href: "/tc", label: "T Combinator" },
 ];
 
 export default function Nav() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  return (
-    <>
-      {/* The recruiting date. The campus survey found nobody at USC publishes
-        * one: TroyLabs points at an Instagram handle and LavaLab's apply
-        * button goes to a closed Google Form. It was the cheapest available
-        * win and the first build shipped without it. */}
-      <div className="topbar">
-        <span className="topbar-dot" aria-hidden="true" />
-        Spring cohort applications open in October. Three companies, not more.
-        <Link href="/apply" className="topbar-link">Get the date</Link>
-      </div>
+  // Close the mobile sheet on navigation, and on Escape.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
-      <nav className={scrolled ? "nav nav-scrolled" : "nav"} aria-label="Main">
-        <Link href="/" className="nav-mark">
-          <span className="nav-mark-badge">TTS</span>
+  return (
+    <header className={scrolled ? "nav is-scrolled" : "nav"}>
+      <nav className="nav-inner" aria-label="Main">
+        <Link href="/" className="nav-mark" onClick={() => setOpen(false)}>
           <span className="nav-mark-name">Trojan Tech Solutions</span>
+          <span className="nav-mark-sub">USC</span>
         </Link>
         <ul className="nav-links">
           {LINKS.map((l) => (
-            <li key={l.href}><Link href={l.href}>{l.label}</Link></li>
+            <li key={l.href}>
+              <Link href={l.href} className="link" aria-current={pathname === l.href ? "page" : undefined}>
+                {l.label}
+              </Link>
+            </li>
           ))}
         </ul>
-        <Link href="/apply" className="nav-cta">Join</Link>
+        <Link href="/apply" className="btn btn-primary" onClick={() => setOpen(false)}>
+          Join
+        </Link>
+        <button
+          type="button"
+          className="btn btn-secondary nav-menu-btn"
+          aria-expanded={open}
+          aria-controls="nav-sheet"
+          onClick={() => setOpen((o) => !o)}
+        >
+          {open ? "Close" : "Menu"}
+        </button>
       </nav>
-    </>
+      {open && (
+        <div className="nav-sheet" id="nav-sheet">
+          <ul>
+            {LINKS.map((l) => (
+              <li key={l.href}>
+                <Link href={l.href} onClick={() => setOpen(false)} aria-current={pathname === l.href ? "page" : undefined}>
+                  {l.label}
+                  <span aria-hidden="true">&rarr;</span>
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link href="/tc" onClick={() => setOpen(false)}>
+                T Combinator
+                <span aria-hidden="true">&rarr;</span>
+              </Link>
+            </li>
+          </ul>
+        </div>
+      )}
+    </header>
   );
 }

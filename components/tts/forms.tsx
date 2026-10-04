@@ -1,0 +1,137 @@
+"use client";
+
+import { useState } from "react";
+
+/* Shared pieces for the three TTS forms (/apply, /work-with-us/form,
+ * /partner). Errors sit next to the field they belong to, never in colour
+ * alone, and the visitor's input is always kept. */
+
+export type Errors<K extends string> = Partial<Record<K, string>>;
+
+export function Field({
+  id,
+  label,
+  hint,
+  error,
+  children,
+}: {
+  id: string;
+  label: string;
+  hint?: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="field">
+      <label htmlFor={id}>{label}</label>
+      {hint && (
+        <span className="hint" id={`${id}-hint`}>
+          {hint}
+        </span>
+      )}
+      {children}
+      {error && (
+        <span className="field-error" id={`${id}-error`}>
+          {error}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/** aria wiring for an input inside <Field>. */
+export function describe(id: string, hint: boolean, error?: string) {
+  const ids = [hint ? `${id}-hint` : null, error ? `${id}-error` : null]
+    .filter(Boolean)
+    .join(" ");
+  return {
+    id,
+    "aria-invalid": error ? true : undefined,
+    "aria-describedby": ids || undefined,
+  } as const;
+}
+
+export function Choices<V extends string>({
+  name,
+  legend,
+  options,
+  value,
+  onChange,
+  error,
+  multiple = false,
+  selected = [],
+}: {
+  name: string;
+  legend: string;
+  options: { value: V; label: string }[];
+  value?: V | "";
+  onChange: (v: V) => void;
+  error?: string;
+  multiple?: boolean;
+  selected?: V[];
+}) {
+  return (
+    <fieldset aria-describedby={error ? `${name}-error` : undefined}>
+      <legend>{legend}</legend>
+      <div className="choices">
+        {options.map((o) => (
+          <label key={o.value} className="choice">
+            <input
+              type={multiple ? "checkbox" : "radio"}
+              name={name}
+              value={o.value}
+              checked={
+                multiple ? selected.includes(o.value) : value === o.value
+              }
+              onChange={() => onChange(o.value)}
+            />
+            <span>{o.label}</span>
+          </label>
+        ))}
+      </div>
+      {error && (
+        <span className="field-error" id={`${name}-error`}>
+          {error}
+        </span>
+      )}
+    </fieldset>
+  );
+}
+
+export const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** POST JSON and turn any failure into a sentence a person can act on. */
+export async function postJson(
+  url: string,
+  body: unknown,
+): Promise<string | null> {
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) return null;
+    if (res.status === 400)
+      return "Something in the form did not pass the server's check. Look over each field and send it again.";
+    return "It did not go through on our end. Your answers are still here, so try again in a minute.";
+  } catch {
+    return "It did not go through, which usually means the connection dropped. Your answers are still here, so try again.";
+  }
+}
+
+export function useForm<T extends Record<string, unknown>>(initial: T) {
+  const [values, setValues] = useState<T>(initial);
+  const set = <K extends keyof T>(k: K, v: T[K]) =>
+    setValues((prev) => ({ ...prev, [k]: v }));
+  return { values, set };
+}
+
+/** After a failed submit, move focus to the first field that needs fixing. */
+export function focusFirstError() {
+  requestAnimationFrame(() => {
+    document
+      .querySelector<HTMLElement>('form [aria-invalid="true"], form fieldset[aria-describedby] input')
+      ?.focus();
+  });
+}

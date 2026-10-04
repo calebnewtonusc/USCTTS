@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
-import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const inter = Inter({
@@ -57,11 +56,6 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
       <head>
         <script
-          dangerouslySetInnerHTML={{
-            __html: `try{if(localStorage.getItem('tts-theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}`,
-          }}
-        />
-        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
@@ -86,7 +80,6 @@ export default function RootLayout({
       <body className={`min-h-full bg-white antialiased`}>
         {children}
         <Toaster theme="light" />
-        <Analytics />
       </body>
     </html>
   );

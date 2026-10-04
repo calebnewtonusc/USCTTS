@@ -1,7 +1,7 @@
 import type { Meeting } from "./types";
 import { COLOR } from "./types";
 
-// Meeting 02 — Tuesday, April 28, 2026
+// Meeting 02: Tuesday, April 28, 2026
 // First half: Building (Caleb + Kaitlyn). Second half: Consulting (Tyler).
 // Tyler's slides are left as clearly-marked placeholders for him to fill.
 
@@ -399,7 +399,7 @@ export const meeting02: Meeting = {
     },
 
     // ------------------------------------------------------------------
-    // TYLER — Consulting second half. Replace these placeholders with
+    // TYLER: Consulting second half. Replace these placeholders with
     // your actual slides. Any slide kind works (bullets, three-up, quote,
     // stat, people, cabinet, cta, venn, split-bullets, video).
     // See _TEMPLATE.ts for examples.

@@ -1,7 +1,7 @@
 import type { Meeting } from "./types";
 import { COLOR } from "./types";
 
-// Meeting 03 — Build session with team breakouts.
+// Meeting 03: Build session with team breakouts.
 // General meeting: 2 slides. Build team breakout: 1 slide.
 // Biotech and Consulting teams run their own slides separately.
 

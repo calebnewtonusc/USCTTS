@@ -1,7 +1,7 @@
 import type { Meeting } from "./types";
 import { COLOR } from "./types";
 
-// Meeting 01 — Tuesday, April 14, 2026
+// Meeting 01: Tuesday, April 14, 2026
 // Introductory meeting. Club overview, six verticals, advisors, Clay, collaboration.
 
 export const meeting01: Meeting = {

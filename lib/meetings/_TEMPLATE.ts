@@ -31,7 +31,7 @@ export const meetingTemplate: Meeting = {
 
   slides: [
     // ------------------------------------------------------------------
-    // 1. TITLE — use once, as the first slide.
+    // 1. TITLE: use once, as the first slide.
     // ------------------------------------------------------------------
     {
       kind: "title",
@@ -42,7 +42,7 @@ export const meetingTemplate: Meeting = {
     },
 
     // ------------------------------------------------------------------
-    // 2. SECTION — big number + section title. Use to break up the deck.
+    // 2. SECTION: big number + section title. Use to break up the deck.
     // ------------------------------------------------------------------
     {
       kind: "section",
@@ -52,7 +52,7 @@ export const meetingTemplate: Meeting = {
     },
 
     // ------------------------------------------------------------------
-    // 3. BULLETS — heading + list of points. 3 to 5 items is the sweet spot.
+    // 3. BULLETS: heading + list of points. 3 to 5 items is the sweet spot.
     // ------------------------------------------------------------------
     {
       kind: "bullets",
@@ -67,7 +67,7 @@ export const meetingTemplate: Meeting = {
     },
 
     // ------------------------------------------------------------------
-    // 4. THREE-UP — three cards side by side. Good for frameworks / tracks.
+    // 4. THREE-UP: three cards side by side. Good for frameworks / tracks.
     // ------------------------------------------------------------------
     {
       kind: "three-up",
@@ -96,7 +96,7 @@ export const meetingTemplate: Meeting = {
     },
 
     // ------------------------------------------------------------------
-    // 5. QUOTE — big pull-quote. Use sparingly, 1 per deck.
+    // 5. QUOTE: big pull-quote. Use sparingly, 1 per deck.
     // ------------------------------------------------------------------
     {
       kind: "quote",
@@ -105,7 +105,7 @@ export const meetingTemplate: Meeting = {
     },
 
     // ------------------------------------------------------------------
-    // 6. STAT — one huge number with label + context. Use for a wow moment.
+    // 6. STAT: one huge number with label + context. Use for a wow moment.
     // ------------------------------------------------------------------
     {
       kind: "stat",
@@ -116,7 +116,7 @@ export const meetingTemplate: Meeting = {
     },
 
     // ------------------------------------------------------------------
-    // 7. PEOPLE — 1 to 3 people with rich bullets. Use for leadership,
+    // 7. PEOPLE: 1 to 3 people with rich bullets. Use for leadership,
     //    advisors, or team presidents. Bullets show credentials.
     // ------------------------------------------------------------------
     {
@@ -142,7 +142,7 @@ export const meetingTemplate: Meeting = {
     },
 
     // ------------------------------------------------------------------
-    // 8. CABINET — many people (4+), compact photo + name + role only.
+    // 8. CABINET: many people (4+), compact photo + name + role only.
     //    Use when introducing a full team.
     // ------------------------------------------------------------------
     {
@@ -163,7 +163,7 @@ export const meetingTemplate: Meeting = {
     },
 
     // ------------------------------------------------------------------
-    // 9. CTA — closing slide. Use once as the last slide.
+    // 9. CTA: closing slide. Use once as the last slide.
     // ------------------------------------------------------------------
     {
       kind: "cta",

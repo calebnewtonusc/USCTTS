@@ -1,741 +1,1086 @@
-/* TTS tokens.
- *
- * Deliberately not dark. TroyLabs, LavaLab, ProductSC and Blockchain@USC are
- * all dark, and Blockchain@USC owns the terminal aesthetic outright, so a
- * fifth black page would read as the fifth black page. Warm paper with a
- * serif display is the only thing in the category nobody is doing.
- *
- * Not pure white either: #faf8f4 rather than #ffffff, following Cursor's
- * cream floor. The old site was #ffffff with gradient blobs on top, which is
- * the generated-page signature.
- */
+/* TTS, the lab report. The whole system is docs/DESIGN-tts.md; this file is
+ * its only implementation. Everything is scoped under .tts so nothing here can
+ * reach /tc, and sizes are px because globals.css owns the root font size that
+ * /tc inherits too. */
 
-.tts-root {
-  --p0: #faf8f4;
-  --p1: #f2eee7;
-  --p2: #e8e2d8;
-  --p3: #1a1714;
+.tts {
+  --paper: oklch(0.971 0.009 85);
+  --paper-2: oklch(0.94 0.013 85);
+  --ink: oklch(0.2 0.013 55);
+  --ink-2: oklch(0.42 0.013 55);
+  --rule: oklch(0.2 0.013 55 / 0.17);
+  /* The accent. One meaning: the code on this page computed this value in
+   * your browser just now. Used by .live and .stamp and nothing else. */
+  --red: oklch(0.53 0.19 33);
 
-  --line: #ddd5c8;
-  --line-strong: #c4b8a5;
+  --serif: var(--tts-serif), "Source Serif 4", Georgia, serif;
+  --grotesk:
+    var(--tts-grotesk), "Schibsted Grotesk", ui-sans-serif, system-ui,
+    sans-serif;
+  --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+  --gutter: 16px;
+  --measure: 62ch;
+  --wide: 1200px;
 
-  --ink: #17140f;
-  --ink-2: #514a40;
-  --ink-3: #7d7366;
-
-  /* USC cardinal, warmed. One accent, four places: mark, CTA, focus, emphasis. */
-  --accent: #b5231f;
-
-  --radius: 7px;
-
-  --step--1: clamp(0.83rem, 0.81rem + 0.1vw, 0.89rem);
-  --step-0: clamp(1.02rem, 0.99rem + 0.15vw, 1.1rem);
-  --step-1: clamp(1.3rem, 1.2rem + 0.5vw, 1.65rem);
-  --step-2: clamp(1.85rem, 1.5rem + 1.5vw, 2.8rem);
-  --step-3: clamp(2.6rem, 1.8rem + 3.6vw, 5.2rem);
-  --step-4: clamp(2.9rem, 1.9rem + 4.2vw, 5.4rem);
-
-  --gutter: clamp(1.25rem, 5vw, 3rem);
-  --rhythm: clamp(4.5rem, 9vw, 8rem);
-
-  background: var(--p0);
+  background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  font-size: var(--step-0);
-  line-height: 1.6;
+  font-family: var(--serif);
+  font-size: 18px;
+  line-height: 1.62;
+  font-optical-sizing: auto;
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+@media (min-width: 768px) {
+  .tts {
+    --gutter: 32px;
+  }
+}
+@media (min-width: 1024px) {
+  .tts {
+    --gutter: 48px;
+  }
+}
+@media (max-width: 599px) {
+  .tts {
+    font-size: 17px;
+  }
 }
 
-.tts-display {
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 400;
-  line-height: 0.97;
-  letter-spacing: -0.026em;
+.tts *,
+.tts *::before,
+.tts *::after {
+  box-sizing: border-box;
+}
+.tts ::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ---------- type ---------- */
+
+.tts h1,
+.tts h2,
+.tts h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-style: normal;
+  margin: 0;
   text-wrap: balance;
 }
-
-.tts-mono {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--step--1);
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+.tts .t-display {
+  font-size: clamp(46px, 7.4vw, 112px);
+  line-height: 0.98;
+  letter-spacing: -0.022em;
+  font-variation-settings: "opsz" 60;
 }
-
-.tts-wrap { max-width: 78rem; margin-inline: auto; padding-inline: var(--gutter); }
-.tts-prose { max-width: 62ch; }
-.tts-rule { height: 1px; background: var(--line); border: 0; margin: 0; }
-
-.tts-cta {
-  display: inline-flex; align-items: center; gap: 0.6rem;
-  background: var(--accent); color: #fff; font-weight: 550;
-  padding: 0.85rem 1.4rem; border-radius: var(--radius); text-decoration: none;
-  transition: transform 160ms ease, filter 160ms ease;
+.tts .t-h2 {
+  font-size: clamp(32px, 4.4vw, 60px);
+  line-height: 1.04;
+  letter-spacing: -0.016em;
+  font-variation-settings: "opsz" 60;
 }
-.tts-cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
-
-.tts-ghost {
-  display: inline-flex; align-items: center; gap: 0.6rem;
-  color: var(--ink); border: 1px solid var(--line-strong); background: transparent;
-  padding: 0.85rem 1.4rem; border-radius: var(--radius); text-decoration: none;
-  transition: background 160ms ease;
+.tts .t-h3 {
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.006em;
+  font-variation-settings: "opsz" 32;
 }
-.tts-ghost:hover { background: var(--p1); }
-
-.tts-root :focus-visible {
-  outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px;
+.tts .t-lead {
+  font-size: 21px;
+  line-height: 1.5;
+  color: var(--ink-2);
 }
-
-/* The partner chips. Caleb's brief: show the valuations "non chalant", small,
- * with the detail on hover. Hover alone strands touch users, so the detail is
- * a <details> that is open by default below the breakpoint and collapses to a
- * hover-and-focus reveal above it. */
-.tts-partner {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--p1);
-  padding: 1.1rem 1.25rem;
-}
-.tts-partner summary {
-  list-style: none; cursor: default; display: flex;
-  align-items: baseline; gap: 0.6rem; flex-wrap: wrap;
-}
-.tts-partner summary::-webkit-details-marker { display: none; }
-.tts-partner-name { font-weight: 560; font-size: var(--step-1); }
-.tts-partner-val {
-  font-family: var(--font-mono), monospace;
-  font-size: var(--step--1); color: var(--ink-3);
-  font-variant-numeric: tabular-nums;
-}
-.tts-partner-body {
-  margin-top: 0.7rem; color: var(--ink-2);
-  font-size: var(--step--1); line-height: 1.6; max-width: 46ch;
-}
-
-@media (min-width: 48rem) {
-  .tts-partner-body {
-    opacity: 0.55;
-    transition: opacity 180ms ease;
+@media (max-width: 599px) {
+  .tts .t-lead {
+    font-size: 19px;
   }
-  .tts-partner:hover .tts-partner-body,
-  .tts-partner:focus-within .tts-partner-body { opacity: 1; }
 }
-
-@keyframes tts-rise {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: none; }
-}
-.tts-rise { animation: tts-rise 280ms cubic-bezier(0.22, 0.61, 0.36, 1) both; }
-
-@media (prefers-reduced-motion: reduce) {
-  .tts-root *, .tts-root *::before, .tts-root *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-  .tts-partner-body { opacity: 1 !important; }
-}
-
-/* ===== The record motif =====
- * A catalog-numbered plate whose fields resolve. This is the ownable shape:
- * crop 400px of it with no logo and it is still recognizably this site.
- */
-.rec {
-  border: 1px solid var(--line-strong);
-  background: var(--p0);
-  border-radius: var(--radius);
-  padding: 1rem 1.15rem 1.15rem;
-  position: relative;
-}
-.rec-ink { background: #1a1714; border-color: #3d352d; color: #f4f0ea; }
-
-.rec-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding-bottom: 0.7rem; margin-bottom: 0.9rem;
-  border-bottom: 1px solid var(--line);
-}
-.rec-ink .rec-head { border-color: #2e2823; }
-
-.rec-code {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--ink-3); font-variant-numeric: tabular-nums;
-}
-.rec-ink .rec-code { color: #8a7f73; }
-
-/* The live dot. The one looping animation on the page, and it earns the
- * exception because it is the signal that this plate is reading something
- * rather than displaying a picture of it. */
-.rec-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent); flex-shrink: 0;
-  animation: rec-pulse 2.4s ease-in-out infinite;
-}
-@keyframes rec-pulse {
-  0%, 100% { opacity: 0.25; transform: scale(0.85); }
-  50% { opacity: 1; transform: scale(1); }
-}
-
-.rec-title-row { display: flex; gap: 0.8rem; align-items: center; margin-bottom: 1.1rem; }
-.rec-logo { border-radius: 6px; background: var(--p2); flex-shrink: 0; object-fit: contain; }
-.rec-title {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: var(--step-1); line-height: 1.1; margin: 0; letter-spacing: -0.02em;
-}
-.rec-sub {
-  margin: 0.2rem 0 0; font-size: var(--step--1); color: var(--ink-3);
-  max-width: 44ch;
-}
-.rec-ink .rec-sub { color: #b8ada0; }
-
-.rec-fields { margin: 0; display: grid; gap: 0; }
-.rec-row {
-  display: grid; grid-template-columns: minmax(7rem, 34%) 1fr;
-  gap: 1rem; padding: 0.52rem 0;
-  border-top: 1px solid var(--line-faint, var(--line));
-  font-size: var(--step--1);
-}
-.rec-row:first-child { border-top: 0; }
-.rec-ink .rec-row { border-color: #241f1b; }
-.rec-row dt {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink-3); align-self: center;
-}
-.rec-ink .rec-row dt { color: #7d7366; }
-.rec-row dd { margin: 0; align-self: center; }
-.rec-hot { color: var(--accent); font-weight: 560; }
-
-/* Skeleton bar. Shown while a field has no value yet. */
-.rec-skel {
-  display: block; height: 0.62rem; width: 62%; border-radius: 3px;
-  background: linear-gradient(90deg, var(--p2) 0%, var(--p1) 50%, var(--p2) 100%);
-  background-size: 200% 100%;
-  animation: rec-shimmer 1.15s ease-in-out infinite;
-}
-@keyframes rec-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* ===== The live enrichment hero ===== */
-.enrich { display: grid; gap: 1.5rem; }
-@media (min-width: 60rem) {
-  .enrich { grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: start; }
-}
-
-.enrich-label {
-  display: block;
-  font-family: var(--font-mono), monospace;
-  font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--ink-3); margin-bottom: 0.6rem;
-}
-.enrich-input-wrap { position: relative; display: flex; align-items: center; }
-.enrich-input {
-  width: 100%;
-  /* 16px minimum or iOS zooms the viewport on focus. */
-  font-size: max(1rem, var(--step-1));
-  font-family: var(--font-display), Georgia, serif;
-  background: transparent; color: var(--ink);
-  border: 0; border-bottom: 2px solid var(--line-strong);
-  padding: 0.55rem 7rem 0.55rem 0;
-  border-radius: 0;
-  transition: border-color 160ms ease;
-}
-.enrich-input::placeholder { color: var(--ink-3); opacity: 0.6; }
-.enrich-input:focus { outline: none; border-bottom-color: var(--accent); }
-.enrich-count {
-  position: absolute; right: 0;
-  font-family: var(--font-mono), monospace;
-  font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink-3); font-variant-numeric: tabular-nums; pointer-events: none;
-}
-.enrich-help {
-  margin: 0.8rem 0 0; font-size: var(--step--1); color: var(--ink-2);
-  max-width: 42ch;
-}
-
-.enrich-hits {
-  list-style: none; margin: 0.75rem 0 0; padding: 0;
-  border: 1px solid var(--line-strong); border-radius: var(--radius);
-  overflow: hidden; background: var(--p0);
-}
-.enrich-hits li + li { border-top: 1px solid var(--line); }
-.enrich-hits button {
-  width: 100%; text-align: left; background: none; border: 0; cursor: pointer;
-  padding: 0.7rem 0.9rem; display: grid; gap: 0.15rem;
-  font: inherit; color: inherit;
-  transition: background 120ms ease;
-}
-.enrich-hits button:hover { background: var(--p1); }
-.enrich-hit-name { font-weight: 560; }
-.enrich-hit-one {
-  font-size: var(--step--1); color: var(--ink-3);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .rec-dot, .rec-skel { animation: none; }
-}
-
-/* ===== Nav and topbar ===== */
-.topbar {
-  display: flex; align-items: center; justify-content: center; gap: 0.6rem;
-  flex-wrap: wrap;
-  background: var(--p3); color: #f4f0ea;
-  font-size: var(--step--1); padding: 0.6rem var(--gutter);
-  text-align: center;
-}
-.topbar-dot {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
-  animation: rec-pulse 2.4s ease-in-out infinite; flex-shrink: 0;
-}
-.topbar-link { color: #f4f0ea; text-underline-offset: 3px; }
-
-.nav {
-  position: sticky; top: 0; z-index: 40;
-  display: flex; align-items: center; gap: 1.5rem;
-  padding: 0.85rem var(--gutter);
-  background: color-mix(in srgb, var(--p0) 88%, transparent);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid transparent;
-  transition: border-color 180ms ease, background 180ms ease;
-}
-.nav-scrolled { border-bottom-color: var(--line); }
-
-.nav-mark { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: inherit; }
-.nav-mark-badge {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.7rem; letter-spacing: 0.1em; font-weight: 700;
-  background: var(--p3); color: var(--p0);
-  padding: 0.3rem 0.45rem; border-radius: 4px;
-}
-.nav-mark-name { font-weight: 560; font-size: var(--step--1); white-space: nowrap; }
-@media (max-width: 40rem) { .nav-mark-name { display: none; } }
-
-.nav-links {
-  list-style: none; display: flex; gap: 1.2rem; margin: 0 auto 0 0; padding: 0;
-  font-size: var(--step--1); flex-wrap: wrap;
-}
-.nav-links a { color: var(--ink-2); text-decoration: none; position: relative; }
-.nav-links a::after {
-  content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px;
-  background: var(--accent); transform: scaleX(0); transform-origin: left;
-  transition: transform 180ms ease;
-}
-.nav-links a:hover { color: var(--ink); }
-.nav-links a:hover::after { transform: scaleX(1); }
-@media (max-width: 52rem) { .nav-links { display: none; } }
-
-.nav-cta {
-  background: var(--accent); color: #fff; text-decoration: none;
-  font-size: var(--step--1); font-weight: 560;
-  padding: 0.5rem 0.95rem; border-radius: var(--radius);
-  transition: filter 150ms ease, transform 150ms ease;
-}
-.nav-cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
-
-/* ===== The trace field =====
- * Three-phase spawn read off frames of uselemma.ai's trace grid: the empty
- * outlines arrive first with no text at all, then the labels populate, then
- * the flagged cells bloom. The whole field drifts afterwards, because their
- * frames two and three carry identical content at a different offset.
- */
-.tfield {
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
-}
-
-/* Phase three: the slow drift. transform only, and it never returns to its
- * start, so there is no visible snap. */
-.tfield-drift {
-  display: grid; gap: 0.45rem;
-  animation: tfield-drift 34s ease-in-out infinite alternate;
-  will-change: transform;
-}
-@keyframes tfield-drift {
-  from { transform: translate3d(-1.2%, 0, 0); }
-  to { transform: translate3d(1.2%, 0, 0); }
-}
-
-.tfield-row { display: flex; gap: 0.45rem; }
-
-/* Phase one: the outline, with nothing in it. */
-.tcell {
-  flex: 1 1 0;
-  min-width: 0;
-  min-height: 3.5rem;
-  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
-  border-radius: 5px;
-  padding: 0.6rem 0.75rem;
-  display: flex; align-items: center;
-  opacity: 0;
-  animation: tcell-in 0.42s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
-}
-@keyframes tcell-in {
-  from { opacity: 0; transform: translateY(6px) scaleY(0.88); }
-  to { opacity: 1; transform: none; }
-}
-
-/* Phase two: the text, once the outlines are all down. */
-.tcell-body {
-  display: grid; gap: 0.12rem; min-width: 0;
-  opacity: 0;
-  animation: tcell-text 0.34s ease-out forwards;
-}
-@keyframes tcell-text { to { opacity: 1; } }
-
-.tcell-code {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.66rem; letter-spacing: 0.07em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--accent) 55%, transparent);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-
-/* The lit cells. Solid fill, white text, two lines: a tag and a quote,
- * matching the shape of the flagged rows in their grid. */
-.tcell-lit {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-.tcell-tag {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
-  color: color-mix(in srgb, #fff 76%, transparent);
-}
-.tcell-quote {
-  color: #fff; font-size: var(--step--1); line-height: 1.3;
-  overflow: hidden; text-overflow: ellipsis;
-}
-
-@media (max-width: 52rem) {
-  .tfield-row { gap: 0.35rem; }
-  .tcell { min-height: 2.9rem; padding: 0.45rem 0.55rem; }
-  .tcell-quote { font-size: 0.72rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tfield-drift { animation: none; }
-  .tcell, .tcell-body { animation: none; opacity: 1; transform: none; }
-}
-
-/* ===== Partner marks at scale ===== */
-.pmarks { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr)); }
-.pmark {
-  border: 1px solid var(--line-strong); border-radius: var(--radius);
-  background: var(--p0); padding: 1.5rem 1.5rem 1.3rem;
-  transition: border-color 200ms ease, transform 200ms ease;
-}
-.pmark:hover { border-color: var(--accent); transform: translateY(-2px); }
-.pmark-logo { height: 30px; width: auto; object-fit: contain; object-position: left; margin-bottom: 1.1rem; display: block; }
-.pmark-val {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: var(--step-2); line-height: 1; letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums; display: block;
-}
-.pmark-as {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink-3); display: block; margin-top: 0.4rem;
-}
-.pmark-body { font-size: var(--step--1); color: var(--ink-2); line-height: 1.6; margin: 1rem 0 0; max-width: 44ch; }
-
-/* ===== Ambient gizmo field ===== */
-.ambient { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-/* Below this width the hero text uses the full column and there is nowhere
- * for a gizmo to sit without landing on top of it. */
-@media (max-width: 68rem) { .ambient { display: none; } }
-
-.ambient-giz {
-  position: absolute;
-  /* The frame accepts the cursor; the container does not, so the gizmos never
-   * eat a click meant for the text underneath. */
-  pointer-events: auto;
-  opacity: 0.9;
-}
-
-/* ===== Command palette ===== */
-.cmdk-trigger {
-  display: inline-flex; align-items: center; gap: 0.7rem;
-  background: var(--p0); border: 1px solid var(--line-strong);
-  border-radius: var(--radius); padding: 0.5rem 0.7rem;
-  font: inherit; font-size: var(--step--1); color: var(--ink-3);
-  cursor: pointer; transition: border-color 160ms ease, color 160ms ease;
-}
-.cmdk-trigger:hover { border-color: var(--accent); color: var(--ink); }
-.cmdk-trigger kbd {
-  font-family: var(--font-mono), monospace; font-size: 0.66rem;
-  border: 1px solid var(--line-strong); border-radius: 4px;
-  padding: 0.1rem 0.32rem; background: var(--p1);
-}
-
-.cmdk-scrim {
-  position: fixed; inset: 0; z-index: 90;
-  background: color-mix(in srgb, #17140f 42%, transparent);
-  backdrop-filter: blur(3px);
-  display: flex; align-items: flex-start; justify-content: center;
-  padding: 12vh 1rem 1rem;
-}
-.cmdk {
-  width: min(42rem, 100%);
-  background: var(--p0); border: 1px solid var(--line-strong);
-  border-radius: 10px; overflow: hidden;
-  box-shadow: 0 24px 60px -20px rgba(23, 20, 15, 0.35);
-}
-.cmdk-input {
-  width: 100%; border: 0; border-bottom: 1px solid var(--line);
-  padding: 1rem 1.1rem; font: inherit; font-size: max(1rem, var(--step-1));
-  font-family: var(--font-display), Georgia, serif;
-  background: transparent; color: var(--ink); border-radius: 0;
-}
-.cmdk-input:focus { outline: none; }
-.cmdk-input::placeholder { color: var(--ink-3); opacity: 0.55; }
-.cmdk-list { list-style: none; margin: 0; padding: 0.35rem; max-height: 46vh; overflow-y: auto; }
-.cmdk-hit {
-  width: 100%; text-align: left; border: 0; background: none; cursor: pointer;
-  font: inherit; color: inherit; padding: 0.6rem 0.75rem; border-radius: 6px;
-  display: grid; grid-template-columns: auto auto; gap: 0.1rem 0.6rem;
-}
-.cmdk-hit-on { background: var(--p1); }
-.cmdk-name { font-weight: 560; }
-.cmdk-batch {
-  font-family: var(--font-mono), monospace; font-size: 0.64rem;
-  text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-3);
-  align-self: center; justify-self: start;
-}
-.cmdk-one {
-  grid-column: 1 / -1; font-size: var(--step--1); color: var(--ink-3);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.cmdk-foot {
-  display: flex; gap: 1.1rem; padding: 0.6rem 1.1rem;
-  border-top: 1px solid var(--line); background: var(--p1);
-  font-family: var(--font-mono), monospace; font-size: 0.62rem;
-  text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-3);
-}
-
-/* ===== Ticker ===== */
-.ticker {
-  overflow: hidden; border-block: 1px solid var(--line);
-  background: var(--p0); padding: 0.85rem 0;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-}
-.ticker-run {
-  display: flex; gap: 0; width: max-content;
-  animation: ticker-roll 42s linear infinite;
-}
-.ticker:hover .ticker-run { animation-play-state: paused; }
-.ticker-item {
-  display: inline-flex; align-items: center; gap: 1.6rem;
-  padding-right: 1.6rem; white-space: nowrap;
-  font-family: var(--font-display), Georgia, serif;
-  font-size: var(--step-1); color: var(--ink-2);
-}
-.ticker-sep { color: var(--accent); opacity: 0.5; }
-@keyframes ticker-roll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .plate-bar span, .ticker-run { animation: none; }
-}
-
-/* ===== Gizmos =====
- * Frame system extracted from uselemma.ai's computed styles, 2026-09-23.
- * No border, no radius, no background, no shadow, 18px padding. The visible
- * rectangle is a stroked rect inside the svg, in the accent. Everything that
- * would make this read as a card has been deliberately removed.
- */
-.giz {
+.tts p {
   margin: 0;
-  padding: 18px;
-  border: 0;
+  text-wrap: pretty;
+}
+.tts .prose > * + * {
+  margin-top: 1em;
+}
+.tts .label,
+.tts .fig {
+  font-family: var(--grotesk);
+  font-weight: 500;
+}
+.tts .label {
+  font-size: 13.5px;
+  line-height: 1.35;
+  letter-spacing: 0.005em;
+  color: var(--ink-2);
+}
+.tts .fig {
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+/* The accent, in its only two uses. */
+.tts .live {
+  color: var(--red);
+}
+.tts .stamp {
+  font-family: var(--grotesk);
+  font-weight: 600;
+  font-size: 12.5px;
+  line-height: 1;
+  color: var(--red);
+  border: 1.5px solid currentColor;
+  padding: 4px 6px 3px;
+  white-space: nowrap;
+}
+.tts .stamp.is-quiet {
+  color: var(--ink-2);
+}
+
+/* ---------- layout: essay plus exhibits ---------- */
+
+.tts .col {
+  width: min(var(--measure), 100% - 2 * var(--gutter));
+  margin-inline: auto;
+}
+.tts .wide {
+  width: min(var(--wide), 100% - 2 * var(--gutter));
+  margin-inline: auto;
+}
+.tts .section {
+  padding-block: clamp(64px, 11vw, 160px) 0;
+}
+.tts .section:last-of-type {
+  padding-bottom: clamp(64px, 11vw, 160px);
+}
+.tts .section-head > * + * {
+  margin-top: 20px;
+}
+
+.tts .exhibit {
+  margin-top: clamp(40px, 6vw, 72px);
+  border-top: 2px solid var(--ink);
+}
+.tts .exhibit-caption {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  justify-content: space-between;
+}
+
+/* ---------- links and buttons ---------- */
+
+/* Not the site toggle: it carries its own colours for both sites, and this
+   rule (0,1,1) beat its (0,1,0) and painted the TC option near-black on black. */
+.tts a:not(.sitetoggle-opt) {
+  color: inherit;
+}
+.tts .link {
+  text-decoration-line: underline;
+  text-decoration-color: var(--rule);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition:
+    text-decoration-color 140ms var(--ease),
+    text-decoration-thickness 140ms var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .link:hover {
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+}
+.tts .link:focus-visible,
+.tts .link[aria-current="page"] {
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
+}
+
+.tts .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 22px;
+  font-family: var(--grotesk);
+  font-weight: 600;
+  font-size: 15.5px;
+  line-height: 1;
+  text-decoration: none;
+  border: 1px solid var(--ink);
   border-radius: 0;
+  cursor: pointer;
+  transition:
+    background-color 120ms var(--ease),
+    color 120ms var(--ease),
+    transform 100ms var(--ease);
+}
+.tts .btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+.tts .btn-secondary {
   background: transparent;
-  box-shadow: none;
-  cursor: crosshair;
+  color: var(--ink);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .btn-primary:hover {
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .tts .btn-secondary:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+}
+.tts .btn:active {
+  transform: scale(0.97);
+}
+.tts .btn[disabled] {
+  cursor: progress;
+}
+.tts .btn .arrow {
+  transition: transform 120ms var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .btn:hover .arrow {
+    transform: translateX(3px);
+  }
 }
 
-.giz-stage {
-  position: relative;
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  border-radius: 0;
-  transition: transform 380ms cubic-bezier(0.22, 0.61, 0.36, 1), border-color 300ms ease;
-  will-change: transform;
+.tts :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
 }
-.giz:hover .giz-stage { border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
 
-.giz-svg {
-  display: block; width: 100%; height: auto; aspect-ratio: 1;
+.tts .skip {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 60;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 14px;
+  font-family: var(--grotesk);
+  font-size: 14px;
+  text-decoration: none;
+}
+.tts .skip:focus-visible {
+  top: 12px;
+}
+
+/* ---------- nav ---------- */
+
+.tts .nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--paper);
+  border-bottom: 1px solid transparent;
+  transition: border-color 160ms var(--ease);
+}
+.tts .nav.is-scrolled {
+  border-bottom-color: var(--rule);
+}
+.tts .nav-inner {
+  width: min(var(--wide), 100% - 2 * var(--gutter));
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-height: 64px;
+}
+.tts .nav-mark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  text-decoration: none;
+  margin-right: auto;
+}
+.tts .nav-mark-name {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+  font-variation-settings: "opsz" 32;
+}
+.tts .nav-mark-sub {
+  font-family: var(--grotesk);
+  font-size: 13px;
+  color: var(--ink-2);
+}
+@media (max-width: 899px) {
+  .tts .nav-mark-sub {
+    display: none;
+  }
+}
+.tts .nav-links {
+  display: flex;
+  gap: 22px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tts .nav-links a {
+  font-family: var(--grotesk);
+  font-size: 15px;
+  font-weight: 500;
+}
+.tts .nav .btn {
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 14.5px;
+}
+.tts .nav-menu-btn {
+  display: none;
+}
+@media (max-width: 759px) {
+  .tts .nav-links {
+    display: none;
+  }
+  .tts .nav-menu-btn {
+    display: inline-flex;
+  }
+}
+.tts .nav-sheet {
+  border-top: 1px solid var(--rule);
+  background: var(--paper);
+  padding: 8px var(--gutter) 20px;
+}
+.tts .nav-sheet ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tts .nav-sheet a {
+  display: flex;
+  justify-content: space-between;
+  min-height: 52px;
+  align-items: center;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 22px;
+  text-decoration: none;
+  transition: color 120ms var(--ease);
+}
+.tts .nav-sheet a:active {
+  color: var(--ink-2);
+}
+@media (min-width: 760px) {
+  .tts .nav-sheet {
+    display: none;
+  }
+}
+
+/* ---------- footer ---------- */
+
+.tts .footer {
+  border-top: 2px solid var(--ink);
+  margin-top: clamp(64px, 11vw, 160px);
+}
+.tts .footer-inner {
+  width: min(var(--wide), 100% - 2 * var(--gutter));
+  margin-inline: auto;
+  padding-block: 32px 48px;
+  display: grid;
+  gap: 32px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 760px) {
+  .tts .footer-inner {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+}
+.tts .footer h2 {
+  font-size: 22px;
+  font-variation-settings: "opsz" 32;
+}
+.tts .footer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.tts .footer a {
+  font-family: var(--grotesk);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* ---------- hero ---------- */
+
+.tts .hero {
+  padding-top: clamp(32px, 5vw, 72px);
+}
+.tts .hero-grid {
+  display: grid;
+  gap: clamp(40px, 6vw, 72px);
+  margin-top: clamp(28px, 4vw, 48px);
+}
+@media (min-width: 1024px) {
+  .tts .hero-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    align-items: start;
+  }
+}
+.tts .hero h1 .line {
+  display: block;
+}
+.tts .hero .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+.tts .hero .t-lead {
+  max-width: 36ch;
+}
+
+.tts .print-in {
+  animation: tts-print 240ms steps(6, end) both;
+}
+.tts .print-in.d1 {
+  animation-delay: 80ms;
+}
+.tts .print-in.d2 {
+  animation-delay: 160ms;
+}
+@keyframes tts-print {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* ---------- intake stream (the one ambient loop) ---------- */
+
+.tts .intake {
+  border-top: 2px solid var(--ink);
+}
+.tts .intake-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0 10px;
+  border-bottom: 1px solid var(--rule);
+}
+.tts .intake-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  height: calc(7 * 57px);
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(transparent 0%, #000 16%, #000 84%, transparent 100%);
-  mask-image: linear-gradient(transparent 0%, #000 16%, #000 84%, transparent 100%);
+  position: relative;
 }
-
-/* The frame, drawn. Same hairline weight as the art, same colour, and it
- * draws itself in first so the plate arrives before its contents. */
-.giz-frame {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 0.22;
-  opacity: 0.45;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: giz-draw 0.7s linear forwards;
+.tts .intake-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  height: 57px;
+  border-bottom: 1px solid var(--rule);
 }
-
-.giz-svg line {
-  stroke: var(--accent);
-  stroke-width: 0.16;
-  fill: none;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: giz-draw 0.7s linear forwards;
-  opacity: 0.4;
+.tts .intake-row .title {
+  font-size: 16px;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.giz-funnel .giz-svg line { stroke-width: 0.13; opacity: 0.3; }
-.giz-sphere .giz-svg line { stroke-width: 0.18; }
-.giz-svg .giz-edge { stroke-width: 0.12; opacity: 0.3; }
-
-@keyframes giz-draw { to { stroke-dashoffset: 0; } }
-
-.giz-svg circle { fill: var(--accent); stroke: none; }
-.giz-svg .giz-off { opacity: 0.14; }
-.giz-svg .giz-on { opacity: 0; animation: giz-pop 0.4s ease-out forwards; }
-.giz-svg .giz-node { opacity: 0; animation: giz-pop 0.38s ease-out forwards; }
-@keyframes giz-pop {
-  from { opacity: 0; transform: scale(0.2); transform-origin: center; }
-  to { opacity: 0.85; transform: scale(1); }
+.tts .intake-row .meta {
+  display: block;
+  font-family: var(--grotesk);
+  font-size: 12.5px;
+  color: var(--ink-2);
 }
-
-/* Their label spec exactly: 9px, weight 400, 0.32px tracking, lowercase, and
- * coloured with the accent rather than a muted grey. The grey is what made
- * the first version read as a caption under a figure instead of as part of
- * the instrument. */
-.giz-cap {
-  display: flex; align-items: baseline; gap: 0.55rem;
-  margin-top: 0.55rem;
-  font-family: var(--font-mono), monospace;
-  font-size: 9px; font-weight: 400; letter-spacing: 0.32px;
-  text-transform: none;
-  color: var(--accent);
+.tts .intake-row.is-new {
+  animation: tts-print 220ms steps(5, end) both;
 }
-.giz-code { opacity: 0.55; white-space: nowrap; }
-.giz-label { opacity: 0.8; }
-
-/* ===== Constant motion, after the spawn finishes =====
- * Lemma's loader-orbit, spin and lemma-scroll-pulse all report
- * iterations: null. These are the equivalent: slow enough to read as alive
- * rather than as something demanding attention.
- */
-
-/* The market sphere turns. transform-box + transform-origin because SVG
- * defaults its origin to the viewport corner, not the shape. */
-.giz-orbit {
-  transform-box: view-box;
-  transform-origin: 50px 50px;
-  animation: giz-spin 28s linear infinite;
+.tts .intake-row.is-new .stamp {
+  animation: tts-stamp 160ms steps(2, end) 200ms both;
 }
-@keyframes giz-spin {
-  from { transform: rotateZ(0deg); }
-  to { transform: rotateZ(360deg); }
+@keyframes tts-stamp {
+  from {
+    opacity: 0;
+    transform: scale(1.35) rotate(-4deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
 }
-
-/* A light travels down the selection funnel, once per cycle, the way a real
- * pipeline drains. */
-.giz-funnel .giz-svg::after { content: none; }
-.giz-funnel .giz-stage::after {
-  content: ""; position: absolute; left: 0; right: 0; height: 22%;
-  top: -22%;
-  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--accent) 22%, transparent), transparent);
-  animation: giz-sweep 4.6s ease-in-out infinite;
+.tts .intake-list::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 57px;
+  background: var(--paper);
+  opacity: 0.7;
   pointer-events: none;
 }
-@keyframes giz-sweep {
-  0% { transform: translateY(0); opacity: 0; }
-  12% { opacity: 1; }
-  88% { opacity: 1; }
-  100% { transform: translateY(560%); opacity: 0; }
+
+/* ---------- the run ---------- */
+
+.tts .run {
+  background: var(--paper-2);
+  padding: clamp(20px, 3vw, 32px);
+}
+.tts .run-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  align-items: center;
+  justify-content: space-between;
+}
+.tts .run-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.tts .switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--grotesk);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition:
+    background-color 120ms var(--ease),
+    color 120ms var(--ease),
+    transform 100ms var(--ease);
+}
+.tts .switch-box {
+  width: 30px;
+  height: 16px;
+  border: 1.5px solid currentColor;
+  position: relative;
+}
+.tts .switch-box::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 9px;
+  height: 9px;
+  background: currentColor;
+  transition: transform 120ms var(--ease);
+}
+.tts .switch[aria-checked="true"] .switch-box::after {
+  transform: translateX(14px);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .switch:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+}
+.tts .switch:active {
+  transform: scale(0.97);
 }
 
-/* Warm-path nodes keep breathing, each on its own phase. */
-.giz-graph .giz-node {
-  animation: giz-pop 0.38s ease-out forwards, giz-breathe 3.4s ease-in-out infinite;
+.tts .stages {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
 }
-@keyframes giz-breathe {
-  0%, 100% { opacity: 0.45; }
-  50% { opacity: 0.95; }
+.tts .stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 24px;
+  padding: 16px 0 16px 18px;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+.tts .stage::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  background: var(--ink);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 160ms var(--ease);
+}
+.tts .stage.is-active::before,
+.tts .stage.is-done::before {
+  transform: scaleY(1);
+}
+.tts .stage.is-done::before {
+  background: var(--rule);
+}
+.tts .stage.is-pending {
+  color: var(--ink-2);
+}
+.tts .stage-name {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.25;
+  font-variation-settings: "opsz" 32;
+}
+.tts .stage-rule {
+  grid-column: 1;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 58ch;
+}
+.tts .stage-out {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  text-align: right;
+  align-self: start;
+}
+.tts .stage-count {
+  display: block;
+  font-family: var(--grotesk);
+  font-weight: 600;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.tts .stage-ms {
+  display: block;
+  margin-top: 6px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .giz-orbit, .giz-graph .giz-node { animation: none; }
-  .giz-funnel .giz-stage::after { display: none; }
-  .giz-svg line { animation: none; stroke-dashoffset: 0; }
-  .giz-svg .giz-on, .giz-svg .giz-node { animation: none; opacity: 0.85; }
-  .giz-stage { transition: none; }
-  .giz-dot { animation: none; }
+.tts .run-out {
+  display: grid;
+  gap: 32px;
+  margin-top: 32px;
+}
+@media (min-width: 1024px) {
+  .tts .run-out {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  }
+}
+.tts .run-out h3 {
+  margin-bottom: 14px;
+}
+.tts .bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.tts .bar-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px;
+  gap: 4px 12px;
+  align-items: center;
+}
+.tts .bar-label {
+  grid-column: 1 / -1;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.tts .bar-track { display: block; width: 100%; height: 14px; }
+.tts .bar { fill: var(--ink); }
+.tts .bar.is-false { fill: none; stroke: var(--ink); stroke-width: 2; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.tts .bar-n {
+  text-align: right;
+}
+.tts .run-note {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-left: 2px solid var(--ink);
+  font-size: 16px;
+  line-height: 1.5;
+  background: var(--paper);
 }
 
-/* ===== Pinned scroll scenes =====
- * Lemma's two sticky containers have parents of 10,800px and 3,600px against
- * a 17,852px page, so 81% of their site is one screen held still while scroll
- * swaps what is inside it. This is the same mechanism at a shorter length.
- * 300vh gives three scenes a viewport each, which is enough to feel pinned
- * without holding somebody hostage.
- */
-.scenes { position: relative; height: 320vh; }
-.scenes-pin {
-  position: sticky; top: 0; height: 100vh;
-  display: grid; place-items: center;
+.tts table.ledger {
+  width: 100%;
+  border-collapse: collapse;
+}
+.tts table.ledger th {
+  text-align: left;
+  font-family: var(--grotesk);
+  font-weight: 500;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  padding: 0 12px 8px 0;
+  border-bottom: 1px solid var(--ink);
+}
+.tts table.ledger td {
+  padding: 10px 12px 10px 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+  font-size: 16px;
+  line-height: 1.4;
+}
+.tts table.ledger td.num,
+.tts table.ledger th.num {
+  text-align: right;
+  padding-right: 0;
+  font-family: var(--grotesk);
+  font-variant-numeric: tabular-nums;
+}
+.tts table.ledger .sub {
+  display: block;
+  font-family: var(--grotesk);
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+/* ---------- format timeline (the one scroll-linked layer) ---------- */
+
+.tts .timeline svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.tts .timeline .tl-wide {
+  display: none;
+}
+@media (min-width: 760px) {
+  .tts .timeline .tl-wide {
+    display: block;
+  }
+  .tts .timeline .tl-tall {
+    display: none;
+  }
+}
+.tts .timeline text {
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 6px;
+  stroke-linejoin: round;
+  font-family: var(--grotesk);
+  fill: var(--ink);
+}
+.tts .timeline .tl-axis {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.tts .timeline .tl-end {
+  stroke: var(--ink);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+.tts .timeline .tl-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+.tts .timeline .tl-line.is-deck {
+  stroke-width: 2;
+  stroke-dasharray: none;
+}
+.tts .timeline .tl-dot {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.tts .timeline .tl-mark {
+  transition: opacity 140ms linear;
+}
+.tts .timeline .tl-small {
+  font-size: 13px;
+  fill: var(--ink-2);
+}
+
+/* ---------- lists of refusals, steps, people ---------- */
+
+.tts .plain-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+.tts .plain-list > li {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.tts .plain-list .t-h3 {
+  display: block;
+}
+.tts .plain-list p {
+  margin-top: 6px;
+  color: var(--ink-2);
+}
+
+.tts .steps {
+  counter-reset: step;
+}
+.tts .steps > li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 0 12px;
+}
+.tts .steps > li::before {
+  content: counter(step);
+  font-family: var(--grotesk);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 30px;
+}
+.tts .steps > li > * {
+  grid-column: 2;
+}
+
+.tts .people {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0 24px;
+  border-top: 1px solid var(--rule);
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+}
+.tts .person {
+  border-bottom: 1px solid var(--rule);
+  padding: 16px 16px 18px 0;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+.tts .person img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.05);
+  display: block;
+}
+.tts .person .ph {
+  width: 64px;
+  height: 64px;
+  background: var(--paper-2);
+  display: grid;
+  place-items: center;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--ink-2);
+}
+.tts .person-name {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.25;
+}
+.tts .person a.person-name {
+  text-decoration: none;
+}
+.tts .person-role {
+  display: block;
+  font-family: var(--grotesk);
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+
+/* ---------- forms ---------- */
+
+.tts form.form {
+  display: grid;
+  gap: 22px;
+}
+.tts .field {
+  display: grid;
+  gap: 8px;
+}
+.tts .field > label,
+.tts fieldset legend {
+  font-family: var(--grotesk);
+  font-weight: 600;
+  font-size: 15px;
+}
+.tts .field .hint {
+  font-family: var(--grotesk);
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+.tts .input,
+.tts textarea.input,
+.tts select.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-bottom: 2px solid var(--ink);
+  border-radius: 0;
+  transition:
+    background-color 120ms var(--ease),
+    border-color 120ms var(--ease);
+}
+.tts textarea.input {
+  min-height: 140px;
+  resize: vertical;
+  line-height: 1.5;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .input:hover {
+    border-color: var(--ink);
+  }
+}
+.tts .input:focus-visible {
+  background: var(--paper);
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+.tts .input[aria-invalid="true"] {
+  border-left: 4px solid var(--ink);
+}
+.tts .field-error {
+  font-family: var(--grotesk);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+}
+.tts fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.tts .choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tts .choice {
+  position: relative;
+}
+.tts .choice input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+.tts .choice span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--ink);
+  font-family: var(--grotesk);
+  font-weight: 500;
+  font-size: 15px;
+  transition:
+    background-color 120ms var(--ease),
+    color 120ms var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .choice:hover span {
+    background: var(--paper-2);
+  }
+}
+.tts .choice input:checked + span {
+  background: var(--ink);
+  color: var(--paper);
+}
+.tts .choice input:focus-visible + span {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+.tts .form-alert {
+  padding: 14px 16px;
+  border-left: 4px solid var(--ink);
+  background: var(--paper-2);
+  font-family: var(--grotesk);
+  font-size: 15px;
+  font-weight: 600;
+}
+.tts .form-done {
+  border-top: 2px solid var(--ink);
+  padding-top: 24px;
+}
+.tts .form-done > * + * {
+  margin-top: 14px;
+}
+
+/* ---------- small utilities ---------- */
+
+.tts .muted {
+  color: var(--ink-2);
+}
+.tts .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
-.scene {
-  grid-area: 1 / 1;
-  width: min(78rem, 100%);
-  margin-inline: auto;
-  padding-inline: var(--gutter);
-  display: grid; gap: 1.2rem;
-  align-content: center;
-  will-change: opacity, transform, filter;
+.tts .mt-s {
+  margin-top: 16px;
 }
-@media (min-width: 62rem) {
-  .scene { grid-template-columns: 1fr auto; column-gap: 3rem; align-items: center; }
-  .scene .tts-mono, .scene-h, .scene-p { grid-column: 1; }
-  .scene-art { grid-column: 2; grid-row: 1 / span 3; }
-  .scene-field { grid-column: 1 / -1; }
+.tts .mt-m {
+  margin-top: 32px;
 }
-.scene-h { font-size: var(--step-2); margin: 0; }
-.scene-p { color: var(--ink-2); margin: 0; }
-.scene-art { display: flex; justify-content: center; }
-.scene-field { max-height: 46vh; overflow: hidden; }
-
-/* Progress ticks, so somebody knows how many beats are left. */
-.scenes-rail {
-  position: sticky; top: 50vh; left: 0;
-  margin-left: var(--gutter);
-  display: flex; flex-direction: column; gap: 0.4rem;
-  width: 0; height: 0;
+.tts .mt-l {
+  margin-top: 56px;
 }
-.scenes-tick {
-  width: 2px; height: 18px; background: var(--accent);
-  transition: opacity 240ms ease;
+.tts .row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
 }
-@media (max-width: 62rem) { .scenes-rail { display: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .scenes { height: auto; }
-  .scenes-pin { position: static; height: auto; display: block; }
-  .scene { opacity: 1 !important; filter: none !important; transform: none !important;
-           padding-block: var(--rhythm); }
+  .tts *,
+  .tts *::before,
+  .tts *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
 }
 
-/* Decoration arrives after the text it decorates. The hero cascade finishes
- * near 500ms, so the gizmo field starts there rather than competing with the
- * headline for the first frame. */
-.ambient-late .giz-svg line,
-.ambient-late .giz-svg circle { animation-delay: inherit; }
-.ambient-late { animation: ambient-hold 520ms steps(1) both; }
-@keyframes ambient-hold { from { opacity: 0; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .ambient-late { animation: none; } }
+/* ---------- narrow screens ---------- */
+
+.tts .nav-mark-name { white-space: nowrap; }
+.tts .intake-head .fig { white-space: nowrap; }
+.tts .intake-row .meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 599px) {
+  .tts .nav-mark-name { font-size: 17px; }
+  .tts .nav-inner { gap: 10px; }
+  .tts .intake-row { grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; }
+  .tts .run { padding: 16px; }
+  .tts .stage { grid-template-columns: minmax(0, 1fr); padding-left: 14px; }
+  .tts .stage-out {
+    grid-column: 1;
+    grid-row: auto;
+    text-align: left;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .tts .stage-ms { margin-top: 0; }
+  .tts .run-controls { width: 100%; }
+  .tts .run-controls > * { flex: 1 1 auto; }
+}
