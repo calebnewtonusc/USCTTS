@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Gizmo from "./gizmos/Gizmo";
-import DeliverableField from "./DeliverableField";
+import TraceGrid from "./TraceGrid";
 
 /* The pinned scene machine.
  *
@@ -96,13 +96,18 @@ export default function ScrollScenes() {
             take three a semester. That ratio is the whole selection argument,
             and it is the shape on the right.
           </p>
-          <div className="scene-art"><Gizmo kind="funnel" size={260} /></div>
+          <div className="scene-art"><Gizmo kind="selection" size={260} /></div>
         </section>
 
         <section className="scene" style={still ? undefined : style(1)} aria-hidden={!still && presence(1) < 0.5}>
           <p className="tts-mono">What everybody else hands over</p>
           <h2 className="tts-display scene-h">Count how many of these say &ldquo;shipped.&rdquo;</h2>
-          <div className="scene-field"><DeliverableField /></div>
+          {/* Scene two owns the middle third of the scroll, so its own local
+            * progress is what writes the field. Passing the page-level p here
+            * would have the grid finishing before the scene arrives. */}
+          <div className="scene-field">
+            <TraceGrid progress={still ? 1 : (p - 1 / SCENES) * SCENES} />
+          </div>
         </section>
 
         <section className="scene" style={still ? undefined : style(2)} aria-hidden={!still && presence(2) < 0.5}>
@@ -113,7 +118,7 @@ export default function ScrollScenes() {
             the SOP written down, and a number measured before and after. If we
             cannot hand you those four, we did not do the work.
           </p>
-          <div className="scene-art"><Gizmo kind="graph" size={240} /></div>
+          <div className="scene-art"><Gizmo kind="resonance" size={240} /></div>
         </section>
 
       </div>

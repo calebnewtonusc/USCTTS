@@ -586,7 +586,7 @@
   animation: giz-draw 0.7s linear forwards;
 }
 
-.giz-svg line {
+.giz-svg path {
   stroke: var(--accent);
   stroke-width: 0.16;
   fill: none;
@@ -595,9 +595,9 @@
   animation: giz-draw 0.7s linear forwards;
   opacity: 0.4;
 }
-.giz-funnel .giz-svg line { stroke-width: 0.13; opacity: 0.3; }
-.giz-sphere .giz-svg line { stroke-width: 0.18; }
-.giz-svg .giz-edge { stroke-width: 0.12; opacity: 0.3; }
+.giz-selection .giz-svg path { stroke-width: 0.13; opacity: 0.34; }
+.giz-resonance .giz-svg path { stroke-width: 0.2; opacity: 0.5; }
+.giz-routing .giz-svg path { stroke-width: 0.15; opacity: 0.4; }
 
 @keyframes giz-draw { to { stroke-dashoffset: 0; } }
 
@@ -661,7 +661,7 @@
 }
 
 /* Warm-path nodes keep breathing, each on its own phase. */
-.giz-graph .giz-node {
+.giz-market .giz-node {
   animation: giz-pop 0.38s ease-out forwards, giz-breathe 3.4s ease-in-out infinite;
 }
 @keyframes giz-breathe {
@@ -670,9 +670,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .giz-orbit, .giz-graph .giz-node { animation: none; }
+  .giz-orbit, .giz-market .giz-node { animation: none; }
   .giz-funnel .giz-stage::after { display: none; }
-  .giz-svg line { animation: none; stroke-dashoffset: 0; }
+  .giz-svg path { animation: none; stroke-dashoffset: 0; }
   .giz-svg .giz-on, .giz-svg .giz-node { animation: none; opacity: 0.85; }
   .giz-stage { transition: none; }
   .giz-dot { animation: none; }
@@ -739,3 +739,46 @@
 .ambient-late { animation: ambient-hold 520ms steps(1) both; }
 @keyframes ambient-hold { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .ambient-late { animation: none; } }
+
+/* ===== Trace grid =====
+ * Geometry and weights measured off uselemma.ai: rect 320x130 rx 6, stroke
+ * 2px in the accent, IBM Plex Mono labels. One SVG, no DOM cells, and nothing
+ * transforms: scroll progress decides how much of the field has been written.
+ */
+.tgrid { display: block; width: 100%; height: auto; }
+
+.tg-rect {
+  fill: transparent;
+  stroke: color-mix(in srgb, var(--accent) 45%, transparent);
+  stroke-width: 2;
+  /* Cells that have not been written yet are still drawn, which is what makes
+   * the field feel like a place the labels are arriving into rather than a
+   * list growing. */
+  transition: fill 260ms ease-out, stroke 260ms ease-out;
+}
+.tg-rect-on { fill: var(--accent); stroke: var(--accent); }
+
+.tg-code, .tg-ghost, .tg-tag, .tg-quote {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  dominant-baseline: middle;
+}
+.tg-code {
+  font-size: 22px; letter-spacing: 1.6px;
+  fill: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.tg-ghost {
+  font-family: var(--font-body), sans-serif;
+  font-size: 26px; fill: var(--ink-3);
+}
+.tg-tag {
+  font-size: 20px; letter-spacing: 2.4px;
+  fill: color-mix(in srgb, #fff 78%, transparent);
+}
+.tg-quote {
+  font-family: var(--font-body), sans-serif;
+  font-size: 28px; fill: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-rect { transition: none; }
+}

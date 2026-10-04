@@ -1,40 +1,48 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { funnel, sphere, matrix, graph } from "./geometry";
+import { harmonograph, phyllotaxis, chladni, flowField, toPath, type Poly } from "./geometry";
 
 /* A generative plate.
  *
- * The frame system was extracted from uselemma.ai's computed styles on
- * 2026-09-23, and it is the opposite of a card in every particular:
+ * Frame system extracted from uselemma.ai's computed styles: no border, no
+ * radius, no background, no shadow, 18px padding, and a 9px lowercase label in
+ * the accent rather than a muted grey. Everything that would make this read as
+ * a card is deliberately absent.
  *
- *   container border ........ 0px, none
- *   border-radius ........... 0px, square corners
- *   background .............. transparent
- *   box-shadow .............. none
- *   padding ................. 18px
- *   label ................... IBM Plex Mono 9px / weight 400 /
- *                             letter-spacing 0.32px / lowercase /
- *                             coloured with the accent, not with a muted grey
+ * The drawings are published algorithms at parameter sets that were rendered
+ * and checked, replacing four shapes that were invented here. Each one also
+ * carries a real quantity, which is the part Lemma's abstract figures do not
+ * do: their sphere is a sphere, this one is 280 marks for 280 companies.
  *
- * The visible rectangle is drawn INSIDE the svg as a stroked rect in the same
- * accent as the art. That single decision is why theirs reads as a technical
- * plate and why a bordered, rounded, tinted version reads as a UI card. The
- * first draft here had a 1px grey border, a 6px radius and a backdrop blur,
- * which is three separate ways of saying card.
- *
- * Labels follow their register too: lowercase, describing what the drawing is
- * doing under a force ("distortion under load", "pattern from rotation")
- * rather than titling it.
+ * Element budget is hard because stagger is per element: 300 elements at 17ms
+ * is a 5.1 second draw-on. Counts below are measured, not estimated.
  */
 
-export type GizmoKind = "funnel" | "sphere" | "matrix" | "graph";
+export type GizmoKind = "selection" | "market" | "resonance" | "routing";
 
 const CAPTIONS: Record<GizmoKind, { code: string; label: string }> = {
-  funnel: { code: "TTS. 1.1", label: "six thousand under selection" },
-  sphere: { code: "TTS. 1.2", label: "market under rotation" },
-  matrix: { code: "TTS. 1.3", label: "coverage under sampling" },
-  graph: { code: "TTS. 2.1", label: "paths already open" },
+  selection: { code: "TTS. 1.1", label: "six thousand under selection" },
+  market:    { code: "TTS. 1.2", label: "every company, packed" },
+  resonance: { code: "TTS. 1.3", label: "where the plate is still" },
+  routing:   { code: "TTS. 2.1", label: "paths that avoid each other" },
+};
+
+/* Drawn once at module load. These are pure and deterministic, so the server
+ * and the client produce identical markup and hydration never warns. */
+const SHAPES: Record<GizmoKind, { polys: Poly[]; dots?: { cx: number; cy: number; r: number }[] }> = {
+  // 1 element. Detuned by driftPi 1.2, which is the phase-drift quantity that
+  // makes it precess rather than sit still.
+  selection: { polys: harmonograph({ base: [5, 4], driftPi: 1.2 }) },
+  // 280 circles, zero path points. Over the 250 threshold where the Fibonacci
+  // arms become the dominant read instead of scattered noise.
+  market:    { polys: [], dots: phyllotaxis({ n: 280, k: 0.72 }) },
+  // Contours stitched from marching squares: ~15 elements instead of ~800.
+  // n=4 m=7 is coprime, which is what keeps it from degenerating to a grid.
+  resonance: { polys: chladni({ n: 4, m: 7 }) },
+  // Separation-enforced so streamlines never converge into a black bundle,
+  // and quantised to pi/4 for the circuit-board read.
+  routing:   { polys: flowField({ seed: 9, quant: 4 }) },
 };
 
 export default function Gizmo({
@@ -43,6 +51,7 @@ export default function Gizmo({
   kind: GizmoKind; size?: number; className?: string; style?: React.CSSProperties;
 }) {
   const cap = CAPTIONS[kind];
+  const shape = SHAPES[kind];
   const ref = useRef<HTMLElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
@@ -56,6 +65,12 @@ export default function Gizmo({
     });
   }
 
+  const count = shape.dots?.length ?? shape.polys.length;
+  // The 400ms ceiling from motion/stagger.md, divided across whatever this
+  // drawing actually emits, so a 1-element figure and a 280-element one both
+  // finish on time instead of one of them running for five seconds.
+  const step = count > 1 ? Math.min(0.02, 0.4 / (count - 1)) : 0;
+
   return (
     <figure
       ref={ref}
@@ -66,50 +81,27 @@ export default function Gizmo({
     >
       <div
         className="giz-stage"
-        style={{
-          transform: `perspective(700px) rotateY(${tilt.x * 7}deg) rotateX(${-tilt.y * 7}deg)`,
-        }}
+        style={{ transform: `perspective(700px) rotateY(${tilt.x * 7}deg) rotateX(${-tilt.y * 7}deg)` }}
       >
         <svg viewBox="0 0 100 100" className="giz-svg" role="img" aria-label={cap.label}>
-          {kind === "funnel" && funnel().map((l, i) => (
-            <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} pathLength={1}
-              style={{ animationDelay: `${(i % 44) * 0.009}s` }} />
-          ))}
-
-          {kind === "sphere" && (
-            <g className="giz-orbit">
-              {sphere().map((l, i) => (
-                <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} pathLength={1}
-                  style={{ animationDelay: `${(i % 60) * 0.006}s` }} />
-              ))}
-            </g>
-          )}
-
-          {kind === "matrix" && (() => {
-            const { dots, filled } = matrix();
-            return dots.map((d, i) => (
-              <circle key={i} cx={d.cx} cy={d.cy} r={d.r}
-                className={filled[i] ? "giz-on" : "giz-off"}
-                style={{ animationDelay: `${((d.cx * 0.7 + d.cy) % 60) * 0.006}s` }} />
-            ));
-          })()}
-
-          {kind === "graph" && (() => {
-            const { dots, edges } = graph();
-            return (
-              <>
-                {edges.map((e, i) => (
-                  <line key={`e${i}`} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2}
-                    pathLength={1} className="giz-edge"
-                    style={{ animationDelay: `${(i % 30) * 0.013}s` }} />
-                ))}
-                {dots.map((d, i) => (
-                  <circle key={`n${i}`} cx={d.cx} cy={d.cy} r={d.r} className="giz-node"
-                    style={{ animationDelay: `${0.45 + (i % 20) * 0.02}s` }} />
-                ))}
-              </>
-            );
-          })()}
+          <g className={kind === "market" ? "giz-orbit" : undefined}>
+            {shape.polys.map((p, i) => (
+              <path
+                key={i}
+                d={toPath(p)}
+                pathLength={1}
+                style={{ animationDelay: `${(i % 30) * step}s` }}
+              />
+            ))}
+            {shape.dots?.map((d, i) => (
+              <circle
+                key={i}
+                cx={d.cx} cy={d.cy} r={d.r}
+                className="giz-node"
+                style={{ animationDelay: `${(i % 30) * step}s` }}
+              />
+            ))}
+          </g>
         </svg>
       </div>
 

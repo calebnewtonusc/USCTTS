@@ -11,9 +11,9 @@ import Gizmo, { type GizmoKind } from "./gizmos/Gizmo";
  * left-aligned and wide, so the free space is the right column.
  */
 const PLACED: Array<{ kind: GizmoKind; x: string; y: string; size: number; rot: number }> = [
-  { kind: "funnel", x: "78%", y: "1%", size: 176, rot: 1.1 },
-  { kind: "sphere", x: "88%", y: "34%", size: 150, rot: -1.4 },
-  { kind: "graph", x: "74%", y: "66%", size: 146, rot: -0.7 },
+  { kind: "selection", x: "78%", y: "1%", size: 176, rot: 1.1 },
+  { kind: "market", x: "88%", y: "34%", size: 150, rot: -1.4 },
+  { kind: "routing", x: "74%", y: "66%", size: 146, rot: -0.7 },
 ];
 
 export default function AmbientField() {
