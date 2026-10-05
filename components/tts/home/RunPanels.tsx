@@ -10,20 +10,22 @@ import type { RunResult } from "../run/pipeline";
  * switched by a class with a 500ms ease-out opacity, the active step chosen by
  * an IntersectionObserver at 0.5 on the copy that scrolls past. */
 
+// The run is the first panel, so the stage opens on the machine itself; the
+// verdict stream comes last, once the reader knows what the verdicts mean.
 const STEPS = [
   {
-    title: "It reads every role on the board.",
+    title: "It runs on the whole board.",
     body: "On 2026-09-15 we read a venture fund's public portfolio job board as a pipeline instead of a job list. A role open for months is a company that has admitted the need and not filled it.",
     panel: 0,
   },
   {
     title: "It checks the feed before it trusts it.",
     body: "One feed held a quarter of every listing, and most of them named a different company. The check sets it aside. Switch the check off and see what would have led the list.",
-    panel: 1,
+    panel: 0,
   },
   {
-    title: "It ends with work a student team can deliver.",
-    body: "Operations, data, CRM, outreach and research roles, longest open first. Nothing clinical, nothing on site, no hard engineering.",
+    title: "Every role gets a verdict.",
+    body: "Kept, set aside, or shortlisted as work a student team can deliver: operations, data, CRM, outreach and research. Nothing clinical, nothing on site, no hard engineering.",
     panel: 1,
   },
 ];
@@ -99,13 +101,13 @@ export default function RunPanels({
             className={panel === 0 ? "rp-layer is-on" : "rp-layer"}
             inert={!narrow && panel !== 0}
           >
-            <Intake initial={initialIntake} total={total} />
+            <Run initial={initialRun} armed={narrow || panel === 0} />
           </div>
           <div
             className={panel === 1 ? "rp-layer is-on" : "rp-layer"}
             inert={!narrow && panel !== 1}
           >
-            <Run initial={initialRun} armed={narrow || panel === 1} />
+            <Intake initial={initialIntake} total={total} />
           </div>
         </div>
       </div>

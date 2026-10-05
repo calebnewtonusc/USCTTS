@@ -125,7 +125,7 @@ export function Roster() {
       <div className="roster-head">
         <p className="kicker">The people</p>
         <h2 id="roster-title" className="t-h2">
-          Started here. Now at Apple, Palantir, Bloomberg and Reddit.
+          Our people are at McKinsey, Apple, Bloomberg and Reddit.
         </h2>
         <p className="t-lead">
           Alumni and advisors from the club&apos;s own roster. Names and
