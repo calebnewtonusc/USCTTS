@@ -176,7 +176,12 @@ function regions(f: Frame) {
   const t = travelT();
   const ax = lerp(0, KOREATOWN[0], t);
   const ay = lerp(0, KOREATOWN[1], t);
-  const settle = easeInOut3(prog(P.week, BEAT.email[0] - 0.02, BEAT.email[0] + 0.04));
+  // The dive (the cardinal to cream change, grid/transitions.ts): the
+  // camera drops straight onto the office's block, through its light, and
+  // comes to rest hovering over it.
+  const D0 = BEAT.gtm[1] - 0.04;
+  const D1 = BEAT.gtm[1] + 0.015;
+  const dive = easeInOut3(prog(P.week, D0, D1));
   // Topdown zoom: 1 is 9 km across the screen. Following the agent the
   // camera holds about 5.5 km (USC and Koreatown both in frame), then closes
   // to about 3.5 km while the map finds customers.
@@ -191,11 +196,11 @@ function regions(f: Frame) {
   // the engine's: 6.5 km tall in portrait, 9 km wide in landscape.
   const vSpan = (f.vh > f.vw ? 6500 : (9000 * f.vh) / f.vw) / wz;
   const up = f.vw < 1024 ? 0.36 * vSpan : 0;
-  x = lerp(x, ax + lane, wi);
-  y = lerp(y, ay - up, wi);
-  zoom = lerp(zoom, wz, wi);
+  x = lerp(x, lerp(ax + lane, KOREATOWN[0], dive), wi);
+  y = lerp(y, lerp(ay - up, KOREATOWN[1], dive), wi);
+  zoom = lerp(zoom, lerp(wz, 12, dive), wi);
   tilt = lerp(tilt, 0, wi);
-  if (wi > 0.35) mode = settle > 0.5 ? "block" : "topdown";
+  if (wi > 0.35) mode = P.week > D1 ? "block" : "topdown";
   // The panel needs a quiet field behind it, except while the map itself
   // is doing the work of finding customers.
   const mapWorks = bump(
@@ -213,16 +218,18 @@ function regions(f: Frame) {
   store.agent.to = KOREATOWN;
   store.agent.t = t;
 
-  // 4. Join: the camera lifts off the block and back over the basin, so
-  // the last change, the agent's cardinal spreading out from Koreatown
-  // across the whole city, is the ending you watch. The points only thin
-  // out once it has arrived.
-  const lift = easeInOut3(prog(P.join, 0, 0.55));
+  // 4. Join. The last change spreads out from the agent while the camera
+  // is still down on its block, so you watch the cardinal run along the
+  // streets there; it finishes across the whole city before the camera
+  // lifts, straight down (no tilted plane, no horizon), so the doors land
+  // on one full-bleed cardinal with nothing left in a corner (review 3,
+  // 2026-10-05, a blob, then a tilted quad, then a pink corner).
+  const lift = easeInOut3(prog(P.join, 0.4, 0.75));
   x = lerp(x, KOREATOWN[0] * 0.55, lift);
   y = lerp(y, KOREATOWN[1] * 0.55, lift);
   zoom = lerp(zoom, 0.95, lift);
-  tilt = lerp(tilt, 0.5, lift);
-  if (lift > 0.15) mode = "basin";
+  tilt = lerp(tilt, 0, lift);
+  if (lift > 0.02) mode = "topdown";
   store.exit = 0.55 * smooth(prog(P.join, 0.85, 1));
   // The doors are big type straight on the field; a bright freeway ribbon
   // through "Teach me to build that" read as a strikethrough at 390
@@ -232,16 +239,21 @@ function regions(f: Frame) {
   // The colour world (grid/palette.ts): 0 night over the basin, 1 dawn sky
   // as the stream lifts, 2 a full cardinal field while the map finds
   // customers, 3 warm cream for the rest of the week, 4 deep cardinal for
-  // Join. Each change is a wavefront (grid/wave.ts), not a crossfade: the
-  // first spreads out from USC as the stream lands there, every later one
-  // from the agent in Koreatown, so the new light is always the work
-  // arriving somewhere. Each runs over about half a screen of scroll or
-  // more, enough to watch the front cross the map.
+  // Join. Each change has its own form (grid/transitions.ts): a sunrise,
+  // a heat map, a dive, and rain.
   const seg = [
-    smooth(prog(P.open, 0.12, 0.9)),
-    smooth(prog(P.week, BEAT.gtm[0] - 0.06, BEAT.gtm[0] + 0.035)),
-    smooth(prog(P.week, BEAT.gtm[1] - 0.05, BEAT.gtm[1] + 0.04)),
-    smooth(prog(P.join, 0.08, 0.85)),
+    // Sunrise, over most of the opening's runway.
+    smooth(prog(P.open, 0.1, 0.95)),
+    // The heat map, as the agent arrives and the map lights its finds.
+    smooth(prog(P.week, BEAT.gtm[0] - 0.06, BEAT.gtm[0] + 0.08)),
+    // The dive, on the camera's own clock.
+    prog(P.week, D0, D1),
+    // Rain, finished across the whole city by Join's 0.4, before the camera
+    // lifts and the doors come up (review 3: the ending must be clean).
+    // It starts as Friday clears (the week's last screen) and runs on into
+    // Join; P.week reaches 1 the moment P.join starts, so the two halves
+    // join without a seam.
+    0.4 * prog(P.week, 0.955, 1) + 0.6 * prog(P.join, 0, 0.4),
   ];
   const world = seg[0] + seg[1] + seg[2] + seg[3];
   store.world = world;
@@ -250,6 +262,12 @@ function regions(f: Frame) {
   store.wave.to = from + 1;
   store.wave.t = world - from;
   store.wave.origin = from === 0 ? [0, 0] : KOREATOWN;
+  // The story lane, held to one world while a change passes behind it.
+  const laneEl = P.weekIn > 0.5 && P.week < 1 ? document.querySelector(".w4-lane") : null;
+  if (laneEl) {
+    const r = laneEl.getBoundingClientRect();
+    store.protect = [r.left, r.top, r.width, r.height];
+  } else store.protect = null;
   store.dim = dim;
   store.camera.x = x;
   store.camera.y = y;

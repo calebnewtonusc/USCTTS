@@ -51,11 +51,17 @@ export default function Partners() {
     const rows = [...el.querySelectorAll<HTMLElement>(".pt-row > li")];
     const line = el.querySelector<HTMLElement>(".pt-line");
     if (reduced) return;
-    return onFrame(() => {
+    const rowList = el.querySelector<HTMLElement>(".pt-row");
+    return onFrame((f) => {
       const p = P.partners;
+      // The count starts once the numbers have cleared the readout rail at
+      // the bottom of the screen (52px tall), and is done a quarter of a
+      // screen later, well before the middle (review 3: it ran under the
+      // rail at 1440).
+      const bottom = rowList?.getBoundingClientRect().bottom ?? f.vh;
+      const clear = f.vh - 52 - 16 - bottom;
       ROWS.forEach((r, i) => {
-        // Done counting by the time the row reaches the middle of the screen.
-        const k = easeOut3(prog(p, 0.12 + i * 0.05, 0.42 + i * 0.05));
+        const k = easeOut3(prog(clear, i * 0.03 * f.vh, (0.25 + i * 0.03) * f.vh));
         const s = `$${(r.value * k).toFixed(r.decimals)}B`;
         if (nums[i] && nums[i].textContent !== s) nums[i].textContent = s;
         // Two depths: the rows travel 90 and 130px across the region.

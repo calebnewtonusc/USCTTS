@@ -24,6 +24,7 @@ import {
   LESSON,
   REPLY,
   STAGES,
+  KEPT_HOURS,
   TOTAL_HOURS,
   type Kind,
 } from "./weekData";
@@ -57,8 +58,11 @@ const WINDOWS = (() => {
     sheet: [],
     teach: [],
   };
-  BLOCKS.forEach((x, i) => byKind[x.kind].push(i));
-  const out: [number, number][] = new Array(BLOCKS.length);
+  BLOCKS.forEach((x, i) => {
+    if (!x.keep) byKind[x.kind].push(i);
+  });
+  // Blocks the work doesn't take stay for the whole week.
+  const out: [number, number][] = BLOCKS.map(() => [9, 10]);
   (Object.keys(byKind) as Kind[]).forEach((k) => {
     const [a, z] = BEAT_OF[k];
     const s0 = a + (z - a) * 0.3;
@@ -229,10 +233,13 @@ export default function Week() {
      * reduced motion each one is its poster, the finished frame. */
     let clipsLoaded = false;
     const clipEls: HTMLElement[] = [];
+    // Only the beat on screen: its view's clip box is filled the first
+    // time the x-ray is open on that beat (review 3: one beat's bytes, not
+    // all five).
     const loadClips = () => {
-      if (clipsLoaded) return;
       clipsLoaded = true;
-      el.querySelectorAll<HTMLElement>(".xr-clip").forEach((box) => {
+      el.querySelectorAll<HTMLElement>(".xr-view.is-on .xr-clip:not([data-loaded])").forEach((box) => {
+        box.dataset.loaded = "1";
         for (const name of (box.dataset.clips ?? "").split(" ").filter(Boolean)) {
           let m: HTMLElement;
           if (reduced) {
@@ -523,8 +530,8 @@ export default function Week() {
       const hrs = Math.round(left);
       setText(
         meter,
-        hrs === 0
-          ? "0 hrs of busywork left"
+        hrs <= KEPT_HOURS
+          ? `${hrs} hrs of busywork left`
           : `${hrs} of ${TOTAL_HOURS} hrs are busywork`,
       );
 
@@ -543,6 +550,7 @@ export default function Week() {
 
       // The x-ray's clip for the beat on screen, scrubbed by the beat's
       // own progress, and the cardinal cut while the world is cardinal.
+      if (split < 1) loadClips();
       if (clipsLoaded && split < 1) {
         const cardinal = v4root?.dataset.world === "cardinal";
         const bk = beatAt(p);

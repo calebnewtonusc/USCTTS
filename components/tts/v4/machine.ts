@@ -18,7 +18,9 @@ import { BEAT, P, store } from "./choreo";
  */
 
 const NS = "http://www.w3.org/2000/svg";
-const GOLD = "#ffcc00";
+// Cream, not gold: gold at partial alpha over the cardinal world printed
+// orange (review 3, 2026-10-05).
+const GOLD = "#fbf3e0";
 const CARD = "#a3162b";
 const SKY = "#3f86c9";
 const INK = "#6f6264";

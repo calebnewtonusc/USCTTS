@@ -17,7 +17,7 @@ import {
   pointVert,
 } from "./shaders";
 import { isDarkWorld, ROLES, viaColour, worldColour, worldGain, WORLDS, type ColourRole } from "./palette";
-import { buildWave, OUTSIDE, sampleWave, WAVE_N, waveRadius, type WaveField } from "./wave";
+import { pickSites, SITE_N, transM } from "./transitions";
 import { grid, KOREATOWN, type GridMode } from "./store";
 
 const PAPER = 0xfbfaf7;
@@ -131,11 +131,14 @@ export function createGridEngine(
     ...roleSet("b"),
     uVia: { value: new THREE.Vector3() },
     uVia2: { value: new THREE.Vector3() },
-    uWaveTex: { value: null as THREE.Texture | null },
-    uWaveSoft: { value: null as THREE.Texture | null },
-    uWaveUnit: { value: 0.0001 },
-    uWaveR: { value: 0 },
-    uWaveOn: { value: 0 },
+    uMode: { value: 0 },
+    uT: { value: 0 },
+    uSite: { value: Array.from({ length: SITE_N }, () => new THREE.Vector2()) },
+    uSiteT: { value: new Array<number>(SITE_N).fill(0) },
+    uFocus: { value: new THREE.Vector2() },
+    uProtect: { value: new THREE.Vector4() },
+    uProtectOn: { value: 0 },
+    uProtectM: { value: 0 },
   };
   const matOpts = {
     uniforms,
@@ -216,7 +219,9 @@ export function createGridEngine(
     const nStreet = data.streets.length / 2;
     const nBiz = data.biz.length / 2;
     const PACKET_TRAIL = 9;
-    const total = nStreet + nBiz + nBiz * PACKET_TRAIL + AGENT_N;
+    // The rain into Join: ten drops per landing site (transitions.ts).
+    const RAIN = SITE_N * 10;
+    const total = nStreet + nBiz + nBiz * PACKET_TRAIL + AGENT_N + RAIN;
     const pos = new Float32Array(total * 3);
     const meta = new Float32Array(total * 4);
     let v = 0;
@@ -264,6 +269,7 @@ export function createGridEngine(
       for (let k = 0; k < PACKET_TRAIL; k++)
         put(data.biz[i * 2], data.biz[i * 2 + 1], 5, rand(), k, bizDelay[i]);
     for (let i = 0; i < AGENT_N; i++) put(0, 0, 6, rand(), i, 0);
+    for (let i = 0; i < RAIN; i++) put(0, 0, 7, rand(), Math.floor(i / 10), i % 10);
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
     g.setAttribute("aMeta", new THREE.BufferAttribute(meta, 4));
@@ -480,35 +486,13 @@ export function createGridEngine(
     }
   }
 
-  /* ------------------------------------------------------- the wave */
-  // One distance field per origin, built once: USC for the first change,
-  // the agent in Koreatown for the rest. The page says which origin each
-  // change spreads from through grid.wave; the engine remembers it per
-  // segment, because its eased world can still be finishing the previous
-  // change while the page has scrolled into the next.
-  const fields = new Map<string, { f: WaveField; tex: THREE.DataTexture; soft: THREE.DataTexture }>();
-  const fieldFor = (o: [number, number]) => {
-    const key = `${Math.round(o[0])},${Math.round(o[1])}`;
-    let hitF = fields.get(key);
-    if (!hitF) {
-      const f = buildWave(data, o);
-      const toTex = (src: Float32Array) => {
-        const half = new Uint16Array(src.length);
-        for (let i = 0; i < src.length; i++) half[i] = THREE.DataUtils.toHalfFloat(src[i]);
-        const t = new THREE.DataTexture(half, WAVE_N, WAVE_N, THREE.RedFormat, THREE.HalfFloatType);
-        t.magFilter = THREE.LinearFilter;
-        t.minFilter = THREE.LinearFilter;
-        t.needsUpdate = true;
-        return t;
-      };
-      hitF = { f, tex: toTex(f.d), soft: toTex(f.blur) };
-      fields.set(key, hitF);
-    }
-    return hitF;
-  };
-  const originBySeg: [number, number][] = [[0, 0], KOREATOWN, KOREATOWN, KOREATOWN];
-  fieldFor(originBySeg[0]);
-  fieldFor(KOREATOWN);
+  /* ------------------------------------------- the four changes of world */
+  // transitions.ts says what each one is. The heat map and the rain both
+  // work from the 16 real businesses nearest the dental office.
+  const picked = pickSites(data.biz, KOREATOWN);
+  for (let i = 0; i < SITE_N; i++)
+    uniforms.uSite.value[i].set(picked.sites[i * 2], picked.sites[i * 2 + 1]);
+  uniforms.uFocus.value.set(KOREATOWN[0], KOREATOWN[1]);
 
   function setRoles(prefix: "a" | "b", world: number) {
     for (const role of ROLES) {
@@ -528,7 +512,7 @@ export function createGridEngine(
       const at = t > 0.5 ? seg + 1 : seg;
       setRoles("a", at);
       setRoles("b", at);
-      uniforms.uWaveOn.value = 0;
+      uniforms.uT.value = 0;
       grid.isDark = isDarkWorld(at);
     } else {
       setRoles("a", seg);
@@ -537,13 +521,13 @@ export function createGridEngine(
       uniforms.uVia.value.set(rgb[0], rgb[1], rgb[2]);
       viaColour(seg, "bg2", rgb);
       uniforms.uVia2.value.set(rgb[0], rgb[1], rgb[2]);
-      const fld = fieldFor(originBySeg[seg]);
-      const R = waveRadius(t);
-      uniforms.uWaveTex.value = fld.tex;
-      uniforms.uWaveSoft.value = fld.soft;
-      uniforms.uWaveUnit.value = fld.f.unit;
-      uniforms.uWaveR.value = R;
-      uniforms.uWaveOn.value = 1;
+      const siteT = seg === 3 ? picked.rainT : picked.heatT;
+      const siteXY = seg === 3 ? picked.rainSites : picked.sites;
+      for (let i = 0; i < SITE_N; i++) uniforms.uSite.value[i].set(siteXY[i * 2], siteXY[i * 2 + 1]);
+      uniforms.uMode.value = seg;
+      if (seg === 2) uniforms.uFocus.value.set(pose.x, pose.y);
+      uniforms.uT.value = t;
+      for (let i = 0; i < SITE_N; i++) uniforms.uSiteT.value[i] = siteT[i];
       // Text follows the world that covers most of the screen: 7 x 7 rays
       // to the ground. The middle of the screen alone flipped the H1 to
       // ink while it still sat on navy in the lower left (2026-10-05).
@@ -555,9 +539,11 @@ export function createGridEngine(
           ray.setFromCamera(ndc, camera);
           const p = ray.ray.intersectPlane(groundPlane, hit);
           all++;
-          if ((p ? sampleWave(fld.f, p.x, p.y) : OUTSIDE) < R - 0.02) got++;
+          if (p && transM(seg, t, p.x, p.y, siteXY, siteT, KOREATOWN) > 0.5) got++;
         }
-      grid.isDark = isDarkWorld(got * 2 > all ? seg + 1 : seg);
+      const reached = got * 2 > all;
+      uniforms.uProtectM.value = reached ? 1 : 0;
+      grid.isDark = isDarkWorld(reached ? seg + 1 : seg);
     }
     worldColour(w < 1e-4 ? 0 : seg, "bg", rgb);
     clear.setRGB(rgb[0], rgb[1], rgb[2], THREE.SRGBColorSpace);
@@ -729,8 +715,13 @@ export function createGridEngine(
       follow.world = v;
     }
     {
-      const wv = grid.wave;
-      if (wv.from >= 0 && wv.from < originBySeg.length) originBySeg[wv.from] = wv.origin;
+      // The lane the story's lines sit in, held to one world (shaders.ts).
+      const pr = grid.protect;
+      // Only the heat map and the rain pass under the story's lines; the
+      // sunrise has no lines over it and the dive is the whole screen.
+      const segNow = Math.floor(Math.min(3.999, Math.max(0, follow.world)));
+      uniforms.uProtectOn.value = pr && (segNow === 1 || segNow === 3) ? 1 : 0;
+      if (pr) uniforms.uProtect.value.set(pr[0] * dpr, (height - pr[1] - pr[3]) * dpr, pr[2] * dpr, pr[3] * dpr);
     }
     // Pointer light decays back to rest after the hand stops.
     if (pointerAmt > 0) {

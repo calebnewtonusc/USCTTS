@@ -14,6 +14,8 @@ export type Block = {
   hours: number;
   label: string;
   kind: Kind;
+  /** the work leaves it alone: a person still does it at the end */
+  keep?: boolean;
 };
 
 const b = (
@@ -22,12 +24,14 @@ const b = (
   hours: number,
   kind: Kind,
   label: string,
+  keep = false,
 ): Block => ({
   day,
   start,
   hours,
   kind,
   label,
+  keep,
 });
 
 // 9am to 5pm, Monday to Friday, every hour taken.
@@ -35,17 +39,17 @@ export const BLOCKS: Block[] = [
   b(0, 0, 2, "email", "Inbox"),
   b(0, 2, 2, "gtm", "Cold calls"),
   b(0, 4, 1, "sheet", "Update the sheet"),
-  b(0, 5, 2, "email", "Confirm appointments"),
+  b(0, 5, 2, "email", "Confirm appointments", true),
   b(0, 7, 1, "sheet", "Copy leads over"),
   b(1, 0, 2, "gtm", "Look for referrals"),
-  b(1, 2, 1, "email", "Insurance emails"),
+  b(1, 2, 1, "email", "Insurance emails", true),
   b(1, 3, 2, "sheet", "Fix the sheet"),
-  b(1, 5, 1, "email", "Reply to reviews"),
+  b(1, 5, 1, "email", "Reply to reviews", true),
   b(1, 6, 2, "teach", "Figure out the new tool"),
   b(2, 0, 2, "email", "Inbox"),
   b(2, 2, 2, "gtm", "Cold calls"),
   b(2, 4, 1, "sheet", "Update the sheet"),
-  b(2, 5, 2, "teach", "Train the new hire"),
+  b(2, 5, 2, "teach", "Train the new hire", true),
   b(2, 7, 1, "email", "Reschedules"),
   b(3, 0, 2, "email", "Insurance emails"),
   b(3, 2, 2, "gtm", "Drop off flyers"),
@@ -60,6 +64,10 @@ export const BLOCKS: Block[] = [
 
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 export const HOURS = ["9", "10", "11", "12", "1", "2", "3", "4"];
+
+/* The week doesn't go to zero (review 3): six hours stay, the ones a
+ * person should still do. */
+export const KEPT_HOURS = BLOCKS.filter((x) => x.keep).reduce((s, x) => s + x.hours, 0);
 
 export const TOTAL_HOURS = BLOCKS.reduce((s, x) => s + x.hours, 0);
 

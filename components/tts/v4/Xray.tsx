@@ -69,7 +69,8 @@ export default function XrayViews() {
                 </tr>
               </thead>
               <tbody>
-                {LEADS.map((l) => (
+                {/* Five rows, the count the clip beside it lands on. */}
+                {LEADS.slice(0, 5).map((l) => (
                   <tr key={l.who}>
                     <td>
                       {l.who}, {l.where}

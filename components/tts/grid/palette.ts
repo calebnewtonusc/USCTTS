@@ -21,17 +21,23 @@ export interface ColourWorld {
   gain: number;
 }
 
+// Light over a cardinal ground is cream or white, never gold or pale
+// yellow: at partial alpha those print orange over red (review 3,
+// 2026-10-05, rgb(184,54,11)). Red light over cream is the site's own
+// cardinal, #a3162b, whose blue lean keeps its halo pink instead of salmon.
+// scripts/check-palette.mjs fails any light-over-ground blend in the orange
+// band. Gold stays only where it sits on navy.
 export const WORLDS: ColourWorld[] = [
   // 0 opening: LA at night from above
-  { name: "night", bg: "#0d1020", bg2: "#1b2140", street: "#ffcc00", art: "#ffe39a", flow: "#5fa8e0", hot: "#d0102e", hi: "#ffcc00", wash: "#3a55b0", grid: "#ffffff", gain: 1.5 },
+  { name: "night", bg: "#0d1020", bg2: "#1b2140", street: "#ffcc00", art: "#fff1cc", flow: "#5fa8e0", hot: "#d0102e", hi: "#ffcc00", wash: "#3a55b0", grid: "#ffffff", gain: 1.5 },
   // 1 stream into partners: dawn over the basin
-  { name: "dawn", bg: "#5fa8e0", bg2: "#bfe0f7", street: "#ffffff", art: "#ffffff", flow: "#ffffff", hot: "#990000", hi: "#ffcc00", wash: "#d8ecfa", grid: "#ffffff", gain: 1.7 },
+  { name: "dawn", bg: "#5fa8e0", bg2: "#bfe0f7", street: "#ffffff", art: "#ffffff", flow: "#ffffff", hot: "#990000", hi: "#ffffff", wash: "#d8ecfa", grid: "#ffffff", gain: 1.7 },
   // 2 finding customers: a full cardinal field
-  { name: "cardinal", bg: "#990000", bg2: "#b3122a", street: "#fbf3e0", art: "#fff4d6", flow: "#ffe39a", hot: "#ffffff", hi: "#ffcc00", wash: "#c41e3a", grid: "#fbf3e0", gain: 1.45 },
+  { name: "cardinal", bg: "#990000", bg2: "#b3122a", street: "#fbf3e0", art: "#ffffff", flow: "#fbf3e0", hot: "#ffffff", hi: "#ffffff", wash: "#c41e3a", grid: "#fbf3e0", gain: 1.45 },
   // 3 the week: warm cream, calm, so the panel reads
-  { name: "cream", bg: "#fff4d6", bg2: "#fffaf0", street: "#1a1416", art: "#1a1416", flow: "#5fa8e0", hot: "#990000", hi: "#990000", wash: "#ffcc00", grid: "#1a1416", gain: 1.0 },
+  { name: "cream", bg: "#fff4d6", bg2: "#fffaf0", street: "#1a1416", art: "#1a1416", flow: "#5fa8e0", hot: "#a3162b", hi: "#a3162b", wash: "#fff4d6", grid: "#1a1416", gain: 1.0 },
   // 4 join: back to cardinal, deep and saturated
-  { name: "join", bg: "#6e0010", bg2: "#990000", street: "#fbf3e0", art: "#fff4d6", flow: "#ffe39a", hot: "#ffffff", hi: "#ffcc00", wash: "#b3122a", grid: "#fbf3e0", gain: 1.3 },
+  { name: "join", bg: "#6e0010", bg2: "#990000", street: "#fbf3e0", art: "#ffffff", flow: "#fbf3e0", hot: "#ffffff", hi: "#ffffff", wash: "#b3122a", grid: "#fbf3e0", gain: 1.3 },
 ];
 
 type Rgb = [number, number, number];

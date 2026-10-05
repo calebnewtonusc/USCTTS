@@ -1,3 +1,5 @@
+import { TRANSITION_GLSL } from "./transitions";
+
 // GLSL for the LA grid. One vocabulary, three passes: the ground (paper
 // treatment, the USC glow, the pulse ring, a 1 km hairline graticule), the
 // freeway ribbons, and every point of light (streets, businesses, packets,
@@ -11,39 +13,21 @@ const COMMON = /* glsl */ `
 // CARD the hot USC and agent light, GOLD the warm wash.
 //
 // Two worlds at once: A is the world the city is leaving, B the one it is
-// going to. A world change is a wavefront (wave.ts): each point takes B once
-// the front, travelling out from the work along real streets, has reached
-// it. uWaveR is the front's radius in the field's normalised distance.
+// going to. How a point or a pixel passes from A to B is the change's own
+// idea, in transitions.ts.
 uniform vec3 aStreet, aArt, aFlow, aHot, aHiCol, aWash, aGrid, aBg, aBg2;
 uniform vec3 bStreet, bArt, bFlow, bHot, bHiCol, bWash, bGrid, bBg, bBg2;
 uniform float aGain, bGain;
-uniform sampler2D uWaveTex, uWaveSoft;
-uniform float uWaveR, uWaveOn, uWaveUnit;
 uniform vec3 uVia, uVia2;
 vec3 uStreet, uArt, uFlow, uHot, uHiCol, uWash, uGrid, uBg, uBg2;
 float uGain;
-vec2 waveUv(vec2 p) { return (p + 6000.0) / 12000.0; }
-bool outBox(vec2 uv) { return uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0; }
-// Street distance at a point, sharp: the street points light by this one,
-// so the front is the points themselves switching on in sequence.
-float waveD(vec2 p) { vec2 uv = waveUv(p); return outBox(uv) ? 1.15 : texture2D(uWaveTex, uv).r; }
-// The same, blurred over about 450 m: the ground fills in by this one.
-float waveSoftD(vec2 p) { vec2 uv = waveUv(p); return outBox(uv) ? 1.15 : texture2D(uWaveSoft, uv).r; }
-// A street point: 0 still in the old world, 1 reached. About 40 m wide.
-float waveM(float d) { return uWaveOn < 0.5 ? 0.0 : 1.0 - smoothstep(uWaveR - 40.0 * uWaveUnit, uWaveR, d); }
-// The ground follows 150 m behind the points and fades in over 500 m, so
-// the blocks fill in after their streets with no hard edge at all.
-float waveGround(float d) {
-  if (uWaveOn < 0.5) return 0.0;
-  float lag = 150.0 * uWaveUnit;
-  return 1.0 - smoothstep(uWaveR - lag - 500.0 * uWaveUnit, uWaveR - lag, d);
-}
-// The crest, on street points only: about 70 m of the new world's hot
-// light right at the front.
-float waveCrest(float d) {
-  if (uWaveOn < 0.5) return 0.0;
-  float w = 70.0 * uWaveUnit;
-  return exp(-pow((d - uWaveR + w * 0.5) / w, 2.0)) * step(-0.05, uWaveR) * step(uWaveR, 1.5);
+${TRANSITION_GLSL}
+// Each change's accent colour: the sunrise's raking light is the night's
+// own gold, the heat map's rims are the cardinal wash, the office light is
+// the cream ground itself, and the rain's rings are the cream week's
+// cardinal. All checked by check:palette over the grounds they cross.
+vec3 crestCol() {
+  return uMode < 0.5 ? aStreet : uMode < 1.5 ? bWash : uMode < 2.5 ? bBg2 : aHot;
 }
 void setWorld(float m) {
   uStreet = mix(aStreet, bStreet, m); uArt = mix(aArt, bArt, m); uFlow = mix(aFlow, bFlow, m);
@@ -88,9 +72,8 @@ void main() {
   float kind = aMeta.x;
   float seed = aMeta.y;
   vec2 p = position.xy;
-  float wd = waveD(p);
-  setWorld(waveM(wd));
-  float wcrest = waveCrest(wd);
+  float wcrest;
+  setWorld(transM(p, wcrest));
   float r = length(p);
   float edge = boxFade(p);
   float radial = mix(1.0, 0.5, smoothstep(1200.0, 6000.0, r));
@@ -151,7 +134,7 @@ void main() {
     size *= 1.0 + ring * 0.9;
     // The front passing: each street point flares in the new world's hot
     // light as the work reaches it, then settles into the new colour.
-    col = mix(col, bHot, wcrest * 0.9);
+    col = mix(col, crestCol(), wcrest * 0.9);
     a += wcrest * 0.7 * edge * le;
     size *= 1.0 + wcrest * 1.4;
   } else if (kind < 4.5) {
@@ -198,6 +181,18 @@ void main() {
       a = vis * pow(f, 1.4) * 0.85;
       size = 1.6 + 3.6 * f;
     }
+  } else if (kind < 7.5) {
+    // Rain into Join: the week's cleared blocks come down as points onto
+    // their landing site, the last 12% of the drop before it lands.
+    int si = int(aMeta.z + 0.5);
+    float land = uSiteT[si] + aMeta.w * 0.004;
+    float u = clamp((uT - (land - 0.12)) / 0.12, 0.0, 1.0);
+    float vis = step(2.5, uMode) * step(land - 0.12, uT) * step(uT, land + 0.015);
+    vec2 jit = vec2(h1(seed * 3.1) - 0.5, h1(seed * 5.7) - 0.5) * 160.0;
+    world = vec3(uSite[si] + jit, mix(420.0 + 160.0 * r2, 0.0, u * u));
+    col = aHot;
+    a = vis * (0.7 + 0.3 * u);
+    size = 4.0 + 3.0 * u;
   }
 #ifdef BURST
   {
@@ -291,8 +286,8 @@ uniform float uTime, uLoad, uStream, uDim, uExit, uMotion;
 varying vec2 vP;
 varying float vSide;
 void main() {
-  float wd = waveD(vP);
-  setWorld(waveM(wd));
+  float lc;
+  setWorld(transM(vP, lc));
   float r = length(vP);
   float edge = boxFade(vP);
   // drawn outward from USC late in the load clock
@@ -335,8 +330,10 @@ uniform float uLoad, uPulse, uStream, uDim, uExit, uTime, uMotion;
 varying vec2 vP;
 vec4 over(vec4 dst, vec3 c, float a) { return vec4(c * a + dst.rgb * (1.0 - a), a + dst.a * (1.0 - a)); }
 void main() {
-  float wd = waveSoftD(vP);
-  float m = waveGround(wd);
+  float tc;
+  float m = transM(vP, tc);
+  float held = protectMask(gl_FragCoord.xy);
+  m = mix(m, uProtectM, held);
   setWorld(m);
   float r = length(vP);
   float k = (1.0 - uExit) * (1.0 - 0.6 * uDim);
@@ -347,7 +344,8 @@ void main() {
   float rr = smoothstep(0.0, 9000.0, r);
   vec3 ga = mix(aBg2, aBg, rr);
   vec3 gb = mix(bBg2, bBg, rr);
-  vec3 gv = mix(uVia2, uVia, rr);
+  // The dive switches under its own light, so it needs no waypoint.
+  vec3 gv = uMode > 1.5 && uMode < 2.5 ? mix(ga, gb, 0.5) : mix(uVia2, uVia, rr);
   vec4 o = vec4(m < 0.5 ? mix(ga, gv, m * 2.0) : mix(gv, gb, m * 2.0 - 1.0), 1.0);
   float breathe = 1.0 + 0.06 * sin(uTime * 0.7) * uMotion;
   float glow = exp(-r * r / (1900.0 * 1900.0)) * (0.10 + 0.08 * clamp(uStream * 2.0, 0.0, 1.0)) * breathe;
@@ -364,11 +362,12 @@ void main() {
   float pulseR = uPulse * 7800.0;
   float ring = exp(-pow((r - pulseR) / 60.0, 2.0)) * step(0.001, uPulse) * (1.0 - smoothstep(0.5, 1.0, uPulse));
   o = over(o, CARD, ring * 0.45 * k);
-  // A soft wake of the new world's wash just behind the street points; the
-  // bright crest itself lives on the points, never as a line on the ground.
-  float lead = uWaveR - wd;
-  float wake = uWaveOn < 0.5 ? 0.0 : smoothstep(0.0, 200.0 * uWaveUnit, lead) * exp(-max(0.0, lead) / (600.0 * uWaveUnit)) * (1.0 - m * 0.5);
-  o = over(o, bWash, wake * 0.12 * boxFade(vP));
+  // The change's own accent on the ground.
+  float tcv = tc * boxFade(vP) * (1.0 - held);
+  if (uMode < 0.5) o = over(o, aStreet, tcv * 0.16);
+  else if (uMode < 1.5) o = over(o, bWash, tcv * 0.35);
+  else if (uMode < 2.5) o = over(o, bBg2, tcv * (1.0 - smoothstep(0.66, 0.85, uT)) * 0.97);
+  else o = over(o, aHot, tcv * 0.55);
   gl_FragColor = o;
 }
 `;

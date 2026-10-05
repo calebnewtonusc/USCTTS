@@ -21,7 +21,10 @@ export default function Opening() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const lines = [...el.querySelectorAll<HTMLElement>(".v4-h1-l")];
     return onFrame(() => {
-      const o = 1 - smooth(prog(P.open, 0.4, 0.92));
+      // Gone before the world under it turns: the wave reaches half the
+      // screen around 0.5, and a headline fading through that flip lost
+      // its contrast (review 3).
+      const o = 1 - smooth(prog(P.open, 0.12, 0.46));
       el.style.opacity = o.toFixed(3);
       el.style.visibility = o > 0.002 ? "visible" : "hidden";
       if (reduced) return;
@@ -31,7 +34,7 @@ export default function Opening() {
       // first line a beat ahead of the second, like it's being drawn up
       // the freeway.
       lines.forEach((ln, i) => {
-        const k = easeIn3(prog(P.open, 0.02 + i * 0.06, 0.8 + i * 0.06));
+        const k = easeIn3(prog(P.open, 0.02 + i * 0.04, 0.46 + i * 0.04));
         ln.style.fontVariationSettings = `"wdth" ${lerp(100, 75, k).toFixed(1)}`;
         ln.style.transform = `scale(1, ${lerp(1, 1.7, k).toFixed(3)})`;
         ln.style.letterSpacing = `${lerp(-0.025, 0.02, k).toFixed(4)}em`;
