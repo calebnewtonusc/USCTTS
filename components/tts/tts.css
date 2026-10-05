@@ -1,33 +1,46 @@
-/* TTS, the lab report. The whole system is docs/DESIGN-tts.md; this file is
- * its only implementation. Everything is scoped under .tts so nothing here can
- * reach /tc, and sizes are px because globals.css owns the root font size that
- * /tc inherits too. */
+/* TTS, the machine room. The whole system is docs/DESIGN-tts.md; this file
+ * and components/tts/home/home.css are its only implementation. Everything is
+ * scoped under .tts, and sizes are px because globals.css owns the root font
+ * size the meeting decks are measured against. */
 
 .tts {
-  --paper: oklch(0.971 0.009 85);
-  --paper-2: oklch(0.94 0.013 85);
-  --ink: oklch(0.2 0.013 55);
-  --ink-2: oklch(0.42 0.013 55);
-  --rule: oklch(0.2 0.013 55 / 0.17);
-  /* The accent. One meaning: the code on this page computed this value in
-   * your browser just now. Used by .live and .stamp and nothing else. */
-  --red: oklch(0.53 0.19 33);
+  /* Token names kept from v1 so every subpage follows the flip: --paper is
+   * the ground, --ink is what sits on it. The ground is warm near-black and
+   * never flat: .tts carries a fixed radial treatment below. */
+  --paper: #0d0c0b;
+  --paper-2: #171513;
+  --paper-3: #211e1b;
+  --ink: #f3eee6;
+  --ink-2: #a59e94;
+  --ink-3: #6f6961;
+  --rule: rgba(243, 238, 230, 0.13);
+  /* Slides in the story: the deck is paper, and paper goes dusty. */
+  --slide: #e9e3d8;
+  --dust: #4a4540;
+  /* The accent. One meaning: this is running, or this value was computed in
+   * your browser just now. Used by .live, .stamp, the status pills and the
+   * running figures, and nothing else. */
+  --red: #ffb547;
+  --live: var(--red);
 
-  --serif: var(--tts-serif), "Source Serif 4", Georgia, serif;
-  --grotesk:
-    var(--tts-grotesk), "Schibsted Grotesk", ui-sans-serif, system-ui,
-    sans-serif;
+  /* One family. Archivo's width axis does the work two families used to:
+   * expanded and heavy for display, normal width for reading. */
+  --serif: var(--tts-sans), "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --grotesk: var(--serif);
   --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
   --gutter: 16px;
   --measure: 62ch;
   --wide: 1200px;
 
-  background: var(--paper);
+  background:
+    radial-gradient(1200px 700px at 78% -10%, rgba(255, 181, 71, 0.07), transparent 60%),
+    radial-gradient(900px 600px at -10% 40%, rgba(233, 227, 216, 0.04), transparent 60%),
+    var(--paper);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: var(--serif);
-  font-size: 18px;
-  line-height: 1.62;
-  font-optical-sizing: auto;
+  font-size: 17px;
+  line-height: 1.6;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -64,31 +77,32 @@
 .tts h2,
 .tts h3 {
   font-family: var(--serif);
-  font-weight: 600;
+  font-weight: 760;
   font-style: normal;
+  font-stretch: 112%;
   margin: 0;
   text-wrap: balance;
 }
 .tts .t-display {
-  font-size: clamp(46px, 7.4vw, 112px);
-  line-height: 0.98;
-  letter-spacing: -0.022em;
-  font-variation-settings: "opsz" 60;
+  font-size: clamp(42px, 7vw, 108px);
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+  font-weight: 820;
+  font-stretch: 122%;
 }
 .tts .t-h2 {
-  font-size: clamp(32px, 4.4vw, 60px);
-  line-height: 1.04;
-  letter-spacing: -0.016em;
-  font-variation-settings: "opsz" 60;
+  font-size: clamp(30px, 4.2vw, 58px);
+  line-height: 1;
+  letter-spacing: -0.03em;
 }
 .tts .t-h3 {
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1.2;
-  letter-spacing: -0.006em;
-  font-variation-settings: "opsz" 32;
+  letter-spacing: -0.01em;
+  font-stretch: 106%;
 }
 .tts .t-lead {
-  font-size: 21px;
+  font-size: 20px;
   line-height: 1.5;
   color: var(--ink-2);
 }
@@ -216,7 +230,7 @@
   line-height: 1;
   text-decoration: none;
   border: 1px solid var(--ink);
-  border-radius: 0;
+  border-radius: 999px;
   cursor: pointer;
   transition:
     background-color 120ms var(--ease),
@@ -257,7 +271,7 @@
 }
 
 .tts :focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--live);
   outline-offset: 3px;
 }
 
@@ -283,7 +297,9 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  background: var(--paper);
+  background: rgba(13, 12, 11, 0.72);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
   border-bottom: 1px solid transparent;
   transition: border-color 160ms var(--ease);
 }

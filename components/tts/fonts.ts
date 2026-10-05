@@ -1,20 +1,14 @@
-import { Schibsted_Grotesk, Source_Serif_4 } from "next/font/google";
+import { Archivo } from "next/font/google";
 
-// Two families and never a third (docs/DESIGN-tts.md). The serif carries every
-// word a person reads; the grotesk is the instrument face for labels, buttons
-// and figures. T Combinator owns the single-sans look, so TTS never sets a
-// heading in the grotesk.
-export const serif = Source_Serif_4({
+// One family (docs/DESIGN-tts.md). Archivo's width axis runs 62 to 125, so the
+// expanded heavy display and the normal-width body are the same font, and the
+// page never needs a second one. The terminal figure in the hero draws in the
+// system monospace inside its canvas, because that is what a terminal is.
+export const sans = Archivo({
   subsets: ["latin"],
-  axes: ["opsz"],
-  variable: "--tts-serif",
+  axes: ["wdth"],
+  variable: "--tts-sans",
   display: "swap",
 });
 
-export const grotesk = Schibsted_Grotesk({
-  subsets: ["latin"],
-  variable: "--tts-grotesk",
-  display: "swap",
-});
-
-export const fontVars = `${serif.variable} ${grotesk.variable}`;
+export const fontVars = sans.variable;

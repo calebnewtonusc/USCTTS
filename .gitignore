@@ -42,3 +42,8 @@ next-env.d.ts
 
 # supabase cli cache
 supabase/.temp/
+
+# manim renders and their venv (only final clips are committed, under public/tts/)
+/manim/.venv/
+/manim/media/
+/manim/install.log
