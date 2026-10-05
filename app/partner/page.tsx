@@ -6,7 +6,8 @@ import "@/components/tts/pages.css";
 
 export const metadata: Metadata = {
   title: "Sponsor, speak or recruit | Trojan Tech Solutions",
-  description: "Sponsor Trojan Tech Solutions, speak at a meeting, or recruit from the club.",
+  description:
+    "Sponsor Trojan Tech Solutions, speak at a meeting, or recruit from the club.",
 };
 
 export default function PartnerPage() {
@@ -19,11 +20,12 @@ export default function PartnerPage() {
             Sponsor, speak, or recruit.
           </h1>
           <p className="pg-lead">
-            Back the club, talk to the people in it, or hire them. Bringing a problem for us to build instead?{" "}
+            You can back the club, talk to the people in it, or hire them, and if
+            you&apos;re bringing a problem for us to build instead,{" "}
             <Link className="link" href="/work-with-us#intake">
-              Use the project form
-            </Link>
-            .
+              the project form
+            </Link>{" "}
+            is the one you want.
           </p>
         </div>
         <PartnerForm />

@@ -19,7 +19,13 @@ const CHIPS = [
   { label: "Research workflows", x: 33, y: 11, w: 28 },
 ];
 const NODES = [26, 42, 58, 74, 90];
-const NODE_LABELS = ["You tell us", "Yes or no", "Scope one thing", "Build in your stack", "Hand it over"];
+const NODE_LABELS = [
+  "You tell us",
+  "Yes or no",
+  "Scope one thing",
+  "Build in your stack",
+  "Hand it over",
+];
 const NO = [
   "Clinical or licensed work",
   "On-site physical work",
@@ -47,13 +53,7 @@ function Track() {
       <g className="s-on2">
         {CHIPS.map((c) => (
           <g key={c.label}>
-            <rect
-              className="f-ink"
-              x={c.x}
-              y={c.y}
-              width={c.w}
-              height="6"
-            />
+            <rect className="f-ink" x={c.x} y={c.y} width={c.w} height="6" />
             <text className="f-label f-label-ink" x={c.x + 2.4} y={c.y + 4.1}>
               {c.label}
             </text>
@@ -103,13 +103,7 @@ function Track() {
 
       {/* 1: the form */}
       <g className="s-on3">
-        <rect
-          className="f-ink"
-          x="72"
-          y="20"
-          width="13"
-          height="12.5"
-        />
+        <rect className="f-ink" x="72" y="20" width="13" height="12.5" />
         <path
           className="f-mute"
           d="M74.5 23.5 L82.5 23.5 M74.5 26.2 L80.5 26.2 M74.5 28.9 L82 28.9"
@@ -147,27 +141,9 @@ function Track() {
 
       {/* 4: inside their stack */}
       <g className="s-on6">
-        <rect
-          className="f-ink"
-          x="60"
-          y="73"
-          width="30"
-          height="3.4"
-        />
-        <rect
-          className="f-ink"
-          x="60"
-          y="77.4"
-          width="30"
-          height="3.4"
-        />
-        <rect
-          className="f-ink"
-          x="60"
-          y="81.8"
-          width="30"
-          height="3.4"
-        />
+        <rect className="f-ink" x="60" y="73" width="30" height="3.4" />
+        <rect className="f-ink" x="60" y="77.4" width="30" height="3.4" />
+        <rect className="f-ink" x="60" y="81.8" width="30" height="3.4" />
       </g>
       <rect
         className="f-live-fill s-hot6"
@@ -198,13 +174,7 @@ function Track() {
       {/* what we turn down, off the "no" branch */}
       <g className="s-hot8">
         <path className="f-mute f-dash" d="M84 49.5 L88 49.5 L88 53" />
-        <rect
-          className="f-paper f-ink"
-          x="50"
-          y="53"
-          width="46"
-          height="21"
-        />
+        <rect className="f-paper f-ink" x="50" y="53" width="46" height="21" />
         {NO.map((t, i) => (
           <g key={t}>
             <path
@@ -228,42 +198,42 @@ function Track() {
 const BUILD = [
   {
     name: "Data sets",
-    job: "Lists you own, enriched and scored.",
+    job: "These are lists you own, enriched and scored.",
   },
   {
     name: "GTM engineering",
-    job: "Routing and outbound that run weekly.",
+    job: "This is routing and outbound that run every week.",
   },
   {
     name: "Custom agents",
-    job: "Research agents with a test set.",
+    job: "These are research agents with a test set behind them.",
   },
   {
     name: "AI inside products",
-    job: "Features your users touch.",
+    job: "These are features your own users touch.",
   },
 ];
 
 const STEPS = [
   {
     title: "You tell us the problem",
-    body: "What happens today, and what you wish happened instead. The form below takes a few minutes.",
+    body: "Tell us what happens today and what you wish happened instead, and the form below only takes a few minutes.",
   },
   {
     title: "Yes or no, early",
-    body: "If it's work we can't finish, you hear it in the first reply, not in week three.",
+    body: "If it's work we can't finish, you'll hear that in our first reply instead of in week three.",
   },
   {
     title: "We scope one thing",
-    body: "One problem, one system, and the number we'll measure before and after.",
+    body: "We pick one problem and one system, and agree on the number we'll measure before and after.",
   },
   {
     title: "We build it in your stack",
-    body: "Your accounts, your data, your tools. Nothing to migrate when we leave.",
+    body: "It runs on your accounts, your data and your tools, so there's nothing to migrate when we leave.",
   },
   {
     title: "We hand it over",
-    body: "To a named person on your team, with the SOP written down and the after number beside the before.",
+    body: "We hand it to a named person on your team, with the SOP written down and the after number next to the before.",
   },
 ];
 
@@ -277,8 +247,8 @@ export default function WorkWithUsPage() {
             Bring us the work a system should be doing.
           </h1>
           <p className="pg-lead">
-            USC students who build data sets, GTM engines and AI agents for
-            companies, and hand over something running.
+            We&apos;re USC students who build data sets, GTM engines and AI agents
+            for companies, and we hand over something that&apos;s running.
           </p>
           <div className="pg-actions">
             <a href="#intake" className="btn btn-primary">
@@ -326,8 +296,9 @@ export default function WorkWithUsPage() {
           </h2>
           <p>
             Clinical or licensed work, on-site physical work, and hard
-            engineering like avionics, composites or propulsion. And anything
-            the first status update would show we can&apos;t do.
+            engineering like avionics, composites or propulsion. We&apos;ll also
+            turn down anything the first status update would show we can&apos;t
+            do.
           </p>
         </section>
 

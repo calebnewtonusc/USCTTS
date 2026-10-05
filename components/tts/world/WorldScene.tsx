@@ -45,50 +45,50 @@ const CAPS: Cap[] = [
     id: "accounts",
     in: 0.1,
     out: 0.205,
-    title: "It starts with raw accounts.",
-    body: "Companies, people and signals, scattered across every source you can name. Messy, partial, everywhere.",
+    title: "Everything starts with raw accounts",
+    body: "Companies, people and signals come in from every source you can name, and most of it is messy and half filled in by the time it gets here.",
   },
   {
     id: "enrich",
     in: 0.235,
     out: 0.335,
-    title: "Enrich first. Then decide.",
-    body: "Every record gets the data it was missing before anyone judges it.",
+    title: "We enrich every record before we judge it",
+    body: "So each record gets the data it was missing before anyone decides whether it's worth reaching out to.",
   },
   {
     id: "qualify",
     in: 0.37,
     out: 0.53,
-    title: "Qualify on criteria, not vibes.",
-    body: "This station ran for real on 2026-09-15, on a venture fund's public job board.",
+    title: "Then it's qualified against criteria we wrote down",
+    body: "This station ran for real on 2026-09-15, on a venture fund's public job board, and the numbers here are from that run.",
   },
   {
     id: "agents",
     in: 0.56,
     out: 0.66,
-    title: "Agents do the research.",
-    body: "Each one gets a real job, gets tested on real records, and answers none when it doesn't know.",
+    title: "Agents do the research on whatever is left",
+    body: "Each one has one real job, it gets tested on real records before it touches anything, and it answers none when it doesn't know instead of making something up.",
   },
   {
     id: "send",
     in: 0.69,
     out: 0.785,
-    title: "Then it reaches the right person.",
-    body: "Sequenced and personal, sent from systems the company owns.",
+    title: "Then the right person hears from you",
+    body: "The outreach goes out in a sequence that's actually personal, and it's sent from systems the company owns, so it keeps going after we hand it over.",
   },
   {
     id: "compound",
     in: 0.815,
     out: 0.905,
-    title: "And it compounds.",
-    body: "A deck gets presented once. A system keeps running after the semester ends.",
+    title: "And it keeps paying off after the semester",
+    body: "A deck gets presented once and filed away, but a system like this keeps running after the semester ends, and the next project starts from it.",
   },
   {
     id: "machine",
     in: 0.93,
     out: 2,
-    title: "This is the machine. We teach every piece of it.",
-    body: "Data, enrichment, qualification, agents, outreach. Learned here, then shipped for real companies.",
+    title: "That's the whole machine, and we teach every piece of it",
+    body: "You learn data, enrichment, qualification, agents and outreach here, and then you build them for real companies.",
   },
 ];
 const CAP_RAMP = 0.035;
@@ -220,7 +220,8 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
       // assembly is seen even when three.js arrives after the copy has risen
       // (review, 2026-10-04: the intro read as finished by 400ms, because the
       // shared clock had run out before the first 3D frame).
-      if (world && worldT0 >= 0) world.setLoad(Math.min(1, (now - worldT0) / LOAD_MS));
+      if (world && worldT0 >= 0)
+        world.setLoad(Math.min(1, (now - worldT0) / LOAD_MS));
       const d = target - cur;
       cur = Math.abs(d) < 8e-5 ? target : cur + d * FOLLOW;
       paint(cur);
@@ -289,7 +290,12 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
         };
         if (new URLSearchParams(window.location.search).has("capture")) {
           (window as unknown as { __ttsWorld: unknown }).__ttsWorld = {
-            still: (n: number, t: number, sweepMs?: number, loadAt?: number) => {
+            still: (
+              n: number,
+              t: number,
+              sweepMs?: number,
+              loadAt?: number,
+            ) => {
               world?.still(n, t, sweepMs, loadAt);
               paint(n);
             },
@@ -346,8 +352,8 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
       </div>
       <div className="w-col-b">
         <p className="w-lede" data-line>
-          We learn to build the systems companies run on: data sets, GTM engines
-          and AI agents. Then we build them for real companies.
+          We learn to build the systems companies run on, like data sets, GTM
+          engines and AI agents, and then we build them for real companies.
         </p>
         <div className="w-actions" data-line>
           <Link className="btn btn-primary" href="/apply">

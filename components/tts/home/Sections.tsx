@@ -10,27 +10,30 @@ import TcLink from "../TcLink";
 const INITIATIVES = [
   {
     name: "Build sessions",
-    job: "Hands-on nights where every member ships a working piece of the machine.",
+    job: "They're hands-on nights where every member ships a working piece of the machine.",
   },
   {
     name: "Practice builds",
-    job: "Real pipelines on public data, like the one running on this page.",
+    job: "We build real pipelines on public data, like the one running on this page.",
   },
   {
     name: "T Combinator",
-    job: "Our team that works with YC companies. Three a semester.",
+    job: "It's our team that works with YC companies, three of them a semester.",
   },
 ] as const;
 
 const TRACKS = [
-  { name: "Building", job: "Engineering and AI agents. You ship the tools." },
+  {
+    name: "Building",
+    job: "You work on engineering and AI agents, and you're the one who ships the tools.",
+  },
   {
     name: "Consulting",
-    job: "GTM engineering for real companies: lists, enrichment, outbound, the CRM.",
+    job: "You do GTM engineering for real companies, so the lists, the enrichment, the outbound and the CRM.",
   },
   {
     name: "Growing",
-    job: "Marketing, content and design that gets the work seen.",
+    job: "You handle the marketing, content and design that get the work seen.",
   },
 ];
 
@@ -136,11 +139,11 @@ const TURN_DOWN = [
   },
   {
     title: "On-site physical work",
-    body: "We build tools a company runs. We don't staff a floor.",
+    body: "We build tools a company runs, but we don't staff a floor.",
   },
   {
     title: "Hard engineering",
-    body: "Avionics, composites, propulsion. Those belong to people trained for them.",
+    body: "Things like avionics, composites and propulsion belong to people who trained for them.",
   },
   {
     title: "Anything week one would expose",
@@ -201,7 +204,8 @@ export function Roster() {
           Who runs it
         </h2>
         <p className="t-lead">
-          Caleb Newton and Tyler Larsen, co-presidents. Emily Zhao, design.
+          Caleb Newton and Tyler Larsen are co-presidents, and Emily Zhao leads
+          design.
         </p>
       </div>
       <h3 className="roster-sub">Running it now</h3>
@@ -247,15 +251,15 @@ export function Join() {
          * takes. Neither is on record, so neither is on the page.] */}
         <ol className="join-steps">
           <li>
-            <span>1</span>Send the form: your year, your track, and one thing
-            you&apos;ve made.
+            <span>1</span>You send the form with your year, your track and one
+            thing you&apos;ve made.
           </li>
           <li>
             <span>2</span>
             {who} read every application.
           </li>
           <li>
-            <span>3</span>You hear back by email, yes or no.
+            <span>3</span>You hear back by email either way, yes or no.
           </li>
         </ol>
         <div className="join-actions">

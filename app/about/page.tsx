@@ -222,12 +222,15 @@ const REFUSE = [
   },
   {
     title: "On-site physical work",
-    body: "We build systems a company runs. We don't staff a floor.",
+    body: "We build systems a company runs, but we don't staff a floor.",
   },
-  { title: "Hard engineering", body: "Avionics, composites, propulsion." },
+  {
+    title: "Hard engineering",
+    body: "Things like avionics, composites and propulsion belong to people trained for them.",
+  },
   {
     title: "Anything week one would expose",
-    body: "If we can't finish it, our first reply says so.",
+    body: "If we can't finish it, our first reply tells you so.",
   },
 ];
 
@@ -250,9 +253,9 @@ export default function AboutPage() {
             USC&apos;s GTM and AI club.
           </h1>
           <p className="pg-lead">
-            Members learn to build the systems that replace headcount: data,
-            enrichment, qualification, prompting, agents and automation. Then
-            they build them for real companies.
+            Members learn to build the systems that replace headcount, so data,
+            enrichment, qualification, prompting, agents and automation, and
+            then they build them for real companies.
           </p>
         </section>
 
@@ -260,8 +263,8 @@ export default function AboutPage() {
           <span className="pg-n">01</span>
           <h2 id="a-2">Data sets</h2>
           <p>
-            Every system starts with a list a company owns: accounts and
-            contacts, enriched, scored and ready to work.
+            Every system starts with a list a company owns, the accounts and
+            contacts, enriched and scored so they&apos;re ready to work.
           </p>
         </section>
 
@@ -269,8 +272,8 @@ export default function AboutPage() {
           <span className="pg-n">02</span>
           <h2 id="a-3">GTM engineering</h2>
           <p>
-            Enrichment, qualification, routing and outbound, running every week
-            on that data. Every verdict carries a written reason.
+            Enrichment, qualification, routing and outbound run every week on
+            that data, and every verdict comes with a written reason.
           </p>
         </section>
 
@@ -278,8 +281,8 @@ export default function AboutPage() {
           <span className="pg-n">03</span>
           <h2 id="a-4">Custom agents</h2>
           <p>
-            Research and qualification agents with a real job and a test set
-            behind them. They say none when they&apos;re unsure.
+            These are research and qualification agents with a real job and a
+            test set behind them, and they say none when they&apos;re unsure.
           </p>
         </section>
 
@@ -287,8 +290,8 @@ export default function AboutPage() {
           <span className="pg-n">04</span>
           <h2 id="a-5">AI inside products</h2>
           <p>
-            Features a company ships to its own users, built in its own stack,
-            so nothing has to move when we leave.
+            These are features a company ships to its own users, built in its
+            own stack, so nothing has to move when we leave.
           </p>
         </section>
 
@@ -334,7 +337,8 @@ export default function AboutPage() {
           {/* POSITIONING.md: "Dormant to a real roster in three months, with zero members inherited." */}
           <h2 id="a-9">Dormant to a real roster in three months.</h2>
           <p>
-            Zero members inherited. Run by {team}, with advisors at {advisedBy}.
+            We inherited zero members when we took it over, and now it&apos;s run by{" "}
+            {team}, with advisors at {advisedBy}.
           </p>
           <div className="pg-actions">
             <Link href="/apply" className="btn btn-primary">

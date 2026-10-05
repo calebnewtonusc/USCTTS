@@ -15,17 +15,17 @@ import type { RunResult } from "../run/pipeline";
 const STEPS = [
   {
     title: "It runs on the whole board.",
-    body: "On 2026-09-15 we read a venture fund's public portfolio job board as a pipeline instead of a job list. A role open for months is a company that has admitted the need and not filled it.",
+    body: "On 2026-09-15 we read a venture fund's public portfolio job board as a pipeline instead of a job list, because a role that's been open for months means a company has admitted the need and still hasn't filled it.",
     panel: 0,
   },
   {
     title: "It checks the feed before it trusts it.",
-    body: "One feed held a quarter of every listing, and most of them named a different company. The check sets it aside. Switch the check off and see what would have led the list.",
+    body: "One feed held a quarter of every listing, and most of those named a different company, so the check sets the whole feed aside, and if you switch the check off you'll see what would've ended up at the top.",
     panel: 0,
   },
   {
     title: "Every role gets a verdict.",
-    body: "Kept, set aside, or shortlisted as work a student team can deliver: operations, data, CRM, outreach and research. Nothing clinical, nothing on site, no hard engineering.",
+    body: "Every role ends up kept, set aside, or shortlisted as work a student team can actually deliver, like operations, data, CRM, outreach and research, with nothing clinical, nothing on site and no hard engineering.",
     panel: 1,
   },
 ];
@@ -73,8 +73,8 @@ export default function RunPanels({
           Run it yourself.
         </h2>
         <p className="t-lead">
-          The same pipeline, on the same data, computed in your browser right
-          now.
+          This is the same pipeline on the same data, and it&apos;s running in your
+          browser right now.
         </p>
       </div>
       <div className="rp-grid">

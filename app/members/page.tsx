@@ -143,10 +143,13 @@ export default function MembersPage() {
               The people, by name.
             </h1>
             <p className="pg-lead">
-              Who runs the club, the advisors who help run it, and where the
-              people who started here went. Names, not logos.
+              This is who runs the club, the advisors who help run it, and where
+              the people who started here went, by name and not by logo.
             </p>
-            <p className="label mt-m">Solid lines and dots: alumni. Dashed lines and open dots: advisors.</p>
+            <p className="label mt-m">
+              Solid lines and dots: alumni. Dashed lines and open dots:
+              advisors.
+            </p>
           </div>
           <div className="pg-figure">
             <Ring />
@@ -169,8 +172,8 @@ export default function MembersPage() {
         <div className="pg-head">
           <h2 id="adv-title">Advisors</h2>
           <p>
-            They help run it now. None of them is a client, and we won&apos;t
-            dress them up as one.
+            They help run the club now, and none of them is a client, so we
+            won&apos;t dress them up as one.
           </p>
         </div>
         <ul className="pg-cards" role="list">
@@ -189,7 +192,7 @@ export default function MembersPage() {
       <section className="pg-sec" aria-labelledby="alum-title">
         <div className="pg-head">
           <h2 id="alum-title">Started here</h2>
-          <p>Alumni of the club, and where they are now.</p>
+          <p>These are the club&apos;s alumni and where they are now.</p>
         </div>
         <ul className="pg-cards" role="list">
           {ALUMNI.map((p) => (

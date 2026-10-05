@@ -29,7 +29,10 @@ const fmt = (iso: string) =>
  * numbered timeline because that is what a student deciding on a club needs
  * first: what happens, in what order, and where it ends. */
 const STEPS = [
-  { name: "Apply", job: "Tell us your track and why. We read every one." },
+  {
+    name: "Apply",
+    job: "You tell us your track and why you want it, and we read every application.",
+  },
   {
     name: "Learn the machine",
     job: "Build sessions take you through data, enrichment, qualification, prompting and agents.",

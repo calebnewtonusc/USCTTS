@@ -15,11 +15,13 @@ export default function ApplyPage() {
         <div className="pg-head">
           <p className="pg-kicker">Join</p>
           <h1 id="apply-title" className="pg-title">
-            Join TTS, learn to build all of this, and build it for a real company.
+            Join TTS, learn to build all of this, and build it for a real
+            company.
           </h1>
           <p className="pg-lead">
-            Six short questions. The last one matters most: one thing you&apos;ve made, or want to make. It only
-            needs to be yours.
+            There are six short questions, and the last one matters most,
+            because it asks for one thing you&apos;ve made or want to make, and
+            it only needs to be yours.
           </p>
           {/* [NEED: the next cohort's application window and reply time. Neither is on record.] */}
         </div>

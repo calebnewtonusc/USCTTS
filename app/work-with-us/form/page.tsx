@@ -19,8 +19,8 @@ export default function IntakePage() {
             Tell us the problem.
           </h1>
           <p className="pg-lead">
-            What happens today, and what you wish happened instead. If it&apos;s not work we can finish, our first
-            reply says so.{" "}
+            Tell us what happens today and what you wish happened instead. If
+            it&apos;s not work we can finish, our first reply says so.{" "}
             <Link className="link" href="/work-with-us">
               How an engagement runs
             </Link>
