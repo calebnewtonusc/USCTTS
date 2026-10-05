@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { TC_URL } from "./links";
+import TcLink from "./TcLink";
 
 export default function Footer() {
   return (
@@ -25,7 +25,7 @@ export default function Footer() {
           <ul>
             <li><Link className="link" href="/work-with-us">For companies</Link></li>
             <li><Link className="link" href="/partner">Sponsor or speak</Link></li>
-            <li><a className="link" href={TC_URL}>T Combinator</a></li>
+            <li><TcLink className="link">T Combinator</TcLink></li>
             <li><a className="link" href="https://www.linkedin.com/company/trojan-tech-solutions/" rel="noreferrer" target="_blank">LinkedIn</a></li>
             <li><a className="link" href="https://www.instagram.com/trojantechsolutions" rel="noreferrer" target="_blank">Instagram</a></li>
           </ul>

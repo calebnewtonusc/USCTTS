@@ -54,3 +54,11 @@
     transition: none;
   }
 }
+/* With no T Combinator deployment yet, the strip is plain text, not a link. */
+.sitetoggle-link.is-pending {
+  cursor: default;
+}
+.sitetoggle-link.is-pending:hover {
+  color: #a59e94;
+  background: transparent;
+}

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Shell from "@/components/tts/Shell";
-import { TC_URL } from "@/components/tts/links";
+import TcLink from "@/components/tts/TcLink";
 
 export const metadata: Metadata = {
   title: "For companies | Trojan Tech Solutions",
@@ -85,9 +85,9 @@ export default function WorkWithUsPage() {
           <Link href="/work-with-us/form" className="btn btn-primary">
             Tell us the problem <span className="arrow" aria-hidden="true">&rarr;</span>
           </Link>
-          <a href={TC_URL} className="btn btn-secondary">
+          <TcLink className="btn btn-secondary" hideWhenPending>
             A YC company? Go to T Combinator
-          </a>
+          </TcLink>
         </div>
         <p className="label mt-m">
           Want to sponsor the club, speak at a meeting or recruit from it instead?{" "}
