@@ -318,22 +318,22 @@ const BEATS: Beat[] = [
   {
     id: "emails",
     title: "Your team answers the same emails all week",
-    body: "We set up AI that drafts the replies, so your people just check each one and hit send.",
+    body: "We set up AI that drafts every reply, so your team just checks and sends.",
   },
   {
     id: "crm",
     title: "Your leads live in a spreadsheet",
-    body: "We move them into a CRM that keeps itself up to date, so every contact and deal is where your team can find it.",
+    body: "We move them into a CRM that keeps itself up to date.",
   },
   {
     id: "customers",
     title: "You need more customers",
-    body: "We build the list of everyone you could reach, mark the few actually worth it, and write the outreach to them.",
+    body: "We find the few worth reaching, the red ones, and write to them.",
   },
   {
     id: "teach",
     title: "Your people don't know how to use AI yet",
-    body: "We teach them with questions from their own work, and we're building a curriculum like that for one client's students right now.",
+    body: "We teach them, and we're building a curriculum like that for one client's students right now.",
   },
 ];
 // Where a beat's caption crossfades, as a share of one beat.
@@ -367,9 +367,8 @@ function Inbox() {
           <rect className="wo-mail-bg" x="1" y="0" width="518" height={RH} rx={i === EMAILS.length - 1 ? 13 : 0} />
           <circle className="wo-av" cx="34" cy="33" r="15" />
           <text className="wo-av-t" x="34" y="38" textAnchor="middle">{from[0]}</text>
-          <text className="wo-s wo-dim" x="62" y="20">{from}</text>
-          <text className="wo-t" x="62" y="39">{subj}</text>
-          <text className="wo-s wo-draft" x="62" y="57">{draft}</text>
+          <text className="wo-t" x="62" y="28">{subj}</text>
+          <text className="wo-s wo-draft" x="62" y="49">{draft}</text>
           <g className="wo-tag">
             <rect x="436" y="9" width="66" height="20" rx="10" />
             <text x="469" y="23" textAnchor="middle">Drafted</text>
@@ -420,13 +419,13 @@ function SheetToCrm() {
       {CARDS.map(([name, stage, note], i) => (
         <g key={name} className="wo-card" style={v({ i })} transform={`translate(${(i % 2) * 266} ${Math.floor(i / 2) * 150 + 20})`}>
           <rect className="wo-frame" x="0.5" y="0.5" width="253" height="132" rx="12" />
+          <rect className="wo-card-stripe" x="0.5" y="0.5" width="6" height="132" rx="3" />
           <text className="wo-h" x="20" y="36">{name}</text>
           <g className={stage === "Talking" ? "wo-pill is-on" : "wo-pill"}>
             <rect x="20" y="50" width={stage === "Talking" ? 62 : 72} height="20" rx="10" />
             <text x={stage === "Talking" ? 51 : 56} y="64" textAnchor="middle">{stage}</text>
           </g>
           <text className="wo-s wo-dim" x="20" y="96">{note}</text>
-          <text className="wo-xs" x="20" y="118">Updated today</text>
         </g>
       ))}
     </svg>
@@ -458,7 +457,7 @@ function Prospects() {
       <line className="wo-rule" x1="0" x2="520" y1="47.5" y2="47.5" />
       <g transform="translate(0 50)">
         {order.map((i) => {
-          const [name, note, worth] = PROSPECTS[i];
+          const [name, , worth] = PROSPECTS[i];
           return (
             <g key={name} className={worth ? "wo-pro is-worth" : "wo-pro"} style={v({ i, to: to.get(i) ?? i })}>
               <rect className="wo-pro-bg" x="2" y="0" width="516" height="44" />
@@ -470,9 +469,7 @@ function Prospects() {
                   <rect x="400" y="12" width="104" height="20" rx="10" />
                   <text x="452" y="26" textAnchor="middle">Worth reaching</text>
                 </g>
-              ) : (
-                <text className="wo-s wo-dim" x="500" y="27" textAnchor="end">{note}</text>
-              )}
+              ) : null}
             </g>
           );
         })}
@@ -537,14 +534,13 @@ export function WorldWalk() {
       const N = clamp((window.scrollY - top) / travel) * BEATS.length;
       let act = 0;
       beats.forEach((b, k) => {
-        // Fully up across its own share, crossfading with its neighbours
-        // over FADE at each edge; the first and last never fade at the ends.
-        const inA = k === 0 ? 1 : prog(N, k - FADE / 2, k + FADE / 2);
-        const outA =
-          k === BEATS.length - 1
-            ? 0
-            : prog(N, k + 1 - FADE / 2, k + 1 + FADE / 2);
+        // Fully up across its own share. At each change the old beat fades
+        // all the way out, then the new one fades in and rises 16px, so two
+        // beats are never up together (review, 2026-10-04).
+        const inA = k === 0 ? 1 : prog(N, k, k + FADE / 2);
+        const outA = k === BEATS.length - 1 ? 0 : prog(N, k + 1 - FADE / 2, k + 1);
         const o = inA * (1 - outA);
+        b.style.setProperty("--rise", ((1 - inA) * 16).toFixed(2) + "px");
         b.style.opacity = o.toFixed(3);
         b.style.visibility = o <= 0.001 ? "hidden" : "";
         // The object plays across the middle of its share.

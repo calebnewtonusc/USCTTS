@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { ADVISORS, LEADERSHIP, type Person } from "@/data/people";
 import MeshBand from "./MeshBand";
+import { ADVISORS, LEADERSHIP, type Person } from "@/data/people";
 import TcLink from "../TcLink";
 
 /* docs/COPY-tts.md, verbatim: what we do (three initiatives, one line each),

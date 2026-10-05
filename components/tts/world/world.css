@@ -26,7 +26,7 @@
   content: "";
   position: absolute;
   inset: auto 0 0;
-  height: 22%;
+  height: 120px;
   background: linear-gradient(180deg, rgba(244, 240, 233, 0), var(--paper));
 }
 .tts .w-canvas {
@@ -54,6 +54,12 @@
     rgba(250, 249, 245, 0.7) calc(var(--edge) + 340px),
     rgba(250, 249, 245, 0) calc(var(--edge) + 700px)
   );
+}
+.tts .world-hero .w-wash {
+  /* The wash fades out over the hero's last 120px with the sky, so it never
+   * leaves a 1px edge at the fold (review, 2026-10-04). */
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 120px), transparent);
+  mask-image: linear-gradient(180deg, #000 calc(100% - 120px), transparent);
 }
 .tts .w-copy {
   position: absolute;
@@ -106,6 +112,7 @@
 /* Caption left, object right, on the page's own container, so the two
  * columns hold at any width and never touch. */
 .tts .ww-beat {
+  translate: 0 var(--rise, 0px);
   position: absolute;
   inset: 0;
   width: 100%;
@@ -113,7 +120,7 @@
   margin-inline: auto;
   padding: 64px var(--gutter) 0;
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
   gap: clamp(48px, 6vw, 112px);
   align-items: center;
 }
@@ -154,9 +161,11 @@
   max-height: calc(100svh - 160px);
   overflow: visible;
 }
-/* No shadows on the objects: SVG drop-shadow filters measured no faster
- * than flat (p99 16.7ms either way, headed trace 2026-10-04), and the
- * hairline frame carries the card. */
+/* Soft shadows lift the cards off the page. Measured: p99 16.7ms with or
+ * without them (headed trace, 2026-10-04). */
+.tts .wo {
+  filter: drop-shadow(0 16px 24px rgba(42, 27, 30, 0.12)) drop-shadow(0 2px 4px rgba(42, 27, 30, 0.06));
+}
 .tts .wo text {
   fill: var(--ink);
 }
@@ -201,17 +210,17 @@
   fill: #7a5a00;
 }
 .tts .wo-tag rect {
-  fill: var(--sky-soft);
+  fill: #2f80ed;
 }
 .tts .wo .wo-tag text {
   font-size: 12px;
-  fill: var(--sky-ink);
+  fill: #fff;
 }
 .tts .wo-tag-red rect {
-  fill: #f8e5e5;
+  fill: var(--cardinal);
 }
 .tts .wo .wo-tag-red text {
-  fill: var(--cardinal);
+  fill: #fff;
 }
 
 /* 1. The inbox: replies are drafted one by one, top to bottom. */
@@ -219,7 +228,7 @@
   --k: clamp(0, calc((var(--p, 0) - var(--i) * 0.17) * 5), 1);
 }
 .tts .wo-mail-bg {
-  fill: var(--sky-soft);
+  fill: #e3efff;
   opacity: calc(var(--k) * 0.85);
 }
 .tts .wo-mail .wo-tag,
@@ -227,7 +236,7 @@
   opacity: var(--k);
 }
 .tts .wo .wo-draft {
-  fill: var(--sky-ink);
+  fill: #1f63c6;
 }
 .tts .wo-mail .wo-tag {
   transform: translateX(calc((1 - var(--k)) * -8px));
@@ -251,17 +260,20 @@
   translate: 0 calc((1 - var(--k)) * -18px);
 }
 .tts .wo-pill rect {
-  fill: #f1eee8;
+  fill: #dcf3ef;
 }
 .tts .wo .wo-pill text {
   font-size: 12px;
-  fill: var(--ink-2);
+  fill: #0b6e63;
 }
 .tts .wo-pill.is-on rect {
-  fill: var(--sky-soft);
+  fill: #12a594;
 }
 .tts .wo .wo-pill.is-on text {
-  fill: var(--sky-ink);
+  fill: #fff;
+}
+.tts .wo-card-stripe {
+  fill: #12a594;
 }
 
 /* 3. The list: the rows worth reaching get a cardinal mark, then rise to
@@ -292,7 +304,7 @@
 
 /* 4. The lesson: a question from the room, answered step by step. */
 .tts .wo-bubble {
-  fill: #fff8db;
+  fill: #fff1b8;
 }
 .tts .wo-step {
   --k: clamp(0, calc((var(--p, 0) - 0.08 - var(--i) * 0.26) * 3.5), 1);
