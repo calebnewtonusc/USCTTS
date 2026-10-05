@@ -7,7 +7,7 @@ import "@/components/tts/pages.css";
 export const metadata: Metadata = {
   title: "About | Trojan Tech Solutions",
   description:
-    "USC's AI implementation lab. Members build AI into real organizations, from GTM engines and agents for companies to an AI curriculum for students.",
+    "USC's AI implementation lab. Members do whatever AI work a company needs, automations, CRM, GTM engineering, agents, even teaching their people, and learn it by building it.",
 };
 
 /* The machine, drawn as a hairline diagram in a 100 x 104 box. One part per
@@ -253,10 +253,11 @@ export default function AboutPage() {
             USC&apos;s AI implementation lab.
           </h1>
           <p className="pg-lead">
-            We put AI to work inside real organizations. Sometimes that&apos;s
-            GTM engineering for a startup, sometimes it&apos;s an agent inside a
-            product, and right now one client has us building an AI curriculum
-            for their students. Members learn it by building it.
+            If a company needs AI work done, we do it. That&apos;s automations,
+            CRM setup, GTM engineering, agents inside their product, and even
+            teaching, since right now one client has us building an AI
+            curriculum for their students. Members learn all of it by building
+            it.
           </p>
         </section>
 

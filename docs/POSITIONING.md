@@ -103,3 +103,10 @@ Blue Modern Advisory is an enterprise partner of Clay and Perplexity
 BMA. Valuations, always with their dates: Clay $7.1B (Series D, Sept 2026),
 Perplexity $20B (Sept 2025). Caleb, 2026-10-04: "We are OFFICAL Partners of clay and perplexity through bma." Say "official partners through Blue Modern Advisory", always with the BMA clause.
 
+## What TTS is (Caleb, 2026-10-04)
+
+"We do everything AI. Automations, teaching, crm, blah blah blah, wtv a
+company needs!" TTS is USC's AI implementation lab. GTM engineering is one
+part. One current client has TTS building an AI curriculum for its students.
+Lead with "whatever AI work a company needs", and give examples, never a
+closed list.

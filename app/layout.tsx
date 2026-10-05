@@ -14,11 +14,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.usctts.com"),
   title: "Trojan Tech Solutions | USC's AI implementation lab",
   description:
-    "USC's AI implementation lab. Members build AI into real organizations, from GTM engines and agents for companies to an AI curriculum for students.",
+    "USC's AI implementation lab. Members do whatever AI work a company needs, automations, CRM, GTM engineering, agents, even teaching their people, and learn it by building it.",
   openGraph: {
     title: "Trojan Tech Solutions",
     description:
-      "USC's AI implementation lab. Members build AI into real organizations, from GTM engines and agents for companies to an AI curriculum for students.",
+      "USC's AI implementation lab. Members do whatever AI work a company needs, automations, CRM, GTM engineering, agents, even teaching their people, and learn it by building it.",
     url: "https://www.usctts.com",
     siteName: "Trojan Tech Solutions",
     type: "website",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Trojan Tech Solutions",
     description:
-      "USC's AI implementation lab. Members build AI into real organizations, from GTM engines and agents for companies to an AI curriculum for students.",
+      "USC's AI implementation lab. Members do whatever AI work a company needs, automations, CRM, GTM engineering, agents, even teaching their people, and learn it by building it.",
     images: ["/img/tts-logo.png"],
   },
   icons: {
