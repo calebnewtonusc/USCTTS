@@ -284,7 +284,12 @@ export function SeamToJoin() {
     if (!s || !g) return;
     // The page ground holds behind the rising sun, so the band below never
     // shows its edge: it is only ever seen as the sun.
-    g.style.opacity = p > 0.001 && p < 0.999 ? String(prog(p, 0.0, 0.1)) : "0";
+    // It covers only from the band's top edge down, so the section above
+    // stays readable while the sun climbs over it.
+    const band = document.querySelector(".join")?.getBoundingClientRect();
+    const edge = band ? Math.max(0, band.top) : window.innerHeight;
+    g.style.clipPath = `inset(${edge.toFixed(1)}px 0 0 0)`;
+    g.style.opacity = p > 0.001 && p < 0.999 ? "1" : "0";
     const W = window.innerWidth;
     const H = window.innerHeight;
     const cover = Math.hypot(W, H);

@@ -3,8 +3,19 @@ import Shell from "./Shell";
 import WorldScene, { type Numbers } from "./world/WorldScene";
 import RunPanels from "./home/RunPanels";
 import Whiteboard from "./home/Whiteboard";
-import { Join, Roster, TurnDown, WorkLines } from "./home/Sections";
-import { SeamToBoard, SeamToJoin, SeamToRun, SeamToSpine, Spine } from "./home/Seams";
+import {
+  Join,
+  Roster,
+  TurnDown,
+  WhatWeDo,
+} from "./home/Sections";
+import {
+  SeamToBoard,
+  SeamToJoin,
+  SeamToRun,
+  SeamToSpine,
+  Spine,
+} from "./home/Seams";
 import type { IntakeRow } from "./run/Intake";
 import { audit, runPipeline, verdict, type Dataset } from "./run/pipeline";
 import "./world/world.css";
@@ -46,7 +57,9 @@ const INITIAL_INTAKE: IntakeRow[] = (() => {
     rows.push({
       n,
       title: role[2],
-      sector: aside.has(role[0]) ? "" : DATA.sectors[DATA.companies[role[0]][0]],
+      sector: aside.has(role[0])
+        ? ""
+        : DATA.sectors[DATA.companies[role[0]][0]],
       days: role[1],
       verdict: verdict(role, aside),
       live: false,
@@ -60,14 +73,18 @@ export default function TTSHome() {
     <Shell>
       <WorldScene nums={NUMS} />
       <SeamToRun rows={READOUT} />
-      <RunPanels initialRun={INITIAL_RUN} initialIntake={INITIAL_INTAKE} total={DATA.roles.length} />
+      <RunPanels
+        initialRun={INITIAL_RUN}
+        initialIntake={INITIAL_INTAKE}
+        total={DATA.roles.length}
+      />
       <SeamToBoard />
       <Whiteboard />
       <SeamToSpine />
       <Spine>
-        <WorkLines />
-        <TurnDown />
+        <WhatWeDo />
         <Roster />
+        <TurnDown />
       </Spine>
       <SeamToJoin />
       <Join />

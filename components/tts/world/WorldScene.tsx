@@ -327,28 +327,27 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
     });
   };
 
+  // docs/COPY-tts.md, verbatim: say what the club is in one sentence, then
+  // what you'd do in it.
   const heroCopy = (
     <>
       <div className="w-col-a">
         <p className="w-pill" data-line>
-          USC&apos;s GTM and AI club
+          Trojan Tech Solutions
         </p>
-        <h1
-          className="w-title"
-          aria-label="Build the systems that do the work."
-        >
+        <h1 className="w-title" aria-label="USC's GTM and AI club.">
           <span data-line aria-hidden="true">
-            Build the systems
+            USC&apos;s GTM
           </span>
           <span data-line aria-hidden="true">
-            that do the work.
+            and AI club.
           </span>
         </h1>
       </div>
       <div className="w-col-b">
         <p className="w-lede" data-line>
-          Trojan Tech Solutions teaches USC students to build data sets, GTM
-          engines and AI agents, then ship them for real companies.
+          We learn to build the systems companies run on: data sets, GTM engines
+          and AI agents. Then we build them for real companies.
         </p>
         <div className="w-actions" data-line>
           <Link className="btn btn-primary" href="/apply">
@@ -357,9 +356,9 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
               &rarr;
             </span>
           </Link>
-          <a className="btn btn-secondary" href="#learn">
-            What you learn
-          </a>
+          <Link className="btn btn-secondary" href="/build">
+            See how it works
+          </Link>
         </div>
       </div>
     </>

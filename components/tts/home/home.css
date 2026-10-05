@@ -205,60 +205,6 @@
   }
 }
 
-/* ---------- lines of work ---------- */
-.tts .lines-list {
-  list-style: none;
-  margin: 48px 0 0;
-  padding: 0;
-  border-bottom: 1px solid var(--rule);
-}
-.tts .line-row {
-  display: grid;
-  grid-template-columns: 384px minmax(0, 1fr);
-  gap: 64px;
-  align-items: baseline;
-  padding: 22px 0;
-  border-top: 1px solid var(--rule);
-}
-.tts .line-name {
-  font-size: clamp(24px, 2.4vw, 32px);
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-}
-.tts .line-job {
-  color: var(--ink-2);
-  max-width: 52ch;
-}
-@media (max-width: 767px) {
-  .tts .line-row {
-    grid-template-columns: 1fr;
-    gap: 4px;
-  }
-}
-
-/* ---------- turn down ---------- */
-.tts .nope-list {
-  list-style: none;
-  margin: 44px 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 64px;
-}
-.tts .nope-list li {
-  padding: 22px 0;
-  border-top: 1px solid var(--rule);
-}
-.tts .nope-list p {
-  margin-top: 8px;
-  color: var(--ink-2);
-}
-@media (max-width: 767px) {
-  .tts .nope-list {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* ---------- roster ---------- */
 .tts .roster-sub {
   margin-top: 48px;
@@ -294,15 +240,17 @@
   font-size: 32px;
   color: var(--ink-3);
 }
-.tts .face-name {
+.tts .face-cap {
   display: block;
   margin-top: 10px;
-  font-size: 15px;
-}
-.tts .face-note {
-  display: block;
   font-size: 14px;
+  line-height: 1.4;
   color: var(--ink-2);
+}
+.tts .face-cap b {
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ink);
 }
 .tts .roster-more {
   margin-top: 36px;
@@ -517,4 +465,82 @@
   .tts .seam {
     display: none;
   }
+}
+
+/* ---------- what we do: one figure, one sentence, plain lists ----------
+ * No card grids and no stat tiles (Caleb, 2026-10-04: "Header, subheader X6
+ * screams SO AI"). The numbers live in the lead sentence; the initiatives
+ * are a list inside one figure well; tracks and refusals are sentences. */
+.tts .lines-head .t-lead {
+  margin-top: 8px;
+  max-width: 60ch;
+}
+.tts .init-well {
+  margin: 40px 0 0;
+  border: var(--line-w) solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--well);
+  padding: 24px clamp(16px, 3vw, 32px) 28px;
+}
+.tts .init-fig {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 120px;
+}
+.tts .init-fig * {
+  vector-effect: non-scaling-stroke;
+}
+.tts .init-fig .ln,
+.tts .init-fig .ln-live {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: var(--line-w);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.tts .init-fig .ln-live {
+  stroke: var(--accent);
+}
+.tts .init-fig .ln-paper {
+  fill: var(--well);
+}
+.tts .init-fig .ln-live-fill {
+  fill: var(--accent-fill);
+  stroke: var(--accent);
+  stroke-width: var(--line-w);
+}
+.tts .init-list,
+.tts .plain-sentences {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  max-width: 68ch;
+}
+.tts .init-list li,
+.tts .plain-sentences li {
+  padding: 10px 0;
+  border-top: var(--line-w) solid var(--rule);
+  color: var(--ink-2);
+}
+.tts .init-list li:first-child {
+  border-top: 0;
+}
+.tts .init-list b,
+.tts .plain-sentences b {
+  font-weight: 500;
+  color: var(--ink);
+}
+.tts .plain-sentences {
+  margin-top: 16px;
+}
+.tts .nope .plain-sentences {
+  margin-top: 24px;
+}
+
+/* The last section before the join band gets air below it: the sun rises
+ * through the final screen above the band, and the refusals must be read
+ * before it covers them. */
+.tts .spine > :last-child {
+  padding-bottom: 50vh;
 }

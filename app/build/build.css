@@ -1,0 +1,33 @@
+/* /build's five-step sequence: a numbered list of sentences in the shared
+ * hairline family, beside the timeline figure at the top of the page. */
+.tts .pg-steps-list {
+  margin: 32px 0 0;
+  padding: 0 0 0 1.6em;
+  list-style: decimal;
+  max-width: 68ch;
+}
+.tts .pg-steps-list li {
+  padding: 12px 0 12px 4px;
+  border-top: var(--line-w, 1px) solid var(--rule);
+  color: var(--ink-2);
+}
+.tts .pg-steps-list li::marker {
+  color: var(--accent, var(--red));
+  font-variant-numeric: tabular-nums;
+}
+.tts .pg-steps-list b {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* The checklists read as sentences: the item's name in ink, then its line,
+ * in one run of text (no heading-plus-line cards). */
+.tts .pg-checks li {
+  color: var(--ink-2);
+}
+.tts .pg-checks b {
+  display: inline;
+  font-size: inherit;
+  color: var(--ink);
+  font-weight: 500;
+}

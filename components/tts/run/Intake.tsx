@@ -131,8 +131,10 @@ export default function Intake({
             className={r.live && i === 0 ? "intake-row is-new" : "intake-row"}
           >
             <span className="fig muted">{(r.n % total) + 1}</span>
+            {/* Four fields per record (number, title, meta, verdict): a
+             * ledger row, not a heading-plus-line card. */}
             <span className="title">
-              {r.title}
+              <span>{r.title}</span>
               <span className="meta">
                 {r.sector ? `${r.sector}, ` : ""}open {r.days} days
               </span>

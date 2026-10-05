@@ -1,36 +1,133 @@
 import Link from "next/link";
 import { ADVISORS, ALUMNI, LEADERSHIP, type Person } from "@/data/people";
 import MeshBand from "./MeshBand";
+import TcLink from "../TcLink";
 
-/* The lines of work, each with one job. The structure (initiatives with
- * one-line jobs) is borrowed from how strong club sites are organised; every
- * line is TTS's own, from docs/POSITIONING.md and docs/DIRECTION-tts-v3.md. */
-const WORK = [
+/* docs/COPY-tts.md, verbatim: what we do (three initiatives, one line each),
+ * the sourced numbers, and the three tracks. Structure taken from how the
+ * clearest club sites are organised; every fact is from POSITIONING.md or
+ * data/people.ts, and the counts are computed from data/people.ts. */
+const INITIATIVES = [
   {
-    name: "Data sets",
-    job: "Account and contact lists a company owns, enriched, scored and ready to work.",
+    name: "Build sessions",
+    job: "Hands-on nights where every member ships a working piece of the machine.",
   },
   {
-    name: "GTM engineering",
-    job: "Routing, enrichment, scoring and outbound, running every week on that data.",
+    name: "Practice builds",
+    job: "Real pipelines on public data, like the one running on this page.",
   },
   {
-    name: "Custom agents",
-    job: "Research and qualification agents with a real job and a test set behind them.",
+    name: "T Combinator",
+    job: "Our team that works with YC companies. Three a semester.",
+  },
+] as const;
+
+const TRACKS = [
+  { name: "Building", job: "Engineering and AI agents. You ship the tools." },
+  {
+    name: "Consulting",
+    job: "GTM engineering for real companies: lists, enrichment, outbound, the CRM.",
   },
   {
-    name: "AI inside products",
-    job: "Features a company ships to its own users, built with them, not for a demo.",
-  },
-  {
-    name: "Research workflows",
-    job: "Repeatable research across files, apps and the web, instead of one-off prompts.",
-  },
-  {
-    name: "Teaching all of it",
-    job: "Every member learns the whole machine, by building it.",
+    name: "Growing",
+    job: "Marketing, content and design that gets the work seen.",
   },
 ];
+
+/* One figure for the three initiatives, not three cards (Caleb on card
+ * grids: "Header, subheader X6 screams SO AI"). A single hairline line runs
+ * through all three; the live one, T Combinator's three companies, is in
+ * cardinal. The initiatives are a plain list inside the same well. */
+function InitiativesFigure() {
+  return (
+    <svg className="init-fig" viewBox="0 0 360 60" aria-hidden="true">
+      <path className="ln" d="M12 30 L348 30" />
+      {/* build sessions: a row of nights, the last one shipped */}
+      {[0, 1, 2, 3].map((i) => (
+        <rect
+          key={i}
+          className={i === 3 ? "ln-live-fill" : "ln ln-paper"}
+          x={20 + i * 20}
+          y="20"
+          width="14"
+          height="20"
+        />
+      ))}
+      {/* practice builds: a small pipeline */}
+      {[150, 172, 194, 216].map((x) => (
+        <rect
+          key={x}
+          className="ln ln-paper"
+          x={x - 6}
+          y="24"
+          width="12"
+          height="12"
+        />
+      ))}
+      {/* T Combinator: three companies */}
+      {[270, 298, 326].map((x) => (
+        <rect
+          key={x}
+          className="ln-live ln-paper"
+          x={x - 10}
+          y="18"
+          width="20"
+          height="24"
+        />
+      ))}
+    </svg>
+  );
+}
+
+export function WhatWeDo() {
+  const alumni = ALUMNI.length;
+  const advisors = ADVISORS.length;
+  return (
+    <section className="lines" aria-labelledby="do-title">
+      <div className="lines-head">
+        <h2 id="do-title" className="t-h2">
+          What we do
+        </h2>
+        {/* The numbers in a sentence, not as stat tiles. Both counts come
+         * from data/people.ts. */}
+        <p className="t-lead">
+          {alumni} alumni now at Apple, Bloomberg, Reddit and Capital One, and{" "}
+          {advisors} advisors including McKinsey and Google. We took the club
+          over dormant, with nobody in it, and had a full roster three months
+          later.
+        </p>
+      </div>
+      <figure className="init-well">
+        <InitiativesFigure />
+        <ul className="init-list">
+          {INITIATIVES.map((x) => (
+            <li key={x.name}>
+              <b>
+                {x.name === "T Combinator" ? (
+                  <TcLink className="link">{x.name}</TcLink>
+                ) : (
+                  x.name
+                )}
+                .
+              </b>{" "}
+              {x.job}
+            </li>
+          ))}
+        </ul>
+      </figure>
+      <h3 className="roster-sub">
+        Three tracks, and you pick one when you apply
+      </h3>
+      <ul className="plain-sentences">
+        {TRACKS.map((t) => (
+          <li key={t.name}>
+            <b>{t.name}.</b> {t.job}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
 
 const TURN_DOWN = [
   {
@@ -51,44 +148,16 @@ const TURN_DOWN = [
   },
 ];
 
-export function WorkLines() {
-  return (
-    <section className="lines" aria-labelledby="lines-title">
-      <div className="lines-head">
-        <p className="kicker">What we build</p>
-        <h2 id="lines-title" className="t-h2">
-          Data sets. GTM engineering. Custom agents. And everything else AI can
-          do.
-        </h2>
-      </div>
-      <ol className="lines-list">
-        {WORK.map((w) => (
-          <li key={w.name} className="line-row">
-            <span className="line-name">{w.name}</span>
-            <span className="line-job">{w.job}</span>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
-
 export function TurnDown() {
   return (
     <section className="nope" aria-labelledby="nope-title">
-      <div className="nope-head">
-        <h2 id="nope-title" className="t-h2">
-          What we turn down.
-        </h2>
-        <p className="t-lead">
-          Saying no in public is cheaper than failing in private.
-        </p>
-      </div>
-      <ul className="nope-list">
+      <h2 id="nope-title" className="t-h2">
+        What we turn down
+      </h2>
+      <ul className="plain-sentences">
         {TURN_DOWN.map((t) => (
           <li key={t.title}>
-            <h3 className="t-h3">{t.title}</h3>
-            <p>{t.body}</p>
+            <b>{t.title}.</b> {t.body}
           </li>
         ))}
       </ul>
@@ -112,25 +181,27 @@ function Face({ p, note }: { p: Person; note: string }) {
           {initials}
         </span>
       )}
-      <span className="face-name">{p.name}</span>
-      <span className="face-note">{note}</span>
+      {/* A caption, name then role, not a heading-plus-line card. */}
+      <span className="face-cap">
+        <b>{p.name}</b>
+        {note ? <br /> : null}
+        {note}
+      </span>
     </li>
   );
 }
 
 export function Roster() {
-  const bench = [...ALUMNI, ...ADVISORS].filter((p) => p.company);
+  // Advisors first, so McKinsey leads (COPY-tts.md).
+  const bench = [...ADVISORS, ...ALUMNI].filter((p) => p.company);
   return (
     <section className="roster" aria-labelledby="roster-title">
       <div className="roster-head">
-        <p className="kicker">The people</p>
         <h2 id="roster-title" className="t-h2">
-          Our people are at McKinsey, Apple, Bloomberg and Reddit.
+          Who runs it
         </h2>
         <p className="t-lead">
-          Alumni and advisors from the club&apos;s own roster. Names and
-          employers, not logos: none of these companies is a client, and we
-          won&apos;t dress them up as one.
+          Caleb Newton and Tyler Larsen, co-presidents. Emily Zhao, design.
         </p>
       </div>
       <h3 className="roster-sub">Running it now</h3>
@@ -176,8 +247,8 @@ export function Join() {
          * takes. Neither is on record, so neither is on the page.] */}
         <ol className="join-steps">
           <li>
-            <span>1</span>Send the form: your year, the half of the work you
-            want, one thing you&apos;ve made.
+            <span>1</span>Send the form: your year, your track, and one thing
+            you&apos;ve made.
           </li>
           <li>
             <span>2</span>
@@ -193,9 +264,6 @@ export function Join() {
             <span className="arrow" aria-hidden="true">
               &rarr;
             </span>
-          </Link>
-          <Link href="/work-with-us" className="btn btn-secondary">
-            Bring us a problem
           </Link>
         </div>
       </div>

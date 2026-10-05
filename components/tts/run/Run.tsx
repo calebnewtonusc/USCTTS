@@ -249,18 +249,26 @@ export default function Run({
               {result.ranking.map((r, i) => (
                 <li key={`${r.company}-${result.verified}`} className="bar-row">
                   <span className="bar-label">
-                    {i + 1}. {r.sector ? `A company in ${r.sector}` : "A company"}
+                    {i + 1}.{" "}
+                    {r.sector ? `A company in ${r.sector}` : "A company"}
                     {r.flagged && !result.verified
                       ? ", the feed the check sets aside"
                       : ""}
                   </span>
-                  <svg className="bar-track" viewBox="0 0 100 14" preserveAspectRatio="none" aria-hidden="true">
+                  <svg
+                    className="bar-track"
+                    viewBox="0 0 100 14"
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                  >
                     <rect
                       x="0"
                       y="0"
                       height="14"
                       width={(100 * r.open) / max}
-                      className={r.flagged && !result.verified ? "bar is-false" : "bar"}
+                      className={
+                        r.flagged && !result.verified ? "bar is-false" : "bar"
+                      }
                     />
                   </svg>
                   <span className={`fig bar-n ${L(live) ?? ""}`}>{r.open}</span>
@@ -303,8 +311,7 @@ export default function Run({
                 {result.shortlist.map((r) => (
                   <tr key={`${r.title}-${r.days}`}>
                     <td>
-                      {r.title}
-                      <span className="sub">{r.sector}</span>
+                      {r.title} ({r.sector})
                     </td>
                     <td className={`num ${L(live) ?? ""}`}>{r.days}</td>
                   </tr>
