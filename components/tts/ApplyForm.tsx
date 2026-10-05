@@ -5,11 +5,15 @@ import Link from "next/link";
 import { LEADERSHIP } from "@/data/people";
 import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors, FormFailure, asText, FormFigure, type FormState } from "./forms";
 
-// Values must match the enums in app/api/apply/route.ts exactly.
+// The stored values must match the enum in app/api/apply/route.ts, which
+// still accepts Building, Consulting, Growing and Unsure. The labels say what
+// the work is now that TTS does whatever AI work a company needs: building it,
+// or getting a company to use it. "Growing" was labelled "GTM engineering"
+// before; the value stays so the applications table reads the same.
 const YEARS = ["Freshman", "Sophomore", "Junior", "Senior", "Graduate"] as const;
 const TRACKS = [
-  { value: "Building", label: "Engineering" },
-  { value: "Growing", label: "GTM engineering" },
+  { value: "Building", label: "Building it: automations, agents, tools" },
+  { value: "Growing", label: "Getting it used: CRM, outreach, teaching a team" },
   { value: "Unsure", label: "Not sure yet" },
 ] as const;
 
@@ -23,6 +27,17 @@ export default function ApplyForm() {
   const [sending, setSending] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  // When the send fails, the answers can still leave the page by hand.
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(asText(values));
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   // The same rules validate() enforces, per field, for the live figure.
   const ok = {
@@ -42,7 +57,7 @@ export default function ApplyForm() {
         { key: "email", label: "Email" },
         { key: "major", label: "Major" },
         { key: "year", label: "Year" },
-        { key: "track", label: "Which half" },
+        { key: "track", label: "Kind of work" },
         { key: "why", label: "One thing you made" },
       ]}
       ok={ok}
@@ -82,12 +97,12 @@ export default function ApplyForm() {
       <div className="form-done" role="status">
         <h2 className="t-h3">Got it, {values.name.split(" ")[0]}.</h2>
         <p>
-          Your application is in. One of the people running the club reads every one, and you will hear back at{" "}
-          {values.email.trim()} whether it is a yes or a no.
+          Your application is in. One of the people running the club reads every one, and you&apos;ll hear back at{" "}
+          {values.email.trim()} whether it&apos;s a yes or a no.
         </p>
         <p>
-          <Link className="link" href="/#run">
-            In the meantime, watch the pipeline run
+          <Link className="link" href="/members">
+            Meet the people who&apos;ll read it
           </Link>
         </p>
       </div>
@@ -109,7 +124,7 @@ export default function ApplyForm() {
         <input className="input" value={values.major} onChange={(e) => set("major", e.target.value)} {...describe("major", false, errors.major)} />
       </Field>
       <Choices name="year" legend="Year" options={YEARS.map((y) => ({ value: y, label: y }))} value={values.year} onChange={(v) => set("year", v)} error={errors.year} />
-      <Choices name="track" legend="Which half of the work" options={TRACKS.map((t) => ({ value: t.value, label: t.label }))} value={values.track} onChange={(v) => set("track", v)} error={errors.track} />
+      <Choices name="track" legend="Which kind of work do you want to do?" options={TRACKS.map((t) => ({ value: t.value, label: t.label }))} value={values.track} onChange={(v) => set("track", v)} error={errors.track} />
       <Field
         id="why"
         label="One thing you have made, or want to make"
@@ -118,7 +133,14 @@ export default function ApplyForm() {
       >
         <textarea className="input" value={values.why} maxLength={1000} onChange={(e) => set("why", e.target.value)} {...describe("why", true, errors.why)} />
       </Field>
-      {failure && <FormFailure message={failure} subject="Application to TTS" body={asText(values)} />}
+      {failure && (
+        <>
+          <FormFailure message={failure} subject="Application to TTS" body={asText(values)} />
+          <button type="button" className="btn btn-secondary pg-copy" onClick={copy}>
+            {copied ? "Copied, paste it into a message to us" : "Copy my answers"}
+          </button>
+        </>
+      )}
       <div>
         <button type="submit" className="btn btn-primary" disabled={sending}>
           {sending ? "Sending" : "Send application"}

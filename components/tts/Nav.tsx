@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import TcLink from "./TcLink";
+import "./pages.css";
 
+// About, Build and the meeting slides are gone (next.config.mjs sends them
+// to /), so the nav is the two pages a visitor actually looks for plus Join.
 const LINKS = [
   { href: "/members", label: "People" },
   { href: "/work-with-us", label: "For companies" },
@@ -13,7 +16,10 @@ const LINKS = [
 export default function Nav() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
+  // The sheet remembers the path it was opened on, so any navigation closes
+  // it without an effect watching the route.
+  const [openOn, setOpenOn] = useState<string | null>(null);
+  const open = openOn === pathname;
   const menuBtn = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -23,46 +29,59 @@ export default function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close the mobile sheet on navigation, and on Escape.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      setOpen(false);
-      // Focus goes back to the control that opened the sheet.
+      setOpenOn(null);
       menuBtn.current?.focus();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  const close = () => setOpenOn(null);
+  const cls = ["nav", scrolled ? "is-scrolled" : "", open ? "is-open" : ""]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <header className={scrolled ? "nav is-scrolled" : "nav"}>
+    <header className={cls}>
       <nav className="nav-inner" aria-label="Main">
-        <Link href="/" className="nav-mark" onClick={() => setOpen(false)}>
+        <Link href="/" className="nav-mark" onClick={close}>
+          <span className="nav-mark-dot" aria-hidden="true" />
           <span className="nav-mark-name">Trojan Tech Solutions</span>
           <span className="nav-mark-sub">USC</span>
         </Link>
         <ul className="nav-links">
           {LINKS.map((l) => (
             <li key={l.href}>
-              <Link href={l.href} className="link" aria-current={pathname === l.href ? "page" : undefined}>
+              <Link
+                href={l.href}
+                aria-current={pathname === l.href ? "page" : undefined}
+              >
                 {l.label}
               </Link>
             </li>
           ))}
         </ul>
-        <Link href="/apply" className="btn btn-primary" onClick={() => setOpen(false)}>
+        <Link
+          href="/apply"
+          className="btn nav-join"
+          onClick={close}
+          aria-current={pathname === "/apply" ? "page" : undefined}
+        >
           Join
         </Link>
         <button
           type="button"
           ref={menuBtn}
-          className="btn btn-secondary nav-menu-btn"
+          className="btn nav-menu-btn"
           aria-expanded={open}
           aria-controls="nav-sheet"
-          onClick={() => setOpen((o) => !o)}
+          onClick={() => setOpenOn(open ? null : pathname)}
         >
+          <span className="nav-burger" aria-hidden="true" />
           {open ? "Close" : "Menu"}
         </button>
       </nav>
@@ -71,7 +90,11 @@ export default function Nav() {
           <ul>
             {LINKS.map((l) => (
               <li key={l.href}>
-                <Link href={l.href} onClick={() => setOpen(false)} aria-current={pathname === l.href ? "page" : undefined}>
+                <Link
+                  href={l.href}
+                  onClick={close}
+                  aria-current={pathname === l.href ? "page" : undefined}
+                >
                   {l.label}
                   <span aria-hidden="true">&rarr;</span>
                 </Link>
@@ -84,6 +107,9 @@ export default function Nav() {
               </TcLink>
             </li>
           </ul>
+          <Link href="/apply" className="btn nav-join" onClick={close}>
+            Join TTS
+          </Link>
         </div>
       )}
     </header>

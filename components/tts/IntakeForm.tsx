@@ -4,11 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors, FormFailure, asText, FormFigure, type FormState } from "./forms";
 
+// Plain words for an owner who doesn't know AI. The API stores these as free
+// strings, so the wording can change without touching it.
 const SERVICES = [
-  "An internal tool",
-  "Automating a manual process",
-  "Data, CRM or dashboards",
-  "Lists, enrichment or outbound",
+  "Answering the same emails",
+  "Keeping track of leads and customers",
+  "Reports someone builds by hand",
+  "Finding people to sell to",
+  "Teaching my team to use AI",
   "Something else",
 ] as const;
 const TIMELINES = ["This semester", "Next semester", "Not sure yet"] as const;
@@ -32,6 +35,17 @@ export default function IntakeForm() {
   const [sending, setSending] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  // When the send fails, the answers can still leave the page by hand.
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(asText(values));
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   // The same rules submit() enforces, per field, for the live figure.
   const ok = {
@@ -46,10 +60,10 @@ export default function IntakeForm() {
   const figure = (
     <FormFigure
       rows={[
-        { key: "orgName", label: "Company" },
         { key: "orgDescription", label: "The problem" },
-        { key: "services", label: "Kind of work" },
+        { key: "services", label: "Closest match" },
         { key: "timeline", label: "When" },
+        { key: "orgName", label: "Company" },
         { key: "contactName", label: "Your name" },
         { key: "contactEmail", label: "Your email" },
       ]}
@@ -66,7 +80,7 @@ export default function IntakeForm() {
     ev.preventDefault();
     const e: Errors<Key> = {};
     if (!values.orgName.trim()) e.orgName = "Add the company or organization name.";
-    if (values.orgDescription.trim().length < 10) e.orgDescription = "Describe the problem in a sentence or two.";
+    if (values.orgDescription.trim().length < 10) e.orgDescription = "Tell us what it is in a sentence or two.";
     if (!values.services.length) e.services = "Pick at least one, or Something else.";
     if (!values.timeline) e.timeline = "Pick one, or Not sure yet.";
     if (!values.contactName.trim()) e.contactName = "Add the name of the person we should talk to.";
@@ -89,10 +103,10 @@ export default function IntakeForm() {
     return (
       <div className="pg-form" data-state={state}>
       <div className="form-done" role="status">
-        <h2 className="t-h3">Thanks. It is with us.</h2>
+        <h2 className="t-h3">Thanks, it&apos;s with us.</h2>
         <p>
-          We will read what {values.orgName.trim()} sent and reply to {values.contactEmail.trim()}. If it is work we
-          cannot finish, we will say so in that first reply.
+          We&apos;ll read what {values.orgName.trim()} sent and reply to {values.contactEmail.trim()}. If it&apos;s work
+          we can&apos;t finish, we&apos;ll say so in that first reply.
         </p>
         <p>
           <Link className="link" href="/">
@@ -108,14 +122,14 @@ export default function IntakeForm() {
   return (
     <div className="pg-form" data-state={state}>
     <form className="form" onSubmit={submit} noValidate>
+      <Field id="orgDescription" label="What's eating your team's time?" hint="What happens today, and what you wish happened instead. Plain words are perfect." error={errors.orgDescription}>
+        <textarea className="input" value={values.orgDescription} maxLength={2000} onChange={(e) => set("orgDescription", e.target.value)} {...describe("orgDescription", true, errors.orgDescription)} />
+      </Field>
+      <Choices name="services" legend="Which of these sounds closest?" options={SERVICES.map((s) => ({ value: s, label: s }))} multiple selected={values.services} onChange={toggleService} error={errors.services} />
+      <Choices name="timeline" legend="When do you want help?" options={TIMELINES.map((t) => ({ value: t, label: t }))} value={values.timeline} onChange={(v) => set("timeline", v)} error={errors.timeline} />
       <Field id="orgName" label="Company or organization" error={errors.orgName}>
         <input className="input" autoComplete="organization" value={values.orgName} onChange={(e) => set("orgName", e.target.value)} {...describe("orgName", false, errors.orgName)} />
       </Field>
-      <Field id="orgDescription" label="What is the problem?" hint="What happens today, and what you wish happened instead." error={errors.orgDescription}>
-        <textarea className="input" value={values.orgDescription} maxLength={2000} onChange={(e) => set("orgDescription", e.target.value)} {...describe("orgDescription", true, errors.orgDescription)} />
-      </Field>
-      <Choices name="services" legend="What kind of work" options={SERVICES.map((s) => ({ value: s, label: s }))} multiple selected={values.services} onChange={toggleService} error={errors.services} />
-      <Choices name="timeline" legend="When" options={TIMELINES.map((t) => ({ value: t, label: t }))} value={values.timeline} onChange={(v) => set("timeline", v)} error={errors.timeline} />
       <Field id="contactName" label="Your name" error={errors.contactName}>
         <input className="input" autoComplete="name" value={values.contactName} onChange={(e) => set("contactName", e.target.value)} {...describe("contactName", false, errors.contactName)} />
       </Field>
@@ -128,7 +142,14 @@ export default function IntakeForm() {
       <Field id="additionalNotes" label="Anything else" hint="Optional.">
         <textarea className="input" maxLength={2000} value={values.additionalNotes} onChange={(e) => set("additionalNotes", e.target.value)} {...describe("additionalNotes", true)} />
       </Field>
-      {failure && <FormFailure message={failure} subject="A project for TTS" body={asText(values)} />}
+      {failure && (
+        <>
+          <FormFailure message={failure} subject="A project for TTS" body={asText(values)} />
+          <button type="button" className="btn btn-secondary pg-copy" onClick={copy}>
+            {copied ? "Copied, paste it into a message to us" : "Copy my answers"}
+          </button>
+        </>
+      )}
       <div>
         <button type="submit" className="btn btn-primary" disabled={sending}>
           {sending ? "Sending" : "Send it"}

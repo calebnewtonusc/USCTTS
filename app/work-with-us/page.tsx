@@ -8,339 +8,269 @@ import "@/components/tts/pages.css";
 export const metadata: Metadata = {
   title: "For companies | Trojan Tech Solutions",
   description:
-    "USC's AI implementation lab: students who do whatever AI work you need, automations, CRM, GTM engineering, agents and training, and hand over something running, an owner, the SOP and a number.",
+    "Tell USC's AI implementation lab what's eating your team's time. We set up AI to take on repeat work, like answering the same emails, keeping leads organized, building reports and teaching your staff.",
 };
 
-const CHIPS = [
-  { label: "Data sets", x: 4, y: 3, w: 15 },
-  { label: "GTM engineering", x: 21, y: 3, w: 24 },
-  { label: "Custom agents", x: 47, y: 3, w: 22 },
-  { label: "AI inside products", x: 4, y: 11, w: 27 },
-  { label: "Research workflows", x: 33, y: 11, w: 28 },
-];
-const NODES = [26, 42, 58, 74, 90];
-const NODE_LABELS = [
-  "You tell us",
-  "Yes or no",
-  "Scope one thing",
-  "Build in your stack",
-  "Hand it over",
-];
-const NO = [
-  "Clinical or licensed work",
-  "On-site physical work",
-  "Hard engineering",
-  "Work week one would expose",
+/* The reader is a business owner who doesn't know much about AI (Caleb,
+ * 2026-10-04, docs/RUBRIC-tts.md). Each row starts from a problem they'd
+ * recognize and says what we'd build, in plain words. These are examples of
+ * the work, never past results; the one live engagement named is the AI
+ * curriculum in docs/POSITIONING.md. */
+const EXAMPLES = [
+  {
+    problem: "Your team answers the same emails all week.",
+    build: "AI that drafts the replies in your inbox,",
+    rest: " and a person on your team reads each one before it goes out.",
+  },
+  {
+    problem: "Your leads live in a spreadsheet someone updates by hand.",
+    build: "A CRM, one shared list of every lead and customer,",
+    rest: " that fills itself in from your forms and email so nobody copies rows.",
+  },
+  {
+    problem: "Someone spends every Friday putting the same report together.",
+    build: "A report that builds itself",
+    rest: " from the tools you already use and lands in your inbox.",
+  },
+  {
+    problem: "Finding the right people to sell to takes hours.",
+    build: "A list of companies and contacts that fit,",
+    rest: " each with a line on why, kept up to date for you.",
+  },
+  {
+    problem: "Your staff don't know how to use AI yet.",
+    build: "Lessons built around the work they already do.",
+    rest: " We're building a course like this for a client's students right now.",
+  },
 ];
 
-/* The engagement as one track. The chips are what we build; each node is a
- * step and turns cardinal while its step is read; the track draws itself
- * down as you go. The turn-down list surfaces off the "no" branch. */
-function Track() {
+const ROWS = [
+  "Answering the same emails",
+  "Updating the lead spreadsheet",
+  "Building the weekly report",
+];
+const DAYS = ["M", "T", "W", "T", "F"];
+// Which days each job lands on in the example week. Illustrative only.
+const BUSY = [
+  [1, 1, 1, 1, 1],
+  [1, 0, 1, 0, 1],
+  [0, 0, 0, 0, 1],
+];
+
+/* An example week: the repeat jobs start as grey blocks done by hand, then a
+ * cardinal sweep hands each to a system and a check marks it handled. Timed
+ * from load, once; reduced motion shows the finished week. */
+function Week() {
+  const x0 = 54;
+  const step = 9;
   return (
     <svg
-      className="f"
-      viewBox="0 0 100 104"
+      className="f wk"
+      viewBox="0 0 100 66"
       role="img"
-      aria-labelledby="track-t"
+      aria-labelledby="week-t"
     >
-      <title id="track-t">
-        An engagement as five steps on one track: you tell us the problem, we
-        say yes or no early, scope one thing, build it in your stack, and hand
-        it over with a before and after number.
+      <title id="week-t">
+        An example week. Answering the same emails, updating the lead
+        spreadsheet and building the weekly report each move from being done by
+        hand to being drafted by AI and checked by your team.
       </title>
-
-      <g className="s-on2">
-        {CHIPS.map((c) => (
-          <g key={c.label}>
-            <rect className="f-ink" x={c.x} y={c.y} width={c.w} height="6" />
-            <text className="f-label f-label-ink" x={c.x + 2.4} y={c.y + 4.1}>
-              {c.label}
+      {DAYS.map((d, i) => (
+        <text
+          key={i}
+          className="f-label"
+          x={x0 + i * step + 3.5}
+          y="7"
+          textAnchor="middle"
+        >
+          {d}
+        </text>
+      ))}
+      {ROWS.map((r, ri) => {
+        const y = 12 + ri * 13;
+        return (
+          <g key={r}>
+            <text className="f-label f-label-ink" x="3" y={y + 5}>
+              {r}
             </text>
+            {DAYS.map((_, di) =>
+              BUSY[ri][di] ? (
+                <g
+                  key={di}
+                  className="wk-cell"
+                  style={{ ["--d" as string]: 900 + (ri * 5 + di) * 70 }}
+                >
+                  <rect
+                    className="wk-hand"
+                    x={x0 + di * step}
+                    y={y}
+                    width="7"
+                    height="7"
+                  />
+                  <rect
+                    className="wk-ai"
+                    x={x0 + di * step}
+                    y={y}
+                    width="7"
+                    height="7"
+                  />
+                  <path
+                    className="wk-tick"
+                    d={`M${x0 + di * step + 1.8} ${y + 3.7} l1.5 1.5 l2.6 -3`}
+                  />
+                </g>
+              ) : (
+                <rect
+                  key={di}
+                  className="f-mute"
+                  x={x0 + di * step}
+                  y={y}
+                  width="7"
+                  height="7"
+                />
+              ),
+            )}
           </g>
-        ))}
-      </g>
-      <g className="s-hot2">
-        {CHIPS.map((c) => (
-          <rect
-            key={c.label}
-            className="f-live"
-            x={c.x}
-            y={c.y}
-            width={c.w}
-            height="6"
-          />
-        ))}
-      </g>
-
-      {/* the track: one segment per step, drawn as you reach it */}
-      <path className="f-mute" d="M12 19 L12 92.4" />
-      {NODES.map((y, i) => (
-        <path
-          key={y}
-          className={`f-ink f-draw s-draw${i + 3}`}
-          pathLength={1}
-          d={`M12 ${i === 0 ? 19 : NODES[i - 1] + 2.4} L12 ${y - 2.4}`}
-        />
-      ))}
-      {NODES.map((y, i) => (
-        <g key={y} className={`s-on${i + 3}`}>
-          <circle className="f-ink f-paper" cx="12" cy={y} r="2.4" />
-          <text className="f-label f-big" x="18" y={y + 1.2}>
-            {NODE_LABELS[i]}
-          </text>
-        </g>
-      ))}
-      {NODES.map((y, i) => (
-        <circle
-          key={y}
-          className={`f-live-fill s-hot${i + 3}`}
-          cx="12"
-          cy={y}
-          r="1.5"
-        />
-      ))}
-
-      {/* 1: the form */}
-      <g className="s-on3">
-        <rect className="f-ink" x="72" y="20" width="13" height="12.5" />
-        <path
-          className="f-mute"
-          d="M74.5 23.5 L82.5 23.5 M74.5 26.2 L80.5 26.2 M74.5 28.9 L82 28.9"
-        />
-      </g>
-
-      {/* 2: the fork, said early */}
-      <g className="s-on4">
-        <path
-          className="f-ink"
-          d="M64 46 L70 46 C74 46 74 42.5 78 42.5 L84 42.5 M70 46 C74 46 74 49.5 78 49.5 L84 49.5"
-        />
-        <text className="f-label" x="86" y="43.4">
-          yes
-        </text>
-        <text className="f-label" x="86" y="50.4">
-          no
-        </text>
-      </g>
-      <path
-        className="f-live s-hot4"
-        d="M70 46 C74 46 74 42.5 78 42.5 L84 42.5"
-      />
-
-      {/* 3: one thing, and its before number */}
-      <g className="s-on5">
-        <rect className="f-ink" x="66" y="56" width="11" height="9" />
-        <circle className="f-ink" cx="71.5" cy="60.5" r="2.2" />
-        <rect className="f-mute" x="82" y="59.5" width="3" height="5.5" />
-        <text className="f-label" x="87" y="64.6">
-          before
-        </text>
-      </g>
-      <circle className="f-live-fill s-hot5" cx="71.5" cy="60.5" r="0.9" />
-
-      {/* 4: inside their stack */}
-      <g className="s-on6">
-        <rect className="f-ink" x="60" y="73" width="30" height="3.4" />
-        <rect className="f-ink" x="60" y="77.4" width="30" height="3.4" />
-        <rect className="f-ink" x="60" y="81.8" width="30" height="3.4" />
-      </g>
-      <rect
-        className="f-live-fill s-hot6"
-        x="70"
-        y="77.9"
-        width="10"
-        height="2.4"
-      />
-
-      {/* 5: handed to a person, with the after number */}
-      <g className="s-on7">
-        <circle className="f-ink" cx="64" cy="91.4" r="1.6" />
-        <path className="f-ink" d="M61 99 C61 95.4 67 95.4 67 99" />
-        <rect className="f-mute" x="78" y="94" width="3" height="5.5" />
-        <rect className="f-ink" x="83" y="88" width="3" height="11.5" />
-        <text className="f-label" x="88" y="99.4">
-          after
-        </text>
-      </g>
-      <rect
-        className="f-live-fill s-hot7 s-hot-end"
-        x="83"
-        y="88"
-        width="3"
-        height="11.5"
-      />
-
-      {/* what we turn down, off the "no" branch */}
-      <g className="s-hot8">
-        <path className="f-mute f-dash" d="M84 49.5 L88 49.5 L88 53" />
-        <rect className="f-paper f-ink" x="50" y="53" width="46" height="21" />
-        {NO.map((t, i) => (
-          <g key={t}>
-            <path
-              className="f-ink"
-              d={`M53 ${57 + i * 4.6} l2 2 M55 ${57 + i * 4.6} l-2 2`}
-            />
-            <text
-              className="f-label f-label-ink"
-              x="58"
-              y={`${58.9 + i * 4.6}`}
-            >
-              {t}
-            </text>
-          </g>
-        ))}
-      </g>
+        );
+      })}
+      <path className="f-mute" d="M3 52 L97 52" />
+      <rect className="wk-legend-hand" x="3" y="57" width="4" height="4" />
+      <text className="f-label" x="9" y="60.4">
+        By hand
+      </text>
+      <rect className="f-sky" x="34" y="57" width="4" height="4" />
+      <path className="wk-tick is-static" d="M34.9 59.1 l0.9 0.9 l1.6 -1.9" />
+      <text className="f-label" x="40" y="60.4">
+        Drafted by AI, checked by your team
+      </text>
     </svg>
   );
 }
 
-const BUILD = [
-  {
-    name: "Data sets",
-    job: "These are lists you own, enriched and scored.",
-  },
-  {
-    name: "GTM engineering",
-    job: "This is routing and outbound that run every week.",
-  },
-  {
-    name: "Custom agents",
-    job: "These are research agents with a test set behind them.",
-  },
-  {
-    name: "AI inside products",
-    job: "These are features your own users touch.",
-  },
-  {
-    name: "Automations and CRM",
-    job: "This is the busywork your team does by hand, wired to run on its own.",
-  },
-  {
-    name: "AI curriculum",
-    job: "This is a course that teaches your people to use AI, built for your context.",
-  },
-];
-
-const STEPS = [
-  {
-    title: "You tell us the problem",
-    body: "Tell us what happens today and what you wish happened instead, and the form below only takes a few minutes.",
-  },
-  {
-    title: "Yes or no, early",
-    body: "If it's work we can't finish, you'll hear that in our first reply instead of in week three.",
-  },
-  {
-    title: "We scope one thing",
-    body: "We pick one problem and one system, and agree on the number we'll measure before and after.",
-  },
-  {
-    title: "We build it in your stack",
-    body: "It runs on your accounts, your data and your tools, so there's nothing to migrate when we leave.",
-  },
-  {
-    title: "We hand it over",
-    body: "We hand it to a named person on your team, with the SOP written down and the after number next to the before.",
-  },
-];
-
 export default function WorkWithUsPage() {
   return (
     <Shell>
-      <div className="pg-scene">
-        <section className="pg-step is-first t1" aria-labelledby="wwu-title">
-          <p className="pg-kicker">For companies</p>
-          <h1 id="wwu-title" className="pg-title">
-            Bring us the work a system should be doing.
-          </h1>
-          <p className="pg-lead">
-            We&apos;re USC&apos;s AI implementation lab, so whatever AI work you
-            need, automations, CRM, GTM engineering, agents or teaching your
-            team, we build it and hand over something that&apos;s running.
-          </p>
-          <div className="pg-actions">
-            <a href="#intake" className="btn btn-primary">
-              Tell us the problem{" "}
-              <span className="arrow" aria-hidden="true">
-                &rarr;
-              </span>
-            </a>
-            <a href="#how" className="btn btn-secondary">
-              How it runs
-            </a>
+      <div className="pgx">
+        <section className="pg-hero" aria-labelledby="wwu-title">
+          <div className="pg-hero-in">
+            <div className="pg-hero-copy">
+              <p className="pg-kicker">For companies</p>
+              <h1 id="wwu-title" className="pg-title">
+                Tell us what&apos;s eating your team&apos;s time, and we&apos;ll
+                set up AI to take it on.
+              </h1>
+              <p className="pg-lead">
+                We&apos;re USC&apos;s AI implementation lab, students who do
+                whatever AI work a business needs. You don&apos;t need to know
+                anything about AI to work with us. Tell us the problem in plain
+                words, and we&apos;ll tell you plainly whether we can take it
+                on.
+              </p>
+              <div className="pg-actions">
+                <a href="#intake" className="btn btn-primary">
+                  Tell us the problem{" "}
+                  <span className="arrow" aria-hidden="true">
+                    &darr;
+                  </span>
+                </a>
+                <a href="#examples" className="btn btn-secondary">
+                  See examples
+                </a>
+              </div>
+            </div>
+            <figure className="pg-figure">
+              <Week />
+            </figure>
           </div>
         </section>
 
-        <section className="pg-step t2" aria-labelledby="w-build">
-          <span className="pg-n">What we build</span>
-          <h2 id="w-build">Data, engines, agents.</h2>
-          <ul className="pg-list">
-            {BUILD.map((b) => (
-              <li key={b.name}>
-                <b>{b.name}</b>
-                <span>{b.job}</span>
+        <section className="pg-sec" id="examples" aria-labelledby="ex-title">
+          <div className="pg-head">
+            <h2 id="ex-title" className="pg-h2">
+              What that looks like
+            </h2>
+            <p>
+              These are examples of the kind of work we take on, not a list of
+              past clients.
+            </p>
+          </div>
+          <ul className="pg-ex" role="list">
+            {EXAMPLES.map((e) => (
+              <li key={e.problem}>
+                <span className="pg-ex-q">{e.problem}</span>
+                <span className="pg-ex-arrow" aria-hidden="true" />
+                <span className="pg-ex-a">
+                  <b>{e.build}</b>
+                  {e.rest}
+                </span>
               </li>
             ))}
           </ul>
         </section>
 
-        {STEPS.map((s, i) => (
-          <section
-            key={s.title}
-            id={i === 0 ? "how" : undefined}
-            className={`pg-step t${i + 3}`}
-            aria-labelledby={`w-s${i}`}
-          >
-            <span className="pg-n">0{i + 1}</span>
-            <h2 id={`w-s${i}`}>{s.title}</h2>
-            <p>{s.body}</p>
-          </section>
-        ))}
-
-        <section className="pg-step is-last t8" aria-labelledby="w-no">
-          <span className="pg-n">What we turn down</span>
-          <h2 id="w-no">
-            Saying no in public is cheaper than failing in private.
-          </h2>
-          <p>
-            Clinical or licensed work, on-site physical work, and hard
-            engineering like avionics, composites or propulsion. We&apos;ll also
-            turn down anything the first status update would show we can&apos;t
-            do.
-          </p>
+        <section className="pg-sec" id="how" aria-labelledby="how-title">
+          <div className="pg-head">
+            <h2 id="how-title" className="pg-h2">
+              How it works
+            </h2>
+          </div>
+          <ol className="pg-steps">
+            <li>
+              <span>You tell us the problem</span>
+              It takes a few minutes on the form below.
+            </li>
+            <li>
+              <span>We say yes or no, early</span>
+              If it&apos;s work we can&apos;t finish, our first reply says so.
+            </li>
+            <li>
+              <span>We build it in your tools</span>
+              It runs on your accounts and your data, so nothing has to move
+              when we&apos;re done.
+            </li>
+            <li>
+              <span>We hand it to your team</span>A named person on your team
+              gets it, with the steps written down.
+            </li>
+          </ol>
+          <div className="pg-no">
+            <h3>What we turn down</h3>
+            <p>
+              Clinical or licensed work, on-site physical work, and hard
+              engineering like avionics or propulsion. We&apos;ll also say no to
+              anything the first status update would show we can&apos;t do.
+            </p>
+          </div>
         </section>
 
-        <div className="pg-stage">
-          <div className="pg-well">
-            <Track />
+        <section className="pg-sec" id="intake" aria-labelledby="intake-title">
+          <div className="pg-head">
+            <h2 id="intake-title" className="pg-h2">
+              What&apos;s eating your team&apos;s time?
+            </h2>
+            <p>
+              Tell us in plain words. You don&apos;t need to know what the fix
+              is.
+            </p>
+            {/* [NEED: pricing for non-YC companies. Nothing on record for TTS
+             * engagements, so no price is on the page.] */}
           </div>
-        </div>
+          <div className="pg-formwrap">
+            <IntakeForm />
+          </div>
+          <p className="label mt-m">
+            Want to sponsor the club, speak at a meeting or recruit from it
+            instead?{" "}
+            <Link className="link" href="/partner">
+              That form is here
+            </Link>
+            .{" "}
+            <TcLink className="link" hideWhenPending>
+              A YC company? T Combinator is for you.
+            </TcLink>
+          </p>
+        </section>
       </div>
-
-      <section className="pg-sec" id="intake" aria-labelledby="intake-title">
-        <div className="pg-head">
-          <h2 id="intake-title">Tell us the problem.</h2>
-          <p>If it&apos;s not work we can finish, our first reply says so.</p>
-          {/* [NEED: pricing for non-YC companies. POSITIONING.md records the
-           * T Combinator model as free for the first cohort and paid after,
-           * and nothing for TTS engagements, so no price is on the page.] */}
-        </div>
-        <IntakeForm />
-        <div className="pg-actions">
-          <TcLink className="btn btn-secondary" hideWhenPending>
-            A YC company? Go to T Combinator
-          </TcLink>
-        </div>
-        <p className="label mt-m">
-          Want to sponsor the club, speak at a meeting or recruit from it
-          instead?{" "}
-          <Link className="link" href="/partner">
-            That form is here
-          </Link>
-          .
-        </p>
-      </section>
     </Shell>
   );
 }
