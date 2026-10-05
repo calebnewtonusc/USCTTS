@@ -417,3 +417,11 @@
     display: none;
   }
 }
+
+/* Anchored sections land below the sticky nav, not under it (Vercel's Web
+ * Interface Guidelines: "Set scroll-margin-top for headers"). 64px is the
+ * nav's min-height, plus 16 of air. */
+.tts #run,
+.tts #learn {
+  scroll-margin-top: 80px;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import TcLink from "./TcLink";
@@ -16,6 +16,7 @@ export default function Nav() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const menuBtn = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -27,7 +28,12 @@ export default function Nav() {
   // Close the mobile sheet on navigation, and on Escape.
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      // Focus goes back to the control that opened the sheet.
+      menuBtn.current?.focus();
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
@@ -53,6 +59,7 @@ export default function Nav() {
         </Link>
         <button
           type="button"
+          ref={menuBtn}
           className="btn btn-secondary nav-menu-btn"
           aria-expanded={open}
           aria-controls="nav-sheet"

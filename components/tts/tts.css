@@ -24,6 +24,24 @@
   --red: #a3162b;
   --live: var(--red);
 
+  /* The figure family, shared by the 3D world, the subpages' line diagrams
+   * and the whiteboard, so the three read as one hand (review, 2026-10-04):
+   *   --line       every drawn stroke and hairline, the one ink
+   *   --line-quiet the stroke for a part that is not yet live
+   *   --line-w     one hairline weight, in CSS px; the world's outline is
+   *                tuned to read at the same weight
+   *   --marker-w   the whiteboard's marker, the one heavier stroke
+   *   --accent     cardinal, only on what is running or live
+   *   --accent-fill cardinal at rest under a live part
+   *   --radius     square corners everywhere: no pills, no rounded cards */
+  --line: var(--ink);
+  --line-quiet: rgba(42, 27, 30, 0.32);
+  --line-w: 1px;
+  --marker-w: 2.4px;
+  --accent: var(--red);
+  --accent-fill: rgba(163, 22, 43, 0.12);
+  --radius: 0;
+
   /* One family, chosen by measurement (2026-10-04, 100px, canvas metrics):
    * Instrument Sans has a cap height of 0.72em and an x-height of 0.708 of
    * its caps. Archivo, the previous face, ran 0.767, which is why the same
@@ -315,8 +333,9 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  /* Floats over the world: the ground at 88%, no blur. */
-  background: rgba(244, 240, 233, 0.88);
+  /* Opaque: a translucent nav let headings show through the wordmark on
+   * every route (review, 2026-10-04). */
+  background: var(--paper);
   border-bottom: 1px solid transparent;
   transition: border-color 160ms var(--ease);
 }

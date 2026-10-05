@@ -98,6 +98,10 @@ const QUALIFY = { in: 0.39, out: 0.53, count: [0.4, 0.47] as const };
 
 const STILLS = 8;
 export const stillSrc = (k: number) => `/tts/world/station-${k}.jpg`;
+// The loading poster is the bare ground and sky, before anything has
+// assembled, so the poster hands over to the assembly instead of to its own
+// finished state. Reduced motion uses the finished station stills instead.
+const POSTER = "/tts/world/ground.jpg";
 
 export default function WorldScene({ nums }: { nums: Numbers }) {
   const run = useRef<HTMLElement>(null);
@@ -134,6 +138,7 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
       banked = 0,
       visible = true;
     const t0 = performance.now();
+    let worldT0 = -1;
     const counted = [
       nums.companies,
       nums.roles,
@@ -210,7 +215,11 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
       if (last) banked += now - last;
       last = now;
       load = Math.min(1, (now - t0) / LOAD_MS);
-      world?.setLoad(load);
+      // The world runs its own load clock from the moment it exists, so the
+      // assembly is seen even when three.js arrives after the copy has risen
+      // (review, 2026-10-04: the intro read as finished by 400ms, because the
+      // shared clock had run out before the first 3D frame).
+      if (world && worldT0 >= 0) world.setLoad(Math.min(1, (now - worldT0) / LOAD_MS));
       const d = target - cur;
       cur = Math.abs(d) < 8e-5 ? target : cur + d * FOLLOW;
       paint(cur);
@@ -266,13 +275,16 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
         }
         size();
         world.setN(cur);
-        world.setLoad(load);
+        // A visitor who arrives mid-page skips the assembly.
+        const assemble = cur < 0.02;
+        world.setLoad(assemble ? 0 : 1);
+        worldT0 = assemble ? performance.now() : 0;
         world.frame(banked);
         setReady(true);
         if (new URLSearchParams(window.location.search).has("capture")) {
           (window as unknown as { __ttsWorld: unknown }).__ttsWorld = {
-            still: (n: number, t: number, sweepMs?: number) => {
-              world?.still(n, t, sweepMs);
+            still: (n: number, t: number, sweepMs?: number, loadAt?: number) => {
+              world?.still(n, t, sweepMs, loadAt);
               paint(n);
             },
             stop: () => {
@@ -402,7 +414,7 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className={ready ? "w-poster is-gone" : "w-poster"}
-            src={stillSrc(0)}
+            src={POSTER}
             alt=""
             aria-hidden="true"
           />

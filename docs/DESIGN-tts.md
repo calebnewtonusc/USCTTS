@@ -94,3 +94,22 @@ are timed; everything else in the world reads the one followed progress value.
 Ambient motion lives inside the world canvas and the join band's mesh, pauses
 offscreen and on a hidden tab, and is replaced by still renders under reduced
 motion.
+
+## The figure family, as tokens
+
+The world, the subpages' line diagrams and the whiteboard draw from one set of
+variables in `components/tts/tts.css`. Use these and nothing else:
+
+| Token | Value | Use |
+|---|---|---|
+| `--line` | `--ink` | every drawn stroke |
+| `--line-quiet` | ink at 32% | a part that is not live yet |
+| `--line-w` | 1px | the one hairline weight (the world's outline is tuned to it) |
+| `--marker-w` | 2.4px | the whiteboard's marker, the only heavier stroke |
+| `--accent` | cardinal | only on what is running or live |
+| `--accent-fill` | cardinal at 12% | the rest state under a live part |
+| `--radius` | 0 | every corner: no pills, no rounded cards |
+
+The world takes the same rules into 3D: a `MeshToonMaterial` with four flat
+bands, a one-pixel ink outline, and cardinal only on what moves
+(`docs/STEAL-tts.md`).

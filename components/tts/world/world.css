@@ -310,3 +310,13 @@
     grid-column: 1;
   }
 }
+
+/* The hero copy is in the server HTML, and the load clock lifts it in once
+ * the script runs. Without this the copy painted fully, then vanished and
+ * rose again on hydration (seen at 0ms on 2026-10-04). Only when scripting is
+ * on, so a no-JS reader still gets the copy. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .tts .world:not(.is-still) .w-copy [data-line] {
+    opacity: 0;
+  }
+}

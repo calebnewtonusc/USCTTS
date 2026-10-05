@@ -69,8 +69,11 @@ interface Key {
   look: [number, number, number];
 }
 export const CAMERA: Key[] = [
-  { n: 0, pos: [-46, 40, 52], look: [16, 2, -74] },
-  { n: 0.055, pos: [-58, 54, 78], look: [16, 2, -74] },
+  // The opening frame is high and behind the funnel, so the whole machine
+  // recedes to the right and the copy column sits over open ground (review,
+  // 2026-10-04: "systems" sat over the first desk). Chosen from six renders.
+  { n: 0, pos: [22, 74, 96], look: [-34, -6, -120] },
+  { n: 0.055, pos: [30, 96, 128], look: [-34, -6, -120] },
   { n: 0.12, pos: [-30, 13, 36], look: [-4, 13, 0] },
   { n: 0.19, pos: [-26, 11, 31], look: [-4, 12, 0] },
   { n: 0.26, pos: [46, 20, 8], look: [6, 9, -30] },
@@ -83,8 +86,8 @@ export const CAMERA: Key[] = [
   { n: 0.77, pos: [14, 12, -101], look: [-20, 10, -128] },
   { n: 0.84, pos: [54, 22, -116], look: [2, 11, -160] },
   { n: 0.89, pos: [57, 24, -113], look: [2, 11, -160] },
-  { n: 0.93, pos: [-14, 66, -246], look: [14, 2, -78] },
-  { n: 1, pos: [-11, 62, -240], look: [14, 2, -80] },
+  { n: 0.93, pos: [-20, 70, -250], look: [32, 2, -80] },
+  { n: 1, pos: [-17, 66, -244], look: [32, 2, -82] },
 ];
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -135,17 +138,30 @@ function groundY(x: number, z: number) {
   return (away + far * 0.8) * (hills * 16 + 2) + vnoise(x * 0.2, z * 0.2) * 0.15;
 }
 
+/* Stepped shading, stolen from the three.js cel-shading practice
+ * (docs/STEAL-tts.md): a four-band gradient map on MeshToonMaterial, so light
+ * falls on each object in flat planes like a printed illustration, and the
+ * one-pixel ink outline reads as drawn rather than as a render artefact. The
+ * bands are the ground's own values, not black, so shadows stay warm. */
+let toonRamp: THREE.DataTexture | null = null;
+function ramp() {
+  if (toonRamp) return toonRamp;
+  const v = [118, 176, 222, 255];
+  const data = new Uint8Array(v.length * 4);
+  v.forEach((x, i) => data.set([x, x, x, 255], i * 4));
+  toonRamp = new THREE.DataTexture(data, v.length, 1, THREE.RGBAFormat);
+  toonRamp.minFilter = toonRamp.magFilter = THREE.NearestFilter;
+  toonRamp.needsUpdate = true;
+  return toonRamp;
+}
+// The second argument was roughness for the old standard material; toon
+// shading has none, and the call sites keep it as a note of intent.
 const mat = (
   color: THREE.Color,
-  rough = 0.82,
-  extra: Partial<THREE.MeshStandardMaterialParameters> = {},
-) =>
-  new THREE.MeshStandardMaterial({
-    color,
-    roughness: rough,
-    metalness: 0.02,
-    ...extra,
-  });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _rough = 0.82,
+  extra: { emissive?: THREE.Color; emissiveIntensity?: number; side?: THREE.Side } = {},
+) => new THREE.MeshToonMaterial({ color, gradientMap: ramp(), ...extra });
 
 function person(m: THREE.Material) {
   // A tiny human, 1.8 units tall, for scale beside the machines.
@@ -167,7 +183,7 @@ export interface World {
   dispose(): void;
   /** For still renders: freeze ambient time at t and draw once. With
    * sweepMs, the build is shown that far into its sweep. */
-  still(n: number, timeMs: number, sweepMs?: number): void;
+  still(n: number, timeMs: number, sweepMs?: number, loadAt?: number): void;
 }
 
 export function createWorld(
@@ -340,11 +356,7 @@ export function createWorld(
   }
   const funnel = new THREE.Mesh(
     new THREE.LatheGeometry(lathePts, 64),
-    new THREE.MeshStandardMaterial({
-      color: COL.bone,
-      roughness: 0.75,
-      side: THREE.DoubleSide,
-    }),
+    mat(COL.bone, 0.75, { side: THREE.DoubleSide }),
   );
   funnel.position.y = 12;
   const spout = new THREE.Mesh(
@@ -382,10 +394,7 @@ export function createWorld(
   // Accounts: many small blocks, falling into the mouth on a loop.
   const ACC = 260;
   const accGeo = rbox(1, 1, 1);
-  const accMat = new THREE.MeshStandardMaterial({
-    roughness: 0.6,
-    vertexColors: false,
-  });
+  const accMat = new THREE.MeshToonMaterial({ gradientMap: ramp() });
   const accounts = new THREE.InstancedMesh(accGeo, accMat, ACC);
   // Raw accounts are neutral: nothing is gold until it has been worked.
   const accPal = [COL.bone, COL.boneDark, new THREE.Color("#8d857b"), COL.bone, new THREE.Color("#5b554f")];
@@ -519,7 +528,7 @@ export function createWorld(
   const ITEMS = 26;
   const items = new THREE.InstancedMesh(
     rbox(2, 1.4, 2.6),
-    new THREE.MeshStandardMaterial({ roughness: 0.6 }),
+    new THREE.MeshToonMaterial({ gradientMap: ramp() }),
     ITEMS,
   );
   items.castShadow = true;
@@ -794,6 +803,7 @@ export function createWorld(
 
   let N = 0;
   let load = 0;
+  const ASSEMBLE = 0.28; // of the 2200ms clock, about 620ms per station
   const tmpObj = new THREE.Object3D();
   const cGold = COL.gold.clone();
   const cAsh = COL.ash.clone();
@@ -802,8 +812,10 @@ export function createWorld(
   function update(time: number) {
     const s = time / 1000;
     // Assembly on the load clock: each station drops into place, staggered.
+    // Starts are spread across the clock and each fall takes ASSEMBLE of it,
+    // so the last station lands as the clock ends rather than at 40% of it.
     for (const { g, base, start } of groups) {
-      const a = easeOut3(clamp((load - start) / 0.35));
+      const a = easeOut3(clamp((load - start * 1.6) / ASSEMBLE));
       g.position.set(base.x, base.y + (1 - a) * 46, base.z);
       g.visible = a > 0.001;
     }
@@ -968,6 +980,31 @@ export function createWorld(
     }
   }
 
+  /* Warm every shader before the first frame: the objects that only appear
+   * later (the build's front, wake, lattice cells, stations hidden during
+   * assembly) otherwise compile on the frame they first show, which measured
+   * as 200ms and 141ms hitches at scroll start and sweep start. */
+  {
+    const hidden: THREE.Object3D[] = [];
+    scene.traverse((o) => {
+      if (!o.visible) {
+        hidden.push(o);
+        o.visible = true;
+      }
+    });
+    const culled: THREE.Object3D[] = [];
+    scene.traverse((o) => {
+      if (o.frustumCulled) {
+        culled.push(o);
+        o.frustumCulled = false;
+      }
+    });
+    renderer.compile(scene, camera);
+    renderer.render(scene, camera);
+    hidden.forEach((o) => (o.visible = false));
+    culled.forEach((o) => (o.frustumCulled = true));
+  }
+
   return {
     setN(n) {
       N = n;
@@ -979,9 +1016,9 @@ export function createWorld(
       update(time);
       renderer.render(scene, camera);
     },
-    still(n, time, sweepMs) {
+    still(n, time, sweepMs, loadAt) {
       N = n;
-      load = 1;
+      load = loadAt ?? 1;
       // A still of the last phase shows the build finished, unless asked for
       // a moment inside it.
       if (n >= ENTER) sweep0 = time - (sweepMs ?? SWEEP_MS + RISE_MS + 1000);
