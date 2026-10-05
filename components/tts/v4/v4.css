@@ -67,27 +67,6 @@
 .tts .v4.is-dark .pt-name img {
   filter: brightness(0) invert(1);
 }
-.tts .v4.is-dark .jn .btn-primary {
-  background: #fbf7f0;
-  color: #85101f;
-}
-.tts .v4.is-dark .jn .jn-cta-2 {
-  color: #fbf7f0;
-  box-shadow: inset 0 0 0 1px #fbf7f0;
-}
-@media (hover: hover) and (pointer: fine) {
-  .tts .v4.is-dark .jn .btn-primary:hover {
-    background: #ffffff;
-  }
-  .tts .v4.is-dark .jn .jn-cta-2:hover {
-    background: rgba(251, 247, 240, 0.12);
-  }
-}
-.tts .v4.is-dark .jn .btn:focus-visible {
-  box-shadow:
-    0 0 0 2px #85101f,
-    0 0 0 4px #fbf7f0;
-}
 .tts .v4-content {
   position: relative;
   z-index: 1;
@@ -324,19 +303,9 @@
   transform-origin: 0 100%;
   will-change: transform;
 }
-.tts .v4-open-line {
-  margin-top: 20px;
-  max-width: 40ch;
-  font-size: clamp(18px, 1.4vw, 21px);
-  line-height: 1.5;
-  color: var(--ink-2);
-}
 .tts .v4-rise {
   display: inline-block;
   animation: v4-rise 640ms cubic-bezier(0.2, 0.6, 0.2, 1) 700ms both;
-}
-.tts .v4-open-line .v4-rise {
-  animation-delay: 880ms;
 }
 @keyframes v4-rise {
   from {
@@ -1241,61 +1210,76 @@
   max-width: var(--wide);
   margin-inline: auto;
   padding-inline: var(--gutter);
-}
-.tts .jn-title {
-  font-size: clamp(34px, 4.4vw, 64px);
-  line-height: 1.08;
-  letter-spacing: -0.02em;
-  max-width: 17ch;
-}
-.tts .jn-doors {
-  margin-top: 56px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 40px;
-  max-width: var(--narrow);
+  gap: 0;
 }
+/* Each door is one big link: the sentence is the button. */
 .tts .jn-door {
   display: grid;
-  gap: 20px;
-  align-content: start;
-  justify-items: start;
+  align-content: space-between;
+  gap: 48px;
+  min-height: 52vh;
+  padding: 32px 32px 28px;
   border-top: 1px solid var(--rule);
-  padding-top: 18px;
+  text-decoration: none;
+  color: var(--ink);
+  transition:
+    background-color 200ms cubic-bezier(0, 0, 0.2, 1),
+    scale 150ms cubic-bezier(0, 0, 0.2, 1);
 }
-.tts .jn-door p {
-  font-size: 18px;
-  line-height: 1.5;
+.tts .jn-door + .jn-door {
+  border-left: 1px solid var(--rule);
+}
+.tts .jn-say {
+  font-size: clamp(32px, 3.8vw, 60px);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  max-width: 13ch;
+  text-wrap: balance;
+}
+.tts .jn-meta {
+  font-family: var(--mono);
+  font-size: 12px;
   color: var(--ink-2);
-  max-width: 34ch;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
 }
-.tts .jn .jn-cta {
-  min-height: 52px;
-  padding: 0 24px;
-  font-size: 16px;
-}
-.tts .jn .jn-cta-2 {
-  min-height: 52px;
-  padding: 0 22px;
-  font-size: 16px;
-  background: transparent;
-  box-shadow: inset 0 0 0 1px var(--ink);
+.tts .jn-meta .arrow {
+  font-family: var(--serif);
+  font-size: 20px;
+  transition: translate 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 @media (hover: hover) and (pointer: fine) {
-  .tts .jn .jn-cta-2:hover {
-    background: var(--paper-2);
+  .tts .jn-door:hover {
+    background-color: rgba(251, 247, 240, 0.1);
+  }
+  .tts .v4:not(.is-dark) .jn-door:hover {
+    background-color: rgba(42, 27, 30, 0.05);
+  }
+  .tts .jn-door:hover .arrow {
+    translate: 6px 0;
   }
 }
-.tts .jn .jn-cta-2:focus-visible {
-  box-shadow:
-    inset 0 0 0 1px var(--ink),
-    0 0 0 2px var(--paper),
-    0 0 0 4px var(--ink);
+.tts .jn-door:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -6px;
+}
+.tts .jn-door:active {
+  scale: 0.99;
 }
 @media (max-width: 767px) {
-  .tts .jn-doors {
+  .tts .jn-inner {
     grid-template-columns: 1fr;
-    gap: 32px;
+  }
+  .tts .jn-door {
+    min-height: 0;
+    padding: 28px 4px 24px;
+    gap: 28px;
+  }
+  .tts .jn-door + .jn-door {
+    border-left: 0;
   }
   .tts .jn {
     padding-block: 96px 96px;
@@ -1309,10 +1293,7 @@
   .tts .v4-h1 {
     font-size: clamp(76px, 4.2vw, 104px);
   }
-  .tts .v4-open-line {
-    font-size: 24px;
-  }
-  .tts .w4-stage {
+    .tts .w4-stage {
     max-width: 2100px;
     gap: 80px;
   }
@@ -1363,8 +1344,8 @@
   .tts .xr-table {
     font-size: 13.5px;
   }
-  .tts .jn-door p {
-    font-size: 21px;
+  .tts .jn-say {
+    font-size: 76px;
   }
 }
 

@@ -19,54 +19,48 @@ export function Join() {
     const el = sec.current;
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const big = el.querySelector<HTMLElement>(".jn-title");
     const doors = [...el.querySelectorAll<HTMLElement>(".jn-door")];
     return onFrame(() => {
       const k = easeOut3(prog(P.join, 0.1, 0.9));
-      if (big) big.style.transform = `translate3d(0, ${((1 - k) * 56).toFixed(1)}px, 0)`;
       doors.forEach((d, i) => {
-        d.style.transform = `translate3d(0, ${((1 - k) * (80 + i * 30)).toFixed(1)}px, 0)`;
+        d.style.transform = `translate3d(0, ${((1 - k) * (60 + i * 50)).toFixed(1)}px, 0)`;
       });
     });
   }, []);
 
+  /* No headline over the doors (RUBRIC, "No X, Y headline over a
+   * subtitle"): the doors are the section, two big choices, each one line
+   * in the reader's own voice. */
   return (
-    <section ref={sec} id="v4-join" className="jn" aria-labelledby="jn-title">
+    <section ref={sec} id="v4-join" className="jn" aria-label="Two ways in">
       <div className="jn-inner">
-        <h2 id="jn-title" className="jn-title">
-          And this is where you&apos;d learn to build all of it.
-        </h2>
-        <div className="jn-doors">
-          <div className="jn-door">
-            <p>
-              If you&apos;re at USC, you&apos;d build exactly this, on Clay
-              and Perplexity, for real businesses. Applications open soon.
-            </p>
-            <Link href="/apply" className="btn btn-primary jn-cta">
-              Hear when applications open{" "}
-              <span className="arrow" aria-hidden="true">
-                &rarr;
-              </span>
-            </Link>
-          </div>
-          <div className="jn-door">
-            <p>
-              And if your week looks anything like that one, let&apos;s go
-              through it together.
-            </p>
-            <a
-              href={CALENDLY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary jn-cta-2"
-            >
-              Book 30 minutes with Caleb{" "}
-              <span className="arrow" aria-hidden="true">
-                &rarr;
-              </span>
-            </a>
-          </div>
-        </div>
+        <Link href="/apply" className="jn-door">
+          <span className="jn-say">
+            I&apos;m at USC. Teach me to build that.
+          </span>
+          <span className="jn-meta">
+            applications open soon{" "}
+            <span className="arrow" aria-hidden="true">
+              &rarr;
+            </span>
+          </span>
+        </Link>
+        <a
+          href={CALENDLY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="jn-door"
+        >
+          <span className="jn-say">
+            I run a business. Book 30 minutes with Caleb.
+          </span>
+          <span className="jn-meta">
+            calendly, opens in a new tab{" "}
+            <span className="arrow" aria-hidden="true">
+              &rarr;
+            </span>
+          </span>
+        </a>
       </div>
     </section>
   );

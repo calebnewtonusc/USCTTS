@@ -69,7 +69,10 @@ function status(): string {
   }
   if (P.partners > 0.25) return "building on Clay and Perplexity, through BMA";
   if (store.load < 1) return `assembling LA, ${Math.round(store.load * 100)}%`;
-  if (store.stream > 0.04) return "streaming in on the 110 and the 10";
+  // The first scroll is the whole club in one move: students at USC, work
+  // going out to businesses across LA. The status line says it as it runs.
+  if (store.stream > 0.55) return "sending work out to LA: automations, CRMs, training";
+  if (store.stream > 0.04) return "students at USC, streaming in on the 110 and the 10";
   if (store.pulse < 1) return "signal out from USC";
   return "live";
 }

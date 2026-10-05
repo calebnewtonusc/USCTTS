@@ -6,8 +6,9 @@ import { onFrame, P } from "./choreo";
 
 /*
  * The opening, about 1.5 screens (DIRECTION-tts-v4.md, beat 1). Reader:
- * both. Who we are in one line, set on the field while LA assembles out of
- * scattered points and a pulse goes out from USC. The words rise on the
+ * both. One line stands alone on the field (RUBRIC: no "X, Y" headline
+ * over a subtitle, no lead paragraph under a headline); the readouts and
+ * the first scroll's scene do the explaining. The words rise on the
  * load clock; the first scroll streams light down the freeways, and the
  * words drift up and give the screen to the field.
  */
@@ -50,13 +51,6 @@ export default function Opening() {
               <span className="v4-rise">implementation lab.</span>
             </span>
           </h1>
-          <p className="v4-open-line">
-            <span className="v4-rise">
-              We&apos;re USC students building whatever AI a business actually
-              needs, from automations to CRMs to teaching their team how to
-              use it.
-            </span>
-          </p>
         </div>
       </div>
     </section>
