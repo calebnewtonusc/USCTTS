@@ -9,14 +9,16 @@ export const metadata: Metadata = {
   title: "Not found | Trojan Tech Solutions",
 };
 
-/* Any unknown URL lands here inside the site, with the two doors most
+/* The map is the whole page's one scene: it fades to paper before the
+ * footer, so the page has one ending, not a map band stacked on a footer
+ * (review, 2026-10-05). Any unknown URL lands here inside the site, with the two doors most
  * visitors were looking for: students to the application, companies to the
  * project form. About, Build and the meeting slides redirect to / instead. */
 export default function NotFound() {
   return (
     <Shell>
       <div className={`pgx ${mono.variable}`}>
-        <section className="ix" aria-labelledby="nf-title">
+        <section className="ix is-nf" aria-labelledby="nf-title">
           <GridEcho />
           <div className="ix-in is-solo">
             <div>

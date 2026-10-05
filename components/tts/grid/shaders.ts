@@ -17,20 +17,34 @@ const COMMON = /* glsl */ `
 uniform vec3 aStreet, aArt, aFlow, aHot, aHiCol, aWash, aGrid, aBg, aBg2;
 uniform vec3 bStreet, bArt, bFlow, bHot, bHiCol, bWash, bGrid, bBg, bBg2;
 uniform float aGain, bGain;
-uniform sampler2D uWaveTex;
-uniform float uWaveR, uWaveOn;
+uniform sampler2D uWaveTex, uWaveSoft;
+uniform float uWaveR, uWaveOn, uWaveUnit;
 uniform vec3 uVia, uVia2;
 vec3 uStreet, uArt, uFlow, uHot, uHiCol, uWash, uGrid, uBg, uBg2;
 float uGain;
-float waveD(vec2 p) {
-  vec2 uv = (p + 6000.0) / 12000.0;
-  if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) return 1.15;
-  return texture2D(uWaveTex, uv).r;
+vec2 waveUv(vec2 p) { return (p + 6000.0) / 12000.0; }
+bool outBox(vec2 uv) { return uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0; }
+// Street distance at a point, sharp: the street points light by this one,
+// so the front is the points themselves switching on in sequence.
+float waveD(vec2 p) { vec2 uv = waveUv(p); return outBox(uv) ? 1.15 : texture2D(uWaveTex, uv).r; }
+// The same, blurred over about 450 m: the ground fills in by this one.
+float waveSoftD(vec2 p) { vec2 uv = waveUv(p); return outBox(uv) ? 1.15 : texture2D(uWaveSoft, uv).r; }
+// A street point: 0 still in the old world, 1 reached. About 40 m wide.
+float waveM(float d) { return uWaveOn < 0.5 ? 0.0 : 1.0 - smoothstep(uWaveR - 40.0 * uWaveUnit, uWaveR, d); }
+// The ground follows 150 m behind the points and fades in over 500 m, so
+// the blocks fill in after their streets with no hard edge at all.
+float waveGround(float d) {
+  if (uWaveOn < 0.5) return 0.0;
+  float lag = 150.0 * uWaveUnit;
+  return 1.0 - smoothstep(uWaveR - lag - 500.0 * uWaveUnit, uWaveR - lag, d);
 }
-// 0 still in the old world, 1 reached by the new one.
-float waveM(float d) { return uWaveOn < 0.5 ? 0.0 : 1.0 - smoothstep(uWaveR - 0.035, uWaveR, d); }
-// The front itself: a thin crest of the new world's hot light.
-float waveCrest(float d) { return uWaveOn < 0.5 ? 0.0 : exp(-pow((d - uWaveR + 0.012) / 0.012, 2.0)) * step(-0.05, uWaveR) * step(uWaveR, 1.5); }
+// The crest, on street points only: about 70 m of the new world's hot
+// light right at the front.
+float waveCrest(float d) {
+  if (uWaveOn < 0.5) return 0.0;
+  float w = 70.0 * uWaveUnit;
+  return exp(-pow((d - uWaveR + w * 0.5) / w, 2.0)) * step(-0.05, uWaveR) * step(uWaveR, 1.5);
+}
 void setWorld(float m) {
   uStreet = mix(aStreet, bStreet, m); uArt = mix(aArt, bArt, m); uFlow = mix(aFlow, bFlow, m);
   uHot = mix(aHot, bHot, m); uHiCol = mix(aHiCol, bHiCol, m); uWash = mix(aWash, bWash, m);
@@ -321,8 +335,8 @@ uniform float uLoad, uPulse, uStream, uDim, uExit, uTime, uMotion;
 varying vec2 vP;
 vec4 over(vec4 dst, vec3 c, float a) { return vec4(c * a + dst.rgb * (1.0 - a), a + dst.a * (1.0 - a)); }
 void main() {
-  float wd = waveD(vP);
-  float m = waveM(wd);
+  float wd = waveSoftD(vP);
+  float m = waveGround(wd);
   setWorld(m);
   float r = length(vP);
   float k = (1.0 - uExit) * (1.0 - 0.6 * uDim);
@@ -350,11 +364,11 @@ void main() {
   float pulseR = uPulse * 7800.0;
   float ring = exp(-pow((r - pulseR) / 60.0, 2.0)) * step(0.001, uPulse) * (1.0 - smoothstep(0.5, 1.0, uPulse));
   o = over(o, CARD, ring * 0.45 * k);
-  // The front, a hairline of the new world's hot light with a soft wake.
-  float wcrest = waveCrest(wd);
-  float wake = uWaveOn < 0.5 ? 0.0 : exp(-max(0.0, uWaveR - wd) / 0.05) * m;
-  o = over(o, bHot, wcrest * 0.55 * boxFade(vP));
-  o = over(o, bWash, wake * 0.18 * boxFade(vP));
+  // A soft wake of the new world's wash just behind the street points; the
+  // bright crest itself lives on the points, never as a line on the ground.
+  float lead = uWaveR - wd;
+  float wake = uWaveOn < 0.5 ? 0.0 : smoothstep(0.0, 200.0 * uWaveUnit, lead) * exp(-max(0.0, lead) / (600.0 * uWaveUnit)) * (1.0 - m * 0.5);
+  o = over(o, bWash, wake * 0.12 * boxFade(vP));
   gl_FragColor = o;
 }
 `;

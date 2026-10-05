@@ -132,6 +132,8 @@ export function createGridEngine(
     uVia: { value: new THREE.Vector3() },
     uVia2: { value: new THREE.Vector3() },
     uWaveTex: { value: null as THREE.Texture | null },
+    uWaveSoft: { value: null as THREE.Texture | null },
+    uWaveUnit: { value: 0.0001 },
     uWaveR: { value: 0 },
     uWaveOn: { value: 0 },
   };
@@ -484,19 +486,22 @@ export function createGridEngine(
   // change spreads from through grid.wave; the engine remembers it per
   // segment, because its eased world can still be finishing the previous
   // change while the page has scrolled into the next.
-  const fields = new Map<string, { f: WaveField; tex: THREE.DataTexture }>();
+  const fields = new Map<string, { f: WaveField; tex: THREE.DataTexture; soft: THREE.DataTexture }>();
   const fieldFor = (o: [number, number]) => {
     const key = `${Math.round(o[0])},${Math.round(o[1])}`;
     let hitF = fields.get(key);
     if (!hitF) {
       const f = buildWave(data, o);
-      const half = new Uint16Array(f.d.length);
-      for (let i = 0; i < f.d.length; i++) half[i] = THREE.DataUtils.toHalfFloat(f.d[i]);
-      const tex = new THREE.DataTexture(half, WAVE_N, WAVE_N, THREE.RedFormat, THREE.HalfFloatType);
-      tex.magFilter = THREE.LinearFilter;
-      tex.minFilter = THREE.LinearFilter;
-      tex.needsUpdate = true;
-      hitF = { f, tex };
+      const toTex = (src: Float32Array) => {
+        const half = new Uint16Array(src.length);
+        for (let i = 0; i < src.length; i++) half[i] = THREE.DataUtils.toHalfFloat(src[i]);
+        const t = new THREE.DataTexture(half, WAVE_N, WAVE_N, THREE.RedFormat, THREE.HalfFloatType);
+        t.magFilter = THREE.LinearFilter;
+        t.minFilter = THREE.LinearFilter;
+        t.needsUpdate = true;
+        return t;
+      };
+      hitF = { f, tex: toTex(f.d), soft: toTex(f.blur) };
       fields.set(key, hitF);
     }
     return hitF;
@@ -535,6 +540,8 @@ export function createGridEngine(
       const fld = fieldFor(originBySeg[seg]);
       const R = waveRadius(t);
       uniforms.uWaveTex.value = fld.tex;
+      uniforms.uWaveSoft.value = fld.soft;
+      uniforms.uWaveUnit.value = fld.f.unit;
       uniforms.uWaveR.value = R;
       uniforms.uWaveOn.value = 1;
       // Text follows the world that covers most of the screen: 7 x 7 rays

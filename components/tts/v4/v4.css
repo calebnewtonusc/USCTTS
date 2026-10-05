@@ -26,8 +26,10 @@
  * ground behind it, even before the field has loaded. */
 .tts .v4 {
   --ro-a: rgba(251, 250, 247, 0.94);
+  /* No transition: the field paints over this anyway, and mid-transition
+   * the half-transparent ground let the doors' paper type read as sitting
+   * on paper (site-gate contrast 1.06, 2026-10-05). */
   background-color: transparent;
-  transition: background-color 500ms cubic-bezier(0.2, 0.6, 0.2, 1);
 }
 .tts .v4 {
   color: var(--ink);

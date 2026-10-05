@@ -24,11 +24,17 @@ const CELL = (2 * WAVE_BOX) / WAVE_N;
 // (plain distance) the front read as a circle with streets in it; at 2.2 it
 // visibly runs up Wilshire and Western ahead of the blocks, then fills them.
 // Chosen by eye at 1440 on 2026-10-05.
-const OFF_NETWORK = 2.2;
+// 2.2 drew the chamfer's diamonds as big torn triangles at the front
+// (review, 2026-10-05); 1.6 still runs ahead along the arterials.
+const OFF_NETWORK = 1.6;
 
 export interface WaveField {
   /** normalised distance per cell, row-major from (-BOX, -BOX), 0..~1.3 */
   d: Float32Array;
+  /** the same field blurred over about 450 m, for the ground's soft fill */
+  blur: Float32Array;
+  /** normalised units per metre, so shaders can size bands in metres */
+  unit: number;
 }
 
 function dijkstra(data: GridData, s: number) {
@@ -150,7 +156,40 @@ export function buildWave(data: GridData, origin: [number, number]): WaveField {
   const d = new Float32Array(N * N);
   for (let i = 0; i < N * N; i++)
     d[i] = Number.isFinite(g[i]) ? Math.min(OUTSIDE, g[i] / norm) : OUTSIDE;
-  return { d };
+  // Three box passes of 4 cells (250 m) each way approximate a gaussian of
+  // about 450 m: the ground fills in behind the street points with no
+  // triangle left in its edge.
+  let blur = d.slice();
+  const tmp = new Float32Array(N * N);
+  const R = 4;
+  for (let pass = 0; pass < 3; pass++) {
+    for (let y = 0; y < N; y++)
+      for (let x = 0; x < N; x++) {
+        let acc = 0;
+        let n = 0;
+        for (let k = -R; k <= R; k++) {
+          const xx = x + k;
+          if (xx < 0 || xx >= N) continue;
+          acc += blur[y * N + xx];
+          n++;
+        }
+        tmp[y * N + x] = acc / n;
+      }
+    for (let y = 0; y < N; y++)
+      for (let x = 0; x < N; x++) {
+        let acc = 0;
+        let n = 0;
+        for (let k = -R; k <= R; k++) {
+          const yy = y + k;
+          if (yy < 0 || yy >= N) continue;
+          acc += tmp[yy * N + x];
+          n++;
+        }
+        blur[y * N + x] = acc / n;
+      }
+  }
+  blur = blur.slice();
+  return { d, blur, unit: OFF_NETWORK / norm };
 }
 
 /** The field's value at a world point, bilinear, for the CPU side. */

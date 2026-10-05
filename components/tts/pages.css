@@ -1623,3 +1623,20 @@
   line-height: 1.4;
   max-width: 40ch;
 }
+
+/* 404: the map fades out into the paper above the footer instead of ending
+ * on a ruled edge, and the readout sits with the route, inside the scene.
+ * A band ending right on the footer read as two endings (2026-10-05). */
+.tts .ix.is-nf {
+  border-bottom: 0;
+  min-height: calc(100vh - 64px);
+  min-height: calc(100svh - 64px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent);
+  mask-image: linear-gradient(to bottom, #000 70%, transparent);
+}
+.tts .ix.is-nf .ix-readout {
+  bottom: 22%;
+}
+.tts main:has(.ix.is-nf) + footer.footer {
+  border-top: 0;
+}
