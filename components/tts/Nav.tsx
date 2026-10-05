@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import TcLink from "./TcLink";
 
 const LINKS = [
-  { href: "/about", label: "About" },
   { href: "/members", label: "People" },
   { href: "/build", label: "Build team" },
   { href: "/work-with-us", label: "For companies" },

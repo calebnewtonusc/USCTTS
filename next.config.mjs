@@ -11,8 +11,12 @@ const nextConfig = {
     unoptimized: false,
   },
   async redirects() {
-    if (!TC_ORIGIN) return [];
+    // Caleb, 2026-10-04: "Why are about and home 2 diff pages?" They said the
+    // same thing twice, so the home page is the about page now.
+    const about = [{ source: "/about", destination: "/", permanent: true }];
+    if (!TC_ORIGIN) return about;
     return [
+      ...about,
       { source: "/tc", destination: TC_ORIGIN, permanent: false },
       { source: "/tc/:path*", destination: `${TC_ORIGIN}/:path*`, permanent: false },
     ];

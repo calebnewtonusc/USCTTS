@@ -164,64 +164,6 @@ export function SeamToPartners() {
   );
 }
 
-/* ---------- B: the ground grid becomes the whiteboard ----------
- * The world's lattice comes back as a ground plane seen from a low camera.
- * The camera pulls up until the plane faces the reader; the flattened sheet
- * then lands on the whiteboard's surface and its lines fade into the board. */
-const GRID = 14;
-export function SeamToBoard() {
-  const ground = useRef<HTMLDivElement>(null);
-  const sheet = useRef<HTMLDivElement>(null);
-  const svg = useRef<SVGSVGElement>(null);
-  const ref = useSeam((p) => {
-    const g = ground.current;
-    const sh = sheet.current;
-    const sv = svg.current;
-    if (!g || !sh || !sv) return;
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-    g.style.opacity = String(prog(p, 0.05, 0.3) * (1 - prog(p, 0.86, 1)));
-    // Tilt: 72 degrees (a ground seen from just above) to 0 (facing).
-    const tilt = 72 * (1 - easeInOut3(prog(p, 0.18, 0.62)));
-    const full: Box = { x: 16, y: 72, w: W - 32, h: H - 96 };
-    const target = boxOf(".wbd-board") ?? full;
-    const b = mixBox(full, target, easeInOut3(prog(p, 0.6, 0.92)));
-    place(sh, b);
-    // The plane is only lines while it is a ground; it fills in as it faces
-    // the reader, which is when it is about to be the board.
-    sh.style.backgroundColor = `rgba(250, 248, 244, ${prog(p, 0.45, 0.65).toFixed(3)})`;
-    sh.style.opacity =
-      p > 0.01 && p < 0.995
-        ? String(prog(p, 0.05, 0.25) * (1 - prog(p, 0.92, 1)))
-        : "0";
-    sv.style.transform = `perspective(${Math.round(H * 1.1)}px) rotateX(${tilt.toFixed(2)}deg)`;
-    sv.style.opacity = String(1 - prog(p, 0.7, 0.9));
-  });
-  const lines = [];
-  for (let i = 0; i <= GRID; i++) {
-    const t = (i / GRID) * 100;
-    lines.push(<line key={`h${i}`} x1="0" y1={t} x2="100" y2={t} />);
-    lines.push(<line key={`v${i}`} x1={t} y1="0" x2={t} y2="100" />);
-  }
-  return (
-    <div className="seam" ref={ref} aria-hidden="true">
-      <div className="seam-stage">
-        <div className="seam-ground" ref={ground} />
-        <div className="seam-sheet" ref={sheet}>
-          <svg
-            ref={svg}
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-            className="seam-grid"
-          >
-            {lines}
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ---------- C: the compounding stroke becomes the spine ----------
  * The board's last stroke keeps drawing: up past the board, over, and down
  * the page's left gutter, where it becomes the rule the next three sections

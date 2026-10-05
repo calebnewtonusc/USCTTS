@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ADVISORS, ALUMNI, LEADERSHIP, type Person } from "@/data/people";
+import { ADVISORS, LEADERSHIP, type Person } from "@/data/people";
 import MeshBand from "./MeshBand";
 import TcLink from "../TcLink";
 
@@ -159,9 +159,47 @@ function Face({ p, note }: { p: Person; note: string }) {
   );
 }
 
+/* Caleb, 2026-10-04: "Keep mentors, but for alumni just put a bunch of
+ * logos". One mark per company an alumnus works at now, or worked at, from
+ * data/people.ts. Apple is left out until Susan Nyirenda is verified, and
+ * NBCUniversal, Epic, Roxborough and USC Gould have no clean mark on disk yet.
+ * Every mark is drawn in ink through a CSS mask, so nine brands read as one
+ * row instead of nine colored tiles. The row drifts; reduced motion holds it. */
+const ALUMNI_MARKS = [
+  { name: "Reddit", src: "/tts/alumni/reddit.svg" },
+  { name: "Bloomberg", src: "/tts/alumni/bloomberg.svg" },
+  { name: "Microsoft", src: "/tts/alumni/microsoft.svg" },
+  { name: "Capital One", src: "/tts/alumni/capitalone.svg" },
+  { name: "Citi", src: "/tts/alumni/citi.svg" },
+  { name: "PwC", src: "/tts/alumni/pwc.svg" },
+  { name: "Jefferies", src: "/tts/alumni/jefferies.svg" },
+  { name: "Nomura", src: "/tts/alumni/nomura.svg" },
+  { name: "Fastly", src: "/tts/alumni/fastly.svg" },
+];
+
+function AlumniMarks() {
+  const row = (hidden: boolean) =>
+    ALUMNI_MARKS.map((m) => (
+      <li key={m.name} aria-hidden={hidden || undefined}>
+        <span
+          className="alum-mark"
+          role={hidden ? undefined : "img"}
+          aria-label={hidden ? undefined : m.name}
+          style={{ ["--src" as string]: `url(${m.src})` }}
+        />
+      </li>
+    ));
+  return (
+    <div className="alum-strip">
+      <ul className="alum-track">
+        {row(false)}
+        {row(true)}
+      </ul>
+    </div>
+  );
+}
+
 export function Roster() {
-  // Advisors first, so McKinsey leads (COPY-tts.md).
-  const bench = [...ADVISORS, ...ALUMNI].filter((p) => p.company);
   return (
     <section className="roster" aria-labelledby="roster-title">
       <div className="roster-head">
@@ -179,20 +217,14 @@ export function Roster() {
           <Face key={p.name} p={p} note={p.role} />
         ))}
       </ul>
-      <h3 className="roster-sub">Alumni and advisors</h3>
+      <h3 className="roster-sub">Mentors</h3>
       <ul className="faces">
-        {bench.map((p) => (
-          <Face
-            key={p.name}
-            p={p}
-            note={
-              p.status === "advisor"
-                ? `Advisor, ${p.company}`
-                : (p.company ?? "")
-            }
-          />
+        {ADVISORS.filter((p) => p.company).map((p) => (
+          <Face key={p.name} p={p} note={p.company ?? ""} />
         ))}
       </ul>
+      <h3 className="roster-sub">Where our alumni work now</h3>
+      <AlumniMarks />
       <p className="roster-more">
         <Link className="link" href="/members">
           See everyone, with roles

@@ -4,8 +4,8 @@ import WorldScene, { type Numbers } from "./world/WorldScene";
 import Partners from "./home/Partners";
 import RunBeats, { type RunBeatsData } from "./home/RunBeats";
 import Whiteboard from "./home/Whiteboard";
-import { Join, Roster, TurnDown, WhatWeDo } from "./home/Sections";
-import { SeamToBoard, SeamToJoin, SeamToPartners, SeamToSpine, Spine } from "./home/Seams";
+import { Join, Roster, WhatWeDo } from "./home/Sections";
+import { SeamToPartners } from "./home/Seams";
 import { audit, runPipeline, type Dataset } from "./run/pipeline";
 import "./world/world.css";
 import "./home/home.css";
@@ -56,15 +56,9 @@ export default function TTSHome() {
       <SeamToPartners />
       <Partners />
       <RunBeats d={BEATS} />
-      <SeamToBoard />
       <Whiteboard />
-      <SeamToSpine />
-      <Spine>
         <WhatWeDo />
         <Roster />
-        <TurnDown />
-      </Spine>
-      <SeamToJoin />
       <Join />
     </Shell>
   );
