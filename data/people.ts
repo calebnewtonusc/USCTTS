@@ -92,7 +92,7 @@ export const ADVISORS: Person[] = [
 // Nyirenda and Reddit appearing in both.
 export const ALUMNI: Person[] = [
   { name: "Susan Nyirenda", role: "Software Engineer", company: "Apple", status: "alumni", photo: "/img/alumni/susannyirenda.jpeg" },
-  { name: "Albert Chung", role: "Forward Deployed Engineer", company: "Palantir", status: "alumni", photo: "/img/alumni/albertchung.jpeg" },
+  { name: "Albert Chung", role: "Forward Deployed Engineer", status: "alumni", photo: "/img/alumni/albertchung.jpeg" },
   { name: "Elizabeth Abbey", role: "Software Engineer, ex-Microsoft", company: "Reddit", status: "alumni", photo: "/img/alumni/elizabethabbey.jpeg" },
   { name: "Senai Assefa", role: "Software Engineer, ex-Microsoft", company: "Bloomberg", status: "alumni", photo: "/img/alumni/senaiassefa.jpeg" },
   { name: "Rohan Singh", role: "Sales and Analytics", company: "Bloomberg", status: "alumni", photo: "/img/alumni/rohansingh.jpeg" },

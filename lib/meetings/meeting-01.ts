@@ -393,7 +393,7 @@ export const meeting01: Meeting = {
         },
         {
           name: "Albert Chung",
-          role: "FDE, Palantir",
+          role: "Forward Deployed Engineer",
           photo: "/img/alumni/albertchung.jpeg",
           initials: "AC",
           accent: COLOR.gold,
