@@ -184,8 +184,15 @@ function regions(f: Frame) {
   // On a wide screen the panel covers the right two thirds, so the camera
   // sits east of the agent and puts it in the open left lane.
   const lane = f.vw >= 1024 ? 0.27 * (9000 / wz) : 0;
+  // Below 1024 the panel fills the lower three quarters and the story
+  // lane sits on top, so the camera sits south of the agent and puts it
+  // about 14% down the screen, above the story's lines, where the map's finds are visible and their
+  // conduits run down the gutter instead of across the calendar. Spans are
+  // the engine's: 6.5 km tall in portrait, 9 km wide in landscape.
+  const vSpan = (f.vh > f.vw ? 6500 : (9000 * f.vh) / f.vw) / wz;
+  const up = f.vw < 1024 ? 0.36 * vSpan : 0;
   x = lerp(x, ax + lane, wi);
-  y = lerp(y, ay, wi);
+  y = lerp(y, ay - up, wi);
   zoom = lerp(zoom, wz, wi);
   tilt = lerp(tilt, 0, wi);
   if (wi > 0.35) mode = settle > 0.5 ? "block" : "topdown";
@@ -206,20 +213,43 @@ function regions(f: Frame) {
   store.agent.to = KOREATOWN;
   store.agent.t = t;
 
-  // 4. Join: the field dissolves into paper.
-  const exit = smooth(prog(P.join, 0.12, 0.85));
-  store.exit = exit;
-  dim = lerp(dim, 0, easeOut3(prog(P.join, 0, 0.6)));
+  // 4. Join: the camera lifts off the block and back over the basin, so
+  // the last change, the agent's cardinal spreading out from Koreatown
+  // across the whole city, is the ending you watch. The points only thin
+  // out once it has arrived.
+  const lift = easeInOut3(prog(P.join, 0, 0.55));
+  x = lerp(x, KOREATOWN[0] * 0.55, lift);
+  y = lerp(y, KOREATOWN[1] * 0.55, lift);
+  zoom = lerp(zoom, 0.95, lift);
+  tilt = lerp(tilt, 0.5, lift);
+  if (lift > 0.15) mode = "basin";
+  store.exit = 0.55 * smooth(prog(P.join, 0.85, 1));
+  // The doors are big type straight on the field; a bright freeway ribbon
+  // through "Teach me to build that" read as a strikethrough at 390
+  // (2026-10-05), so the field's light comes down under them.
+  dim = lerp(dim, 0.45, easeOut3(prog(P.join, 0, 0.6)));
 
   // The colour world (grid/palette.ts): 0 night over the basin, 1 dawn sky
   // as the stream lifts, 2 a full cardinal field while the map finds
   // customers, 3 warm cream for the rest of the week, 4 deep cardinal for
-  // Join. A continuous value, so every chapter change is a change of light.
-  store.world =
-    smooth(prog(P.open, 0.12, 0.9)) +
-    smooth(prog(P.week, BEAT.gtm[0] - 0.035, BEAT.gtm[0] + 0.02)) +
-    smooth(prog(P.week, BEAT.gtm[1] - 0.03, BEAT.gtm[1] + 0.02)) +
-    smooth(prog(P.join, 0.05, 0.6));
+  // Join. Each change is a wavefront (grid/wave.ts), not a crossfade: the
+  // first spreads out from USC as the stream lands there, every later one
+  // from the agent in Koreatown, so the new light is always the work
+  // arriving somewhere. Each runs over about half a screen of scroll or
+  // more, enough to watch the front cross the map.
+  const seg = [
+    smooth(prog(P.open, 0.12, 0.9)),
+    smooth(prog(P.week, BEAT.gtm[0] - 0.06, BEAT.gtm[0] + 0.035)),
+    smooth(prog(P.week, BEAT.gtm[1] - 0.05, BEAT.gtm[1] + 0.04)),
+    smooth(prog(P.join, 0.08, 0.85)),
+  ];
+  const world = seg[0] + seg[1] + seg[2] + seg[3];
+  store.world = world;
+  const from = Math.min(3, Math.floor(world));
+  store.wave.from = from;
+  store.wave.to = from + 1;
+  store.wave.t = world - from;
+  store.wave.origin = from === 0 ? [0, 0] : KOREATOWN;
   store.dim = dim;
   store.camera.x = x;
   store.camera.y = y;

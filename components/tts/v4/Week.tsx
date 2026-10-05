@@ -11,7 +11,8 @@ import {
   smooth,
 } from "../engine/math";
 import { attachFlap } from "./flap";
-import { BEAT, beatAt, onFrame, P, store } from "./choreo";
+import { attachMachine } from "./machine";
+import { BEAT, beatAt, kick, onFrame, P, store } from "./choreo";
 import XrayViews from "./Xray";
 import {
   ASK,
@@ -151,12 +152,14 @@ const LINES = [
   },
 ] as const;
 
-const PANES = [
-  { id: "gtm", a: -1, b: BEAT.email[0] },
-  { id: "email", a: BEAT.email[0], b: BEAT.sheet[0] },
-  { id: "sheet", a: BEAT.sheet[0], b: BEAT.teach[0] },
-  { id: "teach", a: BEAT.teach[0], b: 2 },
-] as const;
+/* Which station is open: each opens as the records from the one before
+ * land in it, and stays open until the next one takes over. */
+const OPEN = [
+  { a: -1, b: BEAT.email[0] },
+  { a: BEAT.email[0], b: BEAT.sheet[0] },
+  { a: BEAT.sheet[0], b: BEAT.teach[0] },
+  { a: BEAT.teach[0], b: 2 },
+];
 
 /* Where the "now" line sits: Monday 9am at the start, Friday 3pm at the end. */
 const NOW_END = 4 * 8 + 6;
@@ -182,7 +185,12 @@ export default function Week() {
     const panel = one(".w4-panel");
     const blocks = all(".w4-blk");
     const lines = all(".w4-line");
-    const panes = all(".w4-pane");
+    const stations = all(".w4-st");
+    const stBodies = all(".w4-st-body");
+    const stCounts = all(".w4-st-n");
+    const sideEl = one(".w4-side");
+    const stageEl = one(".w4-stage");
+    const machine = stageEl ? attachMachine(stageEl, reduced) : () => {};
     const leads = all(".w4-lead");
     const rows = all(".w4-mail");
     const reply = one(".w4-reply-text");
@@ -214,6 +222,53 @@ export default function Week() {
     const xline = one(".xr-line");
     const grip = one(".xr-grip");
     const side = one(".xr-side");
+    /* The manim clips behind each beat (public/tts/manim, manim/README.md).
+     * Nothing is requested until the x-ray first opens, so a visitor who
+     * never taps the word downloads none of them. They never play on
+     * their own: the beat's scroll progress sets their time. Under
+     * reduced motion each one is its poster, the finished frame. */
+    let clipsLoaded = false;
+    const clipEls: HTMLElement[] = [];
+    const loadClips = () => {
+      if (clipsLoaded) return;
+      clipsLoaded = true;
+      el.querySelectorAll<HTMLElement>(".xr-clip").forEach((box) => {
+        for (const name of (box.dataset.clips ?? "").split(" ").filter(Boolean)) {
+          let m: HTMLElement;
+          if (reduced) {
+            const img = document.createElement("img");
+            img.src = `/tts/manim/${name}.png`;
+            img.alt = "";
+            m = img;
+          } else {
+            const v = document.createElement("video");
+            v.muted = true;
+            v.playsInline = true;
+            v.preload = "auto";
+            v.poster = `/tts/manim/${name}.png`;
+            // HEVC first: Safari takes it, everyone else skips to the WebM.
+            const mov = document.createElement("source");
+            mov.src = `/tts/manim/${name}.mov`;
+            mov.type = 'video/mp4; codecs="hvc1"';
+            const webm = document.createElement("source");
+            webm.src = `/tts/manim/${name}.webm`;
+            webm.type = "video/webm";
+            v.append(mov, webm);
+            // The scroll loop only runs on scroll, so a clip that finishes
+            // loading while the page sits still asks for one frame to be
+            // set to the right time.
+            v.addEventListener("loadedmetadata", kick);
+            m = v;
+          }
+          m.className = "xr-media";
+          m.dataset.name = name;
+          m.setAttribute("aria-hidden", "true");
+          box.append(m);
+          clipEls.push(m);
+        }
+      });
+    };
+    const v4root = el.closest<HTMLElement>(".v4");
     let split = 1;
     let glideId = 0;
     let dragging = false;
@@ -228,6 +283,7 @@ export default function Week() {
       // reads whole wherever the line is parked.
       side.style.setProperty("--vis", `${Math.round((1 - split) * w)}px`);
       body.classList.toggle("is-xray", on);
+      if (on) loadClips();
       word.setAttribute("aria-pressed", String(on));
       const pct = Math.round(split * 100);
       grip.setAttribute("aria-valuenow", String(pct));
@@ -238,6 +294,11 @@ export default function Week() {
     };
     const glide = (to: number) => {
       cancelAnimationFrame(glideId);
+      // Reduced motion: the line moves, it just doesn't glide.
+      if (reduced) {
+        setSplit(to);
+        return;
+      }
       const from = split;
       const ms = to < from ? 240 : 200;
       const t0 = performance.now();
@@ -332,23 +393,31 @@ export default function Week() {
         ln.style.transform = `translate3d(0, ${dy.toFixed(1)}px, 0)`;
       });
 
-      // The side panes crossfade, one per beat.
-      panes.forEach((pane, i) => {
-        const W = PANES[i];
-        const o =
-          smooth(prog(p, W.a - 0.012, W.a + 0.012)) *
-          (1 - smooth(prog(p, W.b - 0.012, W.b + 0.012)));
-        pane.style.opacity = o.toFixed(3);
-        pane.style.visibility = o > 0.002 ? "visible" : "hidden";
-      });
+      // The stations open and close on the scroll value: the open one
+      // takes the side's spare height, the rest fold to their header line.
+      if (sideEl && stations.length === 4) {
+        const head = stations[0].querySelector<HTMLElement>(".w4-st-head");
+        const spare = Math.max(0, sideEl.clientHeight - 4 * (head?.offsetHeight ?? 26));
+        stBodies.forEach((bd, i) => {
+          const W = OPEN[i];
+          const o =
+            smooth(prog(p, W.a - 0.02, W.a + 0.012)) *
+            (1 - smooth(prog(p, W.b - 0.02, W.b + 0.012)));
+          bd.style.height = `${(o * spare).toFixed(1)}px`;
+          bd.style.opacity = smooth(clamp(o * 1.6 - 0.3)).toFixed(3);
+          // Folded, its contents leave the page, not just the clip.
+          bd.style.visibility = o > 0.02 ? "visible" : "hidden";
+          stations[i].classList.toggle("is-open", o > 0.5);
+        });
+      }
 
       // Finding customers: the list builds as the map lights them up.
       leads.forEach((li, j) => {
         const k = easeOut3(
           prog(
             p,
-            BEAT.gtm[0] + 0.012 + j * 0.016,
-            BEAT.gtm[0] + 0.04 + j * 0.016,
+            BEAT.gtm[0] + 0.018 + j * 0.016,
+            BEAT.gtm[0] + 0.034 + j * 0.016,
           ),
         );
         li.style.opacity = k.toFixed(3);
@@ -358,7 +427,7 @@ export default function Week() {
       });
 
       // The emails: a reply drafts itself at a person's pace.
-      const typed = prog(p, BEAT.email[0] + 0.01, BEAT.email[0] + 0.1);
+      const typed = prog(p, BEAT.email[0] + 0.02, BEAT.email[0] + 0.11);
       let n = 0;
       while (n < TYPING.at.length && TYPING.at[n] <= typed) n++;
       const last = n >= TYPING.states.length;
@@ -369,13 +438,13 @@ export default function Week() {
         last ? "Draft ready. A person sends it." : n > 0 ? "Drafting" : "New",
       );
       rows.forEach((r, j) => {
-        const ready = p > BEAT.email[0] + 0.1 + j * 0.02;
+        const ready = p > BEAT.email[0] + 0.11 + j * 0.02;
         const tag = r.querySelector<HTMLElement>(".w4-mail-tag");
         setText(
           tag,
           ready
             ? "draft ready"
-            : p > BEAT.email[0] + 0.01
+            : p > BEAT.email[0] + 0.02
               ? "drafting"
               : "unread",
         );
@@ -394,8 +463,8 @@ export default function Week() {
         const k = easeInOut3(
           prog(
             p,
-            BEAT.sheet[0] + 0.01 + j * 0.01,
-            BEAT.sheet[0] + 0.06 + j * 0.01,
+            BEAT.sheet[0] + 0.016 + j * 0.01,
+            BEAT.sheet[0] + 0.066 + j * 0.01,
           ),
         );
         const row = perCol[L.stage]++;
@@ -414,6 +483,15 @@ export default function Week() {
       steps.forEach((s, j) => {
         s.classList.toggle("is-done", p > BEAT.teach[0] + 0.03 + j * 0.03);
       });
+
+      // Each station's count, read off what's actually on screen in it.
+      const count = (els: HTMLElement[], test: (e: HTMLElement) => boolean) =>
+        els.filter(test).length;
+      setText(stCounts[0] ?? null, `${count(leads, (e) => parseFloat(e.style.opacity || "0") > 0.5)} found`);
+      setText(stCounts[1] ?? null, `${count(rows, (e) => e.classList.contains("is-ready"))} drafted`);
+      setText(stCounts[2] ?? null, `${count(cards, (e) => e.classList.contains("is-card"))} cards`);
+      setText(stCounts[3] ?? null, `${count(steps, (e) => e.classList.contains("is-done"))} of 3`);
+      machine();
 
       // Blocks dissolve into points. When one lets go going forward, the
       // field gets a burst in the same place, so the light the block turns
@@ -462,6 +540,37 @@ export default function Week() {
         free.style.opacity = smooth(
           prog(p, BEAT.end[0], BEAT.end[0] + 0.04),
         ).toFixed(3);
+
+      // The x-ray's clip for the beat on screen, scrubbed by the beat's
+      // own progress, and the cardinal cut while the world is cardinal.
+      if (clipsLoaded && split < 1) {
+        const cardinal = v4root?.dataset.world === "cardinal";
+        const bk = beatAt(p);
+        const win =
+          bk === "gtm" || bk === "email" || bk === "sheet" || bk === "teach"
+            ? BEAT[bk]
+            : bk === "end"
+              ? BEAT.teach
+              : null;
+        const kb = win ? prog(p, win[0], win[1] - 0.02) : 0;
+        for (const m of clipEls) {
+          const name = m.dataset.name ?? "";
+          const isGtm = name.startsWith("gtm_score");
+          m.classList.toggle(
+            "is-on",
+            !isGtm || (name === "gtm_score_on_cardinal") === cardinal,
+          );
+          if (!(m instanceof HTMLVideoElement)) continue;
+          const mine =
+            (isGtm && bk === "gtm") ||
+            (name === "email_draft" && bk === "email") ||
+            (name === "crm_merge" && bk === "sheet") ||
+            (name === "teach_curve" && (bk === "teach" || bk === "end"));
+          if (!mine || m.readyState < 1 || m.seeking || !m.duration) continue;
+          const tgt = kb * (m.duration - 0.05);
+          if (Math.abs(m.currentTime - tgt) > 1 / 30) m.currentTime = tgt;
+        }
+      }
 
       // The x-ray shows the beat on screen.
       const b = beatAt(p);
@@ -554,75 +663,102 @@ export default function Week() {
               <div className="w4-now" aria-hidden="true" />
             </div>
 
+            {/* The side is one machine of four stations, top to bottom. The
+             * open station is the beat on screen; the conduits between their
+             * nodes are drawn by machine.ts. */}
             <div className="w4-side">
-              <div className="w4-pane" data-pane="gtm">
-                <p className="w4-pane-head">Worth reaching, near you</p>
-                <ul className="w4-leads">
-                  {LEADS.map((l) => (
-                    <li key={l.who} className="w4-lead">
-                      <i aria-hidden="true" />
-                      <span>
-                        {l.who}, {l.where}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+              <div className="w4-st">
+                <p className="w4-st-head">
+                  <i className="w4-node" aria-hidden="true" />
+                  <span>Worth reaching</span>
+                  <span className="w4-st-n">0 found</span>
+                </p>
+                <div className="w4-st-body">
+                  <ul className="w4-leads">
+                    {LEADS.map((l) => (
+                      <li key={l.who} className="w4-lead">
+                        <i aria-hidden="true" />
+                        <span>
+                          {l.who}, {l.where}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
 
-              <div className="w4-pane" data-pane="email">
-                <ul className="w4-inbox">
-                  {INBOX.map((m) => (
-                    <li key={m.subject} className="w4-mail">
-                      <span className="w4-mail-subj">{m.subject}</span>
-                      <span className="w4-mail-tag">unread</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="w4-thread">
-                  <p className="w4-ask">{ASK}</p>
-                  <div className="w4-reply">
-                    <span className="w4-reply-tag">New</span>
-                    <p>
-                      <span className="w4-reply-text" />
-                      <span className="w4-caret" aria-hidden="true" />
-                    </p>
+              <div className="w4-st">
+                <p className="w4-st-head">
+                  <i className="w4-node" aria-hidden="true" />
+                  <span>Replies</span>
+                  <span className="w4-st-n">0 drafted</span>
+                </p>
+                <div className="w4-st-body">
+                  <ul className="w4-inbox">
+                    {INBOX.map((m) => (
+                      <li key={m.subject} className="w4-mail">
+                        <span className="w4-mail-subj">{m.subject}</span>
+                        <span className="w4-mail-tag">unread</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="w4-thread">
+                    <p className="w4-ask">{ASK}</p>
+                    <div className="w4-reply">
+                      <span className="w4-reply-tag">New</span>
+                      <p>
+                        <span className="w4-reply-text" />
+                        <span className="w4-caret" aria-hidden="true" />
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="w4-pane" data-pane="sheet">
-                <div className="w4-crm">
-                  <span className="w4-sheetname">leads_FINAL_v3.xlsx</span>
-                  {STAGES.map((s, i) => (
-                    <span
-                      key={s}
-                      className="w4-col"
-                      style={{ left: `${i * 33.333}%` }}
-                    >
-                      {s}
-                    </span>
-                  ))}
-                  {LEADS.map((l) => (
-                    <div key={l.who} className="w4-card">
-                      <b>{l.who}</b>
-                      <span>{l.person}</span>
-                    </div>
-                  ))}
+              <div className="w4-st">
+                <p className="w4-st-head">
+                  <i className="w4-node" aria-hidden="true" />
+                  <span>CRM</span>
+                  <span className="w4-st-n">0 cards</span>
+                </p>
+                <div className="w4-st-body">
+                  <div className="w4-crm">
+                    <span className="w4-sheetname">leads_FINAL_v3.xlsx</span>
+                    {STAGES.map((st, i) => (
+                      <span
+                        key={st}
+                        className="w4-col"
+                        style={{ left: `${i * 33.333}%` }}
+                      >
+                        {st}
+                      </span>
+                    ))}
+                    {LEADS.map((l) => (
+                      <div key={l.who} className="w4-card">
+                        <b>{l.who}</b>
+                        <span>{l.person}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              <div className="w4-pane" data-pane="teach">
-                <p className="w4-pane-head">
-                  Lesson for the front desk, 20 min
+              <div className="w4-st">
+                <p className="w4-st-head">
+                  <i className="w4-node" aria-hidden="true" />
+                  <span>Lesson, 20 min</span>
+                  <span className="w4-st-n">0 of 3</span>
                 </p>
-                <ol className="w4-steps">
-                  {LESSON.map((s) => (
-                    <li key={s} className="w4-step">
-                      <i aria-hidden="true" />
-                      <span>{s}</span>
-                    </li>
-                  ))}
-                </ol>
+                <div className="w4-st-body">
+                  <ol className="w4-steps">
+                    {LESSON.map((st) => (
+                      <li key={st} className="w4-step">
+                        <i aria-hidden="true" />
+                        <span>{st}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
               </div>
             </div>
 

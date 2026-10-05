@@ -158,3 +158,10 @@ export function groundLuminance(world: number) {
 // Ink (#1a1416) and white text reach equal contrast on a ground of relative
 // luminance 0.179; above it ink reads better, below it white does.
 export const isDarkWorld = (world: number) => groundLuminance(world) < 0.179;
+
+/** The waypoint ground colour a world change passes through, segment seg
+ *  (seg -> seg + 1), for the wavefront's band (shaders.ts). */
+export function viaColour(seg: number, role: "bg" | "bg2", out: Rgb): Rgb {
+  const i = Math.min(VIA_PARSED.length - 1, Math.max(0, Math.floor(seg)));
+  return oklabToSrgb(VIA_PARSED[i][role], out);
+}

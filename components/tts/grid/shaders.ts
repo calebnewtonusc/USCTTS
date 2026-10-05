@@ -9,8 +9,34 @@ const COMMON = /* glsl */ `
 // The colour world, interpolated on the CPU from the chapter ramp in
 // palette.ts. Roles, not hues: INK is the street light, SKY the data flow,
 // CARD the hot USC and agent light, GOLD the warm wash.
-uniform vec3 uStreet, uArt, uFlow, uHot, uHiCol, uWash, uGrid, uBg, uBg2;
-uniform float uGain;
+//
+// Two worlds at once: A is the world the city is leaving, B the one it is
+// going to. A world change is a wavefront (wave.ts): each point takes B once
+// the front, travelling out from the work along real streets, has reached
+// it. uWaveR is the front's radius in the field's normalised distance.
+uniform vec3 aStreet, aArt, aFlow, aHot, aHiCol, aWash, aGrid, aBg, aBg2;
+uniform vec3 bStreet, bArt, bFlow, bHot, bHiCol, bWash, bGrid, bBg, bBg2;
+uniform float aGain, bGain;
+uniform sampler2D uWaveTex;
+uniform float uWaveR, uWaveOn;
+uniform vec3 uVia, uVia2;
+vec3 uStreet, uArt, uFlow, uHot, uHiCol, uWash, uGrid, uBg, uBg2;
+float uGain;
+float waveD(vec2 p) {
+  vec2 uv = (p + 6000.0) / 12000.0;
+  if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) return 1.15;
+  return texture2D(uWaveTex, uv).r;
+}
+// 0 still in the old world, 1 reached by the new one.
+float waveM(float d) { return uWaveOn < 0.5 ? 0.0 : 1.0 - smoothstep(uWaveR - 0.035, uWaveR, d); }
+// The front itself: a thin crest of the new world's hot light.
+float waveCrest(float d) { return uWaveOn < 0.5 ? 0.0 : exp(-pow((d - uWaveR + 0.012) / 0.012, 2.0)) * step(-0.05, uWaveR) * step(uWaveR, 1.5); }
+void setWorld(float m) {
+  uStreet = mix(aStreet, bStreet, m); uArt = mix(aArt, bArt, m); uFlow = mix(aFlow, bFlow, m);
+  uHot = mix(aHot, bHot, m); uHiCol = mix(aHiCol, bHiCol, m); uWash = mix(aWash, bWash, m);
+  uGrid = mix(aGrid, bGrid, m); uBg = mix(aBg, bBg, m); uBg2 = mix(aBg2, bBg2, m);
+  uGain = mix(aGain, bGain, m);
+}
 #define INK uStreet
 #define SKY uFlow
 #define CARD uHot
@@ -48,6 +74,9 @@ void main() {
   float kind = aMeta.x;
   float seed = aMeta.y;
   vec2 p = position.xy;
+  float wd = waveD(p);
+  setWorld(waveM(wd));
+  float wcrest = waveCrest(wd);
   float r = length(p);
   float edge = boxFade(p);
   float radial = mix(1.0, 0.5, smoothstep(1200.0, 6000.0, r));
@@ -106,6 +135,11 @@ void main() {
     col = mix(col, CARD, ring * 0.85);
     a += ring * 0.45 * edge;
     size *= 1.0 + ring * 0.9;
+    // The front passing: each street point flares in the new world's hot
+    // light as the work reaches it, then settles into the new colour.
+    col = mix(col, bHot, wcrest * 0.9);
+    a += wcrest * 0.7 * edge * le;
+    size *= 1.0 + wcrest * 1.4;
   } else if (kind < 4.5) {
     // business: a faint ring until the agent's neighbourhood lights up
     world = mix(start, world, le);
@@ -243,6 +277,8 @@ uniform float uTime, uLoad, uStream, uDim, uExit, uMotion;
 varying vec2 vP;
 varying float vSide;
 void main() {
+  float wd = waveD(vP);
+  setWorld(waveM(wd));
   float r = length(vP);
   float edge = boxFade(vP);
   // drawn outward from USC late in the load clock
@@ -285,11 +321,20 @@ uniform float uLoad, uPulse, uStream, uDim, uExit, uTime, uMotion;
 varying vec2 vP;
 vec4 over(vec4 dst, vec3 c, float a) { return vec4(c * a + dst.rgb * (1.0 - a), a + dst.a * (1.0 - a)); }
 void main() {
+  float wd = waveD(vP);
+  float m = waveM(wd);
+  setWorld(m);
   float r = length(vP);
   float k = (1.0 - uExit) * (1.0 - 0.6 * uDim);
   // The ground is the colour world itself: a radial lift toward USC, so the
-  // field is never one flat fill.
-  vec4 o = vec4(mix(uBg2, uBg, smoothstep(0.0, 9000.0, r)), 1.0);
+  // field is never one flat fill. Across the front it passes through the
+  // segment's waypoint colour (palette.ts VIA), never a straight mix: a
+  // straight mix of night and dawn is the grey the H1 washed out on.
+  float rr = smoothstep(0.0, 9000.0, r);
+  vec3 ga = mix(aBg2, aBg, rr);
+  vec3 gb = mix(bBg2, bBg, rr);
+  vec3 gv = mix(uVia2, uVia, rr);
+  vec4 o = vec4(m < 0.5 ? mix(ga, gv, m * 2.0) : mix(gv, gb, m * 2.0 - 1.0), 1.0);
   float breathe = 1.0 + 0.06 * sin(uTime * 0.7) * uMotion;
   float glow = exp(-r * r / (1900.0 * 1900.0)) * (0.10 + 0.08 * clamp(uStream * 2.0, 0.0, 1.0)) * breathe;
   o = over(o, GOLD, glow * smoothstep(0.0, 0.6, uLoad) * k);
@@ -305,6 +350,11 @@ void main() {
   float pulseR = uPulse * 7800.0;
   float ring = exp(-pow((r - pulseR) / 60.0, 2.0)) * step(0.001, uPulse) * (1.0 - smoothstep(0.5, 1.0, uPulse));
   o = over(o, CARD, ring * 0.45 * k);
+  // The front, a hairline of the new world's hot light with a soft wake.
+  float wcrest = waveCrest(wd);
+  float wake = uWaveOn < 0.5 ? 0.0 : exp(-max(0.0, uWaveR - wd) / 0.05) * m;
+  o = over(o, bHot, wcrest * 0.55 * boxFade(vP));
+  o = over(o, bWash, wake * 0.18 * boxFade(vP));
   gl_FragColor = o;
 }
 `;

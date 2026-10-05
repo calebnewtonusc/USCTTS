@@ -16,8 +16,9 @@ import {
   pointFrag,
   pointVert,
 } from "./shaders";
-import { isDarkWorld, ROLES, worldColour, worldGain, type ColourRole } from "./palette";
-import { grid, type GridMode } from "./store";
+import { isDarkWorld, ROLES, viaColour, worldColour, worldGain, WORLDS, type ColourRole } from "./palette";
+import { buildWave, OUTSIDE, sampleWave, WAVE_N, waveRadius, type WaveField } from "./wave";
+import { grid, KOREATOWN, type GridMode } from "./store";
 
 const PAPER = 0xfbfaf7;
 const FOV = 30;
@@ -81,16 +82,20 @@ export function createGridEngine(
   const clear = new THREE.Color();
   const rgb: [number, number, number] = [0, 0, 0];
   const roleUniform: Record<ColourRole, string> = {
-    bg: "uBg",
-    bg2: "uBg2",
-    street: "uStreet",
-    art: "uArt",
-    flow: "uFlow",
-    hot: "uHot",
-    hi: "uHiCol",
-    wash: "uWash",
-    grid: "uGrid",
+    bg: "Bg",
+    bg2: "Bg2",
+    street: "Street",
+    art: "Art",
+    flow: "Flow",
+    hot: "Hot",
+    hi: "HiCol",
+    wash: "Wash",
+    grid: "Grid",
   };
+  const roleSet = (p: "a" | "b") =>
+    Object.fromEntries(
+      Object.values(roleUniform).map((n) => [p + n, { value: new THREE.Vector3() }]),
+    ) as Record<string, { value: THREE.Vector3 }>;
   let pointerX = 0;
   let pointerY = 0;
   let pointerFresh = false;
@@ -120,16 +125,15 @@ export function createGridEngine(
     uPointer: { value: new THREE.Vector3(0, 0, 300) },
     uPointerAmt: { value: 0 },
     uDpr: { value: 1 },
-    uGain: { value: 1 },
-    uBg: { value: new THREE.Vector3() },
-    uBg2: { value: new THREE.Vector3() },
-    uStreet: { value: new THREE.Vector3() },
-    uArt: { value: new THREE.Vector3() },
-    uFlow: { value: new THREE.Vector3() },
-    uHot: { value: new THREE.Vector3() },
-    uHiCol: { value: new THREE.Vector3() },
-    uWash: { value: new THREE.Vector3() },
-    uGrid: { value: new THREE.Vector3() },
+    aGain: { value: 1 },
+    bGain: { value: 1 },
+    ...roleSet("a"),
+    ...roleSet("b"),
+    uVia: { value: new THREE.Vector3() },
+    uVia2: { value: new THREE.Vector3() },
+    uWaveTex: { value: null as THREE.Texture | null },
+    uWaveR: { value: 0 },
+    uWaveOn: { value: 0 },
   };
   const matOpts = {
     uniforms,
@@ -474,13 +478,81 @@ export function createGridEngine(
     }
   }
 
-  function applyWorld(world: number) {
+  /* ------------------------------------------------------- the wave */
+  // One distance field per origin, built once: USC for the first change,
+  // the agent in Koreatown for the rest. The page says which origin each
+  // change spreads from through grid.wave; the engine remembers it per
+  // segment, because its eased world can still be finishing the previous
+  // change while the page has scrolled into the next.
+  const fields = new Map<string, { f: WaveField; tex: THREE.DataTexture }>();
+  const fieldFor = (o: [number, number]) => {
+    const key = `${Math.round(o[0])},${Math.round(o[1])}`;
+    let hitF = fields.get(key);
+    if (!hitF) {
+      const f = buildWave(data, o);
+      const half = new Uint16Array(f.d.length);
+      for (let i = 0; i < f.d.length; i++) half[i] = THREE.DataUtils.toHalfFloat(f.d[i]);
+      const tex = new THREE.DataTexture(half, WAVE_N, WAVE_N, THREE.RedFormat, THREE.HalfFloatType);
+      tex.magFilter = THREE.LinearFilter;
+      tex.minFilter = THREE.LinearFilter;
+      tex.needsUpdate = true;
+      hitF = { f, tex };
+      fields.set(key, hitF);
+    }
+    return hitF;
+  };
+  const originBySeg: [number, number][] = [[0, 0], KOREATOWN, KOREATOWN, KOREATOWN];
+  fieldFor(originBySeg[0]);
+  fieldFor(KOREATOWN);
+
+  function setRoles(prefix: "a" | "b", world: number) {
     for (const role of ROLES) {
       worldColour(world, role, rgb);
-      (uniforms[roleUniform[role] as keyof typeof uniforms].value as THREE.Vector3).set(rgb[0], rgb[1], rgb[2]);
+      (uniforms[(prefix + roleUniform[role]) as keyof typeof uniforms].value as THREE.Vector3).set(rgb[0], rgb[1], rgb[2]);
     }
-    uniforms.uGain.value = worldGain(world);
-    worldColour(world, "bg", rgb);
+    (prefix === "a" ? uniforms.aGain : uniforms.bGain).value = worldGain(world);
+  }
+
+  function applyWorld(world: number) {
+    const top = WORLDS.length - 1;
+    const w = Math.min(top, Math.max(0, world));
+    const seg = Math.min(top - 1, Math.floor(w));
+    const t = w - seg;
+    if (t < 1e-4 || t > 1 - 1e-4) {
+      // Settled in one world: both sets the same, no front.
+      const at = t > 0.5 ? seg + 1 : seg;
+      setRoles("a", at);
+      setRoles("b", at);
+      uniforms.uWaveOn.value = 0;
+      grid.isDark = isDarkWorld(at);
+    } else {
+      setRoles("a", seg);
+      setRoles("b", seg + 1);
+      viaColour(seg, "bg", rgb);
+      uniforms.uVia.value.set(rgb[0], rgb[1], rgb[2]);
+      viaColour(seg, "bg2", rgb);
+      uniforms.uVia2.value.set(rgb[0], rgb[1], rgb[2]);
+      const fld = fieldFor(originBySeg[seg]);
+      const R = waveRadius(t);
+      uniforms.uWaveTex.value = fld.tex;
+      uniforms.uWaveR.value = R;
+      uniforms.uWaveOn.value = 1;
+      // Text follows the world that covers most of the screen: 7 x 7 rays
+      // to the ground. The middle of the screen alone flipped the H1 to
+      // ink while it still sat on navy in the lower left (2026-10-05).
+      let got = 0;
+      let all = 0;
+      for (let i = 0; i < 7; i++)
+        for (let j = 0; j < 7; j++) {
+          ndc.set(-0.9 + (i * 1.8) / 6, -0.9 + (j * 1.8) / 6);
+          ray.setFromCamera(ndc, camera);
+          const p = ray.ray.intersectPlane(groundPlane, hit);
+          all++;
+          if ((p ? sampleWave(fld.f, p.x, p.y) : OUTSIDE) < R - 0.02) got++;
+        }
+      grid.isDark = isDarkWorld(got * 2 > all ? seg + 1 : seg);
+    }
+    worldColour(w < 1e-4 ? 0 : seg, "bg", rgb);
     clear.setRGB(rgb[0], rgb[1], rgb[2], THREE.SRGBColorSpace);
     renderer.setClearColor(clear, 1);
   }
@@ -562,6 +634,34 @@ export function createGridEngine(
     uniforms.uHi.value.set(head.x, head.y);
   }
 
+  /* ------------------------------------------- lit businesses, on screen */
+  const proj = new THREE.Vector3();
+  const near6: number[] = [];
+  let litKey = "";
+  function projectLit() {
+    if (!uniforms.uAgentOn.value) {
+      grid.lit.length = 0;
+      return;
+    }
+    const hx = uniforms.uHi.value.x;
+    const hy = uniforms.uHi.value.y;
+    const key = `${Math.round(hx / 20)},${Math.round(hy / 20)}`;
+    if (key !== litKey) {
+      litKey = key;
+      const n = data.biz.length / 2;
+      const order = Array.from({ length: n }, (_, i) => i);
+      const dist = (i: number) => (data.biz[i * 2] - hx) ** 2 + (data.biz[i * 2 + 1] - hy) ** 2;
+      order.sort((a, b) => dist(a) - dist(b));
+      near6.length = 0;
+      near6.push(...order.slice(0, 6));
+    }
+    grid.lit.length = 0;
+    for (const i of near6) {
+      proj.set(data.biz[i * 2], data.biz[i * 2 + 1], 0).project(camera);
+      grid.lit.push([((proj.x + 1) / 2) * width, ((1 - proj.y) / 2) * height]);
+    }
+  }
+
   /* ------------------------------------------------------------ loop */
   interface Follow {
     load: number;
@@ -621,7 +721,10 @@ export function createGridEngine(
       if (v !== follow.world) moving = true;
       follow.world = v;
     }
-    grid.isDark = isDarkWorld(follow.world);
+    {
+      const wv = grid.wave;
+      if (wv.from >= 0 && wv.from < originBySeg.length) originBySeg[wv.from] = wv.origin;
+    }
     // Pointer light decays back to rest after the hand stops.
     if (pointerAmt > 0) {
       pointerAmt = Math.max(0, pointerAmt - dt / POINTER_DECAY_S);
@@ -691,6 +794,7 @@ export function createGridEngine(
     uniforms.uExit.value = follow.exit;
     uniforms.uPointerAmt.value = pointerAmt;
     applyWorld(follow.world);
+    projectLit();
     renderer.render(scene, camera);
     lastRender = now;
     dirty = false;

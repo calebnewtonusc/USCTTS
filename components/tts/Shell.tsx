@@ -7,14 +7,20 @@ import "./tts.css";
 
 /* Every TTS route renders inside this. The .tts class is the scope for the
  * whole system in tts.css, so nothing TTS styles can reach /tc. */
-export default function Shell({ children }: { children: React.ReactNode }) {
+export default function Shell({
+  children,
+  footer = "full",
+}: {
+  children: React.ReactNode;
+  footer?: "full" | "ending";
+}) {
   return (
     <div className={`tts ${fontVars}`}>
       <a className="skip" href="#main">Skip to content</a>
       <SiteToggle />
       <Nav />
       <main id="main">{children}</main>
-      <Footer />
+      <Footer variant={footer} />
     </div>
   );
 }

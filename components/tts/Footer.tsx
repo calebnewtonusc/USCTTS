@@ -3,7 +3,67 @@ import TcLink from "./TcLink";
 import { TC_URL } from "./links";
 import { mono } from "./v4/mono";
 
-export default function Footer() {
+/* Two shapes. "full" is the white closing block every inner page ends on.
+ * "ending" is home's: the same links, small and in mono, inside the
+ * cardinal ending under the two doors, because Join followed by a white
+ * footer was two endings (Caleb, 2026-10-05: "Why do you have back to back
+ * footers?"). */
+export default function Footer({ variant = "full" }: { variant?: "full" | "ending" }) {
+  if (variant === "ending") {
+    return (
+      <footer className={`footer is-ending ${mono.variable}`}>
+        <nav className="footer-strip" aria-label="Footer">
+          <ul>
+            <li>
+              <Link href="/apply">Join TTS</Link>
+            </li>
+            <li>
+              <Link href="/members">People</Link>
+            </li>
+            <li>
+              <Link href="/work-with-us">Work with us</Link>
+            </li>
+            <li>
+              <Link href="/partner">Sponsor, speak or recruit</Link>
+            </li>
+            {TC_URL && (
+              <li>
+                <TcLink>T Combinator</TcLink>
+              </li>
+            )}
+            <li>
+              <a
+                href="https://www.linkedin.com/company/trojan-tech-solutions/"
+                rel="noreferrer"
+                target="_blank"
+              >
+                LinkedIn
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://www.instagram.com/trojantechsolutions"
+                rel="noreferrer"
+                target="_blank"
+              >
+                Instagram
+              </a>
+            </li>
+          </ul>
+          <p>
+            Trojan Tech Solutions, a student organization at USC.{" "}
+            <a
+              href="https://www.openstreetmap.org/copyright"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Map &copy; OpenStreetMap contributors
+            </a>
+          </p>
+        </nav>
+      </footer>
+    );
+  }
   return (
     <footer className={`footer ${mono.variable}`}>
       <div className="footer-inner">

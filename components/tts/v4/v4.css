@@ -564,7 +564,7 @@
 @media (max-width: 767px) {
   .tts .w4-body {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) 188px;
+    grid-template-rows: minmax(0, 1fr) 236px;
   }
 }
 
@@ -725,25 +725,112 @@
 .tts .w4-side {
   position: relative;
   min-height: 0;
-}
-.tts .w4-pane {
-  position: absolute;
-  inset: 0;
-  padding: 14px 16px;
-  opacity: 0;
-  visibility: hidden;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
-@media (max-width: 767px) {
-  .tts .w4-pane {
-    padding: 10px 12px;
-  }
+/* Four stations stacked; the open one takes the spare height (Week.tsx
+ * sets each body's height from the scroll value), the others fold to one
+ * header line. The left 30px is the conduits' margin (machine.ts). */
+.tts .w4-st {
+  flex: none;
+  border-bottom: 1px solid var(--rule);
 }
-.tts .w4-pane-head {
+.tts .w4-st:last-child {
+  border-bottom: 0;
+}
+.tts .w4-st-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 14px 0 30px;
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--ink-2);
-  margin-bottom: 12px;
+  color: var(--ink-3);
+  transition: color 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .w4-st.is-open .w4-st-head {
+  color: var(--ink);
+}
+.tts .w4-st-n {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+.tts .w4-node {
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1.5px solid var(--ink-3);
+  transition:
+    background-color 200ms cubic-bezier(0, 0, 0.2, 1),
+    border-color 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .w4-st.is-open .w4-node {
+  background: var(--red);
+  border-color: var(--red);
+}
+.tts .w4-st-body {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  padding: 0 14px 0 30px;
+}
+.tts .w4-st-body > :first-child {
+  margin-top: 4px;
+}
+@media (max-width: 767px) {
+  .tts .w4-st-head {
+    height: 24px;
+    font-size: 10.5px;
+    padding-right: 10px;
+  }
+  .tts .w4-st-body {
+    padding-right: 10px;
+  }
+}
+/* The conduits and the records riding them, over the whole stage. */
+.tts .w4-machine {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+  overflow: visible;
+  transition: opacity 300ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .w4-machine .mc-base {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+.tts .w4-machine .mc-flow {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1.5 7;
+  opacity: 0;
+  animation: mc-flow 900ms linear infinite;
+}
+@keyframes mc-flow {
+  to {
+    stroke-dashoffset: -17;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tts .w4-machine .mc-flow {
+    animation: none;
+  }
+}
+.tts .w4-machine .mc-rec {
+  opacity: 0;
 }
 .tts .w4-leads {
   list-style: none;
@@ -777,10 +864,7 @@
     font-size: 12px;
     gap: 7px;
   }
-  .tts .w4-pane-head {
-    margin-bottom: 8px;
   }
-}
 
 .tts .w4-inbox {
   list-style: none;
@@ -875,8 +959,7 @@
 
 .tts .w4-crm {
   position: relative;
-  height: 100%;
-  min-height: 180px;
+  height: 150px;
 }
 .tts .w4-sheetname,
 .tts .w4-col {
@@ -1187,11 +1270,6 @@
   outline-offset: -4px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .tts .w4-xword,
-  .tts .xr-line,
-  .tts .xr-side {
-    display: none;
-  }
   .tts .v4-rise {
     animation: none;
   }
@@ -1206,7 +1284,7 @@
    * after the last mono line: centred, the leftover height showed as an
    * empty cardinal band above the footer (review, 2026-10-05, at 390). */
   align-items: flex-end;
-  padding-block: 120px 40px;
+  padding-block: 120px 16px;
 }
 .tts .jn-inner {
   width: 100%;
@@ -1286,7 +1364,7 @@
   }
   .tts .jn {
     min-height: 0;
-    padding-block: 96px 24px;
+    padding-block: 96px 8px;
   }
 }
 
@@ -1313,10 +1391,7 @@
   .tts .w4-meter,
   .tts .w4-xword,
   .tts .w4-day,
-  .tts .w4-pane-head {
-    font-size: 13px;
-  }
-  .tts .w4-blk {
+    .tts .w4-blk {
     font-size: 14px;
     padding: 6px 8px;
   }
@@ -1357,4 +1432,103 @@
  * still counted as 200 words a screen to anything reading the DOM. */
 .tts .w4-body:not(.is-xray) .xr-side {
   visibility: hidden;
+}
+
+/* ---------- the one ending: footer links inside Join's cardinal ---------- */
+.tts footer.footer.is-ending {
+  background: transparent;
+  border-top: 0;
+  color: var(--ink);
+}
+.tts:has(.v4.is-dark) footer.footer.is-ending {
+  --ink: #fbf7f0;
+  --ink-2: rgba(251, 247, 240, 0.78);
+  --rule: rgba(251, 247, 240, 0.26);
+}
+.tts footer.footer.is-ending .footer-strip {
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding: 18px var(--gutter) 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 32px;
+  font-family: var(--tts-mono), ui-monospace, monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  border-top: 1px solid var(--rule);
+}
+.tts footer.footer.is-ending ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 20px;
+}
+.tts footer.footer.is-ending a {
+  display: inline-block;
+  padding-block: 12px;
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: color 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts footer.footer.is-ending p a {
+  padding-block: 0;
+}
+.tts footer.footer.is-ending a:hover,
+.tts footer.footer.is-ending a:focus-visible {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (max-width: 767px) {
+  .tts footer.footer.is-ending ul {
+    gap: 0 16px;
+  }
+  .tts footer.footer.is-ending .footer-strip {
+    padding-bottom: 22px;
+  }
+}
+
+/* ---------- the x-ray's manim clips ----------
+ * The clips are drawn for light grounds (manim/README.md), so each sits on
+ * its own plate: paper for the light ones, cardinal for the cardinal cut.
+ * Beside the table, prompt or graph when the uncovered side is wide, above
+ * it when it isn't. */
+.tts .xr-row {
+  display: grid;
+  gap: 14px;
+}
+@container (min-width: 620px) {
+  .tts .xr-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    align-items: start;
+  }
+}
+.tts .xr-clip:empty {
+  display: none;
+}
+.tts .xr-clip {
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+.tts .xr-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #fbfaf7;
+  opacity: 0;
+  transition: opacity 240ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .xr-media[data-name="gtm_score_on_cardinal"] {
+  background: #990000;
+}
+.tts .xr-media.is-on {
+  opacity: 1;
 }

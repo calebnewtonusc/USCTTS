@@ -44,6 +44,16 @@ export const grid = {
   exit: 0, // 0..1 the field dissolves into paper at the page end
   bursts: [] as GridBurst[], // push screen rects to dissolve them into the field
   world: 0, // colour world along the chapter ramp, fractional blends: 0 night, 1 dawn sky, 2 cardinal, 3 cream week, 4 deep cardinal join (see palette.ts)
+  // How the current world change spreads (wave.ts): from world `from` to
+  // `to` (= from + 1), t 0..1 of the way, out from `origin` in metres along
+  // the real streets. The page writes it with world = from + t; the engine
+  // eases world and spreads each change from the origin given for it.
+  wave: { origin: [0, 0] as [number, number], t: 0, from: 0, to: 1 },
+  // WRITTEN BY THE ENGINE: where the six businesses nearest the agent sit
+  // on screen right now (CSS px, viewport), nearest first, so the page can
+  // draw the conduits that carry them up into the lead list. Empty when the
+  // agent is off.
+  lit: [] as [number, number][],
   isDark: true, // WRITTEN BY THE ENGINE each frame from the eased world: true means put light text over the field
 };
 

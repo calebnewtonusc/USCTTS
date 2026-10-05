@@ -15,7 +15,7 @@ import "./v4/v4.css";
  * for each reader. One scroll loop drives all of it (v4/choreo.ts). */
 export default function TTSHome() {
   return (
-    <Shell>
+    <Shell footer="ending">
       <div className={`v4 ${mono.variable}`}>
         <Stage />
         <div className="v4-content">

@@ -54,59 +54,83 @@ export default function XrayViews() {
       </div>
 
       <div className="xr-view" data-view="gtm">
-        <p className="xr-cap">a Clay table, researched with Perplexity</p>
-        <table className="xr-table">
-          <thead>
-            <tr>
-              <th>company</th>
-              <th>decision maker</th>
-              <th>signal</th>
-              <th>why it&apos;s worth reaching</th>
-            </tr>
-          </thead>
-          <tbody>
-            {LEADS.map((l) => (
-              <tr key={l.who}>
-                <td>
-                  {l.who}, {l.where}
-                </td>
-                <td>{l.person}</td>
-                <td>{l.signal}</td>
-                <td>{l.why}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="xr-row">
+          {/* Filled with the manim clip on the first x-ray open (Week.tsx). */}
+          <div className="xr-clip" data-clips="gtm_score gtm_score_on_cardinal" />
+          <div className="xr-detail">
+            <p className="xr-cap">a Clay table, researched with Perplexity</p>
+            <table className="xr-table">
+              <thead>
+                <tr>
+                  <th>company</th>
+                  <th>decision maker</th>
+                  <th>signal</th>
+                  <th>why it&apos;s worth reaching</th>
+                </tr>
+              </thead>
+              <tbody>
+                {LEADS.map((l) => (
+                  <tr key={l.who}>
+                    <td>
+                      {l.who}, {l.where}
+                    </td>
+                    <td>{l.person}</td>
+                    <td>{l.signal}</td>
+                    <td>{l.why}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <div className="xr-view" data-view="email">
-        <p className="xr-cap">the prompt behind every draft</p>
-        <dl className="xr-prompt">
-          {PROMPT.map(([k, v], i) => (
-            <div key={i}>
-              <dt>{k}</dt>
-              <dd>{v}</dd>
-            </div>
-          ))}
-        </dl>
+        <div className="xr-row">
+          {/* Filled with the manim clip on the first x-ray open (Week.tsx). */}
+          <div className="xr-clip" data-clips="email_draft" />
+          <div className="xr-detail">
+            <p className="xr-cap">the prompt behind every draft</p>
+            <dl className="xr-prompt">
+              {PROMPT.map(([k, v], i) => (
+                <div key={i}>
+                  <dt>{k}</dt>
+                  <dd>{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
       </div>
 
       <div className="xr-view" data-view="sheet">
-        <p className="xr-cap">the workflow behind the CRM</p>
-        <ol className="xr-flow">
-          {FLOW.map((s) => (
-            <li key={s}>{s}</li>
-          ))}
-        </ol>
+        <div className="xr-row">
+          {/* Filled with the manim clip on the first x-ray open (Week.tsx). */}
+          <div className="xr-clip" data-clips="crm_merge" />
+          <div className="xr-detail">
+            <p className="xr-cap">the workflow behind the CRM</p>
+            <ol className="xr-flow">
+              {FLOW.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
+            </ol>
+          </div>
+        </div>
       </div>
 
       <div className="xr-view" data-view="teach">
-        <p className="xr-cap">the lesson plan</p>
-        <ol className="xr-outline">
-          {OUTLINE.map((s) => (
-            <li key={s}>{s}</li>
-          ))}
-        </ol>
+        <div className="xr-row">
+          {/* Filled with the manim clip on the first x-ray open (Week.tsx). */}
+          <div className="xr-clip" data-clips="teach_curve" />
+          <div className="xr-detail">
+            <p className="xr-cap">the lesson plan</p>
+            <ol className="xr-outline">
+              {OUTLINE.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
+            </ol>
+          </div>
+        </div>
       </div>
     </div>
   );
