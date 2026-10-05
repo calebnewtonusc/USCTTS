@@ -81,6 +81,9 @@ export const INACTIVE_CABINET: Person[] = [
 // Caleb's instruction on 2026-09-22: the advisory board and alumni all stay,
 // on both sites. This is the bench the cold outreach actually points at.
 export const ADVISORS: Person[] = [
+  // Faculty advisor, per Caleb on 2026-10-05. Title and headshot from his IYA
+  // faculty page, iovine-young.usc.edu/people/chris-swain.
+  { name: "Chris Swain", role: "Faculty advisor, Associate Professor of Teaching", company: "USC Iovine and Young Academy", status: "advisor", photo: "/img/chris_swain_shot.jpg", link: "https://iovine-young.usc.edu/people/chris-swain" },
   { name: "Matthew Kim", role: "Incoming Analyst", company: "McKinsey & Company", status: "advisor", photo: "/img/matthew_shot.jpeg", logo: "/img/logos/mckinsey.png" },
   { name: "Kevin Sangmuah", role: "Software Engineer, and founder", company: "Reddit", status: "advisor", photo: "/img/kevin_shot.jpeg", logo: "/img/logos/reddit.png" },
   { name: "Duncan Inganji", role: "Software Engineer", company: "Google", status: "advisor", photo: "/img/duncan_shot.jpeg", logo: "/img/logos/google.png" },
