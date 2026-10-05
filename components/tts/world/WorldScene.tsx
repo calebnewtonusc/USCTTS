@@ -131,10 +131,64 @@ export function WorldHero({ nums }: { nums: Numbers }) {
       walkTravel = 1;
     let caps: HTMLElement[] = [];
     let rail: HTMLElement[] = [];
+    // The copy's text box on screen, per thing that can be up: the hero,
+    // then each caption. Text nodes and buttons only, so a block element's
+    // empty width never counts.
+    type Box = { l: number; r: number; t: number; b: number };
+    let heroBox: Box | null = null;
+    let capBoxes: (Box | null)[] = [];
+    const inkOf = (el: HTMLElement, dy: number): Box | null => {
+      const out = { l: Infinity, r: -Infinity, t: Infinity, b: -Infinity };
+      const add = (r: DOMRect) => {
+        if (!r.width || !r.height) return;
+        out.l = Math.min(out.l, r.left);
+        out.r = Math.max(out.r, r.right);
+        out.t = Math.min(out.t, r.top + dy);
+        out.b = Math.max(out.b, r.bottom + dy);
+      };
+      const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      const range = document.createRange();
+      for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+        if (!n.textContent?.trim()) continue;
+        range.selectNodeContents(n);
+        for (const r of range.getClientRects()) add(r);
+      }
+      el.querySelectorAll<HTMLElement>(".btn").forEach((b) => add(b.getBoundingClientRect()));
+      return out.r > out.l ? out : null;
+    };
+    // The rule is 48px of air between text and cubes. The camera's fit is an
+    // estimate (perspective, the idle drift), measured up to 16px short at
+    // 1440, so it aims for 72.
+    const AIR = 72;
+    let navBottom = 64;
+    const boxFor = (ink: Box | null): Box | null => {
+      if (!ink) return null;
+      const W = window.innerWidth;
+      if (W >= 768) return { l: ink.r + AIR, r: W - 56, t: navBottom + 16, b: H - 16 };
+      // On a phone the copy is at the foot, so the cubes go above it.
+      return { l: 12, r: W - 36, t: navBottom + 12, b: ink.t - 24 };
+    };
     const layout = () => {
       H = window.innerHeight;
       const y = window.scrollY;
+      const nav = document.querySelector(".nav");
+      navBottom = nav ? nav.getBoundingClientRect().bottom + y : 64;
+      // The hero ends exactly at the fold, under whatever bar sits above
+      // the nav, so its copy and both buttons are on the first screen.
+      const heroTop = hero.getBoundingClientRect().top + y;
+      hero.style.height = `${Math.max(480, H - Math.max(0, heroTop))}px`;
       heroH = hero.offsetHeight;
+      const copyEl = copy.current;
+      if (copyEl) {
+        // Measured as it sits at the top of the page, with every line up.
+        const saved = lines.map((ln) => [ln.style.opacity, ln.style.transform]);
+        lines.forEach((ln) => (ln.style.transform = "none"));
+        heroBox = inkOf(copyEl, y);
+        lines.forEach((ln, i) => {
+          ln.style.opacity = saved[i][0];
+          ln.style.transform = saved[i][1];
+        });
+      }
       const partners = document.querySelector<HTMLElement>(".partners");
       const walk = document.querySelector<HTMLElement>(".world-walk");
       if (partners) {
@@ -146,6 +200,19 @@ export function WorldHero({ nums }: { nums: Numbers }) {
         walkTravel = Math.max(1, walk.offsetHeight - H);
         caps = [...walk.querySelectorAll<HTMLElement>(".w-cap")];
         rail = [...walk.querySelectorAll<HTMLElement>(".w-rail-btn")];
+        // Captions are measured as they sit in the pinned screen.
+        const pin = walk.querySelector<HTMLElement>(".w-pin");
+        const pinTop = pin ? pin.getBoundingClientRect().top : 0;
+        capBoxes = caps.map((c) => {
+          const d = c.style.display,
+            cp = c.style.clipPath;
+          c.style.display = "";
+          c.style.clipPath = "none";
+          const b = inkOf(c, -pinTop);
+          c.style.display = d;
+          c.style.clipPath = cp;
+          return b;
+        });
       } else {
         walkTop = partnersMid + H;
         walkTravel = 1;
@@ -194,6 +261,14 @@ export function WorldHero({ nums }: { nums: Numbers }) {
           act = i;
         }
       });
+      // The box the cubes keep to: the hero's while it is on screen, then
+      // the caption that is up, or the next one to come.
+      let k = act;
+      if (k < 0) {
+        k = CAPS.findIndex((c) => c.in > N);
+        if (k < 0) k = CAPS.length - 1;
+      }
+      world?.setBox(boxFor(y < heroH * 0.6 ? heroBox : (capBoxes[k] ?? null)));
       if (act !== lastAct) {
         lastAct = act;
         rail.forEach((b, i) => {
@@ -297,6 +372,10 @@ export function WorldHero({ nums }: { nums: Numbers }) {
         paint(cur);
         world.frame(banked);
         setReady(true);
+        if (new URLSearchParams(window.location.search).has("capture"))
+          (window as unknown as { __ttsWorld: unknown }).__ttsWorld = {
+            bounds: () => world?.bounds(),
+          };
         worldBridge.qualify = () => ({
           x: window.innerWidth * 0.66,
           y: window.innerHeight * 0.45,
@@ -337,9 +416,6 @@ export function WorldHero({ nums }: { nums: Numbers }) {
       )}
       <div className="w-wash" aria-hidden="true" />
       <div className="w-copy" ref={copy}>
-        <p className="w-pill" data-line>
-          Trojan Tech Solutions
-        </p>
         <h1 className="w-title" aria-label="USC's AI implementation lab.">
           <span data-line aria-hidden="true">
             USC&apos;s AI

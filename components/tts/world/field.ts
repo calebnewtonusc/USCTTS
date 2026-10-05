@@ -136,12 +136,14 @@ const LIT: [number, number, number][] = [
 
 /* The walkthrough as windows on its progress N: a morph, then a hold where
  * its caption sits. */
+// Each morph is 0.055 of the walk, about half a screen of scroll, so the
+// in-between swarm passes quickly (0.08 read as confetti, review 2026-10-04).
 export const MORPHS: [number, number][] = [
-  [0.04, 0.12],
-  [0.25, 0.33],
-  [0.46, 0.54],
-  [0.67, 0.75],
-  [0.86, 0.92],
+  [0.04, 0.095],
+  [0.265, 0.32],
+  [0.475, 0.53],
+  [0.685, 0.74],
+  [0.865, 0.92],
 ];
 const LOOP_FORM = 1;
 
@@ -476,31 +478,44 @@ export function createField(keptShare: number): Field {
   const forms = [block, loop, crm, stream, lessons, block];
 
   /* ---------- crossing layers ---------- */
+  /* Every cube crosses on one shared clock. Staggering the starts in a
+   * wave was tried and measured worse: cubes that finished early sat at
+   * their new spot on their layer as obstacles, and block to track peaked
+   * at 55 units instead of 36. */
   function layersFor(a: Form, b: Form) {
     const nb: number[][] = Array.from({ length: COUNT }, () => []);
+    const lx = new Float32Array(COUNT),
+      hx = new Float32Array(COUNT),
+      lz = new Float32Array(COUNT),
+      hz = new Float32Array(COUNT);
+    for (let i = 0; i < COUNT; i++) {
+      lx[i] = Math.min(a.x[i], b.x[i]);
+      hx[i] = Math.max(a.x[i], b.x[i]);
+      lz[i] = Math.min(a.z[i], b.z[i]);
+      hz[i] = Math.max(a.z[i], b.z[i]);
+    }
+    const NEAR = 1.06;
     for (let i = 0; i < COUNT; i++)
       for (let j = i + 1; j < COUNT; j++) {
+        if (hx[i] + NEAR < lx[j] || hx[j] + NEAR < lx[i] || hz[i] + NEAR < lz[j] || hz[j] + NEAR < lz[i]) continue;
+        // Cubes cross square on, so two meet only when both axis gaps
+        // close. Both move on one clock, so their difference is linear in
+        // it, the Chebyshev distance is convex, and a ternary search finds
+        // its least.
         const rx = a.x[i] - a.x[j],
           rz = a.z[i] - a.z[j];
         const dx = b.x[i] - b.x[j] - rx,
           dz = b.z[i] - b.z[j] - rz;
-        // Cubes cross square on (frame turns them only over their own
-        // spots), so two meet only when both axis gaps close: the test is the
-        // least Chebyshev distance along the path, convex in t, found by
-        // ternary search.
-        let close: boolean;
-        {
-          let lo = 0,
-            hi = 1;
-          const cheb = (t: number) => Math.max(Math.abs(rx + dx * t), Math.abs(rz + dz * t));
-          for (let k = 0; k < 40; k++) {
-            const m1 = lo + (hi - lo) / 3,
-              m2 = hi - (hi - lo) / 3;
-            if (cheb(m1) < cheb(m2)) hi = m2;
-            else lo = m1;
-          }
-          close = cheb((lo + hi) / 2) < 1.06;
+        const cheb = (u: number) => Math.max(Math.abs(rx + dx * u), Math.abs(rz + dz * u));
+        let lo = 0,
+          hi = 1;
+        for (let it = 0; it < 40; it++) {
+          const m1 = lo + (hi - lo) / 3,
+            m2 = hi - (hi - lo) / 3;
+          if (cheb(m1) < cheb(m2)) hi = m2;
+          else lo = m1;
         }
+        const close = cheb((lo + hi) / 2) < NEAR;
         if (close) {
           nb[i].push(j);
           nb[j].push(i);
@@ -525,7 +540,7 @@ export function createField(keptShare: number): Field {
     const Rl = rng(9);
     let best: Int32Array | null = null,
       bestTop = Infinity;
-    for (let attempt = 0; attempt < 24; attempt++) {
+    for (let attempt = 0; attempt < 200; attempt++) {
       if (attempt > 0)
         for (let k = list.length - 1; k > 0; k--) {
           const j = Math.floor(Rl() * (k + 1));
@@ -678,7 +693,7 @@ export function createField(keptShare: number): Field {
     put(m + 1, FB);
     warm(m);
     const layer = cache[m].layer;
-    const base = Math.max(FA.top, FB.top) + 1.8;
+    const base = Math.max(FA.top, FB.top) + 1.2;
     const up = smooth(prog(t, 0, ACROSS[0])),
       across = easeInOut3(prog(t, ACROSS[0], ACROSS[1])),
       down = smooth(prog(t, ACROSS[1], 1));

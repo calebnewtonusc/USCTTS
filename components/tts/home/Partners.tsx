@@ -18,7 +18,11 @@ import { clamp, easeOut3, prog } from "../engine/math";
 const ROWS = [
   {
     name: "Clay",
-    logo: "/tts/partners/clay.svg",
+    // Rendered from the official clay.svg at 800x252, 2x its largest size.
+    // That SVG is 6.6MB around one raster, and decoding it on first sight
+    // cost a 67 to 75ms frame on the first scroll of home (headed trace,
+    // 2026-10-04). This PNG is 100KB and identical on screen.
+    logo: "/tts/partners/clay.png",
     wordmark: true,
     value: 7.1,
     decimals: 1,

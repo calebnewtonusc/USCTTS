@@ -247,8 +247,9 @@ export function Join() {
         <div className="join-doors">
           <div className="join-door">
             <p>
-              If you&apos;re a USC student, you apply, pick building,
-              consulting or growing, and Caleb, Tyler and Emily read every one.
+              If you&apos;re a USC student, you tell us when you apply if
+              you&apos;d rather build the tools or get them used, and Caleb,
+              Tyler and Emily read every one.
             </p>
             <Link href="/apply" className="btn btn-primary">
               Join TTS{" "}

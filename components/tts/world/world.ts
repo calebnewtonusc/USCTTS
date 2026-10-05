@@ -84,6 +84,11 @@ export interface World {
   setLoad(l: number): void;
   /** The pointer in canvas coordinates, -1 to 1, or null when it left. */
   setPointer(x: number | null, y: number | null): void;
+  /** The box, in canvas pixels, the cubes must stay inside so they never
+   * touch the copy, or null for anywhere. */
+  setBox(b: { l: number; r: number; t: number; b: number } | null): void;
+  /** For checks: the cubes' on-screen bounds with the current camera. */
+  bounds(): { l: number; r: number; t: number; b: number };
   frame(timeMs: number): void;
   resize(w: number, h: number): void;
   dispose(): void;
@@ -243,35 +248,81 @@ export function createWorld(
   let lastLit = "";
   let lastT = -1;
 
+  /* Text and cubes never touch (review, 2026-10-04: "implementation" ran
+   * into the block at 1440). WorldScene measures the copy on screen and
+   * hands over the box the cubes must stay inside; each frame the cubes are
+   * projected with the plain camera, and the camera then stands back (when
+   * the form is too big for the box) and the view slides (when it sits in
+   * the wrong place), both eased so a change of box never jumps. */
+  let viewW = 1,
+    viewH = 1;
+  const baseOff = { x: 0, y: 0 };
+  let box: { l: number; r: number; t: number; b: number } | null = null;
+  let fitS = 1,
+    fitX = 0,
+    fitY = 0;
+  const v = new THREE.Vector3();
+  const lookV = new THREE.Vector3();
+  function frameIt(pos: THREE.Vector3, look: THREE.Vector3, c: number, dt: number) {
+    camera.position.copy(pos);
+    camera.lookAt(look);
+    camera.setViewOffset(viewW, viewH, baseOff.x, baseOff.y, viewW, viewH);
+    camera.updateMatrixWorld();
+    let tS = 1,
+      tX = 0,
+      tY = 0;
+    if (box && c < 0.5) {
+      const f = viewH / 2 / Math.tan((camera.fov * Math.PI) / 360);
+      let x0 = Infinity,
+        x1 = -Infinity,
+        y0 = Infinity,
+        y1 = -Infinity;
+      for (let i = 0; i < COUNT; i++) {
+        // Cubes in the air (falling in, or crossing) are not the form.
+        if (out.y[i] > 12) continue;
+        v.set(out.x[i], out.y[i], out.z[i]).applyMatrix4(camera.matrixWorldInverse);
+        const depth = -v.z;
+        if (depth < 1) continue;
+        const rad = (0.87 * f) / depth;
+        v.applyMatrix4(camera.projectionMatrix);
+        const sx = ((v.x + 1) / 2) * viewW,
+          sy = ((1 - v.y) / 2) * viewH;
+        x0 = Math.min(x0, sx - rad);
+        x1 = Math.max(x1, sx + rad);
+        y0 = Math.min(y0, sy - rad);
+        y1 = Math.max(y1, sy + rad);
+      }
+      if (x1 > x0) {
+        lookV.copy(look).project(camera);
+        const ax = ((lookV.x + 1) / 2) * viewW,
+          ay = ((1 - lookV.y) / 2) * viewH;
+        tS = Math.max(0.35, Math.min(1, (box.r - box.l) / (x1 - x0), (box.b - box.t) / (y1 - y0)));
+        const nx0 = ax + (x0 - ax) * tS,
+          nx1 = ax + (x1 - ax) * tS,
+          ny0 = ay + (y0 - ay) * tS,
+          ny1 = ay + (y1 - ay) * tS;
+        if (nx0 < box.l) tX = box.l - nx0;
+        else if (nx1 > box.r) tX = box.r - nx1;
+        if (ny1 > box.b) tY = box.b - ny1;
+        else if (ny0 < box.t) tY = box.t - ny0;
+      }
+    }
+    const k = fitS === 1 && fitX === 0 && fitY === 0 && dt === 0 ? 1 : clamp(dt * 7);
+    fitS += (tS - fitS) * k;
+    fitX += (tX - fitX) * k;
+    fitY += (tY - fitY) * k;
+    camera.position.copy(pos.sub(look).multiplyScalar(1 / fitS).add(look));
+    camera.lookAt(look);
+    camera.setViewOffset(viewW, viewH, baseOff.x - fitX, baseOff.y - fitY, viewW, viewH);
+    camera.updateMatrixWorld();
+  }
+
   function update(time: number) {
     const s = time / 1000;
     const dt = lastT < 0 ? 0 : clamp(s - lastT, 0, 0.1);
     lastT = s;
 
-    // Camera first, so the pointer ray uses this frame's view.
-    const { pos, look } = camAt(walk);
-    // The load is a slow push in, 18% further out at the start.
-    const push = 1 + 0.18 * (1 - easeOut3(load));
-    pos.sub(look).multiplyScalar(push).add(look);
-    // A tall screen sees less width, so the camera stands back in proportion.
-    if (camera.aspect < 1)
-      pos
-        .sub(look)
-        .multiplyScalar(Math.min(2.2, Math.pow(1 / camera.aspect, 0.7)))
-        .add(look);
-    // A breath of drift, so a still frame is never dead.
-    pos.x += Math.sin(s * 0.21) * 0.35;
-    pos.y += Math.sin(s * 0.17) * 0.2;
-    // The crane: up and looking into the sky, so the cubes sink out of the
-    // frame while the partners section is over it.
-    const c = easeInOut3(crane);
-    pos.y += 7 * c;
-    look.y += 34 * c;
-    camera.position.copy(pos);
-    camera.lookAt(look);
-    camera.updateMatrixWorld();
-
-    // The pointer: the block's outer cubes lift toward it, only while the
+    // The pointer, on last frame's view: the block's outer cubes lift toward it, only while the
     // block is the form on screen and the load has landed.
     const block =
       (walk < MORPHS[0][0] || walk >= MORPHS[4][1]) && load >= 1 && crane < 0.3;
@@ -290,6 +341,28 @@ export function createWorld(
     lean.amt = leanAmt;
 
     field.frame(walk, s, load, leanAmt > 0.001 ? lean : null, out);
+
+    // The camera.
+    const { pos, look } = camAt(walk);
+    // The load is a slow push in, 18% further out at the start.
+    const push = 1 + 0.18 * (1 - easeOut3(load));
+    pos.sub(look).multiplyScalar(push).add(look);
+    // A tall screen sees less width, so the camera stands back in proportion.
+    if (camera.aspect < 1)
+      pos
+        .sub(look)
+        .multiplyScalar(Math.min(2.2, Math.pow(1 / camera.aspect, 0.7)))
+        .add(look);
+    // A breath of drift, so a still frame is never dead.
+    pos.x += Math.sin(s * 0.21) * 0.35;
+    pos.y += Math.sin(s * 0.17) * 0.2;
+    // The crane: up and looking into the sky, so the cubes sink out of the
+    // frame while the partners section is over it.
+    const c = easeInOut3(crane);
+    pos.y += 7 * c;
+    look.y += 34 * c;
+    frameIt(pos, look, c, dt);
+
     for (let i = 0; i < COUNT; i++) {
       p.set(out.x[i], out.y[i], out.z[i]);
       q.setFromAxisAngle(upAxis, out.yaw[i]);
@@ -347,6 +420,27 @@ export function createWorld(
     setLoad(l) {
       load = l;
     },
+    setBox(b) {
+      box = b;
+    },
+    bounds() {
+      const f = viewH / 2 / Math.tan((camera.fov * Math.PI) / 360);
+      const o = { l: Infinity, r: -Infinity, t: Infinity, b: -Infinity };
+      for (let i = 0; i < COUNT; i++) {
+        v.set(out.x[i], out.y[i], out.z[i]).applyMatrix4(camera.matrixWorldInverse);
+        const depth = -v.z;
+        if (depth < 1) continue;
+        const rad = (0.87 * f) / depth;
+        v.applyMatrix4(camera.projectionMatrix);
+        const sx = ((v.x + 1) / 2) * viewW,
+          sy = ((1 - v.y) / 2) * viewH;
+        o.l = Math.min(o.l, sx - rad);
+        o.r = Math.max(o.r, sx + rad);
+        o.t = Math.min(o.t, sy - rad);
+        o.b = Math.max(o.b, sy + rad);
+      }
+      return o;
+    },
     setPointer(x, y) {
       px = x;
       if (y !== null) py = y;
@@ -361,8 +455,11 @@ export function createWorld(
       camera.fov = w < 768 ? 50 : 34;
       // The copy is a column on the left (desktop) or at the foot (phone), so
       // what the camera looks at lands at about 66% across, or 36% down.
-      if (w >= 768) camera.setViewOffset(w, h, -w * 0.16, 0, w, h);
-      else camera.setViewOffset(w, h, 0, h * 0.14, w, h);
+      viewW = w;
+      viewH = h;
+      baseOff.x = w >= 768 ? -w * 0.16 : 0;
+      baseOff.y = w >= 768 ? 0 : h * 0.14;
+      camera.setViewOffset(w, h, baseOff.x, baseOff.y, w, h);
       camera.updateProjectionMatrix();
     },
     dispose() {
