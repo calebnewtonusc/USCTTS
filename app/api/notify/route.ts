@@ -31,7 +31,9 @@ export async function POST(req: NextRequest) {
     if (error) {
       // Unique constraint violation means already signed up
       if (error.code === "23505") {
-        return NextResponse.json({ ok: true, duplicate: true }, { status: 200 });
+        // Same answer as a new signup, so the endpoint can't be used to check
+        // whether an address is on the list (security review, 2026-10-05).
+        return NextResponse.json({ ok: true }, { status: 200 });
       }
       console.error("[notify] supabase error:", error.message);
       return NextResponse.json(

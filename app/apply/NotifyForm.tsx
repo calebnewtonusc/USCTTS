@@ -7,12 +7,11 @@ type State =
   | { kind: "idle" }
   | { kind: "sending" }
   | { kind: "added"; email: string }
-  | { kind: "already"; email: string }
   | { kind: "error"; message: string };
 
 /* Applications are closed, so the one thing a student can do is ask to hear
  * when they open. Posts to /api/notify, which writes to email_signups and
- * answers duplicate: true when the address is already on the list. */
+ * answers the same way whether or not the address was already on the list. */
 export default function NotifyForm() {
   const [email, setEmail] = useState("");
   const [invalid, setInvalid] = useState(false);
@@ -33,10 +32,8 @@ export default function NotifyForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: value }),
       });
-      const data: unknown = await res.json().catch(() => null);
       if (res.ok) {
-        const duplicate = typeof data === "object" && data !== null && (data as { duplicate?: unknown }).duplicate === true;
-        setState({ kind: duplicate ? "already" : "added", email: value });
+        setState({ kind: "added", email: value });
       } else if (res.status === 400) {
         setInvalid(true);
         setState({ kind: "idle" });
@@ -54,13 +51,11 @@ export default function NotifyForm() {
     }
   };
 
-  if (state.kind === "added" || state.kind === "already") {
+  if (state.kind === "added") {
     return (
       <div className="nf-done" role="status">
         <p>
-          {state.kind === "added"
-            ? `You're on the list. We'll email ${state.email} when applications open.`
-            : `${state.email} is already on the list, so you're all set. We'll email you when applications open.`}
+          {`You're on the list. We'll email ${state.email} when applications open.`}
         </p>
       </div>
     );
