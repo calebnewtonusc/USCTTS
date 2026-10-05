@@ -17,7 +17,6 @@ import {
   CARDINAL,
   COUNT,
   GOLD,
-  MORPHS,
   SIZE,
   createField,
   newForm,
@@ -46,40 +45,22 @@ const COL = [
   new THREE.Color("#8ec5ff"), // soft sky blue
 ];
 
-/* The camera, as keys on the walkthrough's progress. Each form has two keys,
- * so the camera keeps drifting a little while its caption is up, and moves
- * on during the morph. Set by rendering each hold at 1440x900. */
+/* The camera on the block, set by rendering the hero at 1440x900: a low
+ * three-quarter view, slightly above the top face. */
 interface Key {
   n: number;
   pos: [number, number, number];
   look: [number, number, number];
 }
-// Mid-morph keys pull back and up, so the cubes crossing above the forms
-// stay in frame as one swarm instead of leaving the top of the screen.
-const mid = (m: number) => (MORPHS[m][0] + MORPHS[m][1]) / 2;
 export const CAMERA: Key[] = [
   { n: 0, pos: [15.5, 7.8, 19], look: [0, 3, 0] },
-  { n: MORPHS[0][0], pos: [16, 8.1, 19.5], look: [0, 3, 0] },
-  { n: mid(0), pos: [30, 22, 46], look: [0, 11, 0] },
-  { n: MORPHS[0][1], pos: [32, 27, 46], look: [4, 0, 0] },
-  { n: MORPHS[1][0], pos: [28, 27, 49], look: [4, 0, 0] },
-  { n: mid(1), pos: [24, 24, 48], look: [0, 11, 0] },
-  { n: MORPHS[1][1], pos: [20, 13, 37], look: [4, 2, 0] },
-  { n: MORPHS[2][0], pos: [17, 13, 38], look: [4, 2, 0] },
-  { n: mid(2), pos: [14, 22, 46], look: [0, 9, 0] },
-  { n: MORPHS[2][1], pos: [9, 30, 40], look: [3, 0, 0] },
-  { n: MORPHS[3][0], pos: [5, 30, 41], look: [3, 0, 0] },
-  { n: mid(3), pos: [3, 28, 34], look: [0, 3, 0] },
-  { n: MORPHS[3][1], pos: [6, 44, 42], look: [1, 0, -1] },
-  { n: MORPHS[4][0], pos: [4, 44, 43], look: [1, 0, -1] },
-  { n: mid(4), pos: [22, 22, 42], look: [0, 10, 0] },
-  { n: MORPHS[4][1], pos: [16, 8.4, 19.5], look: [0, 3, 0] },
-  { n: 1, pos: [15.5, 8, 19], look: [0, 3, 0] },
+  { n: 1, pos: [15.5, 7.8, 19], look: [0, 3, 0] },
 ];
 
 export interface World {
-  /** walk: the walkthrough's progress, 0 to 1. crane: 0 on the cubes, 1
-   * looking up into the sky behind the partners section. */
+  /** walk: kept at 0 since the walkthrough became drawn objects (review,
+   * 2026-10-04); the cubes are the hero's alone. crane: how far the hero has
+   * scrolled away, 0 to 1, which tilts the camera up into the sky. */
   setState(walk: number, crane: number): void;
   setLoad(l: number): void;
   /** The pointer in canvas coordinates, -1 to 1, or null when it left. */
@@ -324,8 +305,7 @@ export function createWorld(
 
     // The pointer, on last frame's view: the block's outer cubes lift toward it, only while the
     // block is the form on screen and the load has landed.
-    const block =
-      (walk < MORPHS[0][0] || walk >= MORPHS[4][1]) && load >= 1 && crane < 0.3;
+    const block = load >= 1 && crane < 0.3;
     const want = block && px !== null ? 1 : 0;
     leanAmt += (want - leanAmt) * clamp(dt * 6);
     if (px !== null) {
@@ -359,8 +339,8 @@ export function createWorld(
     // The crane: up and looking into the sky, so the cubes sink out of the
     // frame while the partners section is over it.
     const c = easeInOut3(crane);
-    pos.y += 7 * c;
-    look.y += 34 * c;
+    pos.y += 4 * c;
+    look.y += 14 * c;
     frameIt(pos, look, c, dt);
 
     for (let i = 0; i < COUNT; i++) {
@@ -400,17 +380,6 @@ export function createWorld(
   }
 
   renderer.compile(scene, camera);
-  // Work out each morph's crossing layers one idle moment at a time, so no
-  // scroll frame pays for it (15 to 25ms each, measured in node).
-  let warmT = 0;
-  const warmNext = (m: number) => {
-    if (m >= MORPHS.length) return;
-    warmT = window.setTimeout(() => {
-      field.warm(m);
-      warmNext(m + 1);
-    }, 80);
-  };
-  warmNext(0);
 
   return {
     setState(w, c) {
@@ -463,7 +432,6 @@ export function createWorld(
       camera.updateProjectionMatrix();
     },
     dispose() {
-      window.clearTimeout(warmT);
       scene.traverse((o) => {
         const m = o as THREE.Mesh;
         if (m.geometry) m.geometry.dispose();

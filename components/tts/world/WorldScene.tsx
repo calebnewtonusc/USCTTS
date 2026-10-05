@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { capClip, clamp, easeInOut3, easeOut3, prog } from "../engine/math";
+import { clamp, easeOut3, prog } from "../engine/math";
 import type { World } from "./world";
 import { worldBridge } from "./bridge";
 
@@ -14,74 +14,21 @@ export interface Numbers {
   shortlist: number;
 }
 
-/* Two parts of one world, with the partners section between them (Caleb,
- * 2026-10-04: a load-in that makes you say woah, then Clay and Perplexity,
- * then the walkthrough). The canvas is fixed behind all three, so it is the
- * same cubes the whole way: they build the block on load, the camera cranes
- * up into the sky while the partners section passes, comes back down to
- * them, and they take one form per example. Every value is a function of the
- * scroll, followed at 0.2 a frame, so it all reverses.
+/* The hero and the walkthrough, with Clay and Perplexity between them.
+ *
+ * The cubes are the hero's alone: 216 of them build a block on a 2.2s load
+ * clock beside the H1, and the outer ones lift toward the pointer. The
+ * walkthrough is four drawn objects a business owner recognizes (review,
+ * 2026-10-04: the cube forms couldn't be read in one look). Everything is a
+ * function of the scroll, so it all reverses.
  *
  * Geometry is read once per resize, never in the scroll path: scroll only
  * reads window.scrollY, so a scroll event can't force a layout. */
 
-const FOLLOW = 0.2;
 const LOAD_MS = 2200;
 const RISE = 0.18;
 const RISE_PX = 12;
-const COPY_STARTS = [0.42, 0.5, 0.56, 0.64, 0.7];
-const WALK_VIEWPORTS = 9;
-
-interface Cap {
-  id: string;
-  in: number;
-  out: number;
-  title: string;
-  body: string;
-}
-/* One example per form, each a before and after a business owner recognizes
- * and a student would want to build. Examples, never claimed as past client
- * results (docs/RUBRIC-tts.md). Windows sit in the holds in field.ts. */
-const CAPS: Cap[] = [
-  {
-    id: "emails",
-    in: 0.12,
-    out: 0.245,
-    title: "Your team answers the same emails all week",
-    body: "We set up AI that drafts them, so your people just check them and hit send.",
-  },
-  {
-    id: "crm",
-    in: 0.33,
-    out: 0.455,
-    title: "Your leads live in a spreadsheet",
-    body: "We set up a CRM that keeps itself up to date, so every contact and deal is where your team can find it.",
-  },
-  {
-    id: "customers",
-    in: 0.54,
-    out: 0.665,
-    title: "You need more customers",
-    body: "We build the lists and the outreach that find them. The red ones are the people actually worth reaching.",
-  },
-  {
-    id: "teach",
-    in: 0.75,
-    out: 0.855,
-    title: "Your people don't know how to use AI yet",
-    body: "We teach them, and we're building a curriculum like that for a client's students right now.",
-  },
-  {
-    id: "build",
-    in: 0.92,
-    out: 2,
-    title: "Members learn all of it by building it",
-    body: "Whatever is eating a team's time, we figure out where AI fits and build it with them.",
-  },
-];
-const CAP_RAMP = 0.03;
-const railTarget = (c: Cap) =>
-  Math.min(0.985, c.in + Math.min(0.5, (Math.min(c.out, 1) - c.in) * 0.45));
+const COPY_STARTS = [0.42, 0.5, 0.56, 0.64];
 
 function useReduced() {
   const [reduced, setReduced] = useState(false);
@@ -95,7 +42,32 @@ function useReduced() {
   return reduced;
 }
 
-/** The hero: the load-in, and the fixed canvas the whole world draws on. */
+type Box = { l: number; r: number; t: number; b: number };
+/** The ink of an element on screen: its text lines and buttons, so a block
+ * element's empty width never counts. */
+function inkOf(el: HTMLElement, dy: number): Box | null {
+  const out = { l: Infinity, r: -Infinity, t: Infinity, b: -Infinity };
+  const add = (r: DOMRect) => {
+    if (!r.width || !r.height) return;
+    out.l = Math.min(out.l, r.left);
+    out.r = Math.max(out.r, r.right);
+    out.t = Math.min(out.t, r.top + dy);
+    out.b = Math.max(out.b, r.bottom + dy);
+  };
+  const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const range = document.createRange();
+  for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+    if (!n.textContent?.trim()) continue;
+    range.selectNodeContents(n);
+    for (const r of range.getClientRects()) add(r);
+  }
+  el.querySelectorAll<HTMLElement>(".btn").forEach((b) =>
+    add(b.getBoundingClientRect()),
+  );
+  return out.r > out.l ? out : null;
+}
+
+/** The hero: the load-in, on a canvas that lives inside it. */
 export function WorldHero({ nums }: { nums: Numbers }) {
   const sec = useRef<HTMLElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -114,169 +86,66 @@ export function WorldHero({ nums }: { nums: Numbers }) {
       last = 0,
       banked = 0,
       odd = false;
-    let target = window.scrollY,
-      cur = target;
     const t0 = performance.now();
     let worldT0 = -1;
     let pointerMoved = 0;
+    let scrolled = 0;
     const lines = copy.current
       ? [...copy.current.querySelectorAll<HTMLElement>("[data-line]")]
       : [];
 
-    // Measured once per resize.
-    let H = window.innerHeight;
-    let heroH = 1,
-      partnersMid = 1,
-      walkTop = 2,
-      walkTravel = 1;
-    let caps: HTMLElement[] = [];
-    let rail: HTMLElement[] = [];
-    // The copy's text box on screen, per thing that can be up: the hero,
-    // then each caption. Text nodes and buttons only, so a block element's
-    // empty width never counts.
-    type Box = { l: number; r: number; t: number; b: number };
-    let heroBox: Box | null = null;
-    let capBoxes: (Box | null)[] = [];
-    const inkOf = (el: HTMLElement, dy: number): Box | null => {
-      const out = { l: Infinity, r: -Infinity, t: Infinity, b: -Infinity };
-      const add = (r: DOMRect) => {
-        if (!r.width || !r.height) return;
-        out.l = Math.min(out.l, r.left);
-        out.r = Math.max(out.r, r.right);
-        out.t = Math.min(out.t, r.top + dy);
-        out.b = Math.max(out.b, r.bottom + dy);
-      };
-      const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-      const range = document.createRange();
-      for (let n = walk.nextNode(); n; n = walk.nextNode()) {
-        if (!n.textContent?.trim()) continue;
-        range.selectNodeContents(n);
-        for (const r of range.getClientRects()) add(r);
-      }
-      el.querySelectorAll<HTMLElement>(".btn").forEach((b) => add(b.getBoundingClientRect()));
-      return out.r > out.l ? out : null;
-    };
-    // The rule is 48px of air between text and cubes. The camera's fit is an
-    // estimate (perspective, the idle drift), measured up to 16px short at
-    // 1440, so it aims for 72.
+    // The rule is 48px of air between text and cubes. The camera's fit is
+    // an estimate (perspective, the idle drift), measured up to 16px short
+    // at 1440, so it aims for 72.
     const AIR = 72;
-    let navBottom = 64;
-    const boxFor = (ink: Box | null): Box | null => {
-      if (!ink) return null;
-      const W = window.innerWidth;
-      if (W >= 768) return { l: ink.r + AIR, r: W - 56, t: navBottom + 16, b: H - 16 };
-      // On a phone the copy is at the foot, so the cubes go above it.
-      return { l: 12, r: W - 36, t: navBottom + 12, b: ink.t - 24 };
-    };
+    let W = window.innerWidth,
+      H = window.innerHeight;
+    let heroH = 1,
+      heroTop = 0,
+      navBottom = 64;
+    let fit: Box | null = null;
     const layout = () => {
+      W = window.innerWidth;
       H = window.innerHeight;
       const y = window.scrollY;
       const nav = document.querySelector(".nav");
       navBottom = nav ? nav.getBoundingClientRect().bottom + y : 64;
       // The hero ends exactly at the fold, under whatever bar sits above
       // the nav, so its copy and both buttons are on the first screen.
-      const heroTop = hero.getBoundingClientRect().top + y;
+      heroTop = hero.getBoundingClientRect().top + y;
       hero.style.height = `${Math.max(480, H - Math.max(0, heroTop))}px`;
       heroH = hero.offsetHeight;
       const copyEl = copy.current;
+      let ink: Box | null = null;
       if (copyEl) {
-        // Measured as it sits at the top of the page, with every line up.
-        const saved = lines.map((ln) => [ln.style.opacity, ln.style.transform]);
+        // Measured with every line up, in canvas pixels.
+        const saved = lines.map((ln) => ln.style.transform);
         lines.forEach((ln) => (ln.style.transform = "none"));
-        heroBox = inkOf(copyEl, y);
-        lines.forEach((ln, i) => {
-          ln.style.opacity = saved[i][0];
-          ln.style.transform = saved[i][1];
-        });
+        const top = hero.getBoundingClientRect().top;
+        ink = inkOf(copyEl, -top);
+        lines.forEach((ln, i) => (ln.style.transform = saved[i]));
       }
-      const partners = document.querySelector<HTMLElement>(".partners");
-      const walk = document.querySelector<HTMLElement>(".world-walk");
-      if (partners) {
-        const r = partners.getBoundingClientRect();
-        partnersMid = r.top + y + r.height / 2 - H / 2;
-      } else partnersMid = heroH;
-      if (walk) {
-        walkTop = walk.getBoundingClientRect().top + y;
-        walkTravel = Math.max(1, walk.offsetHeight - H);
-        caps = [...walk.querySelectorAll<HTMLElement>(".w-cap")];
-        rail = [...walk.querySelectorAll<HTMLElement>(".w-rail-btn")];
-        // Captions are measured as they sit in the pinned screen.
-        const pin = walk.querySelector<HTMLElement>(".w-pin");
-        const pinTop = pin ? pin.getBoundingClientRect().top : 0;
-        capBoxes = caps.map((c) => {
-          const d = c.style.display,
-            cp = c.style.clipPath;
-          c.style.display = "";
-          c.style.clipPath = "none";
-          const b = inkOf(c, -pinTop);
-          c.style.display = d;
-          c.style.clipPath = cp;
-          return b;
-        });
-      } else {
-        walkTop = partnersMid + H;
-        walkTravel = 1;
-      }
-      partnersMid = Math.max(
-        heroH * 0.6,
-        Math.min(partnersMid, walkTop - H * 0.3),
-      );
+      const cw = cv.clientWidth || W,
+        ch = cv.clientHeight || heroH;
+      const navIn = Math.max(0, navBottom - heroTop);
+      fit = !ink
+        ? null
+        : W >= 768
+          ? { l: ink.r + AIR, r: cw - 40, t: navIn + 16, b: ch - 24 }
+          : { l: 12, r: cw - 12, t: navIn + 12, b: ink.t - 24 };
+      world?.setBox(fit);
     };
     layout();
 
-    let lastAct = -2;
-    let opacity = 1;
-    const paint = (y: number) => {
-      // Hero copy rises on the load clock; it scrolls away with the page.
+    const paint = () => {
       const load = Math.min(1, (performance.now() - t0) / LOAD_MS);
       lines.forEach((ln, i) => {
         const n = easeOut3(clamp((load - COPY_STARTS[i]) / RISE));
         ln.style.opacity = n.toFixed(3);
         ln.style.transform = `translateY(${((1 - n) * RISE_PX).toFixed(2)}px)`;
       });
-
-      const crane =
-        y < partnersMid
-          ? easeInOut3(prog(y, heroH * 0.2, partnersMid))
-          : 1 - easeInOut3(prog(y, partnersMid, walkTop));
-      const N = clamp((y - walkTop) / walkTravel);
-      const end = walkTop + walkTravel;
-      // The exit: the canvas fades into the paper while the last caption is
-      // still up, so the block ends with no edge and nothing under it.
-      opacity = 1 - prog(y, end - H * 0.45, end - H * 0.05);
-      cv.style.opacity = opacity.toFixed(3);
-      cv.style.visibility = opacity <= 0 ? "hidden" : "";
-      world?.setState(N, crane);
-
-      let act = -1;
-      caps.forEach((node, i) => {
-        const c = CAPS[i];
-        if (!c) return;
-        const a = prog(N, c.in, c.in + CAP_RAMP);
-        const b = prog(N, c.out - CAP_RAMP, c.out);
-        const hidden = a <= 0 || b >= 1;
-        node.style.display = hidden ? "none" : "";
-        if (!hidden) {
-          node.style.clipPath = capClip(a, b);
-          act = i;
-        }
-      });
-      // The box the cubes keep to: the hero's while it is on screen, then
-      // the caption that is up, or the next one to come.
-      let k = act;
-      if (k < 0) {
-        k = CAPS.findIndex((c) => c.in > N);
-        if (k < 0) k = CAPS.length - 1;
-      }
-      world?.setBox(boxFor(y < heroH * 0.6 ? heroBox : (capBoxes[k] ?? null)));
-      if (act !== lastAct) {
-        lastAct = act;
-        rail.forEach((b, i) => {
-          b.classList.toggle("is-on", i === act);
-          if (i === act) b.setAttribute("aria-current", "step");
-          else b.removeAttribute("aria-current");
-        });
-      }
+      // As the hero scrolls away the camera tilts up a little into the sky.
+      world?.setState(0, clamp((scrolled - heroTop) / heroH));
       return load;
     };
 
@@ -287,23 +156,17 @@ export function WorldHero({ nums }: { nums: Numbers }) {
       last = now;
       if (world && worldT0 >= 0)
         world.setLoad(Math.min(1, (now - worldT0) / LOAD_MS));
-      const d = target - cur;
-      cur = Math.abs(d) < 0.5 ? target : cur + d * FOLLOW;
-      const load = paint(cur);
-      const worldLoading = worldT0 >= 0 && now - worldT0 < LOAD_MS;
-      // While anything moves, every frame renders. At rest only the ambient
-      // motion is left, so it renders every other frame: 60 a second on a
-      // 120Hz display, half the GPU work while someone reads.
+      const load = paint();
+      const onScreen = scrolled < heroTop + heroH;
       const moving =
-        Math.abs(target - cur) > 0.5 ||
         load < 1 ||
-        worldLoading ||
+        (worldT0 >= 0 && now - worldT0 < LOAD_MS) ||
         now - pointerMoved < 400;
       odd = !odd;
-      if (opacity > 0 && (moving || odd)) world?.frame(banked);
-      // Past the world, nothing moves until the scroll comes back.
-      if (!document.hidden && (opacity > 0 || moving))
-        raf = requestAnimationFrame(frame);
+      // At rest only the ambient drift is left, so it renders every other
+      // frame: 60 a second on a 120Hz display.
+      if (onScreen && (moving || odd)) world?.frame(banked);
+      if (!document.hidden && onScreen) raf = requestAnimationFrame(frame);
     };
     const kick = () => {
       if (!raf && !document.hidden) {
@@ -312,15 +175,11 @@ export function WorldHero({ nums }: { nums: Numbers }) {
       }
     };
     const onScroll = () => {
-      target = window.scrollY;
+      scrolled = window.scrollY;
       kick();
     };
-    const size = () => {
-      world?.resize(
-        Math.max(1, window.innerWidth),
-        Math.max(1, window.innerHeight),
-      );
-    };
+    const size = () =>
+      world?.resize(Math.max(1, cv.clientWidth), Math.max(1, cv.clientHeight));
     const onResize = () => {
       layout();
       size();
@@ -328,10 +187,10 @@ export function WorldHero({ nums }: { nums: Numbers }) {
     };
     const onPointer = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
-      world?.setPointer(
-        (e.clientX / window.innerWidth) * 2 - 1,
-        -(e.clientY / H) * 2 + 1,
-      );
+      // The canvas fills the hero from its top, so its y is page y less the
+      // hero's top.
+      const cy = e.clientY + scrolled - heroTop;
+      world?.setPointer((e.clientX / W) * 2 - 1, -(cy / heroH) * 2 + 1);
       pointerMoved = performance.now();
       kick();
     };
@@ -340,7 +199,6 @@ export function WorldHero({ nums }: { nums: Numbers }) {
       pointerMoved = performance.now();
       kick();
     };
-    // Late layout (fonts, images) moves the sections; re-measure then.
     const ro = new ResizeObserver(() => layout());
     ro.observe(document.body);
     document.addEventListener("visibilitychange", kick);
@@ -348,9 +206,9 @@ export function WorldHero({ nums }: { nums: Numbers }) {
     window.addEventListener("resize", onResize);
     window.addEventListener("pointermove", onPointer, { passive: true });
     document.documentElement.addEventListener("pointerleave", onLeave);
+    scrolled = window.scrollY;
     kick();
 
-    // three.js loads after first paint, so the copy is up before it is.
     import("./world")
       .then(({ createWorld }) => {
         if (dead) return;
@@ -365,21 +223,19 @@ export function WorldHero({ nums }: { nums: Numbers }) {
           return;
         }
         size();
+        world.setBox(fit);
         // A visitor who arrives mid-page skips the load-in.
         const assemble = window.scrollY < H * 0.5;
         world.setLoad(assemble ? 0 : 1);
         worldT0 = assemble ? performance.now() : -1;
-        paint(cur);
+        paint();
         world.frame(banked);
         setReady(true);
         if (new URLSearchParams(window.location.search).has("capture"))
           (window as unknown as { __ttsWorld: unknown }).__ttsWorld = {
             bounds: () => world?.bounds(),
           };
-        worldBridge.qualify = () => ({
-          x: window.innerWidth * 0.66,
-          y: window.innerHeight * 0.45,
-        });
+        worldBridge.qualify = () => ({ x: W * 0.66, y: H * 0.45 });
         kick();
       })
       .catch(() => {
@@ -425,9 +281,9 @@ export function WorldHero({ nums }: { nums: Numbers }) {
           </span>
         </h1>
         <p className="w-lede" data-line>
-          If a company needs AI work done, we do it, automations, CRM, GTM
-          engineering, agents, even teaching their people. Members learn all of
-          it by building it.
+          If a company needs AI work done, we do it: drafting emails, keeping a
+          CRM up to date, finding customers, teaching their staff. Members learn
+          all of it by building it.
         </p>
         <div className="w-actions" data-line>
           <Link className="btn btn-primary" href="/apply">
@@ -445,71 +301,344 @@ export function WorldHero({ nums }: { nums: Numbers }) {
   );
 }
 
-/** The walkthrough: the captions and the rail over the same fixed canvas. */
+/* ---------- the walkthrough ----------
+ * Four beats, one screen of scroll each. A beat's caption and object stay
+ * up until the next crossfades in, and inside a beat the object plays on
+ * the beat's own progress p, written to one CSS variable (--p) per frame.
+ * Every item's motion is computed in CSS from --p and its index, so nothing
+ * pops: it is all one continuous function of the scroll. The data is
+ * generic and made up: no real companies or people. */
+
+interface Beat {
+  id: string;
+  title: string;
+  body: string;
+}
+const BEATS: Beat[] = [
+  {
+    id: "emails",
+    title: "Your team answers the same emails all week",
+    body: "We set up AI that drafts the replies, so your people just check each one and hit send.",
+  },
+  {
+    id: "crm",
+    title: "Your leads live in a spreadsheet",
+    body: "We move them into a CRM that keeps itself up to date, so every contact and deal is where your team can find it.",
+  },
+  {
+    id: "customers",
+    title: "You need more customers",
+    body: "We build the list of everyone you could reach, mark the few actually worth it, and write the outreach to them.",
+  },
+  {
+    id: "teach",
+    title: "Your people don't know how to use AI yet",
+    body: "We teach them with questions from their own work, and we're building a curriculum like that for one client's students right now.",
+  },
+];
+// Where a beat's caption crossfades, as a share of one beat.
+const FADE = 0.14;
+
+/* The four objects are drawn in SVG, one family: a white card with a soft
+ * shadow, a 14 unit radius, a title bar, and the page's ink, sky, gold and
+ * cardinal. Each reads --p from its beat; every item's own --k comes from
+ * --p and its index --i in world.css, so items play in turn and move
+ * continuously. The data is made up and generic. */
+const v = (o: Record<string, number>) =>
+  Object.fromEntries(Object.entries(o).map(([k, n]) => [`--${k}`, n])) as React.CSSProperties;
+
+const EMAILS: [string, string, string][] = [
+  ["Order question", "Can I move my delivery to Friday?", "Yes, Friday works. I've moved it for you."],
+  ["New customer", "Do you ship to Canada?", "We do, usually in 5 to 7 business days."],
+  ["Billing", "I was charged twice in March", "Sorry! I've refunded the second charge."],
+  ["Restock", "Is the blue one back in stock?", "It's back next week. Want me to hold one?"],
+  ["Booking", "Table for six on Saturday?", "You're booked for six at 7pm. See you then!"],
+];
+function Inbox() {
+  const RH = 66;
+  return (
+    <svg className="wo" viewBox="0 0 520 380" role="img" aria-label="An inbox where AI drafts each reply">
+      <rect className="wo-frame" x="0.5" y="0.5" width="519" height="379" rx="14" />
+      <text className="wo-t" x="20" y="30">Inbox</text>
+      <text className="wo-t wo-dim" x="500" y="30" textAnchor="end">5 waiting</text>
+      <line className="wo-rule" x1="0" x2="520" y1="47.5" y2="47.5" />
+      {EMAILS.map(([from, subj, draft], i) => (
+        <g key={subj} className="wo-mail" style={v({ i })} transform={`translate(0 ${48 + i * RH})`}>
+          <rect className="wo-mail-bg" x="1" y="0" width="518" height={RH} rx={i === EMAILS.length - 1 ? 13 : 0} />
+          <circle className="wo-av" cx="34" cy="33" r="15" />
+          <text className="wo-av-t" x="34" y="38" textAnchor="middle">{from[0]}</text>
+          <text className="wo-s wo-dim" x="62" y="20">{from}</text>
+          <text className="wo-t" x="62" y="39">{subj}</text>
+          <text className="wo-s wo-draft" x="62" y="57">{draft}</text>
+          <g className="wo-tag">
+            <rect x="436" y="9" width="66" height="20" rx="10" />
+            <text x="469" y="23" textAnchor="middle">Drafted</text>
+          </g>
+          {i < EMAILS.length - 1 && <line className="wo-rule" x1="0" x2="520" y1={RH - 0.5} y2={RH - 0.5} />}
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+const SHEET = [
+  ["jen m", "jen@??", "called 3/2?", "maybe"],
+  ["Dan Ortiz", "N/A", "", "HOT!!"],
+  ["sam (expo)", "sam.k@mail", "left vm", ""],
+  ["Priya", "", "emailed 2x", "follow up"],
+];
+const CARDS = [
+  ["Jen M.", "New lead", "Call booked Thursday"],
+  ["Dan Ortiz", "Talking", "Sent pricing"],
+  ["Sam K.", "New lead", "Met at the expo"],
+  ["Priya S.", "Talking", "Follow up Monday"],
+];
+function SheetToCrm() {
+  const COL = [16, 136, 262, 404];
+  return (
+    <svg className="wo" viewBox="0 0 520 380" role="img" aria-label="A messy spreadsheet whose rows become tidy CRM cards">
+      <g className="wo-sheet">
+        <rect className="wo-frame" x="0.5" y="0.5" width="519" height="300" rx="14" />
+        <text className="wo-t wo-mono" x="20" y="30">leads_FINAL_v3.xlsx</text>
+        <line className="wo-rule" x1="0" x2="520" y1="47.5" y2="47.5" />
+        <rect className="wo-head" x="1" y="48" width="518" height="40" />
+        {["name", "email", "notes", "??"].map((h, k) => (
+          <text key={h} className="wo-s wo-mono wo-dim" x={COL[k]} y="73">{h}</text>
+        ))}
+        {[1, 2, 3].map((k) => (
+          <line key={k} className="wo-rule" x1={COL[k] - 10.5} x2={COL[k] - 10.5} y1="48" y2="300" />
+        ))}
+        {SHEET.map((r, i) => (
+          <g key={i} className="wo-cell-row" style={v({ i })} transform={`translate(0 ${88 + i * 53})`}>
+            <line className="wo-rule" x1="0" x2="520" y1="0.5" y2="0.5" />
+            {r.map((c, k) => (
+              <text key={k} className="wo-s wo-mono" x={COL[k]} y="32">{c}</text>
+            ))}
+          </g>
+        ))}
+      </g>
+      {CARDS.map(([name, stage, note], i) => (
+        <g key={name} className="wo-card" style={v({ i })} transform={`translate(${(i % 2) * 266} ${Math.floor(i / 2) * 150 + 20})`}>
+          <rect className="wo-frame" x="0.5" y="0.5" width="253" height="132" rx="12" />
+          <text className="wo-h" x="20" y="36">{name}</text>
+          <g className={stage === "Talking" ? "wo-pill is-on" : "wo-pill"}>
+            <rect x="20" y="50" width={stage === "Talking" ? 62 : 72} height="20" rx="10" />
+            <text x={stage === "Talking" ? 51 : 56} y="64" textAnchor="middle">{stage}</text>
+          </g>
+          <text className="wo-s wo-dim" x="20" y="96">{note}</text>
+          <text className="wo-xs" x="20" y="118">Updated today</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+const PROSPECTS: [string, string, boolean][] = [
+  ["A bakery in Pasadena", "12 people", false],
+  ["A dental office in Irvine", "Opened last month", true],
+  ["A gym chain in Burbank", "3 locations", false],
+  ["A law firm in Glendale", "Hiring an office manager", true],
+  ["A florist in Santa Monica", "2 people", false],
+  ["A clinic in Long Beach", "Just raised prices", false],
+  ["A car wash in Torrance", "Seasonal", false],
+  ["A café in Echo Park", "Opening a second spot", true],
+];
+function Prospects() {
+  const keep = PROSPECTS.map((p, i) => (p[2] ? i : -1)).filter((i) => i >= 0);
+  const rest = PROSPECTS.map((p, i) => (p[2] ? -1 : i)).filter((i) => i >= 0);
+  const to = new Map<number, number>();
+  [...keep, ...rest].forEach((i, k) => to.set(i, k));
+  // The rows worth reaching are drawn last, so they pass over the rest.
+  const order = [...rest, ...keep];
+  return (
+    <svg className="wo" viewBox="0 0 520 404" role="img" aria-label="A list of possible customers where the ones worth reaching are marked and rise to the top">
+      <rect className="wo-frame" x="0.5" y="0.5" width="519" height="403" rx="14" />
+      <text className="wo-t" x="20" y="30">Everyone you could reach</text>
+      <text className="wo-t wo-dim" x="500" y="30" textAnchor="end">8 of 412</text>
+      <line className="wo-rule" x1="0" x2="520" y1="47.5" y2="47.5" />
+      <g transform="translate(0 50)">
+        {order.map((i) => {
+          const [name, note, worth] = PROSPECTS[i];
+          return (
+            <g key={name} className={worth ? "wo-pro is-worth" : "wo-pro"} style={v({ i, to: to.get(i) ?? i })}>
+              <rect className="wo-pro-bg" x="2" y="0" width="516" height="44" />
+              <line className="wo-rule" x1="16" x2="504" y1="43.5" y2="43.5" />
+              <circle className="wo-mark" cx="26" cy="22" r="5" />
+              <text className="wo-t" x="44" y="27">{name}</text>
+              {worth ? (
+                <g className="wo-tag wo-tag-red">
+                  <rect x="400" y="12" width="104" height="20" rx="10" />
+                  <text x="452" y="26" textAnchor="middle">Worth reaching</text>
+                </g>
+              ) : (
+                <text className="wo-s wo-dim" x="500" y="27" textAnchor="end">{note}</text>
+              )}
+            </g>
+          );
+        })}
+      </g>
+    </svg>
+  );
+}
+
+const ANSWER = [
+  ["Paste in three emails you've already sent", "that sound like you."],
+  ["Ask it to write the new one in the same voice."],
+  ["Then read it out loud before you send it."],
+];
+function Lesson() {
+  return (
+    <svg className="wo" viewBox="0 0 520 330" role="img" aria-label="A lesson card where a student's question gets answered step by step">
+      <rect className="wo-frame" x="0.5" y="0.5" width="519" height="329" rx="14" />
+      <text className="wo-t" x="20" y="30">Lesson 3: Getting AI to sound like you</text>
+      <text className="wo-t wo-dim" x="500" y="30" textAnchor="end">3 of 8</text>
+      <line className="wo-rule" x1="0" x2="520" y1="47.5" y2="47.5" />
+      <circle className="wo-av wo-av-gold" cx="38" cy="90" r="15" />
+      <text className="wo-av-t wo-av-gold-t" x="38" y="95" textAnchor="middle">M</text>
+      <rect className="wo-bubble" x="64" y="66" width="400" height="58" rx="14" />
+      <text className="wo-t" x="80" y="90">How do I get it to write emails that sound</text>
+      <text className="wo-t" x="80" y="111">like our store, not like a robot?</text>
+      {ANSWER.map((lines, i) => (
+        <g key={i} className="wo-step" style={v({ i })} transform={`translate(0 ${150 + i * 54})`}>
+          <circle className="wo-num" cx="92" cy="14" r="11" />
+          <text className="wo-num-t" x="92" y="18" textAnchor="middle">{i + 1}</text>
+          {lines.map((l, k) => (
+            <text key={k} className="wo-t" x="114" y={19 + k * 21}>{l}</text>
+          ))}
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+const OBJECTS = [Inbox, SheetToCrm, Prospects, Lesson];
+
+/** The walkthrough: four beats on one pinned screen. */
 export function WorldWalk() {
   const sec = useRef<HTMLElement>(null);
   const reduced = useReduced();
 
-  const go = (c: Cap) => {
+  useEffect(() => {
+    if (reduced) return;
+    const el = sec.current;
+    if (!el) return;
+    const beats = [...el.querySelectorAll<HTMLElement>(".ww-beat")];
+    const rail = [...el.querySelectorAll<HTMLElement>(".w-rail-btn")];
+    let top = 0,
+      travel = 1,
+      raf = 0,
+      lastAct = -1;
+    const layout = () => {
+      top = el.getBoundingClientRect().top + window.scrollY;
+      travel = Math.max(1, el.offsetHeight - window.innerHeight);
+    };
+    const tick = () => {
+      raf = 0;
+      const N = clamp((window.scrollY - top) / travel) * BEATS.length;
+      let act = 0;
+      beats.forEach((b, k) => {
+        // Fully up across its own share, crossfading with its neighbours
+        // over FADE at each edge; the first and last never fade at the ends.
+        const inA = k === 0 ? 1 : prog(N, k - FADE / 2, k + FADE / 2);
+        const outA =
+          k === BEATS.length - 1
+            ? 0
+            : prog(N, k + 1 - FADE / 2, k + 1 + FADE / 2);
+        const o = inA * (1 - outA);
+        b.style.opacity = o.toFixed(3);
+        b.style.visibility = o <= 0.001 ? "hidden" : "";
+        // The object plays across the middle of its share.
+        b.style.setProperty("--p", prog(N - k, 0.08, 0.82).toFixed(4));
+        if (o > 0.5) act = k;
+      });
+      if (act !== lastAct) {
+        lastAct = act;
+        rail.forEach((b, i) => {
+          b.classList.toggle("is-on", i === act);
+          if (i === act) b.setAttribute("aria-current", "step");
+          else b.removeAttribute("aria-current");
+        });
+      }
+    };
+    const kick = () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    const onResize = () => {
+      layout();
+      kick();
+    };
+    const ro = new ResizeObserver(onResize);
+    ro.observe(document.body);
+    layout();
+    tick();
+    window.addEventListener("scroll", kick, { passive: true });
+    window.addEventListener("resize", onResize);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener("scroll", kick);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [reduced]);
+
+  const go = (k: number) => {
     const el = sec.current;
     if (!el) return;
     const travel = el.offsetHeight - window.innerHeight;
     const top = el.getBoundingClientRect().top + window.scrollY;
     window.scrollTo({
-      top: top + railTarget(c) * travel,
+      top: top + ((k + 0.55) / BEATS.length) * travel,
       behavior: reduced ? "auto" : "smooth",
     });
   };
 
-  if (reduced)
-    return (
-      <section
-        className="world-walk is-still"
-        aria-label="What that looks like"
-      >
-        {CAPS.map((c) => (
-          <div key={c.id} className="w-still">
-            <p className="w-kicker">For example</p>
-            <h2 className="w-cap-title">{c.title}</h2>
-            <p>{c.body}</p>
-          </div>
-        ))}
-      </section>
-    );
-
   return (
     <section
-      className="world-walk"
+      className={reduced ? "world-walk is-still" : "world-walk"}
       ref={sec}
-      style={{ height: `${WALK_VIEWPORTS * 100}vh` }}
       aria-label="What that looks like"
     >
       <div className="w-pin">
-        <div className="w-wash" aria-hidden="true" />
-        {CAPS.map((c, i) => (
-          <div
-            key={c.id}
-            className={i === CAPS.length - 1 ? "w-cap is-final" : "w-cap"}
-            style={{ display: "none" }}
-          >
-            {i < CAPS.length - 1 && <p className="w-kicker">For example</p>}
-            <h2 className="w-cap-title">{c.title}</h2>
-            <p className="w-cap-b">{c.body}</p>
-          </div>
-        ))}
-        <nav className="w-rail" aria-label="Examples">
-          {CAPS.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              className="w-rail-btn"
-              aria-label={`Go to: ${c.title}`}
-              onClick={() => go(c)}
+        {BEATS.map((b, k) => {
+          const Obj = OBJECTS[k];
+          return (
+            <div
+              key={b.id}
+              className="ww-beat"
+              style={
+                reduced || k === 0
+                  ? undefined
+                  : { opacity: 0, visibility: "hidden" }
+              }
             >
-              <span />
-            </button>
-          ))}
-        </nav>
+              <div className="ww-cap">
+                <h2 className="w-cap-title">
+                  <span className="w-kicker">For example</span>
+                  {b.title}
+                </h2>
+                <p className="w-cap-b">{b.body}</p>
+              </div>
+              <div className="ww-obj">
+                <Obj />
+              </div>
+            </div>
+          );
+        })}
+        {!reduced && (
+          <nav className="w-rail" aria-label="Examples">
+            {BEATS.map((b, k) => (
+              <button
+                key={b.id}
+                type="button"
+                className={k === 0 ? "w-rail-btn is-on" : "w-rail-btn"}
+                aria-label={`Go to: ${b.title}`}
+                onClick={() => go(k)}
+              >
+                <span />
+              </button>
+            ))}
+          </nav>
+        )}
       </div>
     </section>
   );

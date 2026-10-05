@@ -1,17 +1,33 @@
-/* The world: a fixed canvas behind the hero, the partners section and the
- * walkthrough. Scoped under .tts.
+/* The hero and the walkthrough. Scoped under .tts.
  *
- * The canvas sits at z-index 0 and those three sections at 1, so copy is
- * always over the cubes. Past the walkthrough the canvas has faded to
- * nothing and is hidden, so the sections after it never sit under it. */
+ * The cubes' canvas lives inside the hero and scrolls away with it, so it
+ * can never sit over anything after it (review, 2026-10-04: a fixed sky
+ * painted over People, both doors and the footer). */
 
+.tts .world-hero {
+  position: relative;
+  overflow: hidden;
+  margin-top: -64px;
+  height: 100vh;
+  height: 100svh;
+  min-height: 480px;
+  --edge: max(var(--gutter), calc((100vw - var(--wide)) / 2 + var(--gutter)));
+}
 .tts .w-sky {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 0;
   pointer-events: none;
-  /* The sky before the canvas is up, the same pale blue into warm white. */
+  /* The sky before the canvas is up: pale blue into warm white. */
   background: linear-gradient(180deg, #d3e5f4 0%, #f9f7f2 62%, #f6f3ec 100%);
+}
+/* The foot of the hero fades into the page's paper, so it hands over to
+ * the partners section with no edge. */
+.tts .w-sky::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 22%;
+  background: linear-gradient(180deg, rgba(244, 240, 233, 0), var(--paper));
 }
 .tts .w-canvas {
   position: absolute;
@@ -23,37 +39,7 @@
   transition: opacity 500ms cubic-bezier(0, 0, 0.2, 1);
 }
 .tts .w-canvas.is-ready {
-  transition: none;
-}
-
-.tts .world-hero,
-.tts .world-walk,
-.tts .partners {
-  position: relative;
-  z-index: 1;
-}
-.tts .world-hero {
-  margin-top: -64px;
-  height: 100vh;
-  height: 100svh;
-  min-height: 560px;
-  --edge: max(var(--gutter), calc((100vw - var(--wide)) / 2 + var(--gutter)));
-}
-.tts .world-walk {
-  --edge: max(var(--gutter), calc((100vw - var(--wide)) / 2 + var(--gutter)));
-}
-.tts .w-pin .w-wash {
-  /* The walkthrough's wash fades in at the top too, so it never shows an
-   * edge as the section rises in under the partners section. */
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
-}
-.tts .w-pin {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100svh;
-  overflow: hidden;
+  opacity: 1;
 }
 
 /* A soft wash of warm white under the copy column, so ink type reads over
@@ -62,10 +48,6 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  /* It fades out at the foot, so the hero's wash never shows a bottom edge
-   * as the hero scrolls away over the sky. */
-  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
   background: linear-gradient(
     90deg,
     rgba(250, 249, 245, 0.9) 0%,
@@ -73,9 +55,7 @@
     rgba(250, 249, 245, 0) calc(var(--edge) + 700px)
   );
 }
-
-.tts .w-copy,
-.tts .w-cap {
+.tts .w-copy {
   position: absolute;
   z-index: 2;
   left: var(--edge);
@@ -86,11 +66,6 @@
   flex-direction: column;
   justify-content: center;
   padding-top: 64px;
-}
-.tts .w-pill {
-  font-size: 15px;
-  color: var(--ink-2);
-  margin-bottom: 16px;
 }
 .tts .w-title {
   font-size: clamp(42px, 5.6vw, 84px);
@@ -114,17 +89,47 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* ---------- the walkthrough ---------- */
+.tts .world-walk {
+  position: relative;
+  /* Four beats, one screen of scroll each, plus the screen it pins on. */
+  height: 500vh;
+}
+.tts .w-pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+/* Caption left, object right, on the page's own container, so the two
+ * columns hold at any width and never touch. */
+.tts .ww-beat {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding: 64px var(--gutter) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(48px, 6vw, 112px);
+  align-items: center;
+}
 .tts .w-kicker {
+  display: block;
   font-size: 14px;
+  line-height: 1.4;
+  letter-spacing: 0;
   color: var(--ink-3);
   margin-bottom: 12px;
 }
 .tts .w-cap-title {
-  font-size: clamp(32px, 3.6vw, 54px);
+  font-size: clamp(32px, 3.4vw, 52px);
   line-height: 1.08;
   letter-spacing: -0.02em;
   font-weight: 400;
-  max-width: 15ch;
 }
 .tts .w-cap-b {
   margin-top: 16px;
@@ -132,6 +137,173 @@
   line-height: 1.56;
   color: var(--ink-2);
   max-width: 34ch;
+}
+
+/* ---------- the four objects, drawn in SVG ----------
+ * Each reads --p, its beat's progress, 0 to 1. An item's own progress --k
+ * comes from --p and its index --i, clamped, so items play one after
+ * another and every one moves continuously. */
+.tts .wo {
+  --sky-ink: #2f6aa6;
+  --sky-soft: #eaf4ff;
+  --gold: #ffcc00;
+  --cardinal: #990000;
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: calc(100svh - 160px);
+  overflow: visible;
+}
+/* No shadows on the objects: SVG drop-shadow filters measured no faster
+ * than flat (p99 16.7ms either way, headed trace 2026-10-04), and the
+ * hairline frame carries the card. */
+.tts .wo text {
+  fill: var(--ink);
+}
+.tts .wo .wo-dim {
+  fill: var(--ink-2);
+}
+.tts .wo-t {
+  font-size: 15px;
+}
+.tts .wo-s {
+  font-size: 12.5px;
+}
+.tts .wo-xs {
+  font-size: 11px;
+  fill: var(--ink-3) !important;
+}
+.tts .wo-h {
+  font-size: 18px;
+}
+.tts .wo-mono {
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+.tts .wo-frame {
+  fill: #fff;
+  stroke: var(--rule);
+}
+.tts .wo-rule {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.tts .wo-av {
+  fill: var(--sky-soft);
+}
+.tts .wo .wo-av-t {
+  font-size: 13px;
+  fill: var(--sky-ink);
+}
+.tts .wo-av-gold {
+  fill: #fff1b8;
+}
+.tts .wo .wo-av-gold-t {
+  fill: #7a5a00;
+}
+.tts .wo-tag rect {
+  fill: var(--sky-soft);
+}
+.tts .wo .wo-tag text {
+  font-size: 12px;
+  fill: var(--sky-ink);
+}
+.tts .wo-tag-red rect {
+  fill: #f8e5e5;
+}
+.tts .wo .wo-tag-red text {
+  fill: var(--cardinal);
+}
+
+/* 1. The inbox: replies are drafted one by one, top to bottom. */
+.tts .wo-mail {
+  --k: clamp(0, calc((var(--p, 0) - var(--i) * 0.17) * 5), 1);
+}
+.tts .wo-mail-bg {
+  fill: var(--sky-soft);
+  opacity: calc(var(--k) * 0.85);
+}
+.tts .wo-mail .wo-tag,
+.tts .wo-mail .wo-draft {
+  opacity: var(--k);
+}
+.tts .wo .wo-draft {
+  fill: var(--sky-ink);
+}
+.tts .wo-mail .wo-tag {
+  transform: translateX(calc((1 - var(--k)) * -8px));
+}
+
+/* 2. The spreadsheet's rows lift off and settle as CRM cards. */
+.tts .wo-sheet {
+  opacity: clamp(0, calc(1 - var(--p, 0) * 1.6), 1);
+}
+.tts .wo-head {
+  fill: #f6f4ef;
+}
+.tts .wo-cell-row {
+  --k: clamp(0, calc((var(--p, 0) - var(--i) * 0.14) * 3.2), 1);
+  opacity: calc(1 - var(--k));
+  translate: 0 calc(var(--k) * -14px);
+}
+.tts .wo-card {
+  --k: clamp(0, calc((var(--p, 0) - 0.1 - var(--i) * 0.14) * 3.2), 1);
+  opacity: var(--k);
+  translate: 0 calc((1 - var(--k)) * -18px);
+}
+.tts .wo-pill rect {
+  fill: #f1eee8;
+}
+.tts .wo .wo-pill text {
+  font-size: 12px;
+  fill: var(--ink-2);
+}
+.tts .wo-pill.is-on rect {
+  fill: var(--sky-soft);
+}
+.tts .wo .wo-pill.is-on text {
+  fill: var(--sky-ink);
+}
+
+/* 3. The list: the rows worth reaching get a cardinal mark, then rise to
+ * the top while the rest close up beneath them. */
+.tts .wo-pro {
+  --mark: clamp(0, calc((var(--p, 0) - var(--i) * 0.035) * 4), 1);
+  --move: clamp(0, calc((var(--p, 0) - 0.45) * 2.4), 1);
+  translate: 0 calc((var(--i) + (var(--to) - var(--i)) * var(--move)) * 44px);
+}
+.tts .wo-pro-bg {
+  fill: #fff;
+}
+.tts .wo-pro:not(.is-worth) text {
+  opacity: calc(1 - var(--move) * 0.4);
+}
+.tts .wo-mark {
+  fill: #fff;
+  stroke: var(--rule);
+  stroke-width: 1.5;
+}
+.tts .wo-pro.is-worth .wo-mark {
+  stroke: var(--cardinal);
+  fill: rgba(153, 0, 0, var(--mark));
+}
+.tts .wo-pro .wo-tag {
+  opacity: var(--mark);
+}
+
+/* 4. The lesson: a question from the room, answered step by step. */
+.tts .wo-bubble {
+  fill: #fff8db;
+}
+.tts .wo-step {
+  --k: clamp(0, calc((var(--p, 0) - 0.08 - var(--i) * 0.26) * 3.5), 1);
+  opacity: var(--k);
+  translate: 0 calc((1 - var(--k)) * 8px);
+}
+.tts .wo-num {
+  fill: var(--gold);
+}
+.tts .wo .wo-num-t {
+  font-size: 12px;
 }
 
 /* ---------- the rail ---------- */
@@ -177,10 +349,9 @@
   scale: 0.96;
 }
 
-/* ---------- narrow: the copy moves to the foot ---------- */
+/* ---------- narrow ---------- */
 @media (max-width: 767px) {
-  .tts .w-copy,
-  .tts .w-cap {
+  .tts .w-copy {
     top: auto;
     bottom: 28px;
     justify-content: flex-end;
@@ -198,12 +369,23 @@
   .tts .w-cap-b {
     font-size: 16px;
   }
+  /* The object above, the caption under it. */
+  .tts .ww-beat {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    align-content: center;
+    gap: 28px;
+    padding-top: 72px;
+  }
+  .tts .ww-obj {
+    order: -1;
+  }
   .tts .w-rail {
     right: 2px;
   }
 }
 
-/* ---------- reduced motion: the copy as a plain sequence ---------- */
+/* ---------- reduced motion: everything in its finished state ---------- */
 .tts .world-hero.is-still {
   margin-top: 0;
   height: auto;
@@ -220,20 +402,17 @@
   display: none;
 }
 .tts .world-walk.is-still {
-  max-width: var(--wide);
-  margin-inline: auto;
-  padding: 0 var(--gutter) 72px;
+  height: auto;
 }
-.tts .w-still {
-  margin: 56px 0 0;
-  max-width: 640px;
+.tts .world-walk.is-still .w-pin {
+  position: static;
+  height: auto;
+  overflow: visible;
 }
-.tts .w-still p:last-child {
-  margin-top: 16px;
-  font-size: 18px;
-  line-height: 1.56;
-  color: var(--ink-2);
-  max-width: 34ch;
+.tts .world-walk.is-still .ww-beat {
+  position: relative;
+  --p: 1;
+  padding-block: 56px;
 }
 
 /* The hero copy is in the server HTML, and the load clock lifts it in once

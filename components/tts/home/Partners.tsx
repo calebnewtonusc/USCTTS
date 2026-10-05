@@ -110,7 +110,8 @@ export default function Partners() {
       </ul>
       <p id="partners-line" className="partners-line">
         We&apos;re official Clay and Perplexity partners through Blue Modern
-        Advisory, so as a member you build with both, on real company work.
+        Advisory, so our members build with both, and the companies we work
+        with get tools built on them.
       </p>
     </section>
   );
