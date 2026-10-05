@@ -363,10 +363,10 @@ class EmailDraft(TTSScene):
 # 3. Three rows, one person: entity resolution.
 # ---------------------------------------------------------------------------
 
-COLUMNS = [("NAME", 2.7), ("PHONE", 3.2), ("EMAIL", 4.3), ("LAST VISIT", 2.3)]
+COLUMNS = [("NAME", 2.7), ("PHONE", 3.2), ("EMAIL", 4.75), ("LAST VISIT", 2.1)]
 ROWS = [
     ["Dan Ortiz", "213-555-0148", "", "Mar 3"],
-    ["dan ortiz␣", "", "dan.ortiz@gmail.com", ""],
+    ["dan ortiz␣", "", "dan.ortiz@example.com", ""],
     ["D. Ortiz", "(213) 555-0148", "", "Aug 19"],
 ]
 
@@ -473,7 +473,7 @@ class CrmMerge(TTSScene):
 
         name = sans("Dan Ortiz", 52, INK, BOLD)
         name.move_to(card.get_corner(UL) + np.array([0.75, -0.6, 0]), aligned_edge=LEFT)
-        fields = [("PHONE", "(213) 555-0148"), ("EMAIL", "dan.ortiz@gmail.com"), ("LAST VISIT", "Aug 19")]
+        fields = [("PHONE", "(213) 555-0148"), ("EMAIL", "dan.ortiz@example.com"), ("LAST VISIT", "Aug 19")]
         keys, values = VGroup(), VGroup()
         for j, (k, v) in enumerate(fields):
             y = name.get_y() - 0.82 - j * 0.52
