@@ -1,101 +1,39 @@
-/* The GTM and AI machine, as one world at golden hour.
+/* One field of cubes, and every beat of the home page is a form it takes.
  *
- * docs/DIRECTION-tts-v3.md: a physical world made of the objects of the work,
- * at cinematic scale. Raw accounts pour into a funnel, enrichment pipes twist
- * across the land, a magnifier qualifies records on a belt, agents work at
- * their stations, a mailbox sends, and a pipeline chart climbs. Scroll flies
- * one camera through it. Everything is built here from primitives, so there
- * are no model files to load and nothing anyone else made.
+ * Caleb, 2026-10-04, on the world it replaces (a funnel, pipes, a ring, a
+ * conveyor, cabinets, a sign, a chart and figures): "No one would look at
+ * this and think it is as cool or cohesive as the lemma and clay sites." So
+ * there is one object here, the way Lemma's bricks become diamonds, then the
+ * lattice, then the mark. The same cubes, each with a stable index, go from a
+ * messy pile to a grid, to a loop that runs on its own, to sorted columns, to
+ * a stream whose keepers turn cardinal, to rows like lessons, and settle into
+ * a line on the horizon that the next section picks up.
  *
- * Framework-free on purpose: Scene.tsx owns scroll, the follower and the DOM,
- * and drives this through setN / setLoad / frame. */
+ * Every morph is continuous and collision free by construction: a moving cube
+ * lifts straight up out of its spot, crosses at its own layer above
+ * everything, and drops straight down into its new spot. Columns at rest are
+ * at least a cube apart, so straight rises and drops cannot meet, and a
+ * column of stacked cubes shares one layer slot so it moves as a stack.
+ * `fieldFrame` is pure, so the no-intersection claim is checked numerically
+ * over every morph, not argued.
+ *
+ * Framework-free on purpose: WorldScene.tsx owns scroll and the DOM, and
+ * drives this through setN / setLoad / frame. */
 
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 
-/* Every box in the world is rounded, so the stations read as one family of
- * made objects rather than primitives. The radius follows the smallest side,
- * capped at 0.45, so thin parts stay crisp. */
-function rbox(w: number, h: number, d: number) {
-  const r = Math.min(0.45, Math.min(w, h, d) * 0.22);
-  return r < 0.03 ? new THREE.BoxGeometry(w, h, d) : new RoundedBoxGeometry(w, h, d, 3, r);
-}
-
 export interface WorldNumbers {
-  /** Share of records the qualification station sets aside (the verify rule). */
-  asideShare: number;
+  /** Share of cubes that are keepers: the run's shortlist over its roles. */
+  keptShare: number;
 }
-
-/* Light and airy: a pale stone ground under a soft dawn sky, objects in three
- * restrained neutrals, and USC cardinal as the one accent, only on what is
- * moving or live (data in the pipes, kept records, agents at work, the flag,
- * the build's wavefront). */
-const COL = {
-  skyTop: new THREE.Color("#c9d3da"),
-  skyMid: new THREE.Color("#e9e4dc"),
-  skyLow: new THREE.Color("#f7e6cf"),
-  haze: new THREE.Color("#efe6d8"),
-  sun: new THREE.Color("#fff0da"),
-  groundA: new THREE.Color("#e6dfd3"),
-  groundB: new THREE.Color("#d6cdbf"),
-  bone: new THREE.Color("#f4efe6"),
-  boneDark: new THREE.Color("#cdc4b6"),
-  // The page ink, for the few dark parts and the outline.
-  cardinal: new THREE.Color("#3a3034"),
-  gold: new THREE.Color("#a3162b"),
-  ink: new THREE.Color("#2a1b1e"),
-  slate: new THREE.Color("#8d8379"),
-  ash: new THREE.Color("#b3aba1"),
-};
-
-/* Where each station stands. The camera path below is written against these,
- * and the stations are spread along -z so one forward move visits them in
- * reading order. */
-export const STATIONS = {
-  funnel: new THREE.Vector3(0, 0, 0),
-  magnifier: new THREE.Vector3(26, 0, -62),
-  agents: new THREE.Vector3(6, 0, -98),
-  mailbox: new THREE.Vector3(-16, 0, -128),
-  chart: new THREE.Vector3(8, 0, -160),
-};
-
-/* The camera, as keys on N. Close pairs make a hold: the camera drifts a few
- * metres while a caption is up, then travels. Positions and targets were set
- * by rendering each key at 1440x900 and moving things until the station sat
- * where its caption does not. */
-interface Key {
-  n: number;
-  pos: [number, number, number];
-  look: [number, number, number];
-}
-export const CAMERA: Key[] = [
-  // The opening frame is high and behind the funnel, so the whole machine
-  // recedes to the right and the copy column sits over open ground (review,
-  // 2026-10-04: "systems" sat over the first desk). Chosen from six renders.
-  { n: 0, pos: [22, 74, 96], look: [-34, -6, -120] },
-  { n: 0.055, pos: [30, 96, 128], look: [-34, -6, -120] },
-  { n: 0.12, pos: [-30, 13, 36], look: [-4, 13, 0] },
-  { n: 0.19, pos: [-26, 11, 31], look: [-4, 12, 0] },
-  { n: 0.26, pos: [46, 20, 8], look: [6, 9, -30] },
-  { n: 0.32, pos: [48, 18, 0], look: [8, 8, -36] },
-  { n: 0.39, pos: [50, 15, -28], look: [27, 9, -62] },
-  { n: 0.5, pos: [52, 14, -31], look: [27, 8, -62] },
-  { n: 0.58, pos: [-16, 13, -64], look: [2, 7, -98] },
-  { n: 0.64, pos: [-12, 12, -68], look: [2, 7, -98] },
-  { n: 0.71, pos: [16, 13, -98], look: [-20, 10, -128] },
-  { n: 0.77, pos: [14, 12, -101], look: [-20, 10, -128] },
-  { n: 0.84, pos: [54, 22, -116], look: [2, 11, -160] },
-  { n: 0.89, pos: [57, 24, -113], look: [2, 11, -160] },
-  { n: 0.93, pos: [-20, 70, -250], look: [32, 2, -80] },
-  { n: 1, pos: [-17, 66, -244], look: [32, 2, -82] },
-];
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const prog = (v: number, a: number, b: number) => clamp((v - a) / (b - a));
-const easeOut3 = (t: number) => 1 - Math.pow(1 - t, 3);
 const easeIn3 = (t: number) => t * t * t;
 const easeInOut3 = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const smooth = (t: number) => t * t * (3 - 2 * t);
 
 function rng(seed: number) {
   let t = seed;
@@ -107,7 +45,6 @@ function rng(seed: number) {
     return ((a ^ (a >>> 14)) >>> 0) / 4294967296;
   };
 }
-
 function hash(x: number, z: number) {
   const s = Math.sin(x * 127.1 + z * 311.7) * 43758.5453;
   return s - Math.floor(s);
@@ -115,10 +52,8 @@ function hash(x: number, z: number) {
 function vnoise(x: number, z: number) {
   const xi = Math.floor(x),
     zi = Math.floor(z);
-  const xf = x - xi,
-    zf = z - zi;
-  const u = xf * xf * (3 - 2 * xf),
-    v = zf * zf * (3 - 2 * zf);
+  const u = smooth(x - xi),
+    v = smooth(z - zi);
   const a = hash(xi, zi),
     b = hash(xi + 1, zi),
     c = hash(xi, zi + 1),
@@ -126,66 +61,603 @@ function vnoise(x: number, z: number) {
   return a * (1 - u) * (1 - v) + b * u * (1 - v) + c * (1 - u) * v + d * u * v;
 }
 
-/** Ground height. Flat along the path, rising into hills away from it. */
-function groundY(x: number, z: number) {
-  // Distance from the station corridor, a band from the funnel to the chart.
-  const pathX = 8 + Math.sin(z * 0.03) * 12;
-  const d = Math.abs(x - pathX);
-  const away = clamp((d - 30) / 70);
-  const far = clamp((-z - 200) / 120) + clamp((z - 40) / 80);
-  const hills =
-    vnoise(x * 0.018, z * 0.018) * 0.7 + vnoise(x * 0.05, z * 0.05) * 0.3;
-  return (away + far * 0.8) * (hills * 16 + 2) + vnoise(x * 0.2, z * 0.2) * 0.15;
+/* ---------- the field ---------- */
+
+export const COLS = 48;
+export const ROWS = 40;
+export const COUNT = COLS * ROWS;
+/** Cube edge. Every form keeps centres at least 1.1 apart on a shared axis,
+ * so 0.9 cubes always show air between them. */
+export const SIZE = 0.9;
+const Y0 = SIZE / 2;
+// Crossing layers: 1.0 apart, a cube plus air. Cubes only turn about the
+// vertical, so a cube is never taller than SIZE.
+const LAYER = 1.0;
+
+/** A form: where each cube sits. `col` is the id of the stacked column a cube
+ * is in (or -1 when the form is one cube high), `lev` its level in it. */
+interface Form {
+  x: Float32Array;
+  y: Float32Array;
+  z: Float32Array;
+  yaw: Float32Array;
+  col: Int32Array;
+  lev: Int32Array;
+  top: number;
+  /** Forms that move on their own rewrite their slots for a time here. */
+  live?: (s: number, f: Form) => void;
+}
+const blank = (): Form => ({
+  x: new Float32Array(COUNT),
+  y: new Float32Array(COUNT).fill(Y0),
+  z: new Float32Array(COUNT),
+  yaw: new Float32Array(COUNT),
+  col: new Int32Array(COUNT).fill(-1),
+  lev: new Int32Array(COUNT),
+  top: Y0,
+});
+
+interface Slot {
+  x: number;
+  y: number;
+  z: number;
+  yaw?: number;
+  col?: number;
+  lev?: number;
+  keep: boolean;
+}
+/** Keepers fill the flagged slots in index order, everyone else fills the
+ * rest in index order, so the mapping is stable on every load. */
+function assign(slots: Slot[], keep: Uint8Array, f: Form, apply = true) {
+  // Both lists in reading order (rows front to back, left to right, bottom
+  // up), the same order the grid indexes its cubes in, so a morph moves
+  // neighbours to neighbours and few paths cross.
+  const order0 = (p: Slot, q: Slot) =>
+    Math.round(p.z / 1.4) - Math.round(q.z / 1.4) || p.x - q.x || p.y - q.y;
+  const kept = slots.filter((s) => s.keep).sort(order0);
+  const rest = slots.filter((s) => !s.keep).sort(order0);
+  let a = 0,
+    b = 0;
+  const order: Slot[] = new Array(COUNT);
+  for (let i = 0; i < COUNT; i++) order[i] = keep[i] ? kept[a++] : rest[b++];
+  if (!apply) return order;
+  for (let i = 0; i < COUNT; i++) {
+    const s = order[i];
+    f.x[i] = s.x;
+    f.y[i] = s.y;
+    f.z[i] = s.z;
+    f.yaw[i] = s.yaw ?? 0;
+    f.col[i] = s.col ?? -1;
+    f.lev[i] = s.lev ?? 0;
+    f.top = Math.max(f.top, s.y);
+  }
+  return order;
 }
 
-/* Stepped shading, stolen from the three.js cel-shading practice
- * (docs/STEAL-tts.md): a four-band gradient map on MeshToonMaterial, so light
- * falls on each object in flat planes like a printed illustration, and the
- * one-pixel ink outline reads as drawn rather than as a render artefact. The
- * bands are the ground's own values, not black, so shadows stay warm. */
-let toonRamp: THREE.DataTexture | null = null;
-function ramp() {
-  if (toonRamp) return toonRamp;
-  const v = [118, 176, 222, 255];
-  const data = new Uint8Array(v.length * 4);
-  v.forEach((x, i) => data.set([x, x, x, 255], i * 4));
-  toonRamp = new THREE.DataTexture(data, v.length, 1, THREE.RGBAFormat);
-  toonRamp.minFilter = toonRamp.magFilter = THREE.NearestFilter;
-  toonRamp.needsUpdate = true;
-  return toonRamp;
+/** Flag the first `n` slots under an ordering, leave the rest. */
+function flagFirst(
+  slots: Slot[],
+  n: number,
+  key: (s: Slot, i: number) => number,
+) {
+  const idx = slots
+    .map((_, i) => i)
+    .sort((p, q) => key(slots[p], p) - key(slots[q], q));
+  for (let k = 0; k < idx.length; k++) slots[idx[k]].keep = k < n;
 }
-// The second argument was roughness for the old standard material; toon
-// shading has none, and the call sites keep it as a note of intent.
-const mat = (
-  color: THREE.Color,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _rough = 0.82,
-  extra: { emissive?: THREE.Color; emissiveIntensity?: number; side?: THREE.Side } = {},
-) => new THREE.MeshToonMaterial({ color, gradientMap: ramp(), ...extra });
 
-function person(m: THREE.Material) {
-  // A tiny human, 1.8 units tall, for scale beside the machines.
-  const g = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.28, 0.9, 4, 10), m);
-  body.position.y = 0.75;
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 10), m);
-  head.position.y = 1.58;
-  body.castShadow = head.castShadow = true;
-  g.add(body, head);
-  return g;
+/* The beats, as windows on N. Each morph runs over its window; between them
+ * the field holds a form. Caption windows in WorldScene sit in the holds. */
+export const MORPHS: [number, number][] = [
+  [0.15, 0.21], // pile -> grid
+  [0.28, 0.35], // grid -> loop
+  [0.43, 0.5], // loop -> columns
+  [0.58, 0.65], // columns -> stream
+  [0.73, 0.8], // stream -> lessons
+  [0.86, 0.92], // lessons -> horizon
+];
+/** The grid hold starts when the pile has landed in it. */
+export const GRID_AT = MORPHS[0][1];
+// When the keepers turn cardinal: as they land in the stream's tail.
+const KEEP_TINT: [number, number] = [0.63, 0.66];
+
+export interface Field {
+  count: number;
+  keep: Uint8Array;
+  forms: Form[];
+  /** Writes every cube's position and yaw at scroll N, time s (seconds), load
+   * l (0 to 1), and the grid ripple's time since entry (ms, or -1). */
+  frame(N: number, s: number, l: number, rippleMs: number, out: Form): void;
+  /** Precompute one morph's crossing layers (about 15ms each, measured in
+   * node on an M4 Pro), so the first frame of that morph does not pay it. */
+  warm(m: number): void;
+  tint(N: number): number;
 }
+
+export function createField(keptShare: number): Field {
+  const R = rng(20261004);
+  // Keepers: the run's shortlist share of the field (31 of 388 on
+  // 2026-09-15 gives 153 cubes). Bounded so every form has room for them.
+  const C = Math.round(clamp(keptShare, 0.03, 0.12) * COUNT);
+  const keep = new Uint8Array(COUNT);
+  {
+    const ids = Array.from({ length: COUNT }, (_, i) => i);
+    for (let i = ids.length - 1; i > 0; i--) {
+      const j = Math.floor(R() * (i + 1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    for (let k = 0; k < C; k++) keep[ids[k]] = 1;
+  }
+
+  /* 1. the grid: 48 by 40 at 1.6. */
+  const grid = blank();
+  for (let i = 0; i < COUNT; i++) {
+    grid.x[i] = ((i % COLS) - (COLS - 1) / 2) * 1.6;
+    grid.z[i] = (Math.floor(i / COLS) - (ROWS - 1) / 2) * 1.6;
+  }
+
+  /* 0. the pile: the grid spread to twice its pitch, warped by a slow field
+   * and jittered, each cube turned at random. Neighbours stay more than 1.3
+   * apart (checked), so a turned cube (0.64 half diagonal) never meets
+   * another. */
+  const pile = blank();
+  for (let i = 0; i < COUNT; i++) {
+    const gx = grid.x[i] * 2,
+      gz = grid.z[i] * 2;
+    const wx = (vnoise(gx * 0.02 + 3.1, gz * 0.02) - 0.5) * 8;
+    const wz = (vnoise(gx * 0.02, gz * 0.02 + 7.7) - 0.5) * 8;
+    pile.x[i] = gx + wx + (R() - 0.5) * 1.2;
+    pile.z[i] = gz + wz + (R() - 0.5) * 1.2;
+    pile.yaw[i] = R() * Math.PI * 2;
+  }
+  // Where each cube starts before the load: high over its own landing spot,
+  // so the fall is a straight drop and two falls never meet.
+  const dropH = Float32Array.from({ length: COUNT }, () => 30 + R() * 46);
+  const dropAt = Float32Array.from({ length: COUNT }, () => R() * 0.55);
+
+  /* 2. the loop: ten lanes round a rounded rectangle, every lane running on
+   * its own at one speed. A closed path, so nothing ever wraps. */
+  const LANES = 10;
+  const RC = 10; // corner radius at the centre lane
+  const laneOff = (l: number) => (l - (LANES - 1) / 2) * 1.4;
+  let half = { a: 30, b: 16 };
+  const perim = (off: number) =>
+    4 * (half.a + half.b) + 2 * Math.PI * (RC + off);
+  const laneN: number[] = [];
+  for (;;) {
+    laneN.length = 0;
+    let sum = 0;
+    for (let l = 0; l < LANES; l++) {
+      laneN.push(Math.floor(perim(laneOff(l)) / 1.45));
+      sum += laneN[l];
+    }
+    if (sum >= COUNT) {
+      // Trim the longest lanes so the total is exact; their spacing only
+      // grows, so no lane gets tighter than 1.45.
+      let extra = sum - COUNT;
+      for (let l = LANES - 1; extra > 0; l = (l - 1 + LANES) % LANES, extra--)
+        laneN[l]--;
+      break;
+    }
+    half = { a: half.a + 0.5, b: half.b + 0.25 };
+  }
+  /** A point on the rounded rectangle at arc length d, offset `off` outward. */
+  const onLoop = (off: number, d: number) => {
+    const A = half.a,
+      B = half.b,
+      r = RC + off;
+    const segs = [
+      2 * A,
+      (Math.PI / 2) * r,
+      2 * B,
+      (Math.PI / 2) * r,
+      2 * A,
+      (Math.PI / 2) * r,
+      2 * B,
+      (Math.PI / 2) * r,
+    ];
+    const P = segs.reduce((p, q) => p + q, 0);
+    d = ((d % P) + P) % P;
+    let k = 0;
+    while (d > segs[k]) d -= segs[k++];
+    // Corners centred at (+-A, +-B); straights run clockwise seen from above.
+    switch (k) {
+      case 0:
+        return { x: -A + d, z: -B - r, yaw: 0 };
+      case 1: {
+        const a = -Math.PI / 2 + d / r;
+        return {
+          x: A + Math.cos(a) * r,
+          z: -B + Math.sin(a) * r,
+          yaw: -(a + Math.PI / 2),
+        };
+      }
+      case 2:
+        return { x: A + r, z: -B + d, yaw: -Math.PI / 2 };
+      case 3: {
+        const a = d / r;
+        return {
+          x: A + Math.cos(a) * r,
+          z: B + Math.sin(a) * r,
+          yaw: -(a + Math.PI / 2),
+        };
+      }
+      case 4:
+        return { x: A - d, z: B + r, yaw: Math.PI };
+      case 5: {
+        const a = Math.PI / 2 + d / r;
+        return {
+          x: -A + Math.cos(a) * r,
+          z: B + Math.sin(a) * r,
+          yaw: -(a + Math.PI / 2),
+        };
+      }
+      case 6:
+        return { x: -A - r, z: B - d, yaw: Math.PI / 2 };
+      default: {
+        const a = Math.PI + d / r;
+        return {
+          x: -A + Math.cos(a) * r,
+          z: -B + Math.sin(a) * r,
+          yaw: -(a + Math.PI / 2),
+        };
+      }
+    }
+  };
+  const loopSlots: Slot[] = [];
+  const loopLane: number[] = [];
+  const loopPhase: number[] = [];
+  for (let l = 0; l < LANES; l++)
+    for (let j = 0; j < laneN[l]; j++) {
+      loopLane.push(l);
+      loopPhase.push(j / laneN[l]);
+      const p0 = onLoop(laneOff(l), (j / laneN[l]) * perim(laneOff(l)));
+      loopSlots.push({ x: p0.x, y: Y0, z: p0.z, keep: false });
+    }
+  // Keepers spread evenly through the loop.
+  flagFirst(loopSlots, C, (_, i) => (i * 7919) % COUNT);
+  const loop = blank();
+  const loopOrder = assign(loopSlots, keep, loop, false);
+  const loopIdx = new Int32Array(COUNT);
+  for (let i = 0; i < COUNT; i++) loopIdx[i] = loopSlots.indexOf(loopOrder[i]);
+  const LOOP_SPEED = 4.2; // units a second
+  loop.live = (s, f) => {
+    for (let i = 0; i < COUNT; i++) {
+      const k = loopIdx[i];
+      const off = laneOff(loopLane[k]);
+      const p = onLoop(off, (loopPhase[k] + 0) * perim(off) + s * LOOP_SPEED);
+      f.x[i] = p.x;
+      f.z[i] = p.z;
+      f.y[i] = Y0;
+      f.yaw[i] = p.yaw;
+    }
+  };
+  loop.live(0, loop);
+
+  /* 3. columns: records sorted into twelve tidy columns, six cubes wide,
+   * longest at the left, like a sorted table seen from above. Flat on
+   * purpose: stacks have to lift as stacks, and a 16 high stack needed a 150
+   * unit climb to cross without touching anything (measured, 2026-10-04). */
+  const colSlots: Slot[] = [];
+  {
+    const n = 12,
+      lanes = 6;
+    const rows = COUNT / lanes;
+    const L = Array.from({ length: n }, (_, c) => Math.round(40 - c * 2.4));
+    let total = L.reduce((p, q) => p + q, 0);
+    for (let c = n - 1; total !== rows; c = (c - 1 + n) % n) {
+      L[c] += total < rows ? 1 : -1;
+      total += total < rows ? 1 : -1;
+    }
+    L.sort((p, q) => q - p);
+    L.forEach((len, c) => {
+      const cx = (c - (n - 1) / 2) * 11;
+      for (let r = 0; r < len; r++)
+        for (let q = 0; q < lanes; q++)
+          colSlots.push({
+            x: cx + (q - (lanes - 1) / 2) * 1.4,
+            y: Y0,
+            // Every column starts on the same front edge.
+            z: 26 - r * 1.4,
+            keep: false,
+          });
+    });
+  }
+  // Keepers head each column, the longest columns first.
+  flagFirst(colSlots, C, (s) => -s.z * 100 + s.x * 0.01);
+  const columns = blank();
+  assign(colSlots, keep, columns);
+
+  /* 4. the stream: a wedge that narrows from 48 lanes to 8, keepers last. */
+  const streamSlots: Slot[] = [];
+  {
+    let r = 0;
+    while (streamSlots.length < COUNT) {
+      const w = Math.max(8, Math.round(48 - (40 * r) / 60));
+      for (let q = 0; q < w && streamSlots.length < COUNT; q++)
+        streamSlots.push({
+          x: r,
+          y: Y0,
+          z: (q - (w - 1) / 2) * 1.4,
+          keep: false,
+        });
+      r++;
+    }
+    for (const s of streamSlots) s.x = (s.x - (r - 1) / 2) * 1.4;
+  }
+  flagFirst(streamSlots, C, (_, i) => -i);
+  const stream = blank();
+  assign(streamSlots, keep, stream);
+  const streamBase = Float32Array.from(stream.x);
+  stream.live = (s, f) => {
+    // A swell runs down the stream toward the narrow end: flow, in place.
+    for (let i = 0; i < COUNT; i++) {
+      const w = Math.max(0, Math.sin(streamBase[i] * 0.3 - s * 3));
+      f.y[i] = Y0 + 0.55 * w * w * w * w * w * w;
+    }
+  };
+  stream.top = Y0 + 0.55;
+
+  /* 5. lessons: eight pages laid out four by two, each one lines of cubes
+   * like lines of text, keepers as the heading lines. */
+  const lessonSlots: Slot[] = [];
+  {
+    const per = COUNT / 8;
+    for (let pg = 0; pg < 8; pg++) {
+      const px = ((pg % 4) - 1.5) * 22;
+      const pz = (Math.floor(pg / 4) - 0.5) * 46 - 4;
+      let n = 0,
+        line = 0,
+        gap = 0;
+      while (n < per) {
+        // A heading, then paragraphs of four lines with a blank line between.
+        const len = line === 0 ? 10 : Math.min(per - n, 9 + Math.floor(hash(pg, line) * 4));
+        for (let u = 0; u < len && n < per; u++, n++)
+          lessonSlots.push({
+            x: px + (u - 5.5) * 1.4,
+            y: Y0,
+            z: pz - 16 + (line + gap) * 1.4,
+            lev: line,
+            keep: false,
+          });
+        if (line === 0 || line % 4 === 0) gap++;
+        line++;
+      }
+    }
+  }
+  flagFirst(lessonSlots, C, (s) => (s.lev ?? 0) * 1000 + (s.x + 60) + (s.z + 60) * 0.001);
+  for (const s of lessonSlots) s.lev = undefined;
+  const lessons = blank();
+  assign(lessonSlots, keep, lessons);
+
+  /* 6. the horizon: one long low band, keepers at its centre. */
+  const bandSlots: Slot[] = [];
+  for (let u = 0; u < 160; u++)
+    for (let v = 0; v < 12; v++)
+      bandSlots.push({
+        x: (u - 79.5) * 1.4,
+        y: Y0,
+        z: (v - 5.5) * 1.4,
+        keep: false,
+      });
+  flagFirst(bandSlots, C, (s) => Math.abs(s.x) * 10 + Math.abs(s.z) * 0.01);
+  const band = blank();
+  assign(bandSlots, keep, band);
+
+  const forms = [pile, grid, loop, columns, stream, lessons, band];
+  const gridMinX = grid.x[0] - 12,
+    gridMaxX = -grid.x[0] + 12;
+
+  /* The layer each cube crosses at, per morph. Two cubes share a layer only
+   * if their straight paths across never come within 1.35 of each other (a
+   * turned cube's footprint, both ways, plus margin), found by checking
+   * every pair's closest approach. A stack takes consecutive layers in level
+   * order, so it lifts and lands as a stack and its cubes never pass each
+   * other. Greedy colouring, tallest stacks first. */
+  const CLEAR = 1.35;
+  function layersFor(a: Form, b: Form) {
+    const ax = a.x,
+      az = a.z,
+      bx = b.x,
+      bz = b.z;
+    const nb: number[][] = Array.from({ length: COUNT }, () => []);
+    const lo = new Float32Array(COUNT),
+      hi = new Float32Array(COUNT);
+    for (let i = 0; i < COUNT; i++) {
+      lo[i] = Math.min(ax[i], bx[i]) - CLEAR;
+      hi[i] = Math.max(ax[i], bx[i]) + CLEAR;
+    }
+    for (let i = 0; i < COUNT; i++)
+      for (let j = i + 1; j < COUNT; j++) {
+        if (hi[i] < lo[j] + CLEAR || hi[j] < lo[i] + CLEAR) continue;
+        const rx = ax[i] - ax[j],
+          rz = az[i] - az[j];
+        const dx = bx[i] - bx[j] - rx,
+          dz = bz[i] - bz[j] - rz;
+        const dd = dx * dx + dz * dz;
+        const t = dd > 1e-9 ? clamp(-(rx * dx + rz * dz) / dd) : 0;
+        const px = rx + dx * t,
+          pz = rz + dz * t;
+        if (px * px + pz * pz < CLEAR * CLEAR) {
+          nb[i].push(j);
+          nb[j].push(i);
+        }
+      }
+    // Groups: a stack on either side, else the cube alone.
+    const groups = new Map<number, number[]>();
+    for (let i = 0; i < COUNT; i++) {
+      const c = b.col[i] >= 0 ? b.col[i] : a.col[i] >= 0 ? a.col[i] + 100000 : -1 - i;
+      (groups.get(c) ?? groups.set(c, []).get(c)!).push(i);
+    }
+    const lev = (i: number) => (b.col[i] >= 0 ? b.lev[i] : a.lev[i]);
+    const list = [...groups.values()].map((g) => g.sort((p, q) => lev(p) - lev(q)));
+    list.sort((p, q) => q.length - p.length);
+    const layer = new Int32Array(COUNT).fill(-1);
+    const used = (i: number, c: number) => {
+      for (const j of nb[i]) if (layer[j] === c) return true;
+      return false;
+    };
+    for (const g of list) {
+      // Each cube of a stack goes strictly above the one under it.
+      let c = 0;
+      for (const i of g) {
+        while (used(i, c)) c++;
+        layer[i] = c++;
+      }
+    }
+    return layer;
+  }
+  // Morphs that touch the loop depend on where the loop stopped, so they are
+  // worked out when first needed and again only if the loop has moved since.
+  const layerCache: { key: number; layer: Int32Array }[] = [];
+
+  // The loop runs on its own clock, which only advances while the loop is
+  // the form on screen; during a morph it holds still.
+  let loopClock = 0,
+    lastS = -1;
+
+  const A = blank(),
+    B = blank();
+  const place = (f: Form, into: Form) => {
+    into.x.set(f.x);
+    into.y.set(f.y);
+    into.z.set(f.z);
+    into.yaw.set(f.yaw);
+    into.col.set(f.col);
+    into.lev.set(f.lev);
+    into.top = f.top;
+  };
+  const live = (k: number, s: number, into: Form) => {
+    const f = forms[k];
+    if (f === loop) loop.live!(loopClock, into);
+    else if (f.live) f.live(s, into);
+  };
+
+  /** Work out a morph's layers ahead of time, so its first frame is cheap. */
+  function warm(m: number) {
+    if (layerCache[m]) return;
+    place(forms[m], A);
+    live(m, 0, A);
+    place(forms[m + 1], B);
+    live(m + 1, 0, B);
+    const key = forms[m] === loop || forms[m + 1] === loop ? loopClock : 0;
+    layerCache[m] = { key, layer: layersFor(A, B) };
+  }
+
+  function frame(N: number, s: number, l: number, rippleMs: number, out: Form) {
+    let m = -1,
+      t = 0,
+      hold = 0;
+    for (let k = 0; k < MORPHS.length; k++) {
+      if (N >= MORPHS[k][1]) hold = k + 1;
+      else if (N > MORPHS[k][0]) {
+        m = k;
+        // Linear here: each phase eases on its own, and easing twice made
+        // the crossing peak at 24 units per 5px of scroll (measured).
+        t = prog(N, MORPHS[k][0], MORPHS[k][1]);
+      }
+    }
+    if (m < 0 && forms[hold] === loop && lastS >= 0) loopClock += clamp(s - lastS, 0, 0.1);
+    lastS = s;
+    if (m < 0) {
+      place(forms[hold], out);
+      live(hold, s, out);
+      if (hold === 0 && l < 1)
+        for (let i = 0; i < COUNT; i++)
+          out.y[i] += dropH[i] * (1 - easeIn3(clamp((l - dropAt[i]) / 0.45)));
+      if (hold === 1 && rippleMs >= 0) ripple(rippleMs, out);
+      return;
+    }
+    place(forms[m], A);
+    live(m, s, A);
+    place(forms[m + 1], B);
+    live(m + 1, s, B);
+    if (m === 0 && rippleMs >= 0) ripple(rippleMs, B);
+    if (m === 1 && rippleMs >= 0) ripple(rippleMs, A);
+    const key = forms[m] === loop || forms[m + 1] === loop ? loopClock : 0;
+    if (!layerCache[m] || layerCache[m].key !== key) layerCache[m] = { key, layer: layersFor(A, B) };
+    const layer = layerCache[m].layer;
+    const base = Math.max(A.top, B.top) + 2.4;
+    // Up over 0 to 0.3, across over 0.3 to 0.7, down over 0.7 to 1.
+    const up = smooth(prog(t, 0, 0.3)),
+      across = easeInOut3(prog(t, 0.3, 0.7)),
+      down = smooth(prog(t, 0.7, 1));
+    for (let i = 0; i < COUNT; i++) {
+      const layerY = base + layer[i] * LAYER;
+      out.x[i] = A.x[i] + (B.x[i] - A.x[i]) * across;
+      out.z[i] = A.z[i] + (B.z[i] - A.z[i]) * across;
+      out.y[i] = t < 0.7 ? A.y[i] + (layerY - A.y[i]) * up : layerY + (B.y[i] - layerY) * down;
+      let dy = B.yaw[i] - A.yaw[i];
+      dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+      out.yaw[i] = A.yaw[i] + dy * across;
+    }
+  }
+
+  /* The grid's sweep: one crest crosses the field once, 1800ms end to end,
+   * timed rather than scrolled (Lemma's lattice sweep). Vertical only, so a
+   * crest can never push a cube into its neighbour. */
+  const SWEEP_MS = 1800;
+  function ripple(ms: number, f: Form) {
+    const front = gridMinX + (gridMaxX - gridMinX) * clamp(ms / SWEEP_MS);
+    if (ms > SWEEP_MS) return;
+    for (let i = 0; i < COUNT; i++) {
+      const d = (f.x[i] + f.z[i] * 0.35 - front) / 3.2;
+      f.y[i] += 1.1 * Math.exp(-d * d);
+    }
+  }
+
+  return {
+    count: COUNT,
+    keep,
+    forms,
+    frame,
+    warm,
+    tint: (N) => prog(N, KEEP_TINT[0], KEEP_TINT[1]),
+  };
+}
+export const newForm = blank;
+
+/* ---------- the renderer ---------- */
+
+const PAPER = new THREE.Color("#f4f0e9");
+const CREAM = new THREE.Color("#f7f3ec");
+const CARDINAL = new THREE.Color("#a3162b");
+const INK = new THREE.Color("#2a1b1e");
+
+/* The camera, as keys on N, one per hold. Set by rendering each hold at
+ * 1440x900 and moving the camera until the form sat clear of the copy. */
+interface Key {
+  n: number;
+  pos: [number, number, number];
+  look: [number, number, number];
+}
+export const CAMERA: Key[] = [
+  { n: 0, pos: [6, 104, 150], look: [-44, 0, -28] },
+  { n: 0.055, pos: [10, 124, 178], look: [-44, 0, -28] },
+  { n: 0.1, pos: [8, 112, 158], look: [-22, 0, -8] },
+  { n: 0.24, pos: [14, 84, 118], look: [-10, 0, 0] },
+  { n: 0.39, pos: [10, 112, 136], look: [-10, 0, 4] },
+  { n: 0.54, pos: [6, 96, 146], look: [-20, 0, -2] },
+  { n: 0.69, pos: [-2, 106, 156], look: [6, 0, 0] },
+  { n: 0.83, pos: [16, 96, 124], look: [-10, 0, 4] },
+  { n: 0.93, pos: [0, 7, 92], look: [0, -1.4, 0] },
+  { n: 1, pos: [0, 7, 88], look: [0, -1.4, 0] },
+];
+/** Where the horizon line of cubes lands on screen, from the top. The seam
+ * into the partners section starts its hairline at the same 46%
+ * (home/Seams.tsx, SeamToPartners), so the line lands on the cubes. */
+const HORIZON_AT = 0.46;
 
 export interface World {
   setN(n: number): void;
   setLoad(l: number): void;
   frame(timeMs: number): void;
   resize(w: number, h: number): void;
-  /** Where the qualification station sits on the canvas, 0 to 1 each way. */
+  /** Where the field's centre sits on the canvas, 0 to 1 each way. */
   qualifyOnCanvas(): { x: number; y: number };
   dispose(): void;
-  /** For still renders: freeze ambient time at t and draw once. With
-   * sweepMs, the build is shown that far into its sweep. */
-  still(n: number, timeMs: number, sweepMs?: number, loadAt?: number): void;
+  /** For still renders: freeze time at t and draw once. */
+  still(n: number, timeMs: number, rippleMs?: number, loadAt?: number): void;
 }
 
 export function createWorld(
@@ -202,594 +674,78 @@ export function createWorld(
     Math.min(window.devicePixelRatio || 1, narrow ? 1.25 : 1.5),
   );
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.NeutralToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  // No tone mapping: the ground has to come out as the page's own paper, to
+  // the value, so the canvas has no edge against the page.
+  renderer.toneMapping = THREE.NoToneMapping;
   /* No real-time shadows. A headed trace on 2026-10-04 (Chrome, ANGLE Metal,
    * M4 Pro, DPR 2) showed GPU tasks of 120 to 270ms during a fast scroll
-   * through the world, each one a dropped stretch of frames; the shadow pass
-   * is the biggest per-frame GPU cost and the source of most pipeline
-   * variants. The toon bands and the ink outline carry the form without it. */
+   * through the world; the shadow pass was the biggest per-frame GPU cost.
+   * Toon bands and the ink outline carry the form without it. */
   renderer.shadowMap.enabled = false;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.setClearColor(PAPER, 1);
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(COL.haze, 170, 760);
+  scene.fog = new THREE.Fog(PAPER, 140, 360);
   const camera = new THREE.PerspectiveCamera(narrow ? 58 : 40, 1, 0.5, 1200);
 
-  /* ---------- sky: a gradient dome with the sun low in it ---------- */
-  const sunDir = new THREE.Vector3(-0.82, 0.26, -0.32).normalize();
-  const sky = new THREE.Mesh(
-    new THREE.SphereGeometry(900, 32, 16),
-    new THREE.ShaderMaterial({
-      side: THREE.BackSide,
-      depthWrite: false,
-      fog: false,
-      uniforms: {
-        top: { value: COL.skyTop },
-        mid: { value: COL.skyMid },
-        low: { value: COL.skyLow },
-        sun: { value: COL.sun },
-        sunDir: { value: sunDir },
-      },
-      vertexShader: `varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-      fragmentShader: `
-        uniform vec3 top; uniform vec3 mid; uniform vec3 low; uniform vec3 sun; uniform vec3 sunDir;
-        varying vec3 vDir;
-        void main(){
-          float h = clamp(vDir.y, -0.2, 1.0);
-          vec3 c = mix(low, mid, smoothstep(0.0, 0.18, h));
-          c = mix(c, top, smoothstep(0.18, 0.75, h));
-          float s = max(dot(normalize(vDir), sunDir), 0.0);
-          c += sun * (pow(s, 900.0) * 0.6 + pow(s, 24.0) * 0.18 + pow(s, 4.0) * 0.06);
-          gl_FragColor = vec4(c, 1.0);
-        }`,
-    }),
-  );
-  scene.add(sky);
+  // One light: a soft sky and a single sun from the upper left.
+  scene.add(new THREE.HemisphereLight("#ffffff", "#e9e3d8", 0.95));
+  const sun = new THREE.DirectionalLight("#ffffff", 0.42);
+  sun.position.set(-60, 120, 70);
+  scene.add(sun);
 
-  /* ---------- light: low golden sun, warm sky, dark warm ground ---------- */
-  const hemi = new THREE.HemisphereLight("#ffffff", "#d9cfc1", 1.5);
-  scene.add(hemi);
-  const sunLight = new THREE.DirectionalLight(COL.sun, 2.4);
-  sunLight.castShadow = false;
-  sunLight.shadow.mapSize.set(narrow ? 1024 : 2048, narrow ? 1024 : 2048);
-  const sc = sunLight.shadow.camera;
-  sc.left = -70;
-  sc.right = 70;
-  sc.top = 70;
-  sc.bottom = -70;
-  sc.near = 1;
-  sc.far = 400;
-  sunLight.shadow.bias = -0.0004;
-  sunLight.shadow.radius = 6;
-  sunLight.shadow.normalBias = 0.04;
-  scene.add(sunLight, sunLight.target);
-  const rim = new THREE.DirectionalLight("#cfd6e0", 0.35);
-  rim.position.set(60, 30, 80);
-  scene.add(rim);
-
-  /* ---------- ground ---------- */
-  const G = 520;
-  const groundGeo = new THREE.PlaneGeometry(G, G, 180, 180);
-  groundGeo.rotateX(-Math.PI / 2);
-  groundGeo.translate(10, 0, -90);
-  const gp = groundGeo.attributes.position as THREE.BufferAttribute;
-  const gcol = new Float32Array(gp.count * 3);
-  const tmp = new THREE.Color();
-  for (let i = 0; i < gp.count; i++) {
-    const x = gp.getX(i),
-      z = gp.getZ(i);
-    const y = groundY(x, z);
-    gp.setY(i, y);
-    tmp
-      .copy(COL.groundA)
-      .lerp(COL.groundB, clamp(y / 40 + vnoise(x * 0.08, z * 0.08) * 0.35));
-    gcol.set([tmp.r, tmp.g, tmp.b], i * 3);
-  }
-  groundGeo.setAttribute("color", new THREE.BufferAttribute(gcol, 3));
-  groundGeo.computeVertexNormals();
+  // The ground is the page: unlit paper, a quiet grid, fog to paper.
   const ground = new THREE.Mesh(
-    groundGeo,
-    new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.96 }),
+    new THREE.PlaneGeometry(3000, 3000),
+    new THREE.MeshBasicMaterial({ color: PAPER, toneMapped: false }),
   );
-  ground.receiveShadow = true;
+  ground.rotation.x = -Math.PI / 2;
   scene.add(ground);
+  const grid = new THREE.GridHelper(640, 160, INK, INK);
+  const gridMat = grid.material as THREE.LineBasicMaterial;
+  gridMat.transparent = true;
+  gridMat.opacity = 0.07;
+  gridMat.depthWrite = false;
+  grid.position.y = 0.01;
+  scene.add(grid);
 
-  /* Cypress spires scattered off the path: scale and depth. Instanced. */
-  const R = rng(1015);
-  const spireGeo = new THREE.ConeGeometry(1, 1, 7);
-  spireGeo.translate(0, 0.5, 0);
-  const spires = new THREE.InstancedMesh(
-    spireGeo,
-    mat(new THREE.Color("#574f46"), 0.9),
-    220,
+  // Stepped shading: four flat bands, so light falls in planes like print.
+  const rampData = new Uint8Array([
+    150, 150, 150, 255, 196, 196, 196, 255, 232, 232, 232, 255, 255, 255, 255,
+    255,
+  ]);
+  const ramp = new THREE.DataTexture(rampData, 4, 1, THREE.RGBAFormat);
+  ramp.minFilter = ramp.magFilter = THREE.NearestFilter;
+  ramp.needsUpdate = true;
+
+  const field = createField(nums.keptShare);
+  const cubes = new THREE.InstancedMesh(
+    new RoundedBoxGeometry(SIZE, SIZE, SIZE, 2, 0.14),
+    new THREE.MeshToonMaterial({ gradientMap: ramp }),
+    COUNT,
   );
-  const m4 = new THREE.Matrix4();
-  const q = new THREE.Quaternion();
-  const sV = new THREE.Vector3();
-  const pV = new THREE.Vector3();
-  let placed = 0;
-  for (let tries = 0; placed < 130 && tries < 3000; tries++) {
-    const x = (R() - 0.5) * 420 + 10;
-    const z = (R() - 0.5) * 420 - 90;
-    const pathX = 8 + Math.sin(z * 0.03) * 12;
-    if (Math.abs(x - pathX) < 34 && z < 50 && z > -190) continue;
-    // Never in the lens: no spire within 22 units of any camera key.
-    if (CAMERA.some((k) => Math.hypot(k.pos[0] - x, k.pos[2] - z) < 22)) continue;
-    const h = 6 + R() * 16;
-    pV.set(x, groundY(x, z) - 0.3, z);
-    sV.set(h * 0.18, h, h * 0.18);
-    m4.compose(pV, q.identity(), sV);
-    spires.setMatrixAt(placed++, m4);
-  }
-  spires.count = placed;
-  spires.castShadow = true;
-  // Decorative spires were cut in review (2026-10-04): only stations stay.
-  void spires;
-
-  const bone = mat(COL.bone, 0.78);
-  const boneDark = mat(COL.boneDark, 0.85);
-  const cardinal = mat(COL.cardinal, 0.7);
-  const gold = mat(COL.gold, 0.45, {
-    emissive: COL.gold,
-    emissiveIntensity: 0.12,
+  cubes.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  cubes.frustumCulled = false;
+  for (let i = 0; i < COUNT; i++) cubes.setColorAt(i, CREAM);
+  scene.add(cubes);
+  // The ink hairline: a back-faced hull pushed out along the normals, sharing
+  // the cubes' own instance matrices, so it can never drift off them.
+  const OUTLINE = 0.02;
+  const outlineMat = new THREE.MeshBasicMaterial({
+    color: INK,
+    side: THREE.BackSide,
   });
-  const slate = mat(COL.slate, 0.7);
-  const ash = mat(COL.ash, 0.9);
-  const peopleMat = mat(new THREE.Color("#1d1512"), 0.9);
-
-  const groups: { g: THREE.Group; base: THREE.Vector3; start: number }[] = [];
-  const station = (at: THREE.Vector3, start: number) => {
-    const g = new THREE.Group();
-    g.position.copy(at);
-    scene.add(g);
-    groups.push({ g, base: at.clone(), start });
-    return g;
-  };
-  const shadow = (o: THREE.Object3D) =>
-    o.traverse((c) => {
-      if ((c as THREE.Mesh).isMesh) {
-        c.castShadow = true;
-        c.receiveShadow = true;
-      }
-    });
-
-  /* ---------- 1. the funnel, raw accounts pouring in ---------- */
-  const funnelG = station(STATIONS.funnel, 0.04);
-  const lathePts: THREE.Vector2[] = [];
-  for (let i = 0; i <= 24; i++) {
-    const t = i / 24;
-    lathePts.push(new THREE.Vector2(1.3 + Math.pow(t, 1.7) * 9.5, t * 10));
-  }
-  const funnel = new THREE.Mesh(
-    new THREE.LatheGeometry(lathePts, 64),
-    mat(COL.bone, 0.75, { side: THREE.DoubleSide }),
-  );
-  funnel.position.y = 12;
-  const spout = new THREE.Mesh(
-    new THREE.CylinderGeometry(1.3, 1.3, 5, 32, 1, true),
-    boneDark,
-  );
-  spout.position.y = 9.5;
-  const rimRing = new THREE.Mesh(
-    new THREE.TorusGeometry(10.8, 0.45, 12, 72),
-    cardinal,
-  );
-  rimRing.rotation.x = Math.PI / 2;
-  rimRing.position.y = 22;
-  funnelG.add(funnel, spout, rimRing);
-  // A gantry holding it up: two cardinal beams, like a press.
-  for (const sx of [-1, 1]) {
-    const leg = new THREE.Mesh(rbox(1.2, 20, 1.2), slate);
-    leg.position.set(sx * 11.5, 10, 0);
-    funnelG.add(leg);
-  }
-  const beam = new THREE.Mesh(rbox(25, 1.4, 1.6), slate);
-  beam.position.y = 17;
-  funnelG.add(beam);
-  for (const [x, z] of [
-    [-5, 9],
-    [-3.6, 10.5],
-    [4.5, 8],
-  ]) {
-    const p = person(peopleMat);
-    p.position.set(x, 0, z);
-    p.rotation.y = R() * 6;
-    funnelG.add(p);
-  }
-  shadow(funnelG);
-  // Accounts: many small blocks, falling into the mouth on a loop.
-  const ACC = 260;
-  const accGeo = rbox(1, 1, 1);
-  const accMat = new THREE.MeshToonMaterial({ gradientMap: ramp() });
-  const accounts = new THREE.InstancedMesh(accGeo, accMat, ACC);
-  // Raw accounts are neutral: nothing is gold until it has been worked.
-  const accPal = [COL.bone, COL.boneDark, new THREE.Color("#8d857b"), COL.bone, new THREE.Color("#5b554f")];
-  const accSeed = Array.from({ length: ACC }, () => ({
-    r: Math.sqrt(R()) * 7.5,
-    a: R() * Math.PI * 2,
-    s: 0.55 + R() * 0.7,
-    off: R(),
-    spin: (R() - 0.5) * 4,
-  }));
-  accSeed.forEach((_, i) => accounts.setColorAt(i, accPal[i % accPal.length]));
-  accounts.castShadow = true;
-  funnelG.add(accounts);
-
-  /* ---------- 2. enrichment pipes ---------- */
-  const pipeG = station(new THREE.Vector3(0, 0, 0), 0.12);
-  const pipeCurves = [
-    new THREE.CatmullRomCurve3(
-      [
-        [0, 7, 0],
-        [0, 3.5, -8],
-        [8, 4, -18],
-        [2, 9, -26],
-        [12, 12, -30],
-        [20, 6, -36],
-        [14, 3.5, -46],
-        [12, 3.2, -62],
-      ].map(([x, y, z]) => new THREE.Vector3(x, y, z)),
-    ),
-    new THREE.CatmullRomCurve3(
-      [
-        [0, 7, 0],
-        [-3, 2.5, -10],
-        [6, 2.5, -24],
-        [22, 4, -22],
-        [30, 10, -28],
-        [24, 14, -38],
-        [16, 7, -44],
-        [12, 3.2, -62],
-      ].map(([x, y, z]) => new THREE.Vector3(x, y, z)),
-    ),
-  ];
-  const pipeMats = [bone, mat(new THREE.Color("#b9b0a3"), 0.8)];
-  pipeCurves.forEach((c, i) => {
-    const tube = new THREE.Mesh(
-      new THREE.TubeGeometry(c, 160, i ? 1 : 1.35, 20, false),
-      pipeMats[i],
-    );
-    pipeG.add(tube);
-    // Couplings every so often, so the pipes read as built, not drawn.
-    for (let k = 1; k < 9; k++) {
-      const u = k / 9;
-      const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(i ? 1.15 : 1.5, 0.22, 8, 24),
-        slate,
-      );
-      ring.position.copy(c.getPointAt(u));
-      ring.lookAt(c.getPointAt(Math.min(1, u + 0.01)));
-      pipeG.add(ring);
-    }
-  });
-  shadow(pipeG);
-  // Data moving through them: glowing beads riding just over the surface.
-  const BEADS = 34;
-  const beads = new THREE.InstancedMesh(
-    new THREE.SphereGeometry(0.34, 12, 8),
-    gold,
-    BEADS,
-  );
-  pipeG.add(beads);
-
-  /* ---------- 3. the magnifier, qualifying records on a belt ---------- */
-  const magG = station(STATIONS.magnifier, 0.2);
-  const belt = new THREE.Mesh(rbox(44, 0.8, 5), slate);
-  belt.position.set(0, 2.6, 0);
-  const beltTop = new THREE.Mesh(
-    rbox(44, 0.1, 4.4),
-    mat(new THREE.Color("#141110"), 0.95),
-  );
-  beltTop.position.set(0, 3.05, 0);
-  magG.add(belt, beltTop);
-  for (let k = -20; k <= 20; k += 5) {
-    const leg = new THREE.Mesh(rbox(0.6, 2.4, 4.6), slate);
-    leg.position.set(k, 1.2, 0);
-    magG.add(leg);
-  }
-  const lens = new THREE.Group();
-  const lensRim = new THREE.Mesh(
-    new THREE.TorusGeometry(6, 0.75, 20, 80),
-    cardinal,
-  );
-  const glass = new THREE.Mesh(
-    new THREE.CircleGeometry(5.6, 64),
-    new THREE.MeshPhysicalMaterial({
-      color: "#ffe6c2",
-      transmission: 0,
-      transparent: true,
-      opacity: 0.16,
-      roughness: 0.05,
-      metalness: 0,
-      side: THREE.DoubleSide,
-      depthWrite: false,
-    }),
-  );
-  const handle = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.8, 0.95, 11, 20),
-    slate,
-  );
-  handle.position.set(5.2, -8.4, 0);
-  handle.rotation.z = 0.6;
-  lens.add(lensRim, glass, handle);
-  lens.position.set(0, 12.5, 0);
-  lens.rotation.y = 0.62;
-  magG.add(lens);
-  // Two bins at the far end: kept, and set aside.
-  const keptBin = new THREE.Mesh(rbox(6, 3, 6), bone);
-  keptBin.position.set(25, 1.5, 0);
-  const asideBin = new THREE.Mesh(rbox(5, 2.4, 5), ash);
-  asideBin.position.set(6, 1.2, 6.5);
-  magG.add(keptBin, asideBin);
-  for (const [x, z] of [
-    [-10, 5],
-    [-8.6, 6.2],
-  ]) {
-    const p = person(peopleMat);
-    p.position.set(x, 0, z);
-    magG.add(p);
-  }
-  shadow(magG);
-  glass.castShadow = false;
-  const ITEMS = 26;
-  const items = new THREE.InstancedMesh(
-    rbox(2, 1.4, 2.6),
-    new THREE.MeshToonMaterial({ gradientMap: ramp() }),
-    ITEMS,
-  );
-  items.castShadow = true;
-  magG.add(items);
-  const itemAside = Array.from({ length: ITEMS }, () => R() < nums.asideShare);
-
-  /* ---------- 4. agents at their stations ---------- */
-  const agG = station(STATIONS.agents, 0.28);
-  const AGENTS = 5;
-  const visors: THREE.Mesh[] = [];
-  const agentDocs: THREE.Mesh[] = [];
-  const visorMat = new THREE.MeshStandardMaterial({
-    color: COL.gold,
-    emissive: COL.gold,
-    emissiveIntensity: 1.6,
-    roughness: 0.3,
-  });
-  for (let i = 0; i < AGENTS; i++) {
-    const a = ((i / (AGENTS - 1)) * 2 - 1) * 0.9;
-    const x = Math.sin(a) * 16;
-    const z = -Math.cos(a) * 9 + 6;
-    const ag = new THREE.Group();
-    const body = new THREE.Mesh(rbox(3.2, 9, 2.2), slate);
-    body.position.y = 4.5;
-    const visor = new THREE.Mesh(
-      rbox(2.6, 0.5, 0.1),
-      visorMat.clone(),
-    );
-    visor.position.set(0, 7.6, 1.12);
-    visors.push(visor);
-    const desk = new THREE.Mesh(rbox(5, 0.5, 3), bone);
-    desk.position.set(0, 3, 2.8);
-    const deskLeg = new THREE.Mesh(
-      rbox(4.4, 3, 2.4),
-      boneDark,
-    );
-    deskLeg.position.set(0, 1.5, 2.8);
-    ag.add(body, visor, desk, deskLeg);
-    for (let d = 0; d < 3; d++) {
-      const doc = new THREE.Mesh(rbox(1.5, 0.05, 2), bone);
-      doc.position.set(-1.4 + d * 1.4, 3.3, 2.8);
-      agentDocs.push(doc);
-      ag.add(doc);
-    }
-    ag.position.set(x, 0, z);
-    ag.lookAt(0, 0, 18);
-    agG.add(ag);
-  }
-  for (const [x, z] of [
-    [-3, 12],
-    [2.5, 13],
-  ]) {
-    const p = person(peopleMat);
-    p.position.set(x, 0, z);
-    p.rotation.y = Math.PI;
-    agG.add(p);
-  }
-  shadow(agG);
-
-  /* ---------- 5. the mailbox ---------- */
-  const mbG = station(STATIONS.mailbox, 0.36);
-  const post = new THREE.Mesh(rbox(1.6, 9, 1.6), slate);
-  post.position.y = 4.5;
-  const box = new THREE.Mesh(rbox(7, 5, 12), bone);
-  box.position.y = 11.5;
-  const roof = new THREE.Mesh(
-    new THREE.CylinderGeometry(3.5, 3.5, 12, 40, 1, false, 0, Math.PI),
-    bone,
-  );
-  roof.rotation.z = Math.PI / 2;
-  roof.rotation.y = Math.PI / 2;
-  roof.position.y = 14;
-  const door = new THREE.Mesh(
-    new THREE.CircleGeometry(3.5, 40, 0, Math.PI),
-    boneDark,
-  );
-  door.position.set(0, 14, 6.01);
-  const doorRect = new THREE.Mesh(new THREE.PlaneGeometry(7, 5), boneDark);
-  doorRect.position.set(0, 11.5, 6.01);
-  const flag = new THREE.Group();
-  const flagPole = new THREE.Mesh(rbox(0.4, 5, 0.4), gold);
-  flagPole.position.y = 2.5;
-  const flagTip = new THREE.Mesh(
-    rbox(0.4, 1.6, 2.2),
-    gold,
-  );
-  flagTip.position.set(0, 4.3, 1);
-  flag.add(flagPole, flagTip);
-  flag.position.set(3.7, 11, 1);
-  mbG.add(post, box, roof, door, doorRect, flag);
-  for (const [x, z] of [
-    [-5, 7],
-    [-6.2, 5.8],
-  ]) {
-    const p = person(peopleMat);
-    p.position.set(x, 0, z);
-    mbG.add(p);
-  }
-  shadow(mbG);
-  const ENV = 30;
-  const envelopes = new THREE.InstancedMesh(
-    rbox(1.6, 0.08, 1.1),
-    mat(new THREE.Color("#f5efe4"), 0.6),
-    ENV,
-  );
-  envelopes.castShadow = true;
-  // Envelopes in flight read as birds in review; the flag is the live cue.
-  void envelopes;
-  const envSeed = Array.from({ length: ENV }, () => ({
-    off: R(),
-    dx: (R() - 0.5) * 50,
-    h: 10 + R() * 18,
-    spin: R() * 6,
-  }));
-
-  /* ---------- 6. the pipeline chart, climbing ---------- */
-  const chG = station(STATIONS.chart, 0.44);
-  const BARS = 7;
-  const bars: THREE.Mesh[] = [];
-  const caps: THREE.Mesh[] = [];
-  for (let i = 0; i < BARS; i++) {
-    const b = new THREE.Mesh(
-      rbox(3.4, 1, 3.4),
-      i % 2 ? bone : boneDark,
-    );
-    b.position.set(-12 + i * 4, 0.5, 0);
-    const cap = new THREE.Mesh(rbox(3.5, 0.5, 3.5), boneDark);
-    bars.push(b);
-    caps.push(cap);
-    chG.add(b, cap);
-  }
-  const ball = new THREE.Mesh(new THREE.SphereGeometry(1.1, 24, 16), gold);
-  chG.add(ball);
-  for (const [x, z] of [
-    [-16, 5],
-    [-14.8, 6],
-  ]) {
-    const p = person(peopleMat);
-    p.position.set(x, 0, z);
-    chG.add(p);
-  }
-  shadow(chG);
-
-  /* ---------- hairline outline: one line family for every station ----------
-   * An inverted hull: a back-faced copy of each mesh pushed out along its
-   * normals by OUTLINE units, drawn in the page ink. At the cameras used here
-   * that renders a line of about one device pixel. */
-  const OUTLINE = 0.06;
-  const outlineMat = new THREE.MeshBasicMaterial({ color: COL.ink, side: THREE.BackSide });
   outlineMat.onBeforeCompile = (sh) => {
     sh.vertexShader = sh.vertexShader.replace(
       "#include <begin_vertex>",
       `#include <begin_vertex>\n transformed += normalize(normal) * ${OUTLINE.toFixed(3)};`,
     );
   };
-  // Collected first, then added: adding while traversing would outline the
-  // outlines, forever (a stack overflow on 2026-10-04).
-  const toOutline: THREE.Mesh[] = [];
-  for (const { g } of groups)
-    g.traverse((o) => {
-      const m = o as THREE.Mesh;
-      if (!m.isMesh || (m as THREE.InstancedMesh).isInstancedMesh) return;
-      if (m.geometry.type === "CircleGeometry" || m.geometry.type === "PlaneGeometry") return;
-      toOutline.push(m);
-    });
-  for (const m of toOutline) {
-    const hull = new THREE.Mesh(m.geometry, outlineMat);
-    hull.userData.outline = true;
-    m.add(hull);
-  }
+  const hull = new THREE.InstancedMesh(cubes.geometry, outlineMat, COUNT);
+  hull.instanceMatrix = cubes.instanceMatrix;
+  hull.frustumCulled = false;
+  scene.add(hull);
 
-  /* ---------- the build: the climax of the flight ----------
-   * The replica's timed sweep, rebuilt for this world: a wavefront crosses the
-   * ground from the funnel to the chart in SWEEP_MS, every part of the machine
-   * rises out of the ground as the front passes it, each over its own short
-   * window, the pipes connect behind the front, and each station only starts
-   * running once its parts have landed. It replays once per entry to the
-   * phase. Before it, the machine sinks into the ground on scroll and a few
-   * lattice cells light up ahead of the front. */
-  const SWEEP_MS = 1800; // the replica's sweep: 1800ms from end to end
-  const RISE_MS = 560; // one part's rise; chosen by eye, the front stays legible
-  const FRONT_FROM = 30;
-  const FRONT_TO = -195;
-  const SINK: [number, number] = [0.9, 0.925];
-  const ENTER = 0.93;
-  const fOf = (z: number) => clamp((FRONT_FROM - z) / (FRONT_FROM - FRONT_TO));
-  interface Part {
-    obj: THREE.Object3D;
-    y: number;
-    depth: number;
-    f: number;
-  }
-  const parts: Part[] = [];
-  const tubes: { mesh: THREE.Mesh; count: number }[] = [];
-  const bb = new THREE.Box3();
-  for (const { g } of groups) {
-    g.updateMatrixWorld(true);
-    for (const child of g.children) {
-      if ((child as THREE.InstancedMesh).isInstancedMesh) continue;
-      const geo = (child as THREE.Mesh).geometry;
-      if (geo && geo.type === "TubeGeometry") {
-        tubes.push({ mesh: child as THREE.Mesh, count: geo.index ? geo.index.count : 0 });
-        continue;
-      }
-      bb.setFromObject(child);
-      parts.push({
-        obj: child,
-        y: child.position.y,
-        depth: Math.max(1, bb.max.y - g.position.y + 1.5),
-        f: fOf((bb.min.z + bb.max.z) / 2),
-      });
-    }
-  }
-  const dynamic = new Set<THREE.Object3D>([...bars, ...caps, ball, lens]);
-  const PIPE_Z0 = 0;
-  const PIPE_Z1 = -62;
-  // Which station each running layer belongs to, by where the front must be.
-  const gates: [THREE.Object3D, number][] = [
-    [accounts, fOf(STATIONS.funnel.z)],
-    [beads, fOf(PIPE_Z1)],
-    [items, fOf(STATIONS.magnifier.z)],
-  ];
-
-  const lattice = new THREE.GridHelper(300, 60, COL.cardinal, COL.cardinal);
-  const latMat = lattice.material as THREE.LineBasicMaterial;
-  latMat.transparent = true;
-  latMat.opacity = 0;
-  latMat.depthWrite = false;
-  lattice.position.set(8, 0.6, -82);
-  scene.add(lattice);
-  const goldLine = new THREE.MeshStandardMaterial({ color: COL.gold, emissive: COL.gold, emissiveIntensity: 1.4, roughness: 0.4 });
-  const front = new THREE.Mesh(rbox(320, 0.3, 1.1), goldLine);
-  const wake = new THREE.Mesh(
-    new THREE.PlaneGeometry(320, 8),
-    new THREE.MeshBasicMaterial({ color: COL.gold, transparent: true, opacity: 0.1, depthWrite: false }),
-  );
-  wake.rotation.x = -Math.PI / 2;
-  front.visible = wake.visible = false;
-  scene.add(front, wake);
-  // Foreshadow: lattice cells along the corridor that light before the front.
-  const cellMat = new THREE.MeshBasicMaterial({ color: COL.gold, transparent: true, opacity: 0, depthWrite: false });
-  const cells: { m: THREE.Mesh; f: number; at: number }[] = [];
-  for (let i = 0; i < 9; i++) {
-    const z = -10 - i * 20 - Math.floor(R() * 3) * 5;
-    const x = Math.round((8 + Math.sin(z * 0.03) * 12 + (R() - 0.5) * 30) / 5) * 5 + 3;
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 4.6), cellMat.clone());
-    m.rotation.x = -Math.PI / 2;
-    m.position.set(x, 0.65, Math.round(z / 5) * 5 - 2);
-    scene.add(m);
-    cells.push({ m, f: fOf(m.position.z), at: R() });
-  }
-  let sweep0 = -1;
-
-  /* ---------- the camera path ---------- */
   const posCurve = new THREE.CatmullRomCurve3(
     CAMERA.map((k) => new THREE.Vector3(...k.pos)),
     false,
@@ -810,207 +766,70 @@ export function createWorld(
 
   let N = 0;
   let load = 0;
-  const ASSEMBLE = 0.28; // of the 2200ms clock, about 620ms per station
-  const tmpObj = new THREE.Object3D();
-  const cGold = COL.gold.clone();
-  const cAsh = COL.ash.clone();
-  const cBone = COL.bone.clone();
+  let ripple0 = -1;
+  let lastTint = -1;
+  const out = newForm();
+  const m4 = new THREE.Matrix4();
+  const q = new THREE.Quaternion();
+  const up = new THREE.Vector3(0, 1, 0);
+  const one = new THREE.Vector3(1, 1, 1);
+  const p = new THREE.Vector3();
+  const col = new THREE.Color();
 
   function update(time: number) {
-    const s = time / 1000;
-    // Assembly on the load clock: each station drops into place, staggered.
-    // Starts are spread across the clock and each fall takes ASSEMBLE of it,
-    // so the last station lands as the clock ends rather than at 40% of it.
-    for (const { g, base, start } of groups) {
-      const a = easeOut3(clamp((load - start * 1.6) / ASSEMBLE));
-      g.position.set(base.x, base.y + (1 - a) * 46, base.z);
-      g.visible = a > 0.001;
+    // The sweep replays once per entry to the grid hold.
+    if (N >= GRID_AT - 0.004 && N < MORPHS[1][1]) {
+      if (ripple0 < 0) ripple0 = time;
+    } else ripple0 = -1;
+    field.frame(N, time / 1000, load, ripple0 < 0 ? -1 : time - ripple0, out);
+    for (let i = 0; i < COUNT; i++) {
+      p.set(out.x[i], out.y[i], out.z[i]);
+      q.setFromAxisAngle(up, out.yaw[i]);
+      m4.compose(p, q, one);
+      cubes.setMatrixAt(i, m4);
     }
-
-    // Accounts fall into the funnel mouth and vanish down the spout.
-    for (let i = 0; i < ACC; i++) {
-      const sd = accSeed[i];
-      const u = (s * 0.16 + sd.off) % 1;
-      const y = 40 - u * 24;
-      const r = sd.r * (u > 0.75 ? 1 - (u - 0.75) * 3.4 : 1);
-      tmpObj.position.set(
-        Math.cos(sd.a + u * 2) * r,
-        y,
-        Math.sin(sd.a + u * 2) * r,
-      );
-      tmpObj.rotation.set(sd.spin * u * 3, sd.spin * u * 2, 0);
-      const sz = sd.s * (u > 0.85 ? (1 - u) / 0.15 : 1);
-      tmpObj.scale.setScalar(Math.max(0.001, sz));
-      tmpObj.updateMatrix();
-      accounts.setMatrixAt(i, tmpObj.matrix);
+    cubes.instanceMatrix.needsUpdate = true;
+    const tint = field.tint(N);
+    if (tint !== lastTint) {
+      lastTint = tint;
+      col.copy(CREAM).lerp(CARDINAL, tint);
+      for (let i = 0; i < COUNT; i++)
+        if (field.keep[i]) cubes.setColorAt(i, col);
+      if (cubes.instanceColor) cubes.instanceColor.needsUpdate = true;
     }
-    accounts.instanceMatrix.needsUpdate = true;
-
-    // Beads through both pipes.
-    for (let i = 0; i < BEADS; i++) {
-      const c = pipeCurves[i % 2];
-      const u = (s * 0.05 + i / BEADS) % 1;
-      const p = c.getPointAt(u);
-      tmpObj.position.set(p.x, p.y + (i % 2 ? 1.05 : 1.4), p.z);
-      tmpObj.rotation.set(0, 0, 0);
-      tmpObj.scale.setScalar(1);
-      tmpObj.updateMatrix();
-      beads.setMatrixAt(i, tmpObj.matrix);
-    }
-    beads.instanceMatrix.needsUpdate = true;
-
-    // Records along the belt. Under the lens each is judged: kept ones turn
-    // gold and ride on to the bin, set-aside ones grey out and drop off.
-    for (let i = 0; i < ITEMS; i++) {
-      const u = (s * 0.045 + i / ITEMS) % 1;
-      const x = -21 + u * 44;
-      const judged = x > 0;
-      const aside = judged && itemAside[i];
-      let y = 3.8,
-        z = 0;
-      if (aside) {
-        const d = clamp((x - 0) / 8);
-        z = d * 6.5;
-        y = 3.8 - d * d * 2.2;
-      }
-      tmpObj.position.set(aside ? Math.min(x, 6) : x, y, z);
-      tmpObj.rotation.set(0, 0, 0);
-      tmpObj.scale.setScalar(u > 0.94 ? Math.max(0.001, (1 - u) / 0.06) : 1);
-      tmpObj.updateMatrix();
-      items.setMatrixAt(i, tmpObj.matrix);
-      items.setColorAt(i, judged ? (aside ? cAsh : cGold) : cBone);
-    }
-    items.instanceMatrix.needsUpdate = true;
-    if (items.instanceColor) items.instanceColor.needsUpdate = true;
-    lens.position.y = 12.5 + Math.sin(s * 0.8) * 0.25;
-
-    // Agents: visors breathe, documents lift and settle as they read.
-    visors.forEach((v, i) => {
-      (v.material as THREE.MeshStandardMaterial).emissiveIntensity =
-        1.1 + 0.8 * Math.max(0, Math.sin(s * 2.2 + i * 1.3));
-    });
-    agentDocs.forEach((d, i) => {
-      d.position.y = 3.3 + Math.max(0, Math.sin(s * 1.4 + i * 0.9)) * 1.2;
-      d.rotation.x = Math.max(0, Math.sin(s * 1.4 + i * 0.9)) * -0.5;
-    });
-
-    // Mailbox: the flag rises as you arrive; envelopes leave in arcs.
-    flag.rotation.x =
-      -Math.PI / 2 + (Math.PI / 2) * easeOut3(prog(N, 0.66, 0.72));
-    for (let i = 0; i < ENV; i++) {
-      const e = envSeed[i];
-      const u = (s * 0.11 + e.off) % 1;
-      tmpObj.position.set(e.dx * u, 13 + Math.sin(u * Math.PI) * e.h, -u * 120);
-      tmpObj.rotation.set(0.2, e.spin + u * 2, Math.sin(u * 8) * 0.3);
-      tmpObj.scale.setScalar(u < 0.05 ? u / 0.05 : 1);
-      tmpObj.updateMatrix();
-      envelopes.setMatrixAt(i, tmpObj.matrix);
-    }
-    envelopes.instanceMatrix.needsUpdate = true;
-
-    // Chart: bars grow on scroll toward the chart, the ball climbs them.
-    const grow = easeOut3(prog(N, 0.72, 0.86));
-    let lastTop = 0;
-    for (let i = 0; i < BARS; i++) {
-      const target = 3 + Math.pow(i + 1, 1.45) * 1.6;
-      const local = clamp(grow * 1.6 - i * 0.09);
-      const h = Math.max(
-        0.3,
-        target * easeOut3(local) + Math.sin(s * 1.3 + i) * 0.12 * local,
-      );
-      bars[i].scale.y = h;
-      bars[i].position.y = h / 2;
-      caps[i].position.set(bars[i].position.x, h + 0.25, 0);
-      if (i === BARS - 1) lastTop = h;
-    }
-    const climb = (s * 0.18) % 1;
-    const step = Math.min(BARS - 1, Math.floor(climb * BARS));
-    const bx = -12 + step * 4;
-    const by =
-      bars[step].scale.y +
-      1.6 +
-      Math.abs(Math.sin(climb * BARS * Math.PI)) * 1.2;
-    ball.position.set(bx, Math.min(by, lastTop + 3), 0);
-
-    // The build. sink: how far each part is under the ground, 0 to 1.
-    let tS = -1;
-    if (N >= ENTER) {
-      if (sweep0 < 0) sweep0 = time;
-      tS = time - sweep0;
-    } else sweep0 = -1;
-    const sinkScroll = easeIn3(prog(N, SINK[0], SINK[1]));
-    const riseOf = (f: number) => (tS < 0 ? 0 : easeOut3(clamp((tS - f * SWEEP_MS) / RISE_MS)));
-    for (const p of parts) {
-      const sink = N >= ENTER ? 1 - riseOf(p.f) : sinkScroll;
-      if (dynamic.has(p.obj)) p.obj.position.y -= p.depth * sink;
-      else p.obj.position.y = p.y - p.depth * sink;
-      p.obj.visible = sink < 0.999;
-    }
-    const frontZ = tS < 0 ? FRONT_FROM : FRONT_FROM + (FRONT_TO - FRONT_FROM) * clamp(tS / SWEEP_MS);
-    for (const t of tubes) {
-      const u = N >= ENTER ? clamp((PIPE_Z0 - frontZ) / (PIPE_Z0 - PIPE_Z1)) : 1 - sinkScroll;
-      t.mesh.geometry.setDrawRange(0, Math.floor((t.count * u) / 6) * 6);
-      t.mesh.visible = u > 0.002;
-    }
-    for (const [layer, f] of gates) {
-      layer.visible = N >= ENTER ? tS > f * SWEEP_MS + RISE_MS : sinkScroll < 0.5;
-    }
-    const inSweep = tS >= 0 && tS <= SWEEP_MS;
-    front.visible = wake.visible = inSweep;
-    if (inSweep) {
-      front.position.set(8, 0.7, frontZ);
-      wake.position.set(8, 0.68, frontZ + 4);
-    }
-    latMat.opacity = 0.16 * prog(N, SINK[0], ENTER) * (tS < 0 ? 1 : 1 - clamp((tS - SWEEP_MS) / 900) * 0.6);
-    lattice.visible = latMat.opacity > 0.002;
-    for (const c of cells) {
-      const before = prog(N, SINK[1] - 0.01 + c.at * 0.006, ENTER);
-      const passed = tS < 0 ? 0 : clamp((tS - c.f * SWEEP_MS) / 300);
-      (c.m.material as THREE.MeshBasicMaterial).opacity = 0.55 * before * (1 - passed);
-      c.m.visible = (c.m.material as THREE.MeshBasicMaterial).opacity > 0.002;
-    }
-
-    // Camera, and a shadow frustum that follows what it looks at.
     const { pos, look } = camAt(N);
+    // A tall screen sees less width, so the camera stands back in proportion
+    // (at 390x844 the loop and the columns ran off the right edge).
+    if (camera.aspect < 1) pos.sub(look).multiplyScalar(Math.min(2, Math.pow(1 / camera.aspect, 0.6))).add(look);
     camera.position.copy(pos);
     camera.lookAt(look);
-    sunLight.target.position.copy(look);
-    sunLight.position.copy(look).addScaledVector(sunDir, 160);
-    const wide = N < 0.06 || N > 0.92;
-    const span = wide ? 130 : 70;
-    if (sc.right !== span) {
-      sc.left = -span;
-      sc.right = span;
-      sc.top = span;
-      sc.bottom = -span;
-      sc.updateProjectionMatrix();
+    // In the last beat, pitch the camera so the line of cubes sits exactly at
+    // HORIZON_AT at any size, eased in so the move stays continuous.
+    const w = easeInOut3(prog(N, MORPHS[5][0], MORPHS[5][1]));
+    if (w > 0) {
+      const want = 1 - 2 * HORIZON_AT;
+      const th = Math.tan((camera.fov * Math.PI) / 360);
+      for (let k = 0; k < 2; k++) {
+        camera.updateMatrixWorld();
+        const y = p.set(0, Y0, 0).project(camera).y;
+        camera.rotateX((Math.atan(y * th) - Math.atan(want * th)) * w);
+      }
     }
   }
 
-  /* Warm every shader before the first frame: the objects that only appear
-   * later (the build's front, wake, lattice cells, stations hidden during
-   * assembly) otherwise compile on the frame they first show, which measured
-   * as 200ms and 141ms hitches at scroll start and sweep start. */
-  {
-    const hidden: THREE.Object3D[] = [];
-    scene.traverse((o) => {
-      if (!o.visible) {
-        hidden.push(o);
-        o.visible = true;
-      }
-    });
-    const culled: THREE.Object3D[] = [];
-    scene.traverse((o) => {
-      if (o.frustumCulled) {
-        culled.push(o);
-        o.frustumCulled = false;
-      }
-    });
-    renderer.compile(scene, camera);
-    renderer.render(scene, camera);
-    hidden.forEach((o) => (o.visible = false));
-    culled.forEach((o) => (o.frustumCulled = true));
-  }
+  // Compile every shader before the first frame, so nothing hitches later.
+  renderer.compile(scene, camera);
+  // Then work out each morph's layers, one per idle moment. The two that
+  // touch the loop are redone on entry if the loop has run since.
+  let warmT = 0;
+  const warmNext = (m: number) => {
+    if (m >= MORPHS.length) return;
+    warmT = window.setTimeout(() => {
+      field.warm(m);
+      warmNext(m + 1);
+    }, 60);
+  };
+  warmNext(0);
 
   return {
     setN(n) {
@@ -1023,31 +842,36 @@ export function createWorld(
       update(time);
       renderer.render(scene, camera);
     },
-    still(n, time, sweepMs, loadAt) {
+    still(n, time, rippleMs, loadAt) {
       N = n;
       load = loadAt ?? 1;
-      // A still of the last phase shows the build finished, unless asked for
-      // a moment inside it.
-      if (n >= ENTER) sweep0 = time - (sweepMs ?? SWEEP_MS + RISE_MS + 1000);
+      ripple0 = rippleMs === undefined ? -1 : time - rippleMs;
+      if (rippleMs === undefined) ripple0 = time - 10000;
       update(time);
       renderer.render(scene, camera);
     },
     qualifyOnCanvas() {
-      const v = new THREE.Vector3(STATIONS.magnifier.x, 12, STATIONS.magnifier.z).project(camera);
+      const v = new THREE.Vector3(0, 2, 0).project(camera);
       return { x: (v.x + 1) / 2, y: (1 - v.y) / 2 };
     },
     resize(w, h) {
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.fov = w < 768 ? 58 : 40;
+      // The fog stands back with the camera (see update), or a phone sees
+      // every form through haze.
+      const back = camera.aspect < 1 ? Math.min(2, Math.pow(1 / camera.aspect, 0.6)) : 1;
+      const fog = scene.fog as THREE.Fog;
+      fog.near = 140 * back;
+      fog.far = 360 * back;
       // The copy is a column on the left (desktop) or at the foot (phone), so
-      // the frame's centre moves off it: what the camera looks at lands at
-      // about 66% across, or 40% down. One offset for every station.
+      // what the camera looks at lands at about 66% across, or 40% down.
       if (w >= 768) camera.setViewOffset(w, h, -w * 0.16, 0, w, h);
       else camera.setViewOffset(w, h, 0, h * 0.1, w, h);
       camera.updateProjectionMatrix();
     },
     dispose() {
+      window.clearTimeout(warmT);
       scene.traverse((o) => {
         const m = o as THREE.Mesh;
         if (m.geometry) m.geometry.dispose();
@@ -1055,6 +879,7 @@ export function createWorld(
         if (Array.isArray(mm)) mm.forEach((x) => x.dispose());
         else mm?.dispose();
       });
+      ramp.dispose();
       renderer.dispose();
     },
   };

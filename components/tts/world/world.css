@@ -17,21 +17,14 @@
   height: 100vh;
   height: 100svh;
   overflow: hidden;
-  background: linear-gradient(
-    180deg,
-    #c9d3da 0%,
-    #e9e4dc 45%,
-    #f7e6cf 58%,
-    #e6dfd3 59%,
-    #d6cdbf 100%
-  );
+  /* The canvas clears to this same paper, so the pin has no edge. */
+  background: var(--paper);
 }
 .tts .w-well,
 .tts .w-overlay {
   position: absolute;
   inset: 0;
 }
-.tts .w-poster,
 .tts .w-canvas,
 .tts .w-grain,
 .tts .w-vignette {
@@ -41,13 +34,12 @@
   height: 100%;
   display: block;
 }
-.tts .w-poster {
-  object-fit: cover;
-  object-position: 66% 50%;
-  transition: opacity 600ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .w-poster.is-gone {
+.tts .w-canvas {
   opacity: 0;
+  transition: opacity 400ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .w-canvas.is-ready {
+  opacity: 1;
 }
 .tts .w-grain {
   pointer-events: none;
@@ -127,6 +119,13 @@
 .tts .w-cap.is-final .w-cap-title {
   max-width: 16ch;
 }
+/* The last beat sits in the top of the frame, because the cubes settle into a
+ * horizon line at 46% down and the next section's hairline lands on it. Text
+ * above the line, never through it. */
+.tts .w-cap.is-final {
+  justify-content: flex-start;
+  padding-top: max(96px, 12vh);
+}
 .tts .w-cap-b p {
   margin-top: 16px;
   font-size: 18px;
@@ -135,50 +134,13 @@
   max-width: 34ch;
 }
 
-/* ---------- over the world: the qualification panel and the rail ---------- */
+/* ---------- over the world: the rail ---------- */
 .tts .w-overlay {
   z-index: 4;
   pointer-events: none;
 }
 .tts .w-overlay > * {
   pointer-events: auto;
-}
-.tts .w-qualify {
-  position: absolute;
-  right: var(--edge);
-  top: 112px;
-  width: 340px;
-  padding: 18px 20px 20px;
-  background: var(--well);
-  border: 1px solid var(--rule);
-}
-.tts .w-q-head {
-  font-size: 14px;
-  color: var(--ink-2);
-}
-.tts .w-q-rows {
-  list-style: none;
-  margin: 8px 0 16px;
-  padding: 0;
-}
-.tts .w-q-rows li {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--rule);
-  font-size: 15px;
-}
-.tts .w-q-rows li .live {
-  font-size: 22px;
-  font-variant-numeric: tabular-nums;
-}
-.tts .w-q-rows li.is-aside .live {
-  color: var(--ink-2);
-}
-.tts .w-q-btn {
-  width: 100%;
 }
 .tts .w-rail {
   position: absolute;
@@ -242,33 +204,18 @@
   .tts .w-cap-b p {
     font-size: 16px;
   }
-  .tts .w-qualify {
-    right: var(--gutter);
-    left: var(--gutter);
-    top: 76px;
-    width: auto;
-    padding: 10px 12px;
-  }
-  .tts .w-q-head,
-  .tts .w-q-btn {
-    display: none;
-  }
-  .tts .w-q-rows {
-    margin: 0;
-  }
-  .tts .w-q-rows li {
-    font-size: 13px;
-    padding: 4px 0;
-  }
-  .tts .w-q-rows li .live {
-    font-size: 16px;
+  .tts .w-cap.is-final {
+    top: 0;
+    bottom: auto;
+    justify-content: flex-start;
+    padding-top: 80px;
   }
   .tts .w-rail {
     right: 2px;
   }
 }
 
-/* ---------- reduced motion: each station as a still ---------- */
+/* ---------- reduced motion: the copy as a plain sequence ---------- */
 .tts .world.is-still {
   margin-top: 0;
   width: 100%;
@@ -282,33 +229,16 @@
   width: auto;
   padding: 0 0 28px;
 }
-.tts .w-still-hero img,
-.tts .w-still img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-}
 .tts .w-still {
   margin: 72px 0 0;
+  max-width: 640px;
 }
-.tts .w-still figcaption {
-  margin-top: 20px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
-  gap: 48px;
-}
-.tts .w-still figcaption .w-q-rows {
-  grid-column: 2;
-}
-@media (max-width: 767px) {
-  .tts .w-still figcaption {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .tts .w-still figcaption .w-q-rows {
-    grid-column: 1;
-  }
+.tts .w-still p {
+  margin-top: 16px;
+  font-size: 18px;
+  line-height: 1.56;
+  color: var(--ink-2);
+  max-width: 34ch;
 }
 
 /* The hero copy is in the server HTML, and the load clock lifts it in once
