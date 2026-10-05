@@ -11,28 +11,41 @@
  * and drives this through setN / setLoad / frame. */
 
 import * as THREE from "three";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+
+/* Every box in the world is rounded, so the stations read as one family of
+ * made objects rather than primitives. The radius follows the smallest side,
+ * capped at 0.45, so thin parts stay crisp. */
+function rbox(w: number, h: number, d: number) {
+  const r = Math.min(0.45, Math.min(w, h, d) * 0.22);
+  return r < 0.03 ? new THREE.BoxGeometry(w, h, d) : new RoundedBoxGeometry(w, h, d, 3, r);
+}
 
 export interface WorldNumbers {
   /** Share of records the qualification station sets aside (the verify rule). */
   asideShare: number;
 }
 
+/* Light and airy: a pale stone ground under a soft dawn sky, objects in three
+ * restrained neutrals, and USC cardinal as the one accent, only on what is
+ * moving or live (data in the pipes, kept records, agents at work, the flag,
+ * the build's wavefront). */
 const COL = {
-  skyTop: new THREE.Color("#57524e"),
-  skyMid: new THREE.Color("#ab9886"),
-  skyLow: new THREE.Color("#efd3ad"),
-  haze: new THREE.Color("#e8d5ba"),
-  sun: new THREE.Color("#ffd49a"),
-  groundA: new THREE.Color("#8f8373"),
-  groundB: new THREE.Color("#c4b39b"),
-  bone: new THREE.Color("#e9e1d2"),
-  boneDark: new THREE.Color("#bdb3a4"),
-  // The ink of the page, used for the dark parts so the world has one accent.
-  cardinal: new THREE.Color("#2a1b1e"),
-  gold: new THREE.Color("#ffb547"),
-  ink: new THREE.Color("#1b1714"),
-  slate: new THREE.Color("#34302c"),
-  ash: new THREE.Color("#6f6961"),
+  skyTop: new THREE.Color("#c9d3da"),
+  skyMid: new THREE.Color("#e9e4dc"),
+  skyLow: new THREE.Color("#f7e6cf"),
+  haze: new THREE.Color("#efe6d8"),
+  sun: new THREE.Color("#fff0da"),
+  groundA: new THREE.Color("#e6dfd3"),
+  groundB: new THREE.Color("#d6cdbf"),
+  bone: new THREE.Color("#f4efe6"),
+  boneDark: new THREE.Color("#cdc4b6"),
+  // The page ink, for the few dark parts and the outline.
+  cardinal: new THREE.Color("#3a3034"),
+  gold: new THREE.Color("#a3162b"),
+  ink: new THREE.Color("#2a1b1e"),
+  slate: new THREE.Color("#8d8379"),
+  ash: new THREE.Color("#b3aba1"),
 };
 
 /* Where each station stands. The camera path below is written against these,
@@ -68,10 +81,10 @@ export const CAMERA: Key[] = [
   { n: 0.64, pos: [-12, 12, -68], look: [2, 7, -98] },
   { n: 0.71, pos: [16, 13, -98], look: [-20, 10, -128] },
   { n: 0.77, pos: [14, 12, -101], look: [-20, 10, -128] },
-  { n: 0.84, pos: [-12, 17, -131], look: [2, 13, -160] },
-  { n: 0.89, pos: [-14, 19, -130], look: [2, 13, -160] },
-  { n: 0.93, pos: [-112, 64, -80], look: [10, 3, -82] },
-  { n: 1, pos: [-106, 60, -82], look: [10, 3, -83] },
+  { n: 0.84, pos: [54, 22, -116], look: [2, 11, -160] },
+  { n: 0.89, pos: [57, 24, -113], look: [2, 11, -160] },
+  { n: 0.93, pos: [-14, 66, -246], look: [14, 2, -78] },
+  { n: 1, pos: [-11, 62, -240], look: [14, 2, -80] },
 ];
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -119,7 +132,7 @@ function groundY(x: number, z: number) {
   const far = clamp((-z - 200) / 120) + clamp((z - 40) / 80);
   const hills =
     vnoise(x * 0.018, z * 0.018) * 0.7 + vnoise(x * 0.05, z * 0.05) * 0.3;
-  return (away + far * 0.8) * (hills * 30 + 4) + vnoise(x * 0.2, z * 0.2) * 0.5;
+  return (away + far * 0.8) * (hills * 16 + 2) + vnoise(x * 0.2, z * 0.2) * 0.15;
 }
 
 const mat = (
@@ -171,13 +184,13 @@ export function createWorld(
     Math.min(window.devicePixelRatio || 1, narrow ? 1.25 : 1.5),
   );
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.32;
+  renderer.toneMapping = THREE.NeutralToneMapping;
+  renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(COL.haze, 120, 520);
+  scene.fog = new THREE.Fog(COL.haze, 170, 760);
   const camera = new THREE.PerspectiveCamera(narrow ? 58 : 40, 1, 0.5, 1200);
 
   /* ---------- sky: a gradient dome with the sun low in it ---------- */
@@ -204,7 +217,7 @@ export function createWorld(
           vec3 c = mix(low, mid, smoothstep(0.0, 0.18, h));
           c = mix(c, top, smoothstep(0.18, 0.75, h));
           float s = max(dot(normalize(vDir), sunDir), 0.0);
-          c += sun * (pow(s, 900.0) * 2.2 + pow(s, 24.0) * 0.35 + pow(s, 4.0) * 0.12);
+          c += sun * (pow(s, 900.0) * 0.6 + pow(s, 24.0) * 0.18 + pow(s, 4.0) * 0.06);
           gl_FragColor = vec4(c, 1.0);
         }`,
     }),
@@ -212,9 +225,9 @@ export function createWorld(
   scene.add(sky);
 
   /* ---------- light: low golden sun, warm sky, dark warm ground ---------- */
-  const hemi = new THREE.HemisphereLight("#f3dcc0", "#2e2823", 0.9);
+  const hemi = new THREE.HemisphereLight("#ffffff", "#d9cfc1", 1.5);
   scene.add(hemi);
-  const sunLight = new THREE.DirectionalLight(COL.sun, 3.4);
+  const sunLight = new THREE.DirectionalLight(COL.sun, 2.4);
   sunLight.castShadow = true;
   sunLight.shadow.mapSize.set(narrow ? 1024 : 2048, narrow ? 1024 : 2048);
   const sc = sunLight.shadow.camera;
@@ -225,7 +238,7 @@ export function createWorld(
   sc.near = 1;
   sc.far = 400;
   sunLight.shadow.bias = -0.0004;
-  sunLight.shadow.radius = 4;
+  sunLight.shadow.radius = 6;
   sunLight.shadow.normalBias = 0.04;
   scene.add(sunLight, sunLight.target);
   const rim = new THREE.DirectionalLight("#cfd6e0", 0.35);
@@ -288,14 +301,15 @@ export function createWorld(
   }
   spires.count = placed;
   spires.castShadow = true;
-  scene.add(spires);
+  // Decorative spires were cut in review (2026-10-04): only stations stay.
+  void spires;
 
   const bone = mat(COL.bone, 0.78);
   const boneDark = mat(COL.boneDark, 0.85);
   const cardinal = mat(COL.cardinal, 0.7);
   const gold = mat(COL.gold, 0.45, {
     emissive: COL.gold,
-    emissiveIntensity: 0.35,
+    emissiveIntensity: 0.12,
   });
   const slate = mat(COL.slate, 0.7);
   const ash = mat(COL.ash, 0.9);
@@ -347,11 +361,11 @@ export function createWorld(
   funnelG.add(funnel, spout, rimRing);
   // A gantry holding it up: two cardinal beams, like a press.
   for (const sx of [-1, 1]) {
-    const leg = new THREE.Mesh(new THREE.BoxGeometry(1.2, 20, 1.2), slate);
+    const leg = new THREE.Mesh(rbox(1.2, 20, 1.2), slate);
     leg.position.set(sx * 11.5, 10, 0);
     funnelG.add(leg);
   }
-  const beam = new THREE.Mesh(new THREE.BoxGeometry(25, 1.4, 1.6), slate);
+  const beam = new THREE.Mesh(rbox(25, 1.4, 1.6), slate);
   beam.position.y = 17;
   funnelG.add(beam);
   for (const [x, z] of [
@@ -367,7 +381,7 @@ export function createWorld(
   shadow(funnelG);
   // Accounts: many small blocks, falling into the mouth on a loop.
   const ACC = 260;
-  const accGeo = new THREE.BoxGeometry(1, 1, 1);
+  const accGeo = rbox(1, 1, 1);
   const accMat = new THREE.MeshStandardMaterial({
     roughness: 0.6,
     vertexColors: false,
@@ -414,7 +428,7 @@ export function createWorld(
       ].map(([x, y, z]) => new THREE.Vector3(x, y, z)),
     ),
   ];
-  const pipeMats = [bone, mat(new THREE.Color("#7a726a"), 0.75)];
+  const pipeMats = [bone, mat(new THREE.Color("#b9b0a3"), 0.8)];
   pipeCurves.forEach((c, i) => {
     const tube = new THREE.Mesh(
       new THREE.TubeGeometry(c, 160, i ? 1 : 1.35, 20, false),
@@ -445,16 +459,16 @@ export function createWorld(
 
   /* ---------- 3. the magnifier, qualifying records on a belt ---------- */
   const magG = station(STATIONS.magnifier, 0.2);
-  const belt = new THREE.Mesh(new THREE.BoxGeometry(44, 0.8, 5), slate);
+  const belt = new THREE.Mesh(rbox(44, 0.8, 5), slate);
   belt.position.set(0, 2.6, 0);
   const beltTop = new THREE.Mesh(
-    new THREE.BoxGeometry(44, 0.1, 4.4),
+    rbox(44, 0.1, 4.4),
     mat(new THREE.Color("#141110"), 0.95),
   );
   beltTop.position.set(0, 3.05, 0);
   magG.add(belt, beltTop);
   for (let k = -20; k <= 20; k += 5) {
-    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.6, 2.4, 4.6), slate);
+    const leg = new THREE.Mesh(rbox(0.6, 2.4, 4.6), slate);
     leg.position.set(k, 1.2, 0);
     magG.add(leg);
   }
@@ -487,9 +501,9 @@ export function createWorld(
   lens.rotation.y = 0.62;
   magG.add(lens);
   // Two bins at the far end: kept, and set aside.
-  const keptBin = new THREE.Mesh(new THREE.BoxGeometry(6, 3, 6), gold);
+  const keptBin = new THREE.Mesh(rbox(6, 3, 6), bone);
   keptBin.position.set(25, 1.5, 0);
-  const asideBin = new THREE.Mesh(new THREE.BoxGeometry(5, 2.4, 5), ash);
+  const asideBin = new THREE.Mesh(rbox(5, 2.4, 5), ash);
   asideBin.position.set(6, 1.2, 6.5);
   magG.add(keptBin, asideBin);
   for (const [x, z] of [
@@ -504,7 +518,7 @@ export function createWorld(
   glass.castShadow = false;
   const ITEMS = 26;
   const items = new THREE.InstancedMesh(
-    new THREE.BoxGeometry(2, 1.4, 2.6),
+    rbox(2, 1.4, 2.6),
     new THREE.MeshStandardMaterial({ roughness: 0.6 }),
     ITEMS,
   );
@@ -528,24 +542,24 @@ export function createWorld(
     const x = Math.sin(a) * 16;
     const z = -Math.cos(a) * 9 + 6;
     const ag = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.BoxGeometry(3.2, 9, 2.2), slate);
+    const body = new THREE.Mesh(rbox(3.2, 9, 2.2), slate);
     body.position.y = 4.5;
     const visor = new THREE.Mesh(
-      new THREE.BoxGeometry(2.6, 0.5, 0.1),
+      rbox(2.6, 0.5, 0.1),
       visorMat.clone(),
     );
     visor.position.set(0, 7.6, 1.12);
     visors.push(visor);
-    const desk = new THREE.Mesh(new THREE.BoxGeometry(5, 0.5, 3), bone);
+    const desk = new THREE.Mesh(rbox(5, 0.5, 3), bone);
     desk.position.set(0, 3, 2.8);
     const deskLeg = new THREE.Mesh(
-      new THREE.BoxGeometry(4.4, 3, 2.4),
+      rbox(4.4, 3, 2.4),
       boneDark,
     );
     deskLeg.position.set(0, 1.5, 2.8);
     ag.add(body, visor, desk, deskLeg);
     for (let d = 0; d < 3; d++) {
-      const doc = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.05, 2), bone);
+      const doc = new THREE.Mesh(rbox(1.5, 0.05, 2), bone);
       doc.position.set(-1.4 + d * 1.4, 3.3, 2.8);
       agentDocs.push(doc);
       ag.add(doc);
@@ -567,9 +581,9 @@ export function createWorld(
 
   /* ---------- 5. the mailbox ---------- */
   const mbG = station(STATIONS.mailbox, 0.36);
-  const post = new THREE.Mesh(new THREE.BoxGeometry(1.6, 9, 1.6), slate);
+  const post = new THREE.Mesh(rbox(1.6, 9, 1.6), slate);
   post.position.y = 4.5;
-  const box = new THREE.Mesh(new THREE.BoxGeometry(7, 5, 12), bone);
+  const box = new THREE.Mesh(rbox(7, 5, 12), bone);
   box.position.y = 11.5;
   const roof = new THREE.Mesh(
     new THREE.CylinderGeometry(3.5, 3.5, 12, 40, 1, false, 0, Math.PI),
@@ -586,10 +600,10 @@ export function createWorld(
   const doorRect = new THREE.Mesh(new THREE.PlaneGeometry(7, 5), boneDark);
   doorRect.position.set(0, 11.5, 6.01);
   const flag = new THREE.Group();
-  const flagPole = new THREE.Mesh(new THREE.BoxGeometry(0.4, 5, 0.4), gold);
+  const flagPole = new THREE.Mesh(rbox(0.4, 5, 0.4), gold);
   flagPole.position.y = 2.5;
   const flagTip = new THREE.Mesh(
-    new THREE.BoxGeometry(0.4, 1.6, 2.2),
+    rbox(0.4, 1.6, 2.2),
     gold,
   );
   flagTip.position.set(0, 4.3, 1);
@@ -607,12 +621,13 @@ export function createWorld(
   shadow(mbG);
   const ENV = 30;
   const envelopes = new THREE.InstancedMesh(
-    new THREE.BoxGeometry(1.6, 0.08, 1.1),
+    rbox(1.6, 0.08, 1.1),
     mat(new THREE.Color("#f5efe4"), 0.6),
     ENV,
   );
   envelopes.castShadow = true;
-  mbG.add(envelopes);
+  // Envelopes in flight read as birds in review; the flag is the live cue.
+  void envelopes;
   const envSeed = Array.from({ length: ENV }, () => ({
     off: R(),
     dx: (R() - 0.5) * 50,
@@ -627,11 +642,11 @@ export function createWorld(
   const caps: THREE.Mesh[] = [];
   for (let i = 0; i < BARS; i++) {
     const b = new THREE.Mesh(
-      new THREE.BoxGeometry(3.4, 1, 3.4),
+      rbox(3.4, 1, 3.4),
       i % 2 ? bone : boneDark,
     );
     b.position.set(-12 + i * 4, 0.5, 0);
-    const cap = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.5, 3.5), gold);
+    const cap = new THREE.Mesh(rbox(3.5, 0.5, 3.5), boneDark);
     bars.push(b);
     caps.push(cap);
     chG.add(b, cap);
@@ -648,16 +663,33 @@ export function createWorld(
   }
   shadow(chG);
 
-  /* ---------- hairline edges: the figures' line family, in 3D ---------- */
-  const edgeMat = new THREE.LineBasicMaterial({ color: COL.cardinal, transparent: true, opacity: 0.32 });
+  /* ---------- hairline outline: one line family for every station ----------
+   * An inverted hull: a back-faced copy of each mesh pushed out along its
+   * normals by OUTLINE units, drawn in the page ink. At the cameras used here
+   * that renders a line of about one device pixel. */
+  const OUTLINE = 0.06;
+  const outlineMat = new THREE.MeshBasicMaterial({ color: COL.ink, side: THREE.BackSide });
+  outlineMat.onBeforeCompile = (sh) => {
+    sh.vertexShader = sh.vertexShader.replace(
+      "#include <begin_vertex>",
+      `#include <begin_vertex>\n transformed += normalize(normal) * ${OUTLINE.toFixed(3)};`,
+    );
+  };
+  // Collected first, then added: adding while traversing would outline the
+  // outlines, forever (a stack overflow on 2026-10-04).
+  const toOutline: THREE.Mesh[] = [];
   for (const { g } of groups)
     g.traverse((o) => {
       const m = o as THREE.Mesh;
       if (!m.isMesh || (m as THREE.InstancedMesh).isInstancedMesh) return;
-      const t = m.geometry.type;
-      if (t !== "BoxGeometry" && t !== "CylinderGeometry") return;
-      m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry, 35), edgeMat));
+      if (m.geometry.type === "CircleGeometry" || m.geometry.type === "PlaneGeometry") return;
+      toOutline.push(m);
     });
+  for (const m of toOutline) {
+    const hull = new THREE.Mesh(m.geometry, outlineMat);
+    hull.userData.outline = true;
+    m.add(hull);
+  }
 
   /* ---------- the build: the climax of the flight ----------
    * The replica's timed sweep, rebuilt for this world: a wavefront crosses the
@@ -709,7 +741,6 @@ export function createWorld(
     [accounts, fOf(STATIONS.funnel.z)],
     [beads, fOf(PIPE_Z1)],
     [items, fOf(STATIONS.magnifier.z)],
-    [envelopes, fOf(STATIONS.mailbox.z)],
   ];
 
   const lattice = new THREE.GridHelper(300, 60, COL.cardinal, COL.cardinal);
@@ -720,10 +751,10 @@ export function createWorld(
   lattice.position.set(8, 0.6, -82);
   scene.add(lattice);
   const goldLine = new THREE.MeshStandardMaterial({ color: COL.gold, emissive: COL.gold, emissiveIntensity: 1.4, roughness: 0.4 });
-  const front = new THREE.Mesh(new THREE.BoxGeometry(320, 0.3, 1.1), goldLine);
+  const front = new THREE.Mesh(rbox(320, 0.3, 1.1), goldLine);
   const wake = new THREE.Mesh(
-    new THREE.PlaneGeometry(320, 16),
-    new THREE.MeshBasicMaterial({ color: COL.gold, transparent: true, opacity: 0.22, depthWrite: false }),
+    new THREE.PlaneGeometry(320, 8),
+    new THREE.MeshBasicMaterial({ color: COL.gold, transparent: true, opacity: 0.1, depthWrite: false }),
   );
   wake.rotation.x = -Math.PI / 2;
   front.visible = wake.visible = false;
@@ -862,7 +893,7 @@ export function createWorld(
     const grow = easeOut3(prog(N, 0.72, 0.86));
     let lastTop = 0;
     for (let i = 0; i < BARS; i++) {
-      const target = 3 + Math.pow(i + 1, 1.45) * 2.6;
+      const target = 3 + Math.pow(i + 1, 1.45) * 1.6;
       const local = clamp(grow * 1.6 - i * 0.09);
       const h = Math.max(
         0.3,
@@ -909,7 +940,7 @@ export function createWorld(
     front.visible = wake.visible = inSweep;
     if (inSweep) {
       front.position.set(8, 0.7, frontZ);
-      wake.position.set(8, 0.68, frontZ + 8);
+      wake.position.set(8, 0.68, frontZ + 4);
     }
     latMat.opacity = 0.16 * prog(N, SINK[0], ENTER) * (tS < 0 ? 1 : 1 - clamp((tS - SWEEP_MS) / 900) * 0.6);
     lattice.visible = latMat.opacity > 0.002;
@@ -961,6 +992,11 @@ export function createWorld(
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.fov = w < 768 ? 58 : 40;
+      // The copy is a column on the left (desktop) or at the foot (phone), so
+      // the frame's centre moves off it: what the camera looks at lands at
+      // about 66% across, or 40% down. One offset for every station.
+      if (w >= 768) camera.setViewOffset(w, h, -w * 0.16, 0, w, h);
+      else camera.setViewOffset(w, h, 0, h * 0.1, w, h);
       camera.updateProjectionMatrix();
     },
     dispose() {

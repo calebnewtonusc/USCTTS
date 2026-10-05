@@ -259,8 +259,10 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
             { asideShare: nums.setAside / nums.roles },
             window.innerWidth < 768,
           );
-        } catch {
-          return; // No WebGL: the poster still stays up.
+        } catch (err) {
+          // No WebGL, or a build error: the poster stays up. Say which.
+          console.error("TTS world did not start", err);
+          return;
         }
         size();
         world.setN(cur);

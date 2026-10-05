@@ -7,7 +7,7 @@ import { attachMesh } from "../engine/mesh";
  * ink with one low trace of the accent, and slowed down so the band breathes
  * rather than swirls. Paused offscreen, a still frame
  * under reduced motion, and the CSS gradient behind it if WebGL is missing. */
-const COLORS = ["#2a1b1e", "#3a272b", "#22161a", "#4a3324", "#2f2023"];
+const COLORS = ["#2a1b1e", "#3a272b", "#22161a", "#4f1a24", "#2f2023"];
 
 export default function MeshBand() {
   const host = useRef<HTMLDivElement>(null);

@@ -6,9 +6,13 @@
 // list, and on 2026-10-04 whois answered "Domain not found" for it. A link to
 // an unregistered domain lets anyone buy it and take the traffic, so it is not
 // linked anywhere. Until the deployment's origin is set in
-// NEXT_PUBLIC_TC_ORIGIN, the redirect falls back to the T Combinator Railway
-// deployment, a host Railway owns, so the link works now and the domain later
-// is an env change. Set the env to "" to turn the link off entirely.
-export const TC_FALLBACK = "https://tcombinator-production.up.railway.app";
-export const TC_ORIGIN = process.env.NEXT_PUBLIC_TC_ORIGIN ?? TC_FALLBACK;
+// NEXT_PUBLIC_TC_ORIGIN, TC_URL is null and every mention renders as text.
+//
+// The lead asked for https://tcombinator-production.up.railway.app as the
+// default. On 2026-10-04 that host answered 404 "Application not found"
+// (x-railway-fallback: true): no app is deployed there, so the link was dead
+// and the subdomain is claimable by any Railway user. It is not the default
+// until it serves T Combinator; set NEXT_PUBLIC_TC_ORIGIN to it then.
+export const TC_PENDING_ORIGIN = "https://tcombinator-production.up.railway.app";
+export const TC_ORIGIN = process.env.NEXT_PUBLIC_TC_ORIGIN ?? "";
 export const TC_URL: string | null = TC_ORIGIN ? "/tc" : null;

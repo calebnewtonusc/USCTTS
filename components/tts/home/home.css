@@ -244,37 +244,43 @@
   display: block;
   width: 100%;
   height: auto;
-  max-height: calc(100vh - 300px);
+  max-height: calc(100vh - 230px);
   overflow: visible;
 }
 .tts .wb-num {
-  font-size: 18px;
-  fill: #a1969a;
+  font-size: 20px;
+  fill: #6f6264;
 }
 .tts .wb-title {
-  font-size: 32px;
-  letter-spacing: -0.015em;
+  font-size: 36px;
+  letter-spacing: -0.02em;
   fill: #2a1b1e;
 }
 .tts .wb-line {
-  font-size: 16px;
-  fill: #6f6264;
+  font-size: 18px;
+  fill: #4d4246;
 }
 .tts .wb-item {
-  font-size: 15px;
+  font-size: 16.5px;
   fill: #2a1b1e;
 }
 /* Marker strokes in the figures' line family: one ink, one weight. */
 .tts .wb-ink {
   fill: none;
   stroke: #2a1b1e;
-  stroke-width: 1.6;
+  stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-dasharray: 1;
 }
 .tts .wb-next {
   stroke: #a1969a;
+  stroke-width: 1.6;
+}
+/* The one accent on the board: the stroke under each station's name. */
+.tts .wb-accent {
+  stroke: var(--live);
+  stroke-width: 3;
 }
 .tts .wb-stacked .wb-ink {
   transition-property: stroke-dashoffset;
@@ -419,7 +425,7 @@
   background:
     radial-gradient(
       80% 90% at 80% 20%,
-      rgba(176, 112, 13, 0.25),
+      rgba(163, 22, 43, 0.22),
       transparent 60%
     ),
     var(--ink);

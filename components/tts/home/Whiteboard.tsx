@@ -327,9 +327,11 @@ export default function Whiteboard() {
                         d={p}
                         pathLength={1}
                         className={
-                          k === strokes.length - 1 && art[i].next
-                            ? "wb-ink wb-next"
-                            : "wb-ink"
+                          k === 0
+                            ? "wb-ink wb-accent"
+                            : k === strokes.length - 1 && art[i].next
+                              ? "wb-ink wb-next"
+                              : "wb-ink"
                         }
                         style={{
                           strokeDashoffset: 1 - local,
