@@ -1,0 +1,254 @@
+/* The whiteboard: "what you learn", drawn in marker. Scoped under .tts .wbd,
+ * a prefix of its own so the older .wb-* rules in home.css never reach it.
+ * Tokens come from tts.css; the hand is Kalam, loaded by Whiteboard.tsx as
+ * --wb-hand, and used only on the board. */
+
+.tts .wbd-pin {
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  padding-block: 144px 0;
+}
+.tts .wbd-head {
+  max-width: var(--narrow);
+  margin-bottom: 40px;
+}
+
+/* ---------- the board ---------- */
+.tts .wbd-board {
+  list-style: none;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border: 1px solid var(--rule);
+  /* The board's surface: the well, with the faint shine of a whiteboard
+   * under a ceiling light, so it reads as an object and not as a panel. */
+  background:
+    radial-gradient(
+      120% 90% at 30% 0%,
+      rgba(255, 255, 255, 0.75),
+      rgba(255, 255, 255, 0) 60%
+    ),
+    var(--well);
+  padding: 36px 0 40px;
+}
+.tts .wbd-station {
+  position: relative;
+  min-width: 0;
+  padding-inline: clamp(16px, 1.8vw, 28px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Marker headings: a hand face, lowercase, at the ink's full strength. */
+.tts .wbd-title {
+  font-family: var(--wb-hand), "Kalam", cursive;
+  font-weight: 700;
+  font-size: clamp(24px, 2.05vw, 30px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.tts .wbd-wipe {
+  display: inline-block;
+}
+.tts .wbd-num {
+  display: block;
+  font-weight: 400;
+  font-size: 0.62em;
+  line-height: 1.2;
+  margin-bottom: 2px;
+  color: var(--ink-2);
+}
+.tts .wbd-word {
+  display: block;
+}
+.tts .wbd-under {
+  display: block;
+  width: 78%;
+  height: 12px;
+  margin-top: 4px;
+  overflow: visible;
+}
+.tts .wbd-line {
+  margin-top: 14px;
+  font-size: 15.5px;
+  line-height: 1.4;
+  color: var(--ink-2);
+  min-height: 2.8em;
+}
+.tts .wbd-art {
+  display: block;
+  width: 100%;
+  max-height: 24vh;
+  margin: 18px 0 22px;
+  overflow: visible;
+}
+.tts .wbd-label {
+  font-family: var(--wb-hand), "Kalam", cursive;
+  font-size: 14px;
+  fill: var(--ink);
+}
+
+.tts .wbd-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.tts .wbd-item {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 6px;
+  align-items: start;
+  font-size: 15px;
+  line-height: 1.42;
+  color: var(--ink);
+}
+.tts .wbd-item > span[data-k="fade"] {
+  display: block;
+}
+.tts .wbd-tick {
+  width: 16px;
+  height: 15px;
+  margin-top: 3px;
+  overflow: visible;
+}
+.tts .wbd-n {
+  display: inline-block;
+  font-family: var(--wb-hand), "Kalam", cursive;
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+/* The hand-drawn rule between stations. */
+.tts .wbd-div {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  right: -4px;
+  width: 8px;
+  height: calc(100% - 12px);
+  overflow: visible;
+}
+
+/* ---------- ink ----------
+ * One ink, confident: 2.2 in a 240-wide drawing that renders near 1:1. The
+ * dash is "1 2" against pathLength 1, so at offset 1 the whole path sits in
+ * the gap and no round cap leaks a dot at either end. */
+.tts .wbd-ink {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 0;
+  transition: stroke 420ms var(--ease);
+}
+.tts .wbd-thick {
+  stroke-width: 3;
+}
+.tts .wbd-faint {
+  stroke-width: 1.7;
+  stroke-opacity: 0.7;
+}
+.tts .wbd-rule {
+  stroke-width: 1.4;
+  stroke-opacity: 0.3;
+}
+/* The one accent on the board: the stroke being drawn right now. It hands
+ * back to the ink as the next stroke starts. */
+.tts .wbd-ink.is-live {
+  stroke: var(--live);
+  transition: none;
+}
+
+/* ---------- pinned (wide, motion allowed) ----------
+ * 460vh: 360vh of travel over five stations is about 0.6 of a screen of
+ * scroll per station, enough to watch each one draw without hurrying. */
+.tts .wbd-pinned {
+  height: 460vh;
+}
+.tts .wbd-pinned .wbd-pin {
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: 24px;
+}
+.tts .wbd-pinned [data-k="fade"],
+.tts .wbd-stacked [data-k="fade"] {
+  will-change: opacity, transform;
+}
+
+/* Short desktop windows: tighten the board so it still fits the pin. */
+@media (min-width: 960px) and (max-height: 820px) {
+  .tts .wbd-head {
+    margin-bottom: 24px;
+  }
+  .tts .wbd-board {
+    padding-block: 24px 28px;
+  }
+  .tts .wbd-art {
+    max-height: 19vh;
+    margin-block: 12px 16px;
+  }
+  .tts .wbd-items {
+    gap: 8px;
+  }
+  .tts .wbd-item {
+    font-size: 14px;
+  }
+}
+
+/* ---------- stacked (narrow) ---------- */
+@media (max-width: 959px) {
+  .tts .wbd-pin {
+    padding-block: 88px 0;
+  }
+  .tts .wbd-head {
+    margin-bottom: 28px;
+  }
+  .tts .wbd-board {
+    grid-template-columns: 1fr;
+    padding: 8px 0;
+  }
+  .tts .wbd-station {
+    width: 100%;
+    max-width: 440px;
+    margin-inline: auto;
+    padding: 36px 24px 40px;
+  }
+  .tts .wbd-station + .wbd-station {
+    border-top: 1px dashed var(--rule);
+  }
+  .tts .wbd-title {
+    font-size: 32px;
+  }
+  .tts .wbd-under {
+    width: 64%;
+  }
+  .tts .wbd-line {
+    min-height: 0;
+    font-size: 16.5px;
+  }
+  .tts .wbd-art {
+    max-height: none;
+    max-width: 300px;
+    margin: 22px 0 26px;
+  }
+  .tts .wbd-item {
+    font-size: 16.5px;
+  }
+  .tts .wbd-div {
+    display: none;
+  }
+}
