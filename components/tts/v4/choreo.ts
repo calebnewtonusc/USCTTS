@@ -51,18 +51,18 @@ export const WEEK = {
   out: [0.925, 0.995],
 } as const;
 
-/* The film's stages, in frames of a 300-frame, 30 fps film. Replaced by
- * public/tts/machine/stages.json once the real film lands (Week.tsx). */
+/* The film's stages, in frames at 30 fps: public/tts/machine/stages.json,
+ * also loaded at runtime (Week.tsx) so a re-render needs no code change. */
 export type Stage = "tray" | "sorter" | "typewriter" | "mailbox" | "blocks" | "pullback";
 export const STAGES: { name: Stage; from: number; to: number }[] = [
-  { name: "tray", from: 30, to: 75 },
-  { name: "sorter", from: 75, to: 120 },
-  { name: "typewriter", from: 120, to: 165 },
-  { name: "mailbox", from: 165, to: 195 },
-  { name: "blocks", from: 195, to: 240 },
-  { name: "pullback", from: 240, to: 300 },
+  { name: "tray", from: 14, to: 48 },
+  { name: "sorter", from: 48, to: 166 },
+  { name: "typewriter", from: 166, to: 214 },
+  { name: "mailbox", from: 214, to: 287 },
+  { name: "blocks", from: 287, to: 326 },
+  { name: "pullback", from: 326, to: 375 },
 ];
-export const FILM_FRAMES = { n: 300 };
+export const FILM_FRAMES = { n: 375 };
 
 /** Share of the film at a point of the week's scroll. */
 export const filmShare = (p: number) => prog(p, WEEK.film[0], WEEK.film[1]);

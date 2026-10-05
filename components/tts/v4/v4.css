@@ -1185,8 +1185,8 @@
 }
 /* Pulling back out: the film closes to the point it came from. */
 .tts .w5-film.is-shrinking {
-  -webkit-mask-image: radial-gradient(circle at 50% calc(50% - var(--nav-h) / 2), #000 calc(var(--r) - 40px), transparent var(--r));
-  mask-image: radial-gradient(circle at 50% calc(50% - var(--nav-h) / 2), #000 calc(var(--r) - 40px), transparent var(--r));
+  -webkit-mask-image: radial-gradient(circle at 50% calc(50% - var(--nav-h) / 2), #000 calc(var(--r) * 0.3), transparent var(--r));
+  mask-image: radial-gradient(circle at 50% calc(50% - var(--nav-h) / 2), #000 calc(var(--r) * 0.3), transparent var(--r));
 }
 .tts .w5-film .w4-body {
   position: absolute;
@@ -1287,4 +1287,66 @@
  * screen's edge and the page scrolled sideways. */
 .tts .v4-open-stage {
   overflow: hidden;
+}
+/* Caption spots for the real film (1934ab8), chosen from its frames so no
+ * line covers the ball or the part that's moving: the tray's and the
+ * sorter's lines top right, the only open sky in both stages (bottom left
+ * put the tray's line on its yellow block), the typewriter's top centre
+ * above it, the stack's mid right where the frame is empty, and the
+ * pull-back's top left over open ground once the mailbox has cleared. */
+.tts .w5-cap.is-br {
+  right: var(--gutter);
+  bottom: calc(var(--strip-h) + 32px);
+  text-align: right;
+}
+.tts .w5-cap.is-mr {
+  right: var(--gutter);
+  top: 50%;
+  margin-top: -2.4em;
+  max-width: min(440px, 32vw);
+}
+.tts .w5-film .w4-media {
+  object-fit: cover;
+}
+.tts .w5-cap.is-tc {
+  left: 30%;
+  top: 56px;
+}
+@media (max-width: 767px) {
+  .tts .w5-cap.is-tc,
+  .tts .w5-cap.is-mr,
+  .tts .w5-cap.is-br {
+    left: var(--gutter);
+    right: var(--gutter);
+    margin-top: 0;
+    max-width: none;
+    text-align: left;
+  }
+  .tts .w5-cap.is-tc,
+  .tts .w5-cap.is-mr {
+    top: 48px;
+  }
+  .tts .w5-cap.is-br {
+    top: auto;
+    bottom: calc(var(--strip-h) + 20px);
+  }
+}
+/* With the x-ray out, the captions step aside: the line would cut them in
+ * half and the x-ray side carries its own words. */
+.tts .w5-film:has(.w4-body.is-xray) .w5-cap {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+.tts .xr-draft {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #efe8de;
+  border-left: 2px solid var(--sky-soft);
+  padding: 2px 0 2px 10px;
+  margin-bottom: 14px;
+}
+@media (min-width: 1800px) {
+  .tts .xr-draft {
+    font-size: 14px;
+  }
 }

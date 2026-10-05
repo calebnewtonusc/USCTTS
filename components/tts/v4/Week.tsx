@@ -27,30 +27,35 @@ import { attachXray } from "./xrayLine";
  * the client, and an example. One scroll value drives all of it, P.week.
  */
 
-/* The film. FILM_READY flips when the Blender render lands in
- * public/tts/machine/ (machine.mp4 with every frame a keyframe, machine.webm,
- * poster.jpg, stages.json, and a portrait cut if there is one). Until then a
- * placeholder of the same length, 300 frames at 30 fps, stands in, so no
- * request ever 404s. */
-const FILM_READY = false;
-const FILM = FILM_READY
-  ? {
-      sources: [
-        { src: "/tts/machine/machine.mp4", type: "video/mp4" },
-        { src: "/tts/machine/machine.webm", type: "video/webm" },
-      ],
-      portrait: [] as { src: string; type: string }[],
-      poster: "/tts/machine/poster.jpg",
-      stages: "/tts/machine/stages.json",
-    }
-  : {
-      sources: [
-        { src: "/tts/machine-placeholder/placeholder.mp4", type: "video/mp4" },
-      ],
-      portrait: [] as { src: string; type: string }[],
-      poster: "/tts/machine-placeholder/placeholder.jpg",
-      stages: "",
-    };
+/* The film (blender/, commit 1934ab8): 1280x720 and a 720x1280 portrait
+ * cut for phones, every frame a keyframe so a seek lands on its exact
+ * frame. poster.jpg is frame 1, the flat #F4EFE6 field the dive's glow
+ * crossfades into; poster-machine.jpg is frame 330, the whole machine, for
+ * reduced motion and for a video that can't play. */
+const FILM = {
+  sources: [
+    { src: "/tts/machine/machine.mp4", type: "video/mp4" },
+    { src: "/tts/machine/machine.webm", type: "video/webm" },
+  ],
+  portrait: [
+    { src: "/tts/machine/machine-portrait.mp4", type: "video/mp4" },
+    { src: "/tts/machine/machine-portrait.webm", type: "video/webm" },
+  ],
+  poster: "/tts/machine/poster.jpg",
+  posterPortrait: "/tts/machine/poster-portrait.jpg",
+  still: "/tts/machine/poster-machine.jpg",
+  stillPortrait: "/tts/machine/poster-machine-portrait.jpg",
+  stages: "/tts/machine/stages.json",
+};
+// stages.json names its stages for the film; these are the page's names.
+const STAGE_NAME: Record<string, Stage> = {
+  tray: "tray",
+  sort: "sorter",
+  type: "typewriter",
+  mail: "mailbox",
+  stack: "blocks",
+  out: "pullback",
+};
 
 /* One line per stage, verbatim from the script, each with its mono label
  * naming the skill or the tool. The mailbox has no words: the flag pops. */
@@ -59,7 +64,7 @@ const CAPTIONS: { stage: Stage; line: string; label?: string; at: string }[] = [
     stage: "tray",
     line: "First you find every business nearby that could use them.",
     label: "finding leads, in Clay",
-    at: "is-bl is-big",
+    at: "is-tr is-big",
   },
   {
     stage: "sorter",
@@ -71,13 +76,13 @@ const CAPTIONS: { stage: Stage; line: string; label?: string; at: string }[] = [
     stage: "typewriter",
     line: "It drafts the first email. You fix it until it sounds like a person.",
     label: "prompting",
-    at: "is-bl is-mid",
+    at: "is-tc is-small",
   },
   {
     stage: "blocks",
     line: "Every reply lands in a CRM you wired up, so nothing gets lost.",
     label: "the CRM",
-    at: "is-tr is-small",
+    at: "is-mr is-big",
   },
   {
     stage: "pullback",
@@ -105,12 +110,13 @@ export default function Week() {
      * otherwise a video whose time the scroll sets, at most one seek per
      * frame and never while the last one is still landing. */
     let video: HTMLVideoElement | null = null;
+    const portrait = window.innerWidth < 768 && window.innerHeight > window.innerWidth;
     const showPoster = () => {
       if (!box) return;
       box.querySelector("video")?.remove();
       if (!box.querySelector("img")) {
         const img = document.createElement("img");
-        img.src = FILM.poster;
+        img.src = portrait ? FILM.stillPortrait : FILM.still;
         img.alt = "";
         img.className = "w4-media";
         box.append(img);
@@ -124,7 +130,7 @@ export default function Week() {
       v.muted = true;
       v.playsInline = true;
       v.preload = "auto";
-      v.poster = FILM.poster;
+      v.poster = portrait ? FILM.posterPortrait : FILM.poster;
       v.setAttribute("aria-hidden", "true");
       const list =
         window.innerWidth < 768 && FILM.portrait.length
@@ -139,28 +145,40 @@ export default function Week() {
         v.append(src);
       });
       v.addEventListener("error", showPoster);
-      v.addEventListener("loadedmetadata", kick);
+      // Warm the decoder while the reader is still at the top: the first
+      // seek decoded mid-scroll as a 233 ms frame at the dive on a cold
+      // load (production build, headed, 2026-10-05).
+      v.addEventListener(
+        "canplay",
+        () => {
+          if (v.currentTime === 0) v.currentTime = 0.04;
+        },
+        { once: true },
+      );
+      // The frame count is the film's own: duration at 30 fps.
+      v.addEventListener("loadedmetadata", () => {
+        if (v.duration) FILM_FRAMES.n = Math.round(v.duration * 30);
+        kick();
+      });
       v.addEventListener("seeked", kick);
       box.append(v);
       video = v;
     }
 
-    /* The real film's stage frames replace the placeholder's. */
-    if (FILM.stages) {
-      fetch(FILM.stages)
-        .then((r) => (r.ok ? r.json() : null))
-        .then((j: unknown) => {
-          const o = j as {
-            frames?: number;
-            stages?: { name: Stage; from: number; to: number }[];
-          } | null;
-          if (!o?.stages?.length) return;
-          STAGES.splice(0, STAGES.length, ...o.stages);
-          if (o.frames) FILM_FRAMES.n = o.frames;
-          kick();
-        })
-        .catch(() => {});
-    }
+    /* The film's own stage frames, from stages.json. */
+    fetch(FILM.stages)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: unknown) => {
+        if (!j || typeof j !== "object") return;
+        const list = Object.entries(j as Record<string, unknown>)
+          .filter((e): e is [string, [number, number]] => Array.isArray(e[1]) && STAGE_NAME[e[0]] !== undefined)
+          .map(([k, [from, to]]) => ({ name: STAGE_NAME[k], from, to }))
+          .sort((x, y) => x.from - y.from);
+        if (!list.length) return;
+        STAGES.splice(0, STAGES.length, ...list);
+        kick();
+      })
+      .catch(() => {});
 
     const xray = attachXray(el, reduced);
 
@@ -199,7 +217,9 @@ export default function Week() {
         const o = a * (1 - smooth(prog(shrink, 0.85, 1)));
         film.style.opacity = o.toFixed(3);
         film.style.visibility = o > 0.002 ? "visible" : "hidden";
-        const r = Math.hypot(f.vw, f.vh) * 0.6 * (1 - shrink) + 6;
+        // Feathered over most of its radius, so the closing film has no
+        // edge: it reads as the machine's light drawing in to a point.
+        const r = Math.hypot(f.vw, f.vh) * 1.8 * (1 - shrink) + 10;
         film.style.setProperty("--r", `${r.toFixed(0)}px`);
         film.classList.toggle("is-shrinking", shrink > 0);
       }
@@ -217,7 +237,10 @@ export default function Week() {
         const st = STAGES.find((x) => x.name === CAPTIONS[i].stage);
         if (!st) return;
         const t = prog(fr, st.from, st.to);
-        const o = smooth(prog(t, 0, 0.18)) * (1 - smooth(prog(t, 0.82, 1)));
+        // The pull-back's line waits for the camera to clear the mailbox,
+        // which still fills its top left for the stage's first frames.
+        const t0 = st.name === "pullback" ? 0.3 : 0;
+        const o = smooth(prog(t, t0, t0 + 0.16)) * (1 - smooth(prog(t, 0.84, 1)));
         c.style.opacity = o.toFixed(3);
         c.style.visibility = o > 0.002 ? "visible" : "hidden";
         if (!reduced)
