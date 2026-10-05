@@ -1,15 +1,52 @@
-/* The world scene. Scoped under .tts .world.
+/* The world: a fixed canvas behind the hero, the partners section and the
+ * walkthrough. Scoped under .tts.
  *
- * Full bleed: the world owns the viewport behind a pinned 1200vh block, the
- * nav floats above it, and the copy sits over it in one quiet column on the
- * shared left edge, on a soft wash of the page ground so ink type stays
- * legible over any frame. The camera's view offset (world.ts) keeps what it
- * looks at clear of that column. */
+ * The canvas sits at z-index 0 and those three sections at 1, so copy is
+ * always over the cubes. Past the walkthrough the canvas has faded to
+ * nothing and is hidden, so the sections after it never sit under it. */
 
-.tts .world {
+.tts .w-sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* The sky before the canvas is up, the same pale blue into warm white. */
+  background: linear-gradient(180deg, #d3e5f4 0%, #f9f7f2 62%, #f6f3ec 100%);
+}
+.tts .w-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 500ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .w-canvas.is-ready {
+  transition: none;
+}
+
+.tts .world-hero,
+.tts .world-walk,
+.tts .partners {
   position: relative;
+  z-index: 1;
+}
+.tts .world-hero {
   margin-top: -64px;
+  height: 100vh;
+  height: 100svh;
+  min-height: 560px;
   --edge: max(var(--gutter), calc((100vw - var(--wide)) / 2 + var(--gutter)));
+}
+.tts .world-walk {
+  --edge: max(var(--gutter), calc((100vw - var(--wide)) / 2 + var(--gutter)));
+}
+.tts .w-pin .w-wash {
+  /* The walkthrough's wash fades in at the top too, so it never shows an
+   * edge as the section rises in under the partners section. */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
 }
 .tts .w-pin {
   position: sticky;
@@ -17,70 +54,38 @@
   height: 100vh;
   height: 100svh;
   overflow: hidden;
-  /* The canvas clears to this same paper, so the pin has no edge. */
-  background: var(--paper);
 }
-.tts .w-well,
-.tts .w-overlay {
+
+/* A soft wash of warm white under the copy column, so ink type reads over
+ * any frame. */
+.tts .w-wash {
   position: absolute;
   inset: 0;
-}
-.tts .w-canvas,
-.tts .w-grain,
-.tts .w-vignette {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.tts .w-canvas {
-  opacity: 0;
-  transition: opacity 400ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .w-canvas.is-ready {
-  opacity: 1;
-}
-.tts .w-grain {
   pointer-events: none;
-  opacity: 0.06;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-}
-/* The wash under the copy column, in the page ground. */
-.tts .w-vignette {
-  pointer-events: none;
+  /* It fades out at the foot, so the hero's wash never shows a bottom edge
+   * as the hero scrolls away over the sky. */
+  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
   background: linear-gradient(
     90deg,
-    rgba(244, 240, 233, 0.94) 0%,
-    rgba(244, 240, 233, 0.82) calc(var(--edge) + 360px),
-    rgba(244, 240, 233, 0) calc(var(--edge) + 720px)
+    rgba(250, 249, 245, 0.9) 0%,
+    rgba(250, 249, 245, 0.7) calc(var(--edge) + 340px),
+    rgba(250, 249, 245, 0) calc(var(--edge) + 700px)
   );
 }
 
-/* ---------- the column: hero copy and station captions ---------- */
-.tts .w-hero {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-}
 .tts .w-copy,
 .tts .w-cap {
   position: absolute;
-  z-index: 3;
+  z-index: 2;
   left: var(--edge);
   top: 0;
   bottom: 0;
-  width: min(640px, 100% - 2 * var(--gutter));
+  width: min(620px, 100% - 2 * var(--gutter));
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding-top: 64px;
-  pointer-events: auto;
-}
-.tts .w-copy {
-  will-change: transform, opacity;
 }
 .tts .w-pill {
   font-size: 15px;
@@ -88,8 +93,8 @@
   margin-bottom: 16px;
 }
 .tts .w-title {
-  font-size: clamp(40px, 5.4vw, 80px);
-  line-height: 1.04;
+  font-size: clamp(42px, 5.6vw, 84px);
+  line-height: 1.03;
   letter-spacing: -0.025em;
   font-weight: 400;
 }
@@ -97,11 +102,11 @@
   display: block;
 }
 .tts .w-lede {
-  margin-top: 20px;
+  margin-top: 22px;
   font-size: 18px;
   line-height: 1.56;
   color: var(--ink-2);
-  max-width: 34ch;
+  max-width: 36ch;
 }
 .tts .w-actions {
   margin-top: 28px;
@@ -109,24 +114,19 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+.tts .w-kicker {
+  font-size: 14px;
+  color: var(--ink-3);
+  margin-bottom: 12px;
+}
 .tts .w-cap-title {
-  font-size: clamp(32px, 3.8vw, 56px);
+  font-size: clamp(32px, 3.6vw, 54px);
   line-height: 1.08;
   letter-spacing: -0.02em;
   font-weight: 400;
-  max-width: 13ch;
+  max-width: 15ch;
 }
-.tts .w-cap.is-final .w-cap-title {
-  max-width: 16ch;
-}
-/* The last beat sits in the top of the frame, because the cubes settle into a
- * horizon line at 46% down and the next section's hairline lands on it. Text
- * above the line, never through it. */
-.tts .w-cap.is-final {
-  justify-content: flex-start;
-  padding-top: max(96px, 12vh);
-}
-.tts .w-cap-b p {
+.tts .w-cap-b {
   margin-top: 16px;
   font-size: 18px;
   line-height: 1.56;
@@ -134,16 +134,10 @@
   max-width: 34ch;
 }
 
-/* ---------- over the world: the rail ---------- */
-.tts .w-overlay {
-  z-index: 4;
-  pointer-events: none;
-}
-.tts .w-overlay > * {
-  pointer-events: auto;
-}
+/* ---------- the rail ---------- */
 .tts .w-rail {
   position: absolute;
+  z-index: 3;
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
@@ -169,7 +163,7 @@
   transition: background-color 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 .tts .w-rail-btn:hover {
-  background: rgba(244, 240, 233, 0.8);
+  background: rgba(250, 249, 245, 0.85);
 }
 .tts .w-rail-btn:hover span,
 .tts .w-rail-btn.is-on span {
@@ -183,7 +177,7 @@
   scale: 0.96;
 }
 
-/* ---------- narrow: the column moves to the foot ---------- */
+/* ---------- narrow: the copy moves to the foot ---------- */
 @media (max-width: 767px) {
   .tts .w-copy,
   .tts .w-cap {
@@ -192,23 +186,17 @@
     justify-content: flex-end;
     padding-top: 0;
   }
-  .tts .w-vignette {
+  .tts .w-wash {
     background: linear-gradient(
       0deg,
-      rgba(244, 240, 233, 0.95) 0%,
-      rgba(244, 240, 233, 0.85) 34%,
-      rgba(244, 240, 233, 0) 60%
+      rgba(250, 249, 245, 0.95) 0%,
+      rgba(250, 249, 245, 0.85) 36%,
+      rgba(250, 249, 245, 0) 60%
     );
   }
   .tts .w-lede,
-  .tts .w-cap-b p {
+  .tts .w-cap-b {
     font-size: 16px;
-  }
-  .tts .w-cap.is-final {
-    top: 0;
-    bottom: auto;
-    justify-content: flex-start;
-    padding-top: 80px;
   }
   .tts .w-rail {
     right: 2px;
@@ -216,24 +204,31 @@
 }
 
 /* ---------- reduced motion: the copy as a plain sequence ---------- */
-.tts .world.is-still {
+.tts .world-hero.is-still {
   margin-top: 0;
-  width: 100%;
-  max-width: var(--wide);
-  padding-inline: var(--gutter);
-  margin-inline: auto;
-  padding-top: 40px;
+  height: auto;
+  min-height: 0;
 }
-.tts .world.is-still .w-copy {
+.tts .world-hero.is-still .w-copy {
   position: static;
   width: auto;
-  padding: 0 0 28px;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding: 72px var(--gutter) 40px;
+}
+.tts .world-hero.is-still .w-wash {
+  display: none;
+}
+.tts .world-walk.is-still {
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding: 0 var(--gutter) 72px;
 }
 .tts .w-still {
-  margin: 72px 0 0;
+  margin: 56px 0 0;
   max-width: 640px;
 }
-.tts .w-still p {
+.tts .w-still p:last-child {
   margin-top: 16px;
   font-size: 18px;
   line-height: 1.56;
@@ -246,7 +241,7 @@
  * rose again on hydration (seen at 0ms on 2026-10-04). Only when scripting is
  * on, so a no-JS reader still gets the copy. */
 @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-  .tts .world:not(.is-still) .w-copy [data-line] {
+  .tts .world-hero:not(.is-still) .w-copy [data-line] {
     opacity: 0;
   }
 }

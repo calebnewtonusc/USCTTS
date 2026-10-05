@@ -240,22 +240,36 @@ export function Join() {
       <MeshBand />
       <div className="join-inner">
         <h2 id="join-title" className="join-title">
-          Join TTS, learn to build all of this, and build it for a real company.
+          Two ways in, depending on who you are.
         </h2>
-        {/* [NEED: the next cohort's application date, and how long a reply
-         * takes. Neither is on record, so neither is on the page.] */}
-        <p className="join-tracks">
-          When you apply you pick building, consulting or growing, and Caleb,
-          Tyler and Emily read every one.
-        </p>
-
-        <div className="join-actions">
-          <Link href="/apply" className="btn btn-primary">
-            Apply to join{" "}
-            <span className="arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </Link>
+        {/* Two readers, two doors (docs/RUBRIC-tts.md): a USC student
+         * deciding whether to join, and a business that wants AI help. */}
+        <div className="join-doors">
+          <div className="join-door">
+            <p>
+              If you&apos;re a USC student, you apply, pick building,
+              consulting or growing, and Caleb, Tyler and Emily read every one.
+            </p>
+            <Link href="/apply" className="btn btn-primary">
+              Join TTS{" "}
+              <span className="arrow" aria-hidden="true">
+                &rarr;
+              </span>
+            </Link>
+          </div>
+          <div className="join-door">
+            <p>
+              If you run a business, tell us the part of the week your team
+              keeps losing, and we&apos;ll tell you what AI can actually do
+              about it.
+            </p>
+            <Link href="/work-with-us#intake" className="btn btn-secondary">
+              Tell us what&apos;s eating your team&apos;s time{" "}
+              <span className="arrow" aria-hidden="true">
+                &rarr;
+              </span>
+            </Link>
+          </div>
         </div>
       </div>
     </section>

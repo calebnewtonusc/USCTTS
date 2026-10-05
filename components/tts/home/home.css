@@ -309,6 +309,32 @@
   color: var(--paper);
   margin-bottom: 6px;
 }
+.tts .join-doors {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+  max-width: var(--narrow);
+}
+.tts .join-door {
+  display: grid;
+  gap: 20px;
+  align-content: start;
+  justify-items: start;
+  border-top: 1px solid rgba(244, 240, 233, 0.22);
+  padding-top: 16px;
+}
+.tts .join-door p {
+  color: rgba(244, 240, 233, 0.82);
+  font-size: 18px;
+  line-height: 1.5;
+  max-width: 34ch;
+}
+@media (max-width: 767px) {
+  .tts .join-doors {
+    grid-template-columns: 1fr;
+  }
+}
 .tts .join-actions {
   margin-top: 40px;
   display: flex;

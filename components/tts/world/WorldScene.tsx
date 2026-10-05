@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { capClip, clamp, easeOut3, prog } from "../engine/math";
+import { capClip, clamp, easeInOut3, easeOut3, prog } from "../engine/math";
 import type { World } from "./world";
 import { worldBridge } from "./bridge";
 
@@ -14,24 +14,23 @@ export interface Numbers {
   shortlist: number;
 }
 
-/* The scene chassis is our lemma-replica's (src/sections/hero-scene.js and
- * hero-intro.js), ported: one 1200vh block, a sticky pin, one progress value
- * N followed at 0.2 a frame, phases as windows on N, captions wiped by a
- * clip-path from N, a 2200ms load clock for the intro, and a depth exit where
- * each layer leaves by its own fixed distance on one cubic curve with the
- * opacity applied on the wrapper and again on each layer. The world, words and
- * colours are TTS's. */
-const VIEWPORTS = 12;
+/* Two parts of one world, with the partners section between them (Caleb,
+ * 2026-10-04: a load-in that makes you say woah, then Clay and Perplexity,
+ * then the walkthrough). The canvas is fixed behind all three, so it is the
+ * same cubes the whole way: they build the block on load, the camera cranes
+ * up into the sky while the partners section passes, comes back down to
+ * them, and they take one form per example. Every value is a function of the
+ * scroll, followed at 0.2 a frame, so it all reverses.
+ *
+ * Geometry is read once per resize, never in the scroll path: scroll only
+ * reads window.scrollY, so a scroll event can't force a layout. */
+
 const FOLLOW = 0.2;
 const LOAD_MS = 2200;
 const RISE = 0.18;
 const RISE_PX = 12;
-const COPY_STARTS = [0.06, 0.1, 0.16, 0.24, 0.3];
-// The replica's intro span: the copy finishes leaving exactly as it reaches
-// zero opacity, about 550px of scroll at 900 tall. On the way out the camera
-// pulls back over the same span (world.ts CAMERA, key 0 to key 1).
-const EXIT_SPAN = 0.055;
-const COPY_TRAVEL = 380;
+const COPY_STARTS = [0.42, 0.5, 0.56, 0.64, 0.7];
+const WALK_VIEWPORTS = 9;
 
 interface Cap {
   id: string;
@@ -40,79 +39,52 @@ interface Cap {
   title: string;
   body: string;
 }
-// One caption per form, each one held while the cubes hold that form
-// (world.ts MORPHS). Plain and short, in Caleb's voice.
+/* One example per form, each a before and after a business owner recognizes
+ * and a student would want to build. Examples, never claimed as past client
+ * results (docs/RUBRIC-tts.md). Windows sit in the holds in field.ts. */
 const CAPS: Cap[] = [
   {
-    id: "mess",
-    in: 0.07,
-    out: 0.155,
-    title: "Most data shows up as a mess",
-    body: "It comes in from everywhere, half filled in and scattered, and nothing useful happens until someone sorts it out.",
-  },
-  {
-    id: "clean",
-    in: 0.2,
-    out: 0.29,
-    title: "So first we clean it up",
-    body: "Every record gets checked and put where it belongs, so whatever we build next stands on something solid.",
-  },
-  {
-    id: "automate",
-    in: 0.34,
-    out: 0.44,
-    title: "Automations that run on their own",
-    body: "We build the workflows a company would otherwise do by hand, and they keep running after we've left.",
+    id: "emails",
+    in: 0.12,
+    out: 0.245,
+    title: "Your team answers the same emails all week",
+    body: "We set up AI that drafts them, so your people just check them and hit send.",
   },
   {
     id: "crm",
-    in: 0.49,
-    out: 0.59,
-    title: "A CRM the team actually keeps up",
-    body: "Contacts, companies and deals sorted where people can find them, instead of lost across five tools.",
+    in: 0.33,
+    out: 0.455,
+    title: "Your leads live in a spreadsheet",
+    body: "We set up a CRM that keeps itself up to date, so every contact and deal is where your team can find it.",
   },
   {
-    id: "gtm",
-    in: 0.64,
-    out: 0.74,
-    title: "GTM engines for startups",
-    body: "Out of everyone a startup could reach, the engine finds the few worth it, and those are the ones who hear from them.",
+    id: "customers",
+    in: 0.54,
+    out: 0.665,
+    title: "You need more customers",
+    body: "We build the lists and the outreach that find them. The red ones are the people actually worth reaching.",
   },
   {
     id: "teach",
-    in: 0.79,
-    out: 0.87,
-    title: "And we teach people to use it",
-    body: "We're building an AI curriculum for one client's students, lesson by lesson, so they can use AI for real work.",
+    in: 0.75,
+    out: 0.855,
+    title: "Your people don't know how to use AI yet",
+    body: "We teach them, and we're building a curriculum like that for a client's students right now.",
   },
   {
     id: "build",
-    in: 0.91,
+    in: 0.92,
     out: 2,
-    title: "You learn it by building it",
-    body: "Every member builds real AI work, for startups, for products and for students.",
+    title: "Members learn all of it by building it",
+    body: "Whatever is eating a team's time, we figure out where AI fits and build it with them.",
   },
 ];
-const CAP_RAMP = 0.035;
-// Where the rail sends you: the middle of each caption's hold.
+const CAP_RAMP = 0.03;
 const railTarget = (c: Cap) =>
   Math.min(0.985, c.in + Math.min(0.5, (Math.min(c.out, 1) - c.in) * 0.45));
-// The exit: the cubes have settled into the horizon line, the seam's own
-// hairline lands on it, and the canvas fades into the paper it sits on, so
-// the block ends with no edge.
-const FADE: [number, number] = [0.955, 1];
 
-export default function WorldScene({ nums }: { nums: Numbers }) {
-  const run = useRef<HTMLElement>(null);
-  const canvas = useRef<HTMLCanvasElement>(null);
-  const hero = useRef<HTMLDivElement>(null);
-  const copy = useRef<HTMLDivElement>(null);
-  const caps = useRef<(HTMLDivElement | null)[]>([]);
-  const well = useRef<HTMLDivElement>(null);
+function useReduced() {
   const [reduced, setReduced] = useState(false);
-  const [ready, setReady] = useState(false);
-  const [active, setActive] = useState(-1);
-
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const on = () => setReduced(mq.matches);
@@ -120,79 +92,117 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
   }, []);
+  return reduced;
+}
+
+/** The hero: the load-in, and the fixed canvas the whole world draws on. */
+export function WorldHero({ nums }: { nums: Numbers }) {
+  const sec = useRef<HTMLElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const copy = useRef<HTMLDivElement>(null);
+  const reduced = useReduced();
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (reduced) return;
-    const el = run.current;
+    const hero = sec.current;
     const cv = canvas.current;
-    if (!el || !cv) return;
+    if (!hero || !cv) return;
     let world: World | null = null;
     let dead = false;
-    let target = 0,
-      cur = 0,
-      load = 0;
     let raf = 0,
       last = 0,
       banked = 0,
-      visible = true;
+      odd = false;
+    let target = window.scrollY,
+      cur = target;
     const t0 = performance.now();
     let worldT0 = -1;
-    let odd = false;
+    let pointerMoved = 0;
     const lines = copy.current
       ? [...copy.current.querySelectorAll<HTMLElement>("[data-line]")]
       : [];
 
-    // Geometry is read once per resize, never in the scroll path: scroll only
-    // reads window.scrollY, so a scroll event can't force a layout.
-    let blockTop = 0,
-      travel = 1;
-    const layoutBlock = () => {
-      blockTop = el.getBoundingClientRect().top + window.scrollY;
-      travel = Math.max(1, el.offsetHeight - window.innerHeight);
-    };
-    const measure = () => {
-      target = clamp((window.scrollY - blockTop) / travel);
-    };
-    layoutBlock();
-
-    let lastActive = -2;
-    const paint = (N: number) => {
-      // Intro: copy lines rise on the load clock, then everything exits in depth.
-      const exitE = easeOut3(clamp(N / EXIT_SPAN));
-      const fade = clamp(1 - N / EXIT_SPAN);
-      if (hero.current) {
-        hero.current.style.opacity = fade.toFixed(3);
-        hero.current.style.visibility = fade <= 0 ? "hidden" : "";
+    // Measured once per resize.
+    let H = window.innerHeight;
+    let heroH = 1,
+      partnersMid = 1,
+      walkTop = 2,
+      walkTravel = 1;
+    let caps: HTMLElement[] = [];
+    let rail: HTMLElement[] = [];
+    const layout = () => {
+      H = window.innerHeight;
+      const y = window.scrollY;
+      heroH = hero.offsetHeight;
+      const partners = document.querySelector<HTMLElement>(".partners");
+      const walk = document.querySelector<HTMLElement>(".world-walk");
+      if (partners) {
+        const r = partners.getBoundingClientRect();
+        partnersMid = r.top + y + r.height / 2 - H / 2;
+      } else partnersMid = heroH;
+      if (walk) {
+        walkTop = walk.getBoundingClientRect().top + y;
+        walkTravel = Math.max(1, walk.offsetHeight - H);
+        caps = [...walk.querySelectorAll<HTMLElement>(".w-cap")];
+        rail = [...walk.querySelectorAll<HTMLElement>(".w-rail-btn")];
+      } else {
+        walkTop = partnersMid + H;
+        walkTravel = 1;
       }
+      partnersMid = Math.max(
+        heroH * 0.6,
+        Math.min(partnersMid, walkTop - H * 0.3),
+      );
+    };
+    layout();
+
+    let lastAct = -2;
+    let opacity = 1;
+    const paint = (y: number) => {
+      // Hero copy rises on the load clock; it scrolls away with the page.
+      const load = Math.min(1, (performance.now() - t0) / LOAD_MS);
       lines.forEach((ln, i) => {
         const n = easeOut3(clamp((load - COPY_STARTS[i]) / RISE));
         ln.style.opacity = n.toFixed(3);
         ln.style.transform = `translateY(${((1 - n) * RISE_PX).toFixed(2)}px)`;
       });
-      if (copy.current) {
-        copy.current.style.opacity = fade.toFixed(3);
-        copy.current.style.transform = `translate3d(0, ${(-COPY_TRAVEL * exitE).toFixed(2)}px, 0)`;
-      }
 
-      // Captions, wiped on a clip from N.
+      const crane =
+        y < partnersMid
+          ? easeInOut3(prog(y, heroH * 0.2, partnersMid))
+          : 1 - easeInOut3(prog(y, partnersMid, walkTop));
+      const N = clamp((y - walkTop) / walkTravel);
+      const end = walkTop + walkTravel;
+      // The exit: the canvas fades into the paper while the last caption is
+      // still up, so the block ends with no edge and nothing under it.
+      opacity = 1 - prog(y, end - H * 0.45, end - H * 0.05);
+      cv.style.opacity = opacity.toFixed(3);
+      cv.style.visibility = opacity <= 0 ? "hidden" : "";
+      world?.setState(N, crane);
+
       let act = -1;
-      CAPS.forEach((c, i) => {
-        const node = caps.current[i];
-        if (!node) return;
+      caps.forEach((node, i) => {
+        const c = CAPS[i];
+        if (!c) return;
         const a = prog(N, c.in, c.in + CAP_RAMP);
         const b = prog(N, c.out - CAP_RAMP, c.out);
         const hidden = a <= 0 || b >= 1;
         node.style.display = hidden ? "none" : "";
-        if (!hidden) node.style.clipPath = capClip(a, b);
-        if (!hidden) act = i;
+        if (!hidden) {
+          node.style.clipPath = capClip(a, b);
+          act = i;
+        }
       });
-      if (act !== lastActive) {
-        lastActive = act;
-        setActive(act);
+      if (act !== lastAct) {
+        lastAct = act;
+        rail.forEach((b, i) => {
+          b.classList.toggle("is-on", i === act);
+          if (i === act) b.setAttribute("aria-current", "step");
+          else b.removeAttribute("aria-current");
+        });
       }
-
-      if (well.current) well.current.style.opacity = (1 - prog(N, FADE[0], FADE[1])).toFixed(3);
-      world?.setN(N);
+      return load;
     };
 
     const frame = (now: number) => {
@@ -200,58 +210,72 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
       if (dead) return;
       if (last) banked += now - last;
       last = now;
-      load = Math.min(1, (now - t0) / LOAD_MS);
-      // The world runs its own load clock from the moment it exists, so the
-      // assembly is seen even when three.js arrives after the copy has risen
-      // (review, 2026-10-04: the intro read as finished by 400ms, because the
-      // shared clock had run out before the first 3D frame).
       if (world && worldT0 >= 0)
         world.setLoad(Math.min(1, (now - worldT0) / LOAD_MS));
       const d = target - cur;
-      cur = Math.abs(d) < 8e-5 ? target : cur + d * FOLLOW;
-      paint(cur);
-      // While the scroll is moving, every frame renders. At rest only the
-      // ambient motion is left, so it renders every other frame, which is 60
-      // a second on a 120Hz display and halves the GPU load while reading.
-      const moving = Math.abs(target - cur) > 1e-5 || load < 1;
+      cur = Math.abs(d) < 0.5 ? target : cur + d * FOLLOW;
+      const load = paint(cur);
+      const worldLoading = worldT0 >= 0 && now - worldT0 < LOAD_MS;
+      // While anything moves, every frame renders. At rest only the ambient
+      // motion is left, so it renders every other frame: 60 a second on a
+      // 120Hz display, half the GPU work while someone reads.
+      const moving =
+        Math.abs(target - cur) > 0.5 ||
+        load < 1 ||
+        worldLoading ||
+        now - pointerMoved < 400;
       odd = !odd;
-      if (moving || odd) world?.frame(banked);
-      if (visible && !document.hidden) raf = requestAnimationFrame(frame);
+      if (opacity > 0 && (moving || odd)) world?.frame(banked);
+      // Past the world, nothing moves until the scroll comes back.
+      if (!document.hidden && (opacity > 0 || moving))
+        raf = requestAnimationFrame(frame);
     };
     const kick = () => {
-      if (!raf && visible && !document.hidden) {
+      if (!raf && !document.hidden) {
         last = 0;
         raf = requestAnimationFrame(frame);
       }
     };
     const onScroll = () => {
-      measure();
+      target = window.scrollY;
       kick();
     };
     const size = () => {
-      const r = cv.getBoundingClientRect();
-      world?.resize(Math.max(1, r.width), Math.max(1, r.height));
+      world?.resize(
+        Math.max(1, window.innerWidth),
+        Math.max(1, window.innerHeight),
+      );
     };
     const onResize = () => {
-      layoutBlock();
+      layout();
       size();
       onScroll();
     };
-    // The pin is only on screen while the block is; pause the GL off it.
-    const io = new IntersectionObserver((e) => {
-      visible = e[e.length - 1].isIntersecting;
+    const onPointer = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      world?.setPointer(
+        (e.clientX / window.innerWidth) * 2 - 1,
+        -(e.clientY / H) * 2 + 1,
+      );
+      pointerMoved = performance.now();
       kick();
-    });
-    io.observe(el);
+    };
+    const onLeave = () => {
+      world?.setPointer(null, null);
+      pointerMoved = performance.now();
+      kick();
+    };
+    // Late layout (fonts, images) moves the sections; re-measure then.
+    const ro = new ResizeObserver(() => layout());
+    ro.observe(document.body);
     document.addEventListener("visibilitychange", kick);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);
-    measure();
-    cur = target;
-    paint(cur);
+    window.addEventListener("pointermove", onPointer, { passive: true });
+    document.documentElement.addEventListener("pointerleave", onLeave);
     kick();
 
-    // The 3D loads after first paint, so the copy is up before three.js is.
+    // three.js loads after first paint, so the copy is up before it is.
     import("./world")
       .then(({ createWorld }) => {
         if (dead) return;
@@ -262,73 +286,57 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
             window.innerWidth < 768,
           );
         } catch (err) {
-          // No WebGL, or a build error: the poster stays up. Say which.
           console.error("TTS world did not start", err);
           return;
         }
         size();
-        world.setN(cur);
-        // A visitor who arrives mid-page skips the assembly.
-        const assemble = cur < 0.02;
+        // A visitor who arrives mid-page skips the load-in.
+        const assemble = window.scrollY < H * 0.5;
         world.setLoad(assemble ? 0 : 1);
-        worldT0 = assemble ? performance.now() : 0;
+        worldT0 = assemble ? performance.now() : -1;
+        paint(cur);
         world.frame(banked);
         setReady(true);
-        worldBridge.qualify = () => {
-          const r = cv.getBoundingClientRect();
-          const q = world ? world.qualifyOnCanvas() : { x: 0.66, y: 0.5 };
-          return { x: r.left + q.x * r.width, y: r.top + q.y * r.height };
-        };
-        if (new URLSearchParams(window.location.search).has("capture")) {
-          (window as unknown as { __ttsWorld: unknown }).__ttsWorld = {
-            still: (
-              n: number,
-              t: number,
-              rippleMs?: number,
-              loadAt?: number,
-            ) => {
-              world?.still(n, t, rippleMs, loadAt);
-              paint(n);
-            },
-            stop: () => {
-              dead = true;
-            },
-          };
-        }
+        worldBridge.qualify = () => ({
+          x: window.innerWidth * 0.66,
+          y: window.innerHeight * 0.45,
+        });
         kick();
       })
       .catch(() => {
-        /* The poster stays up; nothing else depends on the 3D. */
+        /* The sky behind the copy stays; nothing else depends on the 3D. */
       });
 
     return () => {
       dead = true;
       if (raf) cancelAnimationFrame(raf);
-      io.disconnect();
+      ro.disconnect();
       document.removeEventListener("visibilitychange", kick);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("pointermove", onPointer);
+      document.documentElement.removeEventListener("pointerleave", onLeave);
       worldBridge.qualify = null;
       world?.dispose();
     };
   }, [reduced, nums]);
 
-  const go = (c: Cap) => {
-    const el = run.current;
-    if (!el) return;
-    const travel = el.offsetHeight - window.innerHeight;
-    const top = el.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({
-      top: top + railTarget(c) * travel,
-      behavior: reduced ? "auto" : "smooth",
-    });
-  };
-
-  // Caleb's words, 2026-10-04: what the lab is in one line, then the range
-  // of work and how members learn it.
-  const heroCopy = (
-    <>
-      <div className="w-col-a">
+  return (
+    <section
+      className={reduced ? "world-hero is-still" : "world-hero"}
+      ref={sec}
+      aria-label="USC's AI implementation lab"
+    >
+      {!reduced && (
+        <div className="w-sky" aria-hidden="true">
+          <canvas
+            ref={canvas}
+            className={ready ? "w-canvas is-ready" : "w-canvas"}
+          />
+        </div>
+      )}
+      <div className="w-wash" aria-hidden="true" />
+      <div className="w-copy" ref={copy}>
         <p className="w-pill" data-line>
           Trojan Tech Solutions
         </p>
@@ -340,109 +348,92 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
             implementation lab.
           </span>
         </h1>
-      </div>
-      <div className="w-col-b">
         <p className="w-lede" data-line>
           If a company needs AI work done, we do it, automations, CRM, GTM
-          engineering, agents, even teaching their people. Members learn all
-          of it by building it.
+          engineering, agents, even teaching their people. Members learn all of
+          it by building it.
         </p>
         <div className="w-actions" data-line>
           <Link className="btn btn-primary" href="/apply">
-            Apply to join{" "}
+            Join TTS{" "}
             <span className="arrow" aria-hidden="true">
               &rarr;
             </span>
           </Link>
-          <Link className="btn btn-secondary" href="/build">
-            See how it works
+          <Link className="btn btn-secondary" href="/work-with-us">
+            Work with us
           </Link>
         </div>
       </div>
-    </>
+    </section>
   );
+}
 
-  if (reduced) {
-    // Reduced motion: no flight and no morph, the copy as a plain sequence.
+/** The walkthrough: the captions and the rail over the same fixed canvas. */
+export function WorldWalk() {
+  const sec = useRef<HTMLElement>(null);
+  const reduced = useReduced();
+
+  const go = (c: Cap) => {
+    const el = sec.current;
+    if (!el) return;
+    const travel = el.offsetHeight - window.innerHeight;
+    const top = el.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({
+      top: top + railTarget(c) * travel,
+      behavior: reduced ? "auto" : "smooth",
+    });
+  };
+
+  if (reduced)
     return (
-      <section className="world is-still" aria-label="USC's AI implementation lab">
-        <div className="w-copy">{heroCopy}</div>
+      <section
+        className="world-walk is-still"
+        aria-label="What that looks like"
+      >
         {CAPS.map((c) => (
           <div key={c.id} className="w-still">
+            <p className="w-kicker">For example</p>
             <h2 className="w-cap-title">{c.title}</h2>
             <p>{c.body}</p>
           </div>
         ))}
       </section>
     );
-  }
 
   return (
     <section
-      className="world"
-      ref={run}
-      style={{ height: `${VIEWPORTS * 100}vh` }}
-      aria-label="USC's AI implementation lab"
+      className="world-walk"
+      ref={sec}
+      style={{ height: `${WALK_VIEWPORTS * 100}vh` }}
+      aria-label="What that looks like"
     >
       <div className="w-pin">
-        <div className="w-well" ref={well}>
-          <canvas
-            ref={canvas}
-            className={ready ? "w-canvas is-ready" : "w-canvas"}
-            aria-hidden="true"
-          />
-          <div className="w-grain" aria-hidden="true" />
-          <div className="w-vignette" aria-hidden="true" />
-        </div>
-
-        <div className="w-hero" ref={hero}>
-          <div className="w-copy" ref={copy}>
-            {heroCopy}
-          </div>
-        </div>
-
+        <div className="w-wash" aria-hidden="true" />
         {CAPS.map((c, i) => (
           <div
             key={c.id}
-            ref={(n) => {
-              caps.current[i] = n;
-            }}
-            className={c.id === "build" ? "w-cap is-final" : "w-cap"}
+            className={i === CAPS.length - 1 ? "w-cap is-final" : "w-cap"}
             style={{ display: "none" }}
           >
+            {i < CAPS.length - 1 && <p className="w-kicker">For example</p>}
             <h2 className="w-cap-title">{c.title}</h2>
-            <div className="w-cap-b">
-              <p>{c.body}</p>
-              {c.id === "build" && (
-                <div className="w-actions">
-                  <Link className="btn btn-primary" href="/apply">
-                    Apply to join{" "}
-                    <span className="arrow" aria-hidden="true">
-                      &rarr;
-                    </span>
-                  </Link>
-                </div>
-              )}
-            </div>
+            <p className="w-cap-b">{c.body}</p>
           </div>
         ))}
-
-        <div className="w-overlay">
-          <nav className="w-rail" aria-label="Stations">
-            {CAPS.map((c, i) => (
-              <button
-                key={c.id}
-                type="button"
-                className={i === active ? "w-rail-btn is-on" : "w-rail-btn"}
-                aria-label={`Go to: ${c.title}`}
-                aria-current={i === active ? "step" : undefined}
-                onClick={() => go(c)}
-              >
-                <span />
-              </button>
-            ))}
-          </nav>
-        </div>
+        <nav className="w-rail" aria-label="Examples">
+          {CAPS.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              className="w-rail-btn"
+              aria-label={`Go to: ${c.title}`}
+              onClick={() => go(c)}
+            >
+              <span />
+            </button>
+          ))}
+        </nav>
       </div>
     </section>
   );
