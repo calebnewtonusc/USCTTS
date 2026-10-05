@@ -97,8 +97,7 @@ export default function ApplyForm() {
       <div className="form-done" role="status">
         <h2 className="t-h3">Got it, {values.name.split(" ")[0]}.</h2>
         <p>
-          Your application is in. One of the people running the club reads every one, and you&apos;ll hear back at{" "}
-          {values.email.trim()} whether it&apos;s a yes or a no.
+          {`Your application is in. One of the people running the club reads every one, and you'll hear back at ${values.email.trim()} whether it's a yes or a no.`}
         </p>
         <p>
           <Link className="link" href="/members">

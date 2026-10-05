@@ -105,8 +105,7 @@ export default function IntakeForm() {
       <div className="form-done" role="status">
         <h2 className="t-h3">Thanks, it&apos;s with us.</h2>
         <p>
-          We&apos;ll read what {values.orgName.trim()} sent and reply to {values.contactEmail.trim()}. If it&apos;s work
-          we can&apos;t finish, we&apos;ll say so in that first reply.
+          {`We'll read what ${values.orgName.trim()} sent and reply to ${values.contactEmail.trim()}. If it's work we can't finish, we'll say so in that first reply.`}
         </p>
         <p>
           <Link className="link" href="/">

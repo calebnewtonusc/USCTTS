@@ -6,6 +6,8 @@ import { TC_URL } from "@/components/tts/links";
  * (redirected in next.config.mjs), kept first in the document so the two
  * still read as siblings. Until that deployment exists it is plain text. */
 export default function SiteToggle() {
+  // Plain text serves neither reader, so the banner waits for a live deploy.
+  if (!TC_URL) return null;
   return (
     <div className="sitetoggle" role="navigation" aria-label="Sister site">
       <TcLink className="sitetoggle-link">

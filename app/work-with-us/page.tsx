@@ -214,25 +214,16 @@ export default function WorkWithUsPage() {
               How it works
             </h2>
           </div>
-          <ol className="pg-steps">
-            <li>
-              <span>You tell us the problem</span>
-              It takes a few minutes on the form below.
-            </li>
-            <li>
-              <span>We say yes or no, early</span>
-              If it&apos;s work we can&apos;t finish, our first reply says so.
-            </li>
-            <li>
-              <span>We build it in your tools</span>
-              It runs on your accounts and your data, so nothing has to move
-              when we&apos;re done.
-            </li>
-            <li>
-              <span>We hand it to your team</span>A named person on your team
-              gets it, with the steps written down.
-            </li>
-          </ol>
+          <div className="pg-prose">
+            <p>
+              You tell us the problem on the form below, and our first reply says yes or no, so you never find out in
+              week three that we can&apos;t do it.
+            </p>
+            <p>
+              If it&apos;s a yes, we build it on your own accounts and tools, so nothing has to move when we&apos;re done,
+              and we hand it to a named person on your team with the steps written down.
+            </p>
+          </div>
           <div className="pg-no">
             <h3>What we turn down</h3>
             <p>

@@ -69,7 +69,7 @@ export default function MembersPage() {
     <Shell>
       <div className="pgx">
         <section className="pg-hero" aria-labelledby="people-title">
-          <div className="pg-hero-in is-solo">
+          <div className="pg-hero-in is-people">
             <div className="pg-hero-copy">
               <p className="pg-kicker">People</p>
               <h1 id="people-title" className="pg-title">

@@ -14,7 +14,7 @@ export default function PartnerPage() {
     <Shell>
       <div className="pgx">
         <section className="pg-hero" aria-labelledby="partner-title">
-          <div className="pg-hero-in is-solo">
+          <div className="pg-hero-in is-split">
             <div className="pg-hero-copy">
               <p className="pg-kicker">Partner with TTS</p>
               <h1 id="partner-title" className="pg-title">

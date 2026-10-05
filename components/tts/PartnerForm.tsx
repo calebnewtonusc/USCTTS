@@ -4,12 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors, FormFailure, asText, FormFigure, type FormState } from "./forms";
 
-// Values must match the enum in app/api/partner/route.ts exactly.
+// Values must match the enum in app/api/partner/route.ts exactly. "Client
+// Project" is still valid there, but a project goes to the intake form on
+// /work-with-us, so business leads land in one place.
 const TYPES = [
   { value: "Sponsor", label: "Sponsor the club" },
   { value: "Speaker", label: "Speak at a meeting" },
   { value: "Recruiting", label: "Recruit from the club" },
-  { value: "Client Project", label: "A project for us to build" },
   { value: "Other", label: "Something else" },
 ] as const;
 type PartnerType = (typeof TYPES)[number]["value"];
@@ -69,7 +70,7 @@ export default function PartnerForm() {
       <div className="pg-form" data-state={state}>
       <div className="form-done" role="status">
         <h2 className="t-h3">Thanks, {values.contactName.split(" ")[0]}.</h2>
-        <p>We have it, and we will reply to {values.email.trim()}.</p>
+        <p>{`We have it, and we'll reply to ${values.email.trim()}.`}</p>
         <p>
           <Link className="link" href="/members">
             Meet the people who will read it
@@ -85,6 +86,13 @@ export default function PartnerForm() {
     <div className="pg-form" data-state={state}>
     <form className="form" onSubmit={submit} noValidate>
       <Choices name="partnerType" legend="What did you have in mind" options={TYPES.map((t) => ({ value: t.value, label: t.label }))} value={values.partnerType} onChange={(v) => set("partnerType", v)} error={errors.partnerType} />
+      <p className="pg-route">
+        Bringing work you want AI to take on?{" "}
+        <Link className="link" href="/work-with-us#intake">
+          Use the project form instead
+        </Link>
+        .
+      </p>
       <Field id="orgName" label="Company or organization" error={errors.orgName}>
         <input className="input" autoComplete="organization" value={values.orgName} onChange={(e) => set("orgName", e.target.value)} {...describe("orgName", false, errors.orgName)} />
       </Field>

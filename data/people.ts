@@ -44,10 +44,13 @@ export const LEADERSHIP: Person[] = [
     // 180 Degrees Consulting. She designed the current logo and the previous
     // site redesign on 2026-05-24 with, in Caleb's words, "full creative
     // freedom", so brand decisions are hers to make rather than to approve.
-    // NEED: headshot and LinkedIn; neither exists on disk.
+    // Headshot from the 180 Degrees Consulting masthead Caleb built
+    // (~/code/work/pro-bono-post/staff/emily-zhao.jpeg, committed 2026-09-05),
+    // the same club this note places her in. NEED: LinkedIn URL.
     name: "Emily Zhao",
     role: "Design and Brand",
     status: "active",
+    photo: "/img/emily_shot.jpeg",
   },
 ];
 

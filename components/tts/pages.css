@@ -1051,3 +1051,83 @@
 .tts .wk .f-label {
   font-size: 3.3px;
 }
+
+/* How it works, said as two sentences instead of four step cards. */
+.tts .pg-prose {
+  margin-top: 24px;
+  max-width: 64ch;
+  font-size: 19px;
+  line-height: 1.6;
+}
+.tts .pg-prose p + p {
+  margin-top: 14px;
+}
+
+/* /members: the three leaders sit beside the copy, so the hero has no
+ * empty right half at 1440. */
+.tts .pg-hero-in.is-people {
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  align-items: end;
+}
+.tts .pg-hero-in.is-people .pg-lead-grid {
+  margin-top: 0;
+  max-width: none;
+}
+@media (max-width: 959px) {
+  .tts .pg-hero-in.is-people {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* /partner: the title and the lead side by side, then the form. */
+.tts .pg-hero-in.is-split {
+  grid-template-columns: minmax(0, 1fr);
+}
+.tts .pg-hero-in.is-split .pg-hero-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  column-gap: 64px;
+  align-items: end;
+}
+.tts .pg-hero-in.is-split .pg-kicker {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+.tts .pg-hero-in.is-split .pg-lead {
+  margin-top: 0;
+  padding-bottom: 6px;
+}
+@media (max-width: 959px) {
+  .tts .pg-hero-in.is-split .pg-hero-copy {
+    display: block;
+  }
+  .tts .pg-hero-in.is-split .pg-lead {
+    margin-top: 20px;
+  }
+}
+.tts .pg-route {
+  margin-top: -8px;
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+/* A form right under a hero needs no second runway. */
+.tts .pg-hero + .pg-sec:has(.pg-formwrap) {
+  padding-top: clamp(40px, 5vw, 72px);
+}
+.tts .pg-hero + .pg-sec:has(.pg-formwrap) .pg-formwrap {
+  margin-top: 0;
+}
+/* Three leaders stay one row on a phone, so nobody sits alone. */
+@media (max-width: 767px) {
+  .tts .pg-hero-in.is-people .pg-lead-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .tts .pg-hero-in.is-people .pg-name {
+    font-size: 15px;
+  }
+  .tts .pg-hero-in.is-people .pg-role {
+    font-size: 12.5px;
+  }
+}
