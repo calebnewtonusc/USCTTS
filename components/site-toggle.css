@@ -1,50 +1,56 @@
-/* Shared by both sites, so it reads from neither token set and defines its
- * own. Both roots sit under it, and it must look identical on the paper site
- * and the warm-dark one or the two stop reading as siblings. */
+/* The strip above the TTS nav that links across to T Combinator. It defines
+ * its own colours rather than reading TTS tokens, because it sits outside the
+ * .tts scope in the document order. */
 .sitetoggle {
-  background: #12100e;
-  padding: 0.5rem clamp(1.25rem, 5vw, 3rem);
+  background: #0a0908;
+  border-bottom: 1px solid rgba(243, 238, 230, 0.08);
+  padding: 0.45rem 16px;
   display: flex;
   justify-content: center;
-  font-family: var(--font-body, ui-sans-serif, system-ui, sans-serif);
+  font-family: var(--tts-sans, ui-sans-serif, system-ui, sans-serif);
+  position: relative;
+  z-index: 60;
 }
-
-.sitetoggle-track {
+.sitetoggle-link {
   display: inline-flex;
-  gap: 2px;
-  padding: 2px;
-  background: #1e1a16;
-  border-radius: 6px;
-}
-
-.sitetoggle-opt {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 4px;
+  align-items: center;
+  gap: 0.6rem;
+  color: #a59e94;
   text-decoration: none;
-  color: #8a7f73;
-  /* Press feedback numbers from ux-engine/motion/press-feedback.md: colour
-   * transitions run 50 to 150ms, transform 100 to 160ms, ease-out always. */
-  transition: background-color 120ms ease-out, color 120ms ease-out;
+  font-size: 12.5px;
+  line-height: 1.3;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  transition: color 120ms ease-out, background-color 120ms ease-out;
 }
-/* Gated, or a touch device fires a false hover on every tap and the control
- * flashes its hover state on press. Same file. */
-@media (hover: hover) and (pointer: fine) {
-  .sitetoggle-opt:hover { color: #f4f0ea; background: #272119; }
+.sitetoggle-link:hover,
+.sitetoggle-link:focus-visible {
+  color: #f3eee6;
+  background: rgba(243, 238, 230, 0.07);
 }
-.sitetoggle-opt.is-on { background: #f4f0ea; color: #12100e; }
-
+.sitetoggle-link:focus-visible {
+  outline: 2px solid #ffb547;
+  outline-offset: 2px;
+}
+.sitetoggle-link:active {
+  background: rgba(243, 238, 230, 0.12);
+}
 .sitetoggle-mark {
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #0a0908;
+  background: #f3eee6;
+  border-radius: 4px;
+  padding: 0.1rem 0.3rem;
 }
-.sitetoggle-name { font-size: 0.74rem; }
-@media (max-width: 30rem) { .sitetoggle-name { display: none; } }
-
+@media (max-width: 480px) {
+  .sitetoggle-link {
+    font-size: 11.5px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  .sitetoggle-opt { transition-duration: 1ms; }
+  .sitetoggle-link {
+    transition: none;
+  }
 }

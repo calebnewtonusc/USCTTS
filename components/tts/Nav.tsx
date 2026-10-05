@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { TC_URL } from "./links";
 
 const LINKS = [
   { href: "/about", label: "About" },
@@ -72,10 +73,10 @@ export default function Nav() {
               </li>
             ))}
             <li>
-              <Link href="/tc" onClick={() => setOpen(false)}>
+              <a href={TC_URL}>
                 T Combinator
                 <span aria-hidden="true">&rarr;</span>
-              </Link>
+              </a>
             </li>
           </ul>
         </div>

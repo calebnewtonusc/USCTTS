@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Not found | Trojan Tech Solutions",
 };
 
-/* Any unknown URL outside /tc/for/* landed on Next's unstyled default: a
+/* Any unknown URL landed on Next's unstyled default: a
  * white page in a system font (review, 2026-10-04). This keeps the visitor
  * inside the site with the two places most people were looking for. */
 export default function NotFound() {

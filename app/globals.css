@@ -126,7 +126,7 @@
   }
 }
 
-/* Root size, kept because /tc and the slide decks are measured against it.
+/* Root size, kept because the meeting slide decks are measured against it.
  * TTS routes set their own sizes in px under .tts and are unaffected. */
 html {
   font-size: 120%;
