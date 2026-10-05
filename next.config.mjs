@@ -1,9 +1,10 @@
 /** @type {import('next').NextConfig} */
 
 // T Combinator moved to its own deployment on 2026-10-04. TTS links only to
-// /tc on its own host, and this sends that path on. With no origin set there
-// is no redirect, and components/tts/links.ts renders every mention as text.
-const TC_ORIGIN = process.env.NEXT_PUBLIC_TC_ORIGIN ?? "";
+// /tc on its own host, and this sends that path on. Unset, the origin falls
+// back to the Railway deployment (a host Railway owns); set to "", there is no
+// redirect and components/tts/links.ts renders every mention as text.
+const TC_ORIGIN = process.env.NEXT_PUBLIC_TC_ORIGIN ?? "https://tcombinator-production.up.railway.app";
 
 const nextConfig = {
   images: {

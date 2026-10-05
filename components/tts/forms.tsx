@@ -135,3 +135,54 @@ export function focusFirstError() {
       ?.focus();
   });
 }
+
+/* Where to go when the form itself cannot deliver. On 2026-10-04 the live
+ * database was paused and the deployment had no database env, so every submit
+ * failed; the lead is fixing that, and this keeps a failure from being a dead
+ * end. No usctts.com mailbox exists yet (docs/EMAIL.md: Workspace not bought),
+ * so an address only appears once NEXT_PUBLIC_TTS_CONTACT_EMAIL names one that
+ * is read. Until then the fallback is the club's two working public channels.
+ * [NEED: a monitored contact address] */
+const CONTACT_EMAIL = process.env.NEXT_PUBLIC_TTS_CONTACT_EMAIL ?? "";
+
+export function FormFailure({ message, subject, body }: { message: string; subject: string; body: string }) {
+  const mailto = CONTACT_EMAIL
+    ? `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    : "";
+  return (
+    <div className="form-alert" role="alert">
+      <p>{message}</p>
+      <p className="mt-s">
+        {mailto ? (
+          <>
+            Or send the same answers by email:{" "}
+            <a className="link" href={mailto}>
+              open an email with them filled in
+            </a>
+            .
+          </>
+        ) : (
+          <>
+            If it keeps failing, message us on{" "}
+            <a className="link" href="https://www.instagram.com/trojantechsolutions" rel="noreferrer" target="_blank">
+              Instagram
+            </a>{" "}
+            or{" "}
+            <a className="link" href="https://www.linkedin.com/company/trojan-tech-solutions/" rel="noreferrer" target="_blank">
+              LinkedIn
+            </a>{" "}
+            and we&apos;ll take it from there. Your answers stay in the form.
+          </>
+        )}
+      </p>
+    </div>
+  );
+}
+
+/** A form's answers as plain text, for the email fallback. */
+export function asText(values: Record<string, unknown>) {
+  return Object.entries(values)
+    .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : String(v ?? "")}`)
+    .join("\n");
+}
+

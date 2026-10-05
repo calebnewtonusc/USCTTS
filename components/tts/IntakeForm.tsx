@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors } from "./forms";
+import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors, FormFailure, asText } from "./forms";
 
 const SERVICES = [
   "An internal tool",
@@ -98,11 +98,7 @@ export default function IntakeForm() {
       <Field id="additionalNotes" label="Anything else" hint="Optional.">
         <textarea className="input" maxLength={2000} value={values.additionalNotes} onChange={(e) => set("additionalNotes", e.target.value)} {...describe("additionalNotes", true)} />
       </Field>
-      {failure && (
-        <p className="form-alert" role="alert">
-          {failure}
-        </p>
-      )}
+      {failure && <FormFailure message={failure} subject="A project for TTS" body={asText(values)} />}
       <div>
         <button type="submit" className="btn btn-primary" disabled={sending}>
           {sending ? "Sending" : "Send it"}

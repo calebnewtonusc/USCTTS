@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors } from "./forms";
+import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors, FormFailure, asText } from "./forms";
 
 // Values must match the enums in app/api/apply/route.ts exactly.
 const YEARS = ["Freshman", "Sophomore", "Junior", "Senior", "Graduate"] as const;
@@ -86,11 +86,7 @@ export default function ApplyForm() {
       >
         <textarea className="input" value={values.why} maxLength={1000} onChange={(e) => set("why", e.target.value)} {...describe("why", true, errors.why)} />
       </Field>
-      {failure && (
-        <p className="form-alert" role="alert">
-          {failure}
-        </p>
-      )}
+      {failure && <FormFailure message={failure} subject="Application to TTS" body={asText(values)} />}
       <div>
         <button type="submit" className="btn btn-primary" disabled={sending}>
           {sending ? "Sending" : "Send application"}

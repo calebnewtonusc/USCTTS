@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors } from "./forms";
+import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors, FormFailure, asText } from "./forms";
 
 // Values must match the enum in app/api/partner/route.ts exactly.
 const TYPES = [
@@ -69,11 +69,7 @@ export default function PartnerForm() {
       <Field id="description" label="Tell us more" error={errors.description}>
         <textarea className="input" maxLength={2000} value={values.description} onChange={(e) => set("description", e.target.value)} {...describe("description", false, errors.description)} />
       </Field>
-      {failure && (
-        <p className="form-alert" role="alert">
-          {failure}
-        </p>
-      )}
+      {failure && <FormFailure message={failure} subject="Partnering with TTS" body={asText(values)} />}
       <div>
         <button type="submit" className="btn btn-primary" disabled={sending}>
           {sending ? "Sending" : "Send"}
