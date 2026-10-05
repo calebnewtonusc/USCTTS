@@ -46,6 +46,14 @@ in the shared hairline family:
 - `Practice builds`: `Real pipelines on public data, like the one running on this page.`
 - `T Combinator`: `Our team that works with YC companies. Three a semester.` (link: the T Combinator site)
 
+**The stack moment** (Caleb 2026-10-04, right after the world's climax, before the numbers band):
+
+- Line: `We build on Clay and Perplexity, through Blue Modern Advisory, an official partner of both.`
+- Two names in type, no logos, each with its valuation counting up on scroll:
+  - `Clay` / `$7.1B` / small: `valuation as of Sept 2026`
+  - `Perplexity` / `$20B` / small: `valuation as of Sept 2025`
+- Never sum them, never say TTS is the partner, no superlatives.
+
 **Numbers band** (TroyLabs' stat row, our sourced numbers):
 
 - `15` / `alumni at Apple, Bloomberg, Reddit, Capital One and more`
