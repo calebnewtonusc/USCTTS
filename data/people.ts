@@ -90,6 +90,8 @@ export const ADVISORS: Person[] = [
 // outreach line "our people are at Google, Apple, McKinsey and Reddit" is
 // sourced entirely from ADVISORS and this list, with Apple being Susan
 // Nyirenda and Reddit appearing in both.
+// Albert's employer is left off on purpose: Caleb, 2026-10-04, "We shouldn't
+// flex palantir". Company is optional, so every renderer must handle it absent.
 export const ALUMNI: Person[] = [
   { name: "Susan Nyirenda", role: "Software Engineer", company: "Apple", status: "alumni", photo: "/img/alumni/susannyirenda.jpeg" },
   { name: "Albert Chung", role: "Forward Deployed Engineer", status: "alumni", photo: "/img/alumni/albertchung.jpeg" },

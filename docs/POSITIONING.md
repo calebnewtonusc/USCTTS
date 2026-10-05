@@ -59,9 +59,10 @@ that list exists, no company name goes on a public page.
 What is real and sourced:
 
 1. **The alumni bench.** Fifteen people who started in this club: Apple,
-   Palantir, Bloomberg twice, Reddit, Capital One, NBC Universal, Fastly, Epic,
+   Bloomberg twice, Reddit, Capital One, NBC Universal, Fastly, Epic,
    PwC, Citi, Jefferies, Nomura. Plus advisors at Google, McKinsey, Reddit and
-   the founder of Mixbook. The outreach line "our people are at Google, Apple,
+   the founder of Mixbook. Never name Palantir (Caleb, 2026-10-04: "We
+   shouldn't flex palantir"); lead with McKinsey. The outreach line "our people are at Google, Apple,
    McKinsey and Reddit" is fully sourced from this, and it undersells it.
 2. **The artifact.** Built 2026-09-15 for the Praxis portfolio: 180 companies
    enumerated, 388 roles pulled, 2,158 LinkedIn connections matched to them, and
