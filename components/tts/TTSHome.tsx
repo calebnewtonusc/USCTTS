@@ -1,14 +1,24 @@
 import dataset from "@/public/tts/run/portfolio-board-2026-09-15.json";
 import Shell from "./Shell";
 import WorldScene, { type Numbers } from "./world/WorldScene";
-import { runPipeline, type Dataset } from "./run/pipeline";
+import RunPanels from "./home/RunPanels";
+import Whiteboard from "./home/Whiteboard";
+import { Join, Roster, TurnDown, WorkLines } from "./home/Sections";
+import type { IntakeRow } from "./run/Intake";
+import { audit, runPipeline, verdict, type Dataset } from "./run/pipeline";
 import "./world/world.css";
+import "./home/home.css";
 
+// The JSON's tuples widen to arrays on import; the shape is checked by the
+// builder script that wrote it, so this goes via unknown.
 const DATA = dataset as unknown as Dataset;
+
+// Computed on the server so the static HTML carries the finished result: an
+// animated number always ships its final value.
 const INITIAL_RUN = runPipeline(DATA, true);
 
-// Every number the world shows, computed on the server from the same dataset
-// the run section loads, so no figure on the page is typed in by hand.
+// Every number the world shows comes from the same run, so no figure on the
+// page is typed in by hand.
 const NUMS: Numbers = {
   companies: INITIAL_RUN.stages[0].count,
   roles: INITIAL_RUN.stages[1].count,
@@ -17,12 +27,33 @@ const NUMS: Numbers = {
   shortlist: INITIAL_RUN.shortlistTotal,
 };
 
+const INITIAL_INTAKE: IntakeRow[] = (() => {
+  const aside = audit(DATA);
+  const rows: IntakeRow[] = [];
+  for (let n = 7; n >= 0; n--) {
+    const role = DATA.roles[(n * 61) % DATA.roles.length];
+    rows.push({
+      n,
+      title: role[2],
+      sector: aside.has(role[0]) ? "" : DATA.sectors[DATA.companies[role[0]][0]],
+      days: role[1],
+      verdict: verdict(role, aside),
+      live: false,
+    });
+  }
+  return rows;
+})();
+
 export default function TTSHome() {
   return (
     <Shell>
       <WorldScene nums={NUMS} />
-      <section id="run" style={{ height: "100vh" }} />
-      <section id="learn" style={{ height: "100vh" }} />
+      <RunPanels initialRun={INITIAL_RUN} initialIntake={INITIAL_INTAKE} total={DATA.roles.length} />
+      <Whiteboard />
+      <WorkLines />
+      <TurnDown />
+      <Roster />
+      <Join />
     </Shell>
   );
 }

@@ -1,10 +1,11 @@
-import { Archivo } from "next/font/google";
+import { Instrument_Sans } from "next/font/google";
 
-// One family (docs/DESIGN-tts.md). Archivo's width axis runs 62 to 125, so the
-// expanded heavy display and the normal-width body are the same font, and the
-// page never needs a second one. The terminal figure in the hero draws in the
-// system monospace inside its canvas, because that is what a terminal is.
-export const sans = Archivo({
+// One family (docs/DESIGN-tts.md), chosen by measured proportions, not by name:
+// cap height 0.72em, x-height 0.708 of the caps, measured 2026-10-04 at 100px
+// against eleven other free grotesques. next/font self-hosts it, so the page
+// makes no third-party font request. The width axis stays available for the
+// rare place a condensed setting earns its keep.
+export const sans = Instrument_Sans({
   subsets: ["latin"],
   axes: ["wdth"],
   variable: "--tts-sans",

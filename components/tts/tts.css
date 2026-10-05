@@ -1,45 +1,45 @@
-/* TTS, the machine room. The whole system is docs/DESIGN-tts.md; this file
- * and components/tts/home/home.css are its only implementation. Everything is
- * scoped under .tts, and sizes are px because globals.css owns the root font
- * size the meeting decks are measured against. */
+/* TTS. The whole system is docs/DESIGN-tts.md; this file, home/home.css and
+ * world/world.css are its only implementation. Everything is scoped under
+ * .tts, and sizes are px because globals.css owns the root font size the
+ * meeting decks are measured against.
+ *
+ * Built on what the Lemma replica measured (lemma-replica docs/waves/W2):
+ * light type with flat leading, an ink that is not black, a muted version of
+ * the same ink, a warm ground, one accent, square quiet controls. */
 
 .tts {
-  /* Token names kept from v1 so every subpage follows the flip: --paper is
-   * the ground, --ink is what sits on it. The ground is warm near-black and
-   * never flat: .tts carries a fixed radial treatment below. */
-  --paper: #0d0c0b;
-  --paper-2: #171513;
-  --paper-3: #211e1b;
-  --ink: #f3eee6;
-  --ink-2: #a59e94;
-  --ink-3: #6f6961;
-  --rule: rgba(243, 238, 230, 0.13);
-  /* Slides in the story: the deck is paper, and paper goes dusty. */
-  --slide: #e9e3d8;
-  --dust: #4a4540;
+  /* Token names kept from v1 so every subpage follows: --paper is the
+   * ground, --ink is what sits on it. */
+  --paper: #f4f0e9;
+  --paper-2: #ebe6dd;
+  --paper-3: #e1dbd0;
+  --well: #faf8f4;
+  /* Ink: the darkest end of USC cardinal, so the page is never black. */
+  --ink: #2a1b1e;
+  --ink-2: #6f6264;
+  --ink-3: #a1969a;
+  --rule: rgba(42, 27, 30, 0.14);
   /* The accent. One meaning: this is running, or this value was computed in
-   * your browser just now. Used by .live, .stamp, the status pills and the
-   * running figures, and nothing else. */
-  --red: #ffb547;
+   * your browser just now. Used by .live, .stamp and the running figures. */
+  --red: #b0700d;
   --live: var(--red);
 
-  /* One family. Archivo's width axis does the work two families used to:
-   * expanded and heavy for display, normal width for reading. */
-  --serif: var(--tts-sans), "Archivo", ui-sans-serif, system-ui, sans-serif;
+  /* One family, chosen by measurement (2026-10-04, 100px, canvas metrics):
+   * Instrument Sans has a cap height of 0.72em and an x-height of 0.708 of
+   * its caps. Archivo, the previous face, ran 0.767, which is why the same
+   * size read heavier. */
+  --serif: var(--tts-sans), "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
   --grotesk: var(--serif);
   --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
   --gutter: 16px;
   --measure: 62ch;
-  --wide: 1200px;
+  --wide: 1280px;
+  --narrow: 880px;
 
-  background:
-    radial-gradient(1200px 700px at 78% -10%, rgba(255, 181, 71, 0.07), transparent 60%),
-    radial-gradient(900px 600px at -10% 40%, rgba(233, 227, 216, 0.04), transparent 60%),
-    var(--paper);
-  background-attachment: fixed;
+  background: var(--paper);
   color: var(--ink);
   font-family: var(--serif);
-  font-size: 17px;
+  font-size: 16.5px;
   line-height: 1.6;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -77,33 +77,29 @@
 .tts h2,
 .tts h3 {
   font-family: var(--serif);
-  font-weight: 760;
+  font-weight: 400;
   font-style: normal;
-  font-stretch: 112%;
   margin: 0;
   text-wrap: balance;
 }
 .tts .t-display {
-  font-size: clamp(42px, 7vw, 108px);
-  line-height: 0.94;
-  letter-spacing: -0.035em;
-  font-weight: 820;
-  font-stretch: 122%;
+  font-size: clamp(40px, 5.6vw, 80px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
 }
 .tts .t-h2 {
-  font-size: clamp(30px, 4.2vw, 58px);
-  line-height: 1;
-  letter-spacing: -0.03em;
-}
-.tts .t-h3 {
-  font-size: 22px;
+  font-size: clamp(28px, 3vw, 40px);
   line-height: 1.2;
   letter-spacing: -0.01em;
-  font-stretch: 106%;
+}
+.tts .t-h3 {
+  font-size: 21px;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
 }
 .tts .t-lead {
-  font-size: 20px;
-  line-height: 1.5;
+  font-size: 18px;
+  line-height: 1.56;
   color: var(--ink-2);
 }
 @media (max-width: 599px) {
@@ -141,7 +137,7 @@
 }
 .tts .stamp {
   font-family: var(--grotesk);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 12.5px;
   line-height: 1;
   color: var(--red);
@@ -155,12 +151,25 @@
 
 /* ---------- layout: essay plus exhibits ---------- */
 
+/* The reading column sits on the shared left edge of the wide container,
+ * not centred, so every heading on every page starts at the same x. */
 .tts .col {
-  width: min(var(--measure), 100% - 2 * var(--gutter));
+  width: 100%;
+  max-width: var(--wide);
+  padding-inline: var(--gutter);
   margin-inline: auto;
 }
+.tts .col > * {
+  max-width: var(--narrow);
+}
+.tts .col.prose > p,
+.tts .col > p {
+  max-width: var(--measure);
+}
 .tts .wide {
-  width: min(var(--wide), 100% - 2 * var(--gutter));
+  width: 100%;
+  max-width: var(--wide);
+  padding-inline: var(--gutter);
   margin-inline: auto;
 }
 .tts .section {
@@ -175,7 +184,7 @@
 
 .tts .exhibit {
   margin-top: clamp(40px, 6vw, 72px);
-  border-top: 2px solid var(--ink);
+  border-top: 1px solid var(--rule);
 }
 .tts .exhibit-caption {
   margin-top: 14px;
@@ -217,62 +226,71 @@
   text-decoration-thickness: 2px;
 }
 
+/* Controls: square and quiet. A dark-ink primary, a light grey secondary,
+ * and three measured states each, the shape the replica measured on Lemma
+ * (docs/spec/states.md): hover a shade, a two-ring focus, a 0.96 press, all
+ * on 150ms of the same ease-out. */
 .tts .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 48px;
-  padding: 0 22px;
+  min-height: 44px;
+  padding: 0 18px;
   font-family: var(--grotesk);
-  font-weight: 600;
-  font-size: 15.5px;
+  font-weight: 500;
+  font-size: 15px;
   line-height: 1;
   text-decoration: none;
-  border: 1px solid var(--ink);
-  border-radius: 999px;
+  border: 0;
+  border-radius: 0;
   cursor: pointer;
   transition:
-    background-color 120ms var(--ease),
-    color 120ms var(--ease),
-    transform 100ms var(--ease);
+    background-color 150ms cubic-bezier(0, 0, 0.2, 1),
+    color 150ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0, 0, 0.2, 1),
+    scale 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 .tts .btn-primary {
   background: var(--ink);
   color: var(--paper);
 }
 .tts .btn-secondary {
-  background: transparent;
+  background: var(--paper-2);
   color: var(--ink);
 }
 @media (hover: hover) and (pointer: fine) {
   .tts .btn-primary:hover {
-    background: var(--paper);
-    color: var(--ink);
+    background: #45303a;
   }
   .tts .btn-secondary:hover {
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--paper-3);
   }
 }
+.tts .btn:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow:
+    0 0 0 2px var(--paper),
+    0 0 0 4px var(--ink);
+}
 .tts .btn:active {
-  transform: scale(0.97);
+  scale: 0.96;
 }
 .tts .btn[disabled] {
   cursor: progress;
 }
 .tts .btn .arrow {
-  transition: transform 120ms var(--ease);
+  transition: translate 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 @media (hover: hover) and (pointer: fine) {
   .tts .btn:hover .arrow {
-    transform: translateX(3px);
+    translate: 3px 0;
   }
 }
 
 .tts :focus-visible {
-  outline: 2px solid var(--live);
-  outline-offset: 3px;
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }
 
 .tts .skip {
@@ -297,9 +315,7 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(13, 12, 11, 0.72);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  backdrop-filter: blur(14px) saturate(140%);
+  background: var(--paper);
   border-bottom: 1px solid transparent;
   transition: border-color 160ms var(--ease);
 }
@@ -307,7 +323,9 @@
   border-bottom-color: var(--rule);
 }
 .tts .nav-inner {
-  width: min(var(--wide), 100% - 2 * var(--gutter));
+  width: 100%;
+  max-width: var(--wide);
+  padding-inline: var(--gutter);
   margin-inline: auto;
   display: flex;
   align-items: center;
@@ -323,7 +341,7 @@
 }
 .tts .nav-mark-name {
   font-family: var(--serif);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 19px;
   letter-spacing: -0.01em;
   font-variation-settings: "opsz" 32;
@@ -348,7 +366,13 @@
 .tts .nav-links a {
   font-family: var(--grotesk);
   font-size: 15px;
-  font-weight: 500;
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tts .nav-links a:hover,
+.tts .nav-links a[aria-current="page"] {
+  color: var(--ink);
 }
 .tts .nav .btn {
   min-height: 40px;
@@ -383,7 +407,7 @@
   align-items: center;
   border-bottom: 1px solid var(--rule);
   font-family: var(--serif);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 22px;
   text-decoration: none;
   transition: color 120ms var(--ease);
@@ -400,11 +424,13 @@
 /* ---------- footer ---------- */
 
 .tts .footer {
-  border-top: 2px solid var(--ink);
+  border-top: 1px solid var(--rule);
   margin-top: clamp(64px, 11vw, 160px);
 }
 .tts .footer-inner {
-  width: min(var(--wide), 100% - 2 * var(--gutter));
+  width: 100%;
+  max-width: var(--wide);
+  padding-inline: var(--gutter);
   margin-inline: auto;
   padding-block: 32px 48px;
   display: grid;
@@ -483,7 +509,7 @@
 /* ---------- intake stream (the one ambient loop) ---------- */
 
 .tts .intake {
-  border-top: 2px solid var(--ink);
+  border-top: 0;
 }
 .tts .intake-head {
   display: flex;
@@ -570,19 +596,26 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  min-height: 48px;
+  min-height: 44px;
   padding: 0 14px;
-  border: 1px solid var(--ink);
-  background: transparent;
+  border: 0;
+  border-radius: 0;
+  background: var(--paper-2);
   color: var(--ink);
   font-family: var(--grotesk);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 15px;
   cursor: pointer;
   transition:
-    background-color 120ms var(--ease),
-    color 120ms var(--ease),
-    transform 100ms var(--ease);
+    background-color 150ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0, 0, 0.2, 1),
+    scale 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .switch:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow:
+    0 0 0 2px var(--paper),
+    0 0 0 4px var(--ink);
 }
 .tts .switch-box {
   width: 30px;
@@ -605,12 +638,11 @@
 }
 @media (hover: hover) and (pointer: fine) {
   .tts .switch:hover {
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--paper-3);
   }
 }
 .tts .switch:active {
-  transform: scale(0.97);
+  scale: 0.96;
 }
 
 .tts .stages {
@@ -651,7 +683,7 @@
 }
 .tts .stage-name {
   font-family: var(--serif);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 20px;
   line-height: 1.25;
   font-variation-settings: "opsz" 32;
@@ -672,7 +704,7 @@
 .tts .stage-count {
   display: block;
   font-family: var(--grotesk);
-  font-weight: 600;
+  font-weight: 500;
   font-size: clamp(30px, 4vw, 44px);
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -852,7 +884,7 @@
 .tts .steps > li::before {
   content: counter(step);
   font-family: var(--grotesk);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 15px;
   line-height: 30px;
 }
@@ -890,13 +922,13 @@
   display: grid;
   place-items: center;
   font-family: var(--serif);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 22px;
   color: var(--ink-2);
 }
 .tts .person-name {
   font-family: var(--serif);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 18px;
   line-height: 1.25;
 }
@@ -924,7 +956,7 @@
 .tts .field > label,
 .tts fieldset legend {
   font-family: var(--grotesk);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 15px;
 }
 .tts .field .hint {
@@ -969,7 +1001,7 @@
 }
 .tts .field-error {
   font-family: var(--grotesk);
-  font-weight: 700;
+  font-weight: 500;
   font-size: 14px;
   color: var(--ink);
 }
@@ -1029,7 +1061,7 @@
   background: var(--paper-2);
   font-family: var(--grotesk);
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
 }
 .tts .form-done {
   border-top: 2px solid var(--ink);

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { capClip, clamp, easeOut3, prog, smooth } from "../engine/math";
+import { capClip, clamp, easeOut3, prog } from "../engine/math";
 import type { World } from "./world";
 
 export interface Numbers {
@@ -26,20 +26,11 @@ const LOAD_MS = 2200;
 const RISE = 0.18;
 const RISE_PX = 12;
 const COPY_STARTS = [0.06, 0.1, 0.16, 0.24, 0.3];
-// The replica's intro span: the copy and the chips finish leaving exactly as
-// they reach zero opacity, about 550px of scroll at 900 tall.
+// The replica's intro span: the copy finishes leaving exactly as it reaches
+// zero opacity, about 550px of scroll at 900 tall. On the way out the camera
+// pulls back over the same span (world.ts CAMERA, key 0 to key 1).
 const EXIT_SPAN = 0.055;
 const COPY_TRAVEL = 380;
-
-/* Chips around the headline, one per line of work, each its own depth layer.
- * Speeds are px over the exit, on the same curve, so they finish together. */
-const CHIPS = [
-  { label: "Data sets", left: 56, top: 17, speed: 460, load: 0.32 },
-  { label: "GTM engineering", left: 76, top: 27, speed: 520, load: 0.36 },
-  { label: "Custom agents", left: 84, top: 50, speed: 300, load: 0.4 },
-  { label: "AI inside products", left: 63, top: 66, speed: 360, load: 0.44 },
-  { label: "Research workflows", left: 76, top: 80, speed: 240, load: 0.48 },
-];
 
 interface Cap {
   id: string;
@@ -105,7 +96,7 @@ const railTarget = (c: Cap) =>
   Math.min(0.985, c.in + Math.min(0.5, (Math.min(c.out, 1) - c.in) * 0.45));
 const QUALIFY = { in: 0.39, out: 0.53, count: [0.4, 0.47] as const };
 
-const STILLS = 7;
+const STILLS = 8;
 export const stillSrc = (k: number) => `/tts/world/station-${k}.jpg`;
 
 export default function WorldScene({ nums }: { nums: Numbers }) {
@@ -113,7 +104,6 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const hero = useRef<HTMLDivElement>(null);
   const copy = useRef<HTMLDivElement>(null);
-  const chips = useRef<(HTMLSpanElement | null)[]>([]);
   const caps = useRef<(HTMLDivElement | null)[]>([]);
   const panel = useRef<HTMLDivElement>(null);
   const counts = useRef<(HTMLSpanElement | null)[]>([]);
@@ -178,16 +168,6 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
         copy.current.style.opacity = fade.toFixed(3);
         copy.current.style.transform = `translate3d(0, ${(-COPY_TRAVEL * exitE).toFixed(2)}px, 0)`;
       }
-      const lift = 0.6 + 0.4 * smooth(clamp((load - 0.55) / 0.3));
-      chips.current.forEach((c, i) => {
-        if (!c) return;
-        const L = CHIPS[i];
-        const open = 100 * easeOut3(clamp((load - L.load) / 0.35));
-        const clip = `polygon(0% 0%, 100% 0%, 100% ${open.toFixed(2)}%, 0% ${open.toFixed(2)}%)`;
-        c.style.clipPath = clip;
-        c.style.opacity = (lift * fade).toFixed(3);
-        c.style.transform = `translate3d(0, ${(-L.speed * exitE).toFixed(2)}px, 0)`;
-      });
 
       // Captions, wiped on a clip from N.
       let act = -1;
@@ -289,8 +269,8 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
         setReady(true);
         if (new URLSearchParams(window.location.search).has("capture")) {
           (window as unknown as { __ttsWorld: unknown }).__ttsWorld = {
-            still: (n: number, t: number) => {
-              world?.still(n, t);
+            still: (n: number, t: number, sweepMs?: number) => {
+              world?.still(n, t, sweepMs);
               paint(n);
             },
             stop: () => {
@@ -328,31 +308,38 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
 
   const heroCopy = (
     <>
-      <p className="w-pill" data-line>
-        USC&apos;s GTM and AI club
-      </p>
-      <h1 className="w-title" aria-label="Build the systems that do the work.">
-        <span data-line aria-hidden="true">
-          Build the systems
-        </span>
-        <span data-line aria-hidden="true">
-          that do the work.
-        </span>
-      </h1>
-      <p className="w-lede" data-line>
-        Trojan Tech Solutions teaches USC students to build data sets, GTM
-        engines and AI agents, then ship them for real companies.
-      </p>
-      <div className="w-actions" data-line>
-        <Link className="btn btn-primary" href="/apply">
-          Apply to join{" "}
-          <span className="arrow" aria-hidden="true">
-            &rarr;
+      <div className="w-col-a">
+        <p className="w-pill" data-line>
+          USC&apos;s GTM and AI club
+        </p>
+        <h1
+          className="w-title"
+          aria-label="Build the systems that do the work."
+        >
+          <span data-line aria-hidden="true">
+            Build the systems
           </span>
-        </Link>
-        <a className="btn btn-secondary w-ghost" href="#learn">
-          What you learn
-        </a>
+          <span data-line aria-hidden="true">
+            that do the work.
+          </span>
+        </h1>
+      </div>
+      <div className="w-col-b">
+        <p className="w-lede" data-line>
+          Trojan Tech Solutions teaches USC students to build data sets, GTM
+          engines and AI agents, then ship them for real companies.
+        </p>
+        <div className="w-actions" data-line>
+          <Link className="btn btn-primary" href="/apply">
+            Apply to join{" "}
+            <span className="arrow" aria-hidden="true">
+              &rarr;
+            </span>
+          </Link>
+          <a className="btn btn-secondary" href="#learn">
+            What you learn
+          </a>
+        </div>
       </div>
     </>
   );
@@ -409,37 +396,22 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
       aria-label="The GTM and AI machine"
     >
       <div className="w-pin">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className={ready ? "w-poster is-gone" : "w-poster"}
-          src={stillSrc(0)}
-          alt=""
-          aria-hidden="true"
-        />
-        <canvas ref={canvas} className="w-canvas" aria-hidden="true" />
-        <div className="w-grain" aria-hidden="true" />
-        <div className="w-vignette" aria-hidden="true" />
+        <div className="w-well">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className={ready ? "w-poster is-gone" : "w-poster"}
+            src={stillSrc(0)}
+            alt=""
+            aria-hidden="true"
+          />
+          <canvas ref={canvas} className="w-canvas" aria-hidden="true" />
+          <div className="w-grain" aria-hidden="true" />
+          <div className="w-vignette" aria-hidden="true" />
+        </div>
 
         <div className="w-hero" ref={hero}>
-          {CHIPS.map((c, i) => (
-            <span
-              key={c.label}
-              ref={(n) => {
-                chips.current[i] = n;
-              }}
-              className="w-chip"
-              style={{ left: `${c.left}%`, top: `${c.top}%` }}
-              aria-hidden="true"
-            >
-              <span className="w-chip-dot" />
-              {c.label}
-            </span>
-          ))}
           <div className="w-copy" ref={copy}>
             {heroCopy}
-          </div>
-          <div className="w-cue" aria-hidden="true">
-            <span />
           </div>
         </div>
 
@@ -453,61 +425,63 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
             style={{ display: "none" }}
           >
             <h2 className="w-cap-title">{c.title}</h2>
-            <p>{c.body}</p>
-            {c.id === "machine" && (
-              <div className="w-actions">
-                <Link className="btn btn-primary" href="/apply">
-                  Apply to join{" "}
-                  <span className="arrow" aria-hidden="true">
-                    &rarr;
-                  </span>
-                </Link>
-              </div>
-            )}
+            <div className="w-cap-b">
+              <p>{c.body}</p>
+              {c.id === "machine" && (
+                <div className="w-actions">
+                  <Link className="btn btn-primary" href="/apply">
+                    Apply to join{" "}
+                    <span className="arrow" aria-hidden="true">
+                      &rarr;
+                    </span>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         ))}
 
-        <div className="w-qualify" ref={panel} style={{ display: "none" }}>
-          <p className="w-q-head">
-            <span className="w-chip-dot" /> The run, 2026-09-15
-          </p>
-          <ul className="w-q-rows">
-            {qualifyRows.map(([l, n], i) => (
-              <li key={l} className={i === 2 ? "is-aside" : undefined}>
-                <span>{l}</span>
-                <span
-                  className="live"
-                  ref={(s) => {
-                    counts.current[i] = s;
-                  }}
-                >
-                  {n}
-                </span>
-              </li>
-            ))}
-          </ul>
-          <a className="btn btn-secondary w-q-btn" href="#run">
-            Run it yourself{" "}
-            <span className="arrow" aria-hidden="true">
-              &darr;
-            </span>
-          </a>
-        </div>
+        <div className="w-overlay">
+          <div className="w-qualify" ref={panel} style={{ display: "none" }}>
+            <p className="w-q-head">The run, 2026-09-15</p>
+            <ul className="w-q-rows">
+              {qualifyRows.map(([l, n], i) => (
+                <li key={l} className={i === 2 ? "is-aside" : undefined}>
+                  <span>{l}</span>
+                  <span
+                    className="live"
+                    ref={(s) => {
+                      counts.current[i] = s;
+                    }}
+                  >
+                    {n}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <a className="btn btn-secondary w-q-btn" href="#run">
+              Run it yourself{" "}
+              <span className="arrow" aria-hidden="true">
+                &darr;
+              </span>
+            </a>
+          </div>
 
-        <nav className="w-rail" aria-label="Stations">
-          {CAPS.map((c, i) => (
-            <button
-              key={c.id}
-              type="button"
-              className={i === active ? "w-rail-btn is-on" : "w-rail-btn"}
-              aria-label={`Go to: ${c.title}`}
-              aria-current={i === active ? "step" : undefined}
-              onClick={() => go(c)}
-            >
-              <span />
-            </button>
-          ))}
-        </nav>
+          <nav className="w-rail" aria-label="Stations">
+            {CAPS.map((c, i) => (
+              <button
+                key={c.id}
+                type="button"
+                className={i === active ? "w-rail-btn is-on" : "w-rail-btn"}
+                aria-label={`Go to: ${c.title}`}
+                aria-current={i === active ? "step" : undefined}
+                onClick={() => go(c)}
+              >
+                <span />
+              </button>
+            ))}
+          </nav>
+        </div>
       </div>
     </section>
   );

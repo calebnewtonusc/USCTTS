@@ -54,7 +54,14 @@ const fmtMs = (ms: number) =>
   ms < 0.01 ? "under 0.01 ms" : `${ms.toFixed(2)} ms`;
 const sleep = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
 
-export default function Run({ initial }: { initial: RunResult }) {
+export default function Run({
+  initial,
+  armed = true,
+}: {
+  initial: RunResult;
+  /** Auto-run only once armed, so a run inside a hidden crossfade layer waits until it is shown. */
+  armed?: boolean;
+}) {
   const [verify, setVerify] = useState(true);
   const [result, setResult] = useState<RunResult>(initial);
   const [shown, setShown] = useState<Shown>({
@@ -132,7 +139,7 @@ export default function Run({ initial }: { initial: RunResult }) {
   // The run starts by itself once the exhibit is half in view, once.
   useEffect(() => {
     const el = exhibit.current;
-    if (!el) return;
+    if (!el || !armed) return;
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !started.current) {
@@ -145,7 +152,7 @@ export default function Run({ initial }: { initial: RunResult }) {
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [go]);
+  }, [go, armed]);
 
   const toggle = () => {
     const next = !verify;

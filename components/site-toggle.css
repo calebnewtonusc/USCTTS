@@ -2,8 +2,8 @@
  * its own colours rather than reading TTS tokens, because it sits outside the
  * .tts scope in the document order. */
 .sitetoggle {
-  background: #0a0908;
-  border-bottom: 1px solid rgba(243, 238, 230, 0.08);
+  background: #ebe6dd;
+  border-bottom: 1px solid rgba(42, 27, 30, 0.1);
   padding: 0.45rem 16px;
   display: flex;
   justify-content: center;
@@ -15,33 +15,33 @@
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  color: #a59e94;
+  color: #6f6264;
   text-decoration: none;
   font-size: 12.5px;
   line-height: 1.3;
   padding: 0.2rem 0.5rem;
-  border-radius: 999px;
+  border-radius: 0;
   transition: color 120ms ease-out, background-color 120ms ease-out;
 }
 .sitetoggle-link:hover,
 .sitetoggle-link:focus-visible {
-  color: #f3eee6;
-  background: rgba(243, 238, 230, 0.07);
+  color: #2a1b1e;
+  background: rgba(42, 27, 30, 0.06);
 }
 .sitetoggle-link:focus-visible {
-  outline: 2px solid #ffb547;
+  outline: 2px solid #2a1b1e;
   outline-offset: 2px;
 }
 .sitetoggle-link:active {
-  background: rgba(243, 238, 230, 0.12);
+  background: rgba(42, 27, 30, 0.1);
 }
 .sitetoggle-mark {
   font-weight: 700;
   font-size: 11px;
   letter-spacing: 0.04em;
-  color: #0a0908;
-  background: #f3eee6;
-  border-radius: 4px;
+  color: #f4f0e9;
+  background: #2a1b1e;
+  border-radius: 0;
   padding: 0.1rem 0.3rem;
 }
 @media (max-width: 480px) {
@@ -59,6 +59,6 @@
   cursor: default;
 }
 .sitetoggle-link.is-pending:hover {
-  color: #a59e94;
+  color: #6f6264;
   background: transparent;
 }

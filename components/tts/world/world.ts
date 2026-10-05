@@ -27,7 +27,8 @@ const COL = {
   groundB: new THREE.Color("#c4b39b"),
   bone: new THREE.Color("#e9e1d2"),
   boneDark: new THREE.Color("#bdb3a4"),
-  cardinal: new THREE.Color("#8f1d2c"),
+  // The ink of the page, used for the dark parts so the world has one accent.
+  cardinal: new THREE.Color("#2a1b1e"),
   gold: new THREE.Color("#ffb547"),
   ink: new THREE.Color("#1b1714"),
   slate: new THREE.Color("#34302c"),
@@ -69,12 +70,14 @@ export const CAMERA: Key[] = [
   { n: 0.77, pos: [14, 12, -101], look: [-20, 10, -128] },
   { n: 0.84, pos: [-12, 17, -131], look: [2, 13, -160] },
   { n: 0.89, pos: [-14, 19, -130], look: [2, 13, -160] },
-  { n: 1, pos: [70, 78, 30], look: [0, 0, -80] },
+  { n: 0.93, pos: [-112, 64, -80], look: [10, 3, -82] },
+  { n: 1, pos: [-106, 60, -82], look: [10, 3, -83] },
 ];
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const prog = (v: number, a: number, b: number) => clamp((v - a) / (b - a));
 const easeOut3 = (t: number) => 1 - Math.pow(1 - t, 3);
+const easeIn3 = (t: number) => t * t * t;
 const easeInOut3 = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
@@ -149,8 +152,9 @@ export interface World {
   frame(timeMs: number): void;
   resize(w: number, h: number): void;
   dispose(): void;
-  /** For still renders: freeze ambient time at t and draw once. */
-  still(n: number, timeMs: number): void;
+  /** For still renders: freeze ambient time at t and draw once. With
+   * sweepMs, the build is shown that far into its sweep. */
+  still(n: number, timeMs: number, sweepMs?: number): void;
 }
 
 export function createWorld(
@@ -269,7 +273,7 @@ export function createWorld(
   const sV = new THREE.Vector3();
   const pV = new THREE.Vector3();
   let placed = 0;
-  for (let tries = 0; placed < 220 && tries < 3000; tries++) {
+  for (let tries = 0; placed < 130 && tries < 3000; tries++) {
     const x = (R() - 0.5) * 420 + 10;
     const z = (R() - 0.5) * 420 - 90;
     const pathX = 8 + Math.sin(z * 0.03) * 12;
@@ -582,11 +586,11 @@ export function createWorld(
   const doorRect = new THREE.Mesh(new THREE.PlaneGeometry(7, 5), boneDark);
   doorRect.position.set(0, 11.5, 6.01);
   const flag = new THREE.Group();
-  const flagPole = new THREE.Mesh(new THREE.BoxGeometry(0.4, 5, 0.4), cardinal);
+  const flagPole = new THREE.Mesh(new THREE.BoxGeometry(0.4, 5, 0.4), gold);
   flagPole.position.y = 2.5;
   const flagTip = new THREE.Mesh(
     new THREE.BoxGeometry(0.4, 1.6, 2.2),
-    cardinal,
+    gold,
   );
   flagTip.position.set(0, 4.3, 1);
   flag.add(flagPole, flagTip);
@@ -643,6 +647,100 @@ export function createWorld(
     chG.add(p);
   }
   shadow(chG);
+
+  /* ---------- hairline edges: the figures' line family, in 3D ---------- */
+  const edgeMat = new THREE.LineBasicMaterial({ color: COL.cardinal, transparent: true, opacity: 0.32 });
+  for (const { g } of groups)
+    g.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh || (m as THREE.InstancedMesh).isInstancedMesh) return;
+      const t = m.geometry.type;
+      if (t !== "BoxGeometry" && t !== "CylinderGeometry") return;
+      m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry, 35), edgeMat));
+    });
+
+  /* ---------- the build: the climax of the flight ----------
+   * The replica's timed sweep, rebuilt for this world: a wavefront crosses the
+   * ground from the funnel to the chart in SWEEP_MS, every part of the machine
+   * rises out of the ground as the front passes it, each over its own short
+   * window, the pipes connect behind the front, and each station only starts
+   * running once its parts have landed. It replays once per entry to the
+   * phase. Before it, the machine sinks into the ground on scroll and a few
+   * lattice cells light up ahead of the front. */
+  const SWEEP_MS = 1800; // the replica's sweep: 1800ms from end to end
+  const RISE_MS = 560; // one part's rise; chosen by eye, the front stays legible
+  const FRONT_FROM = 30;
+  const FRONT_TO = -195;
+  const SINK: [number, number] = [0.9, 0.925];
+  const ENTER = 0.93;
+  const fOf = (z: number) => clamp((FRONT_FROM - z) / (FRONT_FROM - FRONT_TO));
+  interface Part {
+    obj: THREE.Object3D;
+    y: number;
+    depth: number;
+    f: number;
+  }
+  const parts: Part[] = [];
+  const tubes: { mesh: THREE.Mesh; count: number }[] = [];
+  const bb = new THREE.Box3();
+  for (const { g } of groups) {
+    g.updateMatrixWorld(true);
+    for (const child of g.children) {
+      if ((child as THREE.InstancedMesh).isInstancedMesh) continue;
+      const geo = (child as THREE.Mesh).geometry;
+      if (geo && geo.type === "TubeGeometry") {
+        tubes.push({ mesh: child as THREE.Mesh, count: geo.index ? geo.index.count : 0 });
+        continue;
+      }
+      bb.setFromObject(child);
+      parts.push({
+        obj: child,
+        y: child.position.y,
+        depth: Math.max(1, bb.max.y - g.position.y + 1.5),
+        f: fOf((bb.min.z + bb.max.z) / 2),
+      });
+    }
+  }
+  const dynamic = new Set<THREE.Object3D>([...bars, ...caps, ball, lens]);
+  const PIPE_Z0 = 0;
+  const PIPE_Z1 = -62;
+  // Which station each running layer belongs to, by where the front must be.
+  const gates: [THREE.Object3D, number][] = [
+    [accounts, fOf(STATIONS.funnel.z)],
+    [beads, fOf(PIPE_Z1)],
+    [items, fOf(STATIONS.magnifier.z)],
+    [envelopes, fOf(STATIONS.mailbox.z)],
+  ];
+
+  const lattice = new THREE.GridHelper(300, 60, COL.cardinal, COL.cardinal);
+  const latMat = lattice.material as THREE.LineBasicMaterial;
+  latMat.transparent = true;
+  latMat.opacity = 0;
+  latMat.depthWrite = false;
+  lattice.position.set(8, 0.6, -82);
+  scene.add(lattice);
+  const goldLine = new THREE.MeshStandardMaterial({ color: COL.gold, emissive: COL.gold, emissiveIntensity: 1.4, roughness: 0.4 });
+  const front = new THREE.Mesh(new THREE.BoxGeometry(320, 0.3, 1.1), goldLine);
+  const wake = new THREE.Mesh(
+    new THREE.PlaneGeometry(320, 16),
+    new THREE.MeshBasicMaterial({ color: COL.gold, transparent: true, opacity: 0.22, depthWrite: false }),
+  );
+  wake.rotation.x = -Math.PI / 2;
+  front.visible = wake.visible = false;
+  scene.add(front, wake);
+  // Foreshadow: lattice cells along the corridor that light before the front.
+  const cellMat = new THREE.MeshBasicMaterial({ color: COL.gold, transparent: true, opacity: 0, depthWrite: false });
+  const cells: { m: THREE.Mesh; f: number; at: number }[] = [];
+  for (let i = 0; i < 9; i++) {
+    const z = -10 - i * 20 - Math.floor(R() * 3) * 5;
+    const x = Math.round((8 + Math.sin(z * 0.03) * 12 + (R() - 0.5) * 30) / 5) * 5 + 3;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 4.6), cellMat.clone());
+    m.rotation.x = -Math.PI / 2;
+    m.position.set(x, 0.65, Math.round(z / 5) * 5 - 2);
+    scene.add(m);
+    cells.push({ m, f: fOf(m.position.z), at: R() });
+  }
+  let sweep0 = -1;
 
   /* ---------- the camera path ---------- */
   const posCurve = new THREE.CatmullRomCurve3(
@@ -784,6 +882,44 @@ export function createWorld(
       Math.abs(Math.sin(climb * BARS * Math.PI)) * 1.2;
     ball.position.set(bx, Math.min(by, lastTop + 3), 0);
 
+    // The build. sink: how far each part is under the ground, 0 to 1.
+    let tS = -1;
+    if (N >= ENTER) {
+      if (sweep0 < 0) sweep0 = time;
+      tS = time - sweep0;
+    } else sweep0 = -1;
+    const sinkScroll = easeIn3(prog(N, SINK[0], SINK[1]));
+    const riseOf = (f: number) => (tS < 0 ? 0 : easeOut3(clamp((tS - f * SWEEP_MS) / RISE_MS)));
+    for (const p of parts) {
+      const sink = N >= ENTER ? 1 - riseOf(p.f) : sinkScroll;
+      if (dynamic.has(p.obj)) p.obj.position.y -= p.depth * sink;
+      else p.obj.position.y = p.y - p.depth * sink;
+      p.obj.visible = sink < 0.999;
+    }
+    const frontZ = tS < 0 ? FRONT_FROM : FRONT_FROM + (FRONT_TO - FRONT_FROM) * clamp(tS / SWEEP_MS);
+    for (const t of tubes) {
+      const u = N >= ENTER ? clamp((PIPE_Z0 - frontZ) / (PIPE_Z0 - PIPE_Z1)) : 1 - sinkScroll;
+      t.mesh.geometry.setDrawRange(0, Math.floor((t.count * u) / 6) * 6);
+      t.mesh.visible = u > 0.002;
+    }
+    for (const [layer, f] of gates) {
+      layer.visible = N >= ENTER ? tS > f * SWEEP_MS + RISE_MS : sinkScroll < 0.5;
+    }
+    const inSweep = tS >= 0 && tS <= SWEEP_MS;
+    front.visible = wake.visible = inSweep;
+    if (inSweep) {
+      front.position.set(8, 0.7, frontZ);
+      wake.position.set(8, 0.68, frontZ + 8);
+    }
+    latMat.opacity = 0.16 * prog(N, SINK[0], ENTER) * (tS < 0 ? 1 : 1 - clamp((tS - SWEEP_MS) / 900) * 0.6);
+    lattice.visible = latMat.opacity > 0.002;
+    for (const c of cells) {
+      const before = prog(N, SINK[1] - 0.01 + c.at * 0.006, ENTER);
+      const passed = tS < 0 ? 0 : clamp((tS - c.f * SWEEP_MS) / 300);
+      (c.m.material as THREE.MeshBasicMaterial).opacity = 0.55 * before * (1 - passed);
+      c.m.visible = (c.m.material as THREE.MeshBasicMaterial).opacity > 0.002;
+    }
+
     // Camera, and a shadow frustum that follows what it looks at.
     const { pos, look } = camAt(N);
     camera.position.copy(pos);
@@ -812,9 +948,12 @@ export function createWorld(
       update(time);
       renderer.render(scene, camera);
     },
-    still(n, time) {
+    still(n, time, sweepMs) {
       N = n;
       load = 1;
+      // A still of the last phase shows the build finished, unless asked for
+      // a moment inside it.
+      if (n >= ENTER) sweep0 = time - (sweepMs ?? SWEEP_MS + RISE_MS + 1000);
       update(time);
       renderer.render(scene, camera);
     },

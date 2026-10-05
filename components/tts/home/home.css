@@ -1,0 +1,518 @@
+/* The home page below the world. Scoped under .tts.
+ *
+ * Two container widths, the replica's: 1280 wide for figures and 880 narrow
+ * for reading, with the padding inside the container so every heading on the
+ * page shares one left edge (the world's band uses the same edge). Every
+ * figure sits in a padded well inside a 1px frame. */
+
+.tts .rp,
+.tts .lines,
+.tts .nope,
+.tts .roster,
+.tts .wb-pin,
+.tts .join-inner {
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.tts .rp,
+.tts .lines,
+.tts .nope,
+.tts .roster {
+  padding-block: 144px 0;
+}
+@media (max-width: 767px) {
+  .tts .rp,
+  .tts .lines,
+  .tts .nope,
+  .tts .roster {
+    padding-block: 88px 0;
+  }
+}
+.tts .kicker {
+  font-size: 15px;
+  color: var(--ink-2);
+  margin-bottom: 12px;
+}
+.tts .rp-head,
+.tts .lines-head,
+.tts .nope-head,
+.tts .roster-head,
+.tts .wb-head {
+  max-width: var(--narrow);
+}
+/* The lead sits 8px under its heading, in the muted ink. */
+.tts .rp-head .t-lead,
+.tts .nope-head .t-lead,
+.tts .roster-head .t-lead {
+  margin-top: 8px;
+  max-width: 56ch;
+}
+
+/* The well: every figure's frame. */
+.tts .well {
+  border: 1px solid var(--rule);
+  background: var(--well);
+  padding: 10px;
+}
+
+/* ---------- run it yourself: the pinned crossfade ---------- */
+.tts .rp-grid {
+  display: grid;
+  grid-template-columns: 384px minmax(0, 1fr);
+  gap: 64px;
+  margin-top: 48px;
+}
+.tts .rp-step {
+  min-height: 74vh;
+  padding-top: 18vh;
+  opacity: 0.35;
+  transition: opacity 500ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .rp-step:first-child {
+  padding-top: 4vh;
+}
+.tts .rp-step.is-on {
+  opacity: 1;
+}
+.tts .rp-n {
+  display: block;
+  font-size: 15px;
+  color: var(--ink-2);
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.tts .rp-step p {
+  margin-top: 8px;
+  color: var(--ink-2);
+  max-width: 40ch;
+}
+.tts .rp-stage {
+  position: sticky;
+  top: 96px;
+  height: calc(100vh - 128px);
+  max-height: 760px;
+}
+.tts .rp-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  /* Hidden layers leave the accessibility and hover tree once faded. */
+  visibility: hidden;
+  transition:
+    opacity 500ms cubic-bezier(0, 0, 0.2, 1),
+    visibility 0s linear 500ms;
+  pointer-events: none;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  background: var(--well);
+  padding: 20px;
+}
+.tts .rp-layer.is-on {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 500ms cubic-bezier(0, 0, 0.2, 1),
+    visibility 0s;
+  pointer-events: auto;
+}
+/* The run, compacted to fit the stage: five stages across, results below. */
+.tts .rp-stage .run {
+  background: transparent;
+  padding: 0;
+}
+.tts .rp-stage .exhibit {
+  margin-top: 0;
+  border-top: 0;
+}
+.tts .rp-stage .exhibit-caption {
+  display: none;
+}
+.tts .rp-stage .stages {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 16px;
+  border: 1px solid var(--rule);
+}
+.tts .rp-stage .stage {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 0;
+  border-left: 1px solid var(--rule);
+  grid-template-columns: none;
+}
+.tts .rp-stage .stage:first-child {
+  border-left: 0;
+}
+.tts .rp-stage .stage-rule {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tts .rp-stage .stage-name {
+  font-size: 14px;
+}
+.tts .rp-stage .stage-count {
+  font-size: 28px;
+}
+.tts .rp-stage .run-out {
+  margin-top: 18px;
+  gap: 28px;
+}
+.tts .rp-stage .run-note {
+  font-size: 14px;
+}
+.tts .rp-stage table.ledger td,
+.tts .rp-stage table.ledger th {
+  font-size: 13.5px;
+  padding-block: 6px;
+}
+.tts .step-2 .run-out > div:first-child {
+  opacity: 0.35;
+  transition: opacity 500ms cubic-bezier(0, 0, 0.2, 1);
+}
+@media (max-width: 959px) {
+  .tts .rp-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .tts .rp-step {
+    min-height: 0;
+    padding-top: 12px;
+    opacity: 1;
+  }
+  .tts .rp-stage {
+    position: static;
+    height: auto;
+    max-height: none;
+    display: grid;
+    gap: 16px;
+  }
+  .tts .rp-layer {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    padding: 14px;
+  }
+  .tts .rp-stage .stages {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tts .rp-stage .stage:nth-child(odd) {
+    border-left: 0;
+  }
+}
+
+/* ---------- the whiteboard ---------- */
+.tts .wb-pinned {
+  height: 330vh;
+}
+.tts .wb-pin {
+  padding-block: 144px 0;
+}
+.tts .wb-pinned .wb-pin {
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: 24px;
+}
+.tts .wb-head {
+  margin-bottom: 28px;
+}
+.tts .wb-board {
+  display: flex;
+  border: 1px solid var(--rule);
+  background: var(--well);
+  padding: 16px 8px 4px;
+}
+.tts .wb-station {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.tts .wb-station svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: calc(100vh - 300px);
+  overflow: visible;
+}
+.tts .wb-num {
+  font-size: 18px;
+  fill: #a1969a;
+}
+.tts .wb-title {
+  font-size: 32px;
+  letter-spacing: -0.015em;
+  fill: #2a1b1e;
+}
+.tts .wb-line {
+  font-size: 16px;
+  fill: #6f6264;
+}
+.tts .wb-item {
+  font-size: 15px;
+  fill: #2a1b1e;
+}
+/* Marker strokes in the figures' line family: one ink, one weight. */
+.tts .wb-ink {
+  fill: none;
+  stroke: #2a1b1e;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+}
+.tts .wb-next {
+  stroke: #a1969a;
+}
+.tts .wb-stacked .wb-ink {
+  transition-property: stroke-dashoffset;
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .wb-stacked text {
+  transition: opacity 600ms cubic-bezier(0, 0, 0.2, 1);
+}
+@media (max-width: 959px) {
+  .tts .wb-board {
+    flex-direction: column;
+    padding: 8px 0;
+  }
+  .tts .wb-station {
+    max-width: 380px;
+    margin-inline: auto;
+    width: 100%;
+  }
+  .tts .wb-station + .wb-station {
+    border-top: 1px solid var(--rule);
+  }
+  .tts .wb-station svg {
+    max-height: none;
+  }
+  .tts .wb-next {
+    display: none;
+  }
+}
+
+/* ---------- lines of work ---------- */
+.tts .lines-list {
+  list-style: none;
+  margin: 48px 0 0;
+  padding: 0;
+  border-bottom: 1px solid var(--rule);
+}
+.tts .line-row {
+  display: grid;
+  grid-template-columns: 384px minmax(0, 1fr);
+  gap: 64px;
+  align-items: baseline;
+  padding: 22px 0;
+  border-top: 1px solid var(--rule);
+}
+.tts .line-name {
+  font-size: clamp(24px, 2.4vw, 32px);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.tts .line-job {
+  color: var(--ink-2);
+  max-width: 52ch;
+}
+@media (max-width: 767px) {
+  .tts .line-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+/* ---------- turn down ---------- */
+.tts .nope-list {
+  list-style: none;
+  margin: 44px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 64px;
+}
+.tts .nope-list li {
+  padding: 22px 0;
+  border-top: 1px solid var(--rule);
+}
+.tts .nope-list p {
+  margin-top: 8px;
+  color: var(--ink-2);
+}
+@media (max-width: 767px) {
+  .tts .nope-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- roster ---------- */
+.tts .roster-sub {
+  margin-top: 48px;
+  font-size: 15px;
+  color: var(--ink-2);
+}
+.tts .faces {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 24px 16px;
+}
+.tts .face img,
+.tts .face-ph {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border: 1px solid var(--rule);
+  padding: 6px;
+  background: var(--well);
+  filter: grayscale(1) contrast(1.02);
+  transition: filter 400ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .face:hover img {
+  filter: none;
+}
+.tts .face-ph {
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+  color: var(--ink-3);
+}
+.tts .face-name {
+  display: block;
+  margin-top: 10px;
+  font-size: 15px;
+}
+.tts .face-note {
+  display: block;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.tts .roster-more {
+  margin-top: 36px;
+}
+
+/* ---------- join: the one ink band ---------- */
+.tts .join {
+  position: relative;
+  overflow: hidden;
+  margin-top: 160px;
+  min-height: 80vh;
+  display: flex;
+  align-items: flex-end;
+  color: var(--paper);
+  background:
+    radial-gradient(
+      80% 90% at 80% 20%,
+      rgba(176, 112, 13, 0.25),
+      transparent 60%
+    ),
+    var(--ink);
+}
+.tts .join-mesh {
+  position: absolute;
+  inset: 0;
+}
+.tts .join-mesh canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.tts .join-inner {
+  position: relative;
+  padding-block: 120px 96px;
+}
+.tts .join-title {
+  font-size: clamp(40px, 5.6vw, 80px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+  max-width: 16ch;
+}
+.tts .join-steps {
+  list-style: none;
+  margin: 40px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  max-width: var(--narrow);
+}
+.tts .join-steps li {
+  color: rgba(244, 240, 233, 0.72);
+  border-top: 1px solid rgba(244, 240, 233, 0.22);
+  padding-top: 14px;
+}
+.tts .join-steps span {
+  display: block;
+  color: var(--paper);
+  margin-bottom: 6px;
+}
+.tts .join-actions {
+  margin-top: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* On the ink band the controls invert: a ground-coloured primary, a quiet
+ * translucent secondary, the same states. */
+.tts .join .btn-primary {
+  background: var(--paper);
+  color: var(--ink);
+}
+.tts .join .btn-secondary {
+  background: rgba(244, 240, 233, 0.12);
+  color: var(--paper);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .join .btn-primary:hover {
+    background: #ffffff;
+  }
+  .tts .join .btn-secondary:hover {
+    background: rgba(244, 240, 233, 0.2);
+  }
+}
+.tts .join .btn:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--ink),
+    0 0 0 4px var(--paper);
+}
+@media (max-width: 767px) {
+  .tts .join-steps {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The stage holds the whole run at 1440x900: tighter rows, the shortlist cut
+ * to what fits. Judged from a 1440x900 screenshot, where the uncompacted run
+ * spilled past the bottom of the stage; not measured in px. */
+@media (min-width: 960px) {
+  .tts .rp-stage .bars {
+    gap: 6px;
+  }
+  .tts .rp-stage .bar-label {
+    font-size: 13px;
+  }
+  .tts .rp-stage .run-note {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .tts .rp-stage table.ledger tbody tr:nth-child(n + 5) {
+    display: none;
+  }
+}
