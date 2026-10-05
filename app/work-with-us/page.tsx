@@ -53,7 +53,6 @@ function Track() {
               y={c.y}
               width={c.w}
               height="6"
-              rx="3"
             />
             <text className="f-label f-label-ink" x={c.x + 2.4} y={c.y + 4.1}>
               {c.label}
@@ -70,7 +69,6 @@ function Track() {
             y={c.y}
             width={c.w}
             height="6"
-            rx="3"
           />
         ))}
       </g>
@@ -111,7 +109,6 @@ function Track() {
           y="20"
           width="13"
           height="12.5"
-          rx="0.8"
         />
         <path
           className="f-mute"
@@ -139,7 +136,7 @@ function Track() {
 
       {/* 3: one thing, and its before number */}
       <g className="s-on5">
-        <rect className="f-ink" x="66" y="56" width="11" height="9" rx="1" />
+        <rect className="f-ink" x="66" y="56" width="11" height="9" />
         <circle className="f-ink" cx="71.5" cy="60.5" r="2.2" />
         <rect className="f-mute" x="82" y="59.5" width="3" height="5.5" />
         <text className="f-label" x="87" y="64.6">
@@ -156,7 +153,6 @@ function Track() {
           y="73"
           width="30"
           height="3.4"
-          rx="0.6"
         />
         <rect
           className="f-ink"
@@ -164,7 +160,6 @@ function Track() {
           y="77.4"
           width="30"
           height="3.4"
-          rx="0.6"
         />
         <rect
           className="f-ink"
@@ -172,7 +167,6 @@ function Track() {
           y="81.8"
           width="30"
           height="3.4"
-          rx="0.6"
         />
       </g>
       <rect
@@ -181,7 +175,6 @@ function Track() {
         y="77.9"
         width="10"
         height="2.4"
-        rx="0.4"
       />
 
       {/* 5: handed to a person, with the after number */}
@@ -211,7 +204,6 @@ function Track() {
           y="53"
           width="46"
           height="21"
-          rx="1"
         />
         {NO.map((t, i) => (
           <g key={t}>

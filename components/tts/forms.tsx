@@ -221,7 +221,7 @@ export function FormFigure({
             const y = top + i * step;
             return (
               <g key={r.key} className={`fr${ok[r.key] ? " is-ok" : ""}`}>
-                <rect className="fr-box" x="6" y={y} width="5" height="5" rx="0.6" />
+                <rect className="fr-box" x="6" y={y} width="5" height="5" />
                 <text className="f-label" x="15" y={y + 3.9}>
                   {r.label}
                 </text>

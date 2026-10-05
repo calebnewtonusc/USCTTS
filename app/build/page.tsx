@@ -40,8 +40,8 @@ const INITIATIVES = [
     job: "The whole club in one room, then teams split off to build.",
   },
   {
-    name: "Client builds",
-    job: "Real problems from companies, scoped to end with something running and an owner.",
+    name: "Practice builds",
+    job: "Members practise the whole machine on public data before anyone's real problem, like the run on the home page.",
   },
   {
     name: "T Combinator",
@@ -67,7 +67,7 @@ const DIVISIONS = [
 
 /* Initiatives across the top, divisions across the bottom, every division
  * wired to every initiative, because members from each half staff all of
- * them. The one cardinal mark is the session that is current now. */
+ * them. */
 function Structure() {
   const top = INITIATIVES.map((x, i) => ({ ...x, cx: 14 + i * 24 }));
   const bottom = DIVISIONS.map((x, i) => ({ ...x, cx: 18 + i * 32 }));
@@ -83,7 +83,7 @@ function Structure() {
         builds and T Combinator. Three divisions staff all of them: engineering,
         GTM engineering, and design and brand.
       </title>
-      <rect className="f-ink" x="40" y="3" width="20" height="8" rx="1" />
+      <rect className="f-ink" x="40" y="3" width="20" height="8" />
       <text className="f-label f-big" x="50" y="8.2" textAnchor="middle">
         TTS
       </text>
@@ -97,7 +97,6 @@ function Structure() {
             y="19"
             width="22.8"
             height="10"
-            rx="1"
           />
           <text
             className="f-label f-label-ink"
@@ -127,7 +126,6 @@ function Structure() {
             y="52"
             width="26"
             height="10"
-            rx="5"
           />
           <text
             className="f-label f-label-ink"
@@ -139,7 +137,6 @@ function Structure() {
           </text>
         </g>
       ))}
-      <circle className="f-live-fill" cx={top[0].cx + 9.2} cy="21.2" r="0.9" />
     </svg>
   );
 }
@@ -226,10 +223,7 @@ export default function BuildPage() {
       <section className="pg-sec" id="setup" aria-labelledby="latest-title">
         <div className="pg-head">
           <p className="pg-kicker">
-            Latest build session, {fmt(latest.date)}{" "}
-            <span className="stamp" aria-hidden="true">
-              Current
-            </span>
+            Most recent build session, {fmt(latest.date)}
           </p>
           <h2 id="latest-title">
             {latest.title.replace(/^Build Meeting \d+: /, "")}

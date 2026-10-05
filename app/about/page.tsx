@@ -52,7 +52,6 @@ function Machine() {
             y={c.y}
             width="3.4"
             height="3.4"
-            rx="0.6"
           />
         ))}
       </g>
@@ -65,7 +64,6 @@ function Machine() {
             y={c.y + 0.7}
             width="2"
             height="2"
-            rx="0.3"
           />
         ))}
       </g>
@@ -96,14 +94,7 @@ function Machine() {
         {STATIONS.map((x) => (
           <g key={x}>
             <path className="f-ink" d={`M${x + 7} 46 L${x + 7} 48.5`} />
-            <rect
-              className="f-ink"
-              x={x}
-              y="48.5"
-              width="14"
-              height="11"
-              rx="1.6"
-            />
+            <rect className="f-ink" x={x} y="48.5" width="14" height="11" />
             <path
               className="f-mute"
               d={`M${x + 2.5} 54 L${x + 11.5} 54 M${x + 2.5} 56.6 L${x + 8.5} 56.6`}
@@ -127,18 +118,11 @@ function Machine() {
       {/* 04 AI inside products, and outbound */}
       <g className="s-on5">
         <path className="f-mute" d="M19 59.5 L19 68 M38 59.5 L38 68" />
-        <rect className="f-ink" x="8" y="68" width="44" height="20" rx="1.6" />
+        <rect className="f-ink" x="8" y="68" width="44" height="20" />
         <path className="f-ink" d="M8 72 L52 72" />
         <circle className="f-ink" cx="10.6" cy="70" r="0.6" />
         <circle className="f-ink" cx="12.8" cy="70" r="0.6" />
-        <rect
-          className="f-ink"
-          x="12"
-          y="75.5"
-          width="12"
-          height="9"
-          rx="1.2"
-        />
+        <rect className="f-ink" x="12" y="75.5" width="12" height="9" />
         <path
           className="f-mute"
           d="M28 77 L48 77 M28 80 L44 80 M28 83 L46 83"
@@ -163,7 +147,7 @@ function Machine() {
 
       {/* 05 teaching: the people who run it, at scale beside the machine */}
       <g className="s-on6">
-        <rect className="f-ink" x="8" y="95" width="16" height="7.5" rx="0.6" />
+        <rect className="f-ink" x="8" y="95" width="16" height="7.5" />
         <path className="f-mute" d="M10 97.6 L19 97.6 M10 100 L16 100" />
         {[28, 31.4, 34.8, 38.2, 41.6].map((x) => (
           <g key={x}>
@@ -186,7 +170,6 @@ function Machine() {
             y={102.4 - h}
             width="2.6"
             height={h}
-            rx="0.4"
           />
         ))}
       </g>
@@ -196,16 +179,24 @@ function Machine() {
         y="82.4"
         width="2.6"
         height="20"
-        rx="0.4"
       />
 
       {/* what we refuse: the deck as the deliverable, shown only while that
        * step is read, in the empty band between the accounts and the bus */}
       <g className="s-hot7">
-        <rect className="f-paper f-mute" x="12" y="32" width="28" height="11" rx="0.8" />
-        <rect className="f-paper f-mute" x="10" y="33.2" width="28" height="11" rx="0.8" />
-        <rect className="f-paper f-ink" x="8" y="34.4" width="28" height="11" rx="0.8" />
-        <path className="f-mute" d="M10.5 38 L24 38 M10.5 40.6 L32 40.6 M10.5 43 L28 43" />
+        <rect className="f-paper f-mute" x="12" y="32" width="28" height="11" />
+        <rect
+          className="f-paper f-mute"
+          x="10"
+          y="33.2"
+          width="28"
+          height="11"
+        />
+        <rect className="f-paper f-ink" x="8" y="34.4" width="28" height="11" />
+        <path
+          className="f-mute"
+          d="M10.5 38 L24 38 M10.5 40.6 L32 40.6 M10.5 43 L28 43"
+        />
         <path className="f-ink" d="M6.5 46.6 L37.5 33.2" />
         <text className="f-label f-label-ink" x="42" y="40.6">
           A deck nobody runs
@@ -219,7 +210,6 @@ function Machine() {
         y="1"
         width="94"
         height="103"
-        rx="2"
       />
     </svg>
   );
@@ -320,8 +310,9 @@ export default function AboutPage() {
           <h2 id="a-7">A deck as the deliverable.</h2>
           <p>
             A lot of student consulting ends at a recommendation nobody
-            implements. Ours ends with a working system, a person who owns it,
-            the SOP, and a number measured before and after.
+            implements. We scope every engagement to end with a working system,
+            a person who owns it, the SOP, and a number to measure before and
+            after.
           </p>
         </section>
 
