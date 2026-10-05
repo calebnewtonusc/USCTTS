@@ -9,7 +9,6 @@
 .tts .lines,
 .tts .nope,
 .tts .roster,
-.tts .wb-pin,
 .tts .join-inner {
   width: 100%;
   max-width: var(--wide);
@@ -38,8 +37,7 @@
 .tts .rp-head,
 .tts .lines-head,
 .tts .nope-head,
-.tts .roster-head,
-.tts .wb-head {
+.tts .roster-head {
   max-width: var(--narrow);
 }
 /* The lead sits 8px under its heading, in the muted ink. */
@@ -204,105 +202,6 @@
   }
   .tts .rp-stage .stage:nth-child(odd) {
     border-left: 0;
-  }
-}
-
-/* ---------- the whiteboard ---------- */
-.tts .wb-pinned {
-  height: 330vh;
-}
-.tts .wb-pin {
-  padding-block: 144px 0;
-}
-.tts .wb-pinned .wb-pin {
-  position: sticky;
-  top: 64px;
-  height: calc(100vh - 64px);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-block: 24px;
-}
-.tts .wb-head {
-  margin-bottom: 28px;
-}
-.tts .wb-board {
-  display: flex;
-  border: 1px solid var(--rule);
-  background: var(--well);
-  padding: 16px 8px 4px;
-}
-.tts .wb-station {
-  flex: 1 1 0;
-  min-width: 0;
-}
-.tts .wb-station svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: calc(100vh - 230px);
-  overflow: visible;
-}
-.tts .wb-num {
-  font-size: 20px;
-  fill: #6f6264;
-}
-.tts .wb-title {
-  font-size: 36px;
-  letter-spacing: -0.02em;
-  fill: #2a1b1e;
-}
-.tts .wb-line {
-  font-size: 18px;
-  fill: #4d4246;
-}
-.tts .wb-item {
-  font-size: 16.5px;
-  fill: #2a1b1e;
-}
-/* Marker strokes in the figures' line family: one ink, one weight. */
-.tts .wb-ink {
-  fill: none;
-  stroke: #2a1b1e;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 1;
-}
-.tts .wb-next {
-  stroke: #a1969a;
-  stroke-width: 1.6;
-}
-/* The one accent on the board: the stroke under each station's name. */
-.tts .wb-accent {
-  stroke: var(--live);
-  stroke-width: 3;
-}
-.tts .wb-stacked .wb-ink {
-  transition-property: stroke-dashoffset;
-  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .wb-stacked text {
-  transition: opacity 600ms cubic-bezier(0, 0, 0.2, 1);
-}
-@media (max-width: 959px) {
-  .tts .wb-board {
-    flex-direction: column;
-    padding: 8px 0;
-  }
-  .tts .wb-station {
-    max-width: 380px;
-    margin-inline: auto;
-    width: 100%;
-  }
-  .tts .wb-station + .wb-station {
-    border-top: 1px solid var(--rule);
-  }
-  .tts .wb-station svg {
-    max-height: none;
-  }
-  .tts .wb-next {
-    display: none;
   }
 }
 
