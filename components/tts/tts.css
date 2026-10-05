@@ -176,8 +176,10 @@
 /* ---------- links and buttons ---------- */
 
 /* Not the site toggle: it carries its own colours for both sites, and this
-   rule (0,1,1) beat its (0,1,0) and painted the TC option near-black on black. */
-.tts a:not(.sitetoggle-opt) {
+   rule (0,1,1) beat its (0,1,0) and painted the TC option near-black on black.
+   Then :not() added a class's weight and beat .btn-primary, blanking Join
+   (2026-10-04). :where() weighs nothing, so every real colour wins. */
+:where(.tts a:not(.sitetoggle-opt)) {
   color: inherit;
 }
 .tts .link {
