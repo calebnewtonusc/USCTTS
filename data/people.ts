@@ -87,7 +87,7 @@ export const ADVISORS: Person[] = [
   { name: "Matthew Kim", role: "Incoming Analyst", company: "McKinsey & Company", status: "advisor", photo: "/img/matthew_shot.jpeg", logo: "/img/logos/mckinsey.png" },
   { name: "Kevin Sangmuah", role: "Software Engineer, and founder", company: "Reddit", status: "advisor", photo: "/img/kevin_shot.jpeg", logo: "/img/logos/reddit.png" },
   { name: "Duncan Inganji", role: "Software Engineer", company: "Google", status: "advisor", photo: "/img/duncan_shot.jpeg", logo: "/img/logos/google.png" },
-  { name: "Sagar Tiwari", role: "Stanford MBA, ex-McKinsey", company: "Stanford", status: "advisor", photo: "/img/sagar_shot.jpeg", logo: "/img/logos/stanford.png" },
+  { name: "Sagar Tiwari", role: "MBA, ex-McKinsey", company: "Stanford GSB", status: "advisor", photo: "/img/sagar_shot.jpeg", logo: "/img/logos/stanford.png" },
   { name: "Andrew Laffoon", role: "Founder and CEO", company: "Mixbook", status: "advisor", photo: "/img/andrew_shot.jpeg", logo: "/img/logos/mixbook.png" },
 ];
 
