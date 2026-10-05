@@ -1202,8 +1202,11 @@
   min-height: 100vh;
   min-height: 100svh;
   display: flex;
-  align-items: center;
-  padding-block: 120px 140px;
+  /* The doors sit at the bottom of the screen and the footer follows right
+   * after the last mono line: centred, the leftover height showed as an
+   * empty cardinal band above the footer (review, 2026-10-05, at 390). */
+  align-items: flex-end;
+  padding-block: 120px 40px;
 }
 .tts .jn-inner {
   width: 100%;
@@ -1282,7 +1285,8 @@
     border-left: 0;
   }
   .tts .jn {
-    padding-block: 96px 96px;
+    min-height: 0;
+    padding-block: 96px 24px;
   }
 }
 
