@@ -108,6 +108,7 @@
   margin-top: 24px;
 }
 .tts .pg-well {
+  border-radius: var(--radius, 0);
   height: 100%;
   border: 1px solid var(--rule);
   background: var(--well);
@@ -148,11 +149,14 @@
 }
 
 /* ---------- the figure family ---------- */
-/* One stroke weight for every figure. --hairline is the shared token the
- * home page's world is publishing in tts.css; until it lands this falls back
- * to the weight these figures were drawn at. */
+/* The figure family's shared tokens from tts.css (--line, --line-quiet,
+ * --line-w, --accent, --radius), so these diagrams, the world and the
+ * whiteboard read as one hand. Fallbacks equal the tokens' values. */
 .tts {
-  --pg-hair: var(--hairline, 1.25px);
+  --pg-hair: var(--line-w, 1px);
+  --pg-line: var(--line, var(--ink));
+  --pg-quiet: var(--line-quiet, rgba(42, 27, 30, 0.32));
+  --pg-accent: var(--accent, var(--red));
 }
 .tts .f {
   overflow: visible;
@@ -162,14 +166,14 @@
 }
 .tts .f-ink {
   fill: none;
-  stroke: var(--ink);
+  stroke: var(--pg-line);
   stroke-width: var(--pg-hair);
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 .tts .f-mute {
   fill: none;
-  stroke: var(--ink-3);
+  stroke: var(--pg-quiet);
   stroke-width: var(--pg-hair);
   stroke-linecap: round;
 }
@@ -177,7 +181,7 @@
   stroke-dasharray: 4 4;
 }
 .tts .f-fill {
-  fill: var(--ink);
+  fill: var(--pg-line);
   stroke: none;
 }
 /* Opaque cards: listed after .f-ink and doubled in weight, because a card
@@ -190,13 +194,13 @@
 }
 .tts .f-live {
   fill: none;
-  stroke: var(--live);
+  stroke: var(--pg-accent);
   stroke-width: var(--pg-hair);
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 .tts .f-live-fill {
-  fill: var(--live);
+  fill: var(--pg-accent);
   stroke: none;
 }
 .tts .f-label {
@@ -483,6 +487,7 @@
   }
 }
 .tts .pg-figure {
+  border-radius: var(--radius, 0);
   border: 1px solid var(--rule);
   background: var(--well);
   padding: 10px;
@@ -584,6 +589,7 @@
   position: relative;
 }
 .tts .pg-photo {
+  border-radius: var(--radius, 0);
   display: block;
   width: 100%;
   aspect-ratio: 4 / 5;
@@ -644,6 +650,7 @@
   background: var(--ink-3);
 }
 .tts .pg-tag {
+  border-radius: var(--radius, 0);
   display: inline-block;
   margin-top: 8px;
   font-size: 12.5px;
@@ -768,7 +775,7 @@
  * the accent, because that verdict was just computed in your browser. */
 .tts .fr .fr-box {
   fill: var(--well);
-  stroke: var(--ink-3);
+  stroke: var(--pg-quiet);
   stroke-width: var(--pg-hair);
   transition:
     fill 220ms cubic-bezier(0, 0, 0.2, 1),
@@ -776,7 +783,7 @@
 }
 .tts .fr .fr-wire {
   fill: none;
-  stroke: var(--ink-3);
+  stroke: var(--pg-quiet);
   stroke-width: var(--pg-hair);
   transition: stroke 220ms cubic-bezier(0, 0, 0.2, 1);
 }
@@ -785,12 +792,12 @@
 }
 .tts .fr.is-ok .fr-box,
 .tts .pg-form[data-state="sent"] .fr .fr-box {
-  fill: var(--live);
-  stroke: var(--live);
+  fill: var(--pg-accent);
+  stroke: var(--pg-accent);
 }
 .tts .fr.is-ok .fr-wire,
 .tts .pg-form[data-state="sent"] .fr .fr-wire {
-  stroke: var(--live);
+  stroke: var(--pg-accent);
   stroke-width: var(--pg-hair);
 }
 .tts .fr.is-ok .f-label {
@@ -798,13 +805,13 @@
 }
 .tts .fo-out {
   fill: none;
-  stroke: var(--ink-3);
+  stroke: var(--pg-quiet);
   stroke-width: var(--pg-hair);
   stroke-dasharray: 3 3;
 }
 .tts .fo-node {
   fill: var(--well);
-  stroke: var(--ink);
+  stroke: var(--pg-line);
   stroke-width: var(--pg-hair);
 }
 .tts .fo-break,
@@ -813,12 +820,12 @@
   transition: opacity 220ms cubic-bezier(0, 0, 0.2, 1);
 }
 .tts .pg-form[data-state="sent"] .fo-out {
-  stroke: var(--live);
+  stroke: var(--pg-accent);
   stroke-dasharray: none;
 }
 .tts .pg-form[data-state="sent"] .fo-node {
-  fill: var(--live);
-  stroke: var(--live);
+  fill: var(--pg-accent);
+  stroke: var(--pg-accent);
 }
 .tts .pg-form[data-state="sent"] .fo-sent,
 .tts .pg-form[data-state="failed"] .fo-break {
