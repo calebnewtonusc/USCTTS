@@ -10,31 +10,32 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://usctts.com"),
-  title: "Trojan Tech Solutions | USC's applied AI implementation lab",
+  // www, not the apex: the apex 301s and drops the path, so og:image 404d there.
+  metadataBase: new URL("https://www.usctts.com"),
+  title: "Trojan Tech Solutions | USC's GTM and AI club",
   description:
-    "USC's applied AI implementation lab. Every engagement ends with a working tool, a named owner, a written SOP, and a number that moved.",
+    "USC's GTM and AI club. Students learn to build data sets, GTM engines and AI agents, then build them for real companies.",
   openGraph: {
-    title: "Trojan Technology Solutions",
+    title: "Trojan Tech Solutions",
     description:
-      "USC's applied AI implementation lab. Not a consulting club.",
-    url: "https://usctts.com",
-    siteName: "Trojan Technology Solutions",
+      "USC's GTM and AI club. Students learn to build data sets, GTM engines and AI agents, then build them for real companies.",
+    url: "https://www.usctts.com",
+    siteName: "Trojan Tech Solutions",
     type: "website",
     images: [
       {
         url: "/img/tts-logo.png",
         width: 512,
         height: 512,
-        alt: "Trojan Technology Solutions",
+        alt: "Trojan Tech Solutions",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Trojan Technology Solutions",
+    title: "Trojan Tech Solutions",
     description:
-      "USC's applied AI implementation lab. Not a consulting club.",
+      "USC's GTM and AI club. Students learn to build data sets, GTM engines and AI agents, then build them for real companies.",
     images: ["/img/tts-logo.png"],
   },
   icons: {
@@ -61,11 +62,11 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              name: "Trojan Technology Solutions",
-              url: "https://usctts.com",
+              name: "Trojan Tech Solutions",
+              url: "https://www.usctts.com",
               logo: {
                 "@type": "ImageObject",
-                url: "https://usctts.com/img/tts-logo.png",
+                url: "https://www.usctts.com/img/tts-logo.png",
                 width: 512,
                 height: 512,
               },
