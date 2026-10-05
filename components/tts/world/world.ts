@@ -204,7 +204,12 @@ export function createWorld(
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NeutralToneMapping;
   renderer.toneMappingExposure = 1.0;
-  renderer.shadowMap.enabled = true;
+  /* No real-time shadows. A headed trace on 2026-10-04 (Chrome, ANGLE Metal,
+   * M4 Pro, DPR 2) showed GPU tasks of 120 to 270ms during a fast scroll
+   * through the world, each one a dropped stretch of frames; the shadow pass
+   * is the biggest per-frame GPU cost and the source of most pipeline
+   * variants. The toon bands and the ink outline carry the form without it. */
+  renderer.shadowMap.enabled = false;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
@@ -246,7 +251,7 @@ export function createWorld(
   const hemi = new THREE.HemisphereLight("#ffffff", "#d9cfc1", 1.5);
   scene.add(hemi);
   const sunLight = new THREE.DirectionalLight(COL.sun, 2.4);
-  sunLight.castShadow = true;
+  sunLight.castShadow = false;
   sunLight.shadow.mapSize.set(narrow ? 1024 : 2048, narrow ? 1024 : 2048);
   const sc = sunLight.shadow.camera;
   sc.left = -70;

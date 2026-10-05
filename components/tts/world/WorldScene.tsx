@@ -140,6 +140,7 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
       visible = true;
     const t0 = performance.now();
     let worldT0 = -1;
+    let odd = false;
     const counted = [
       nums.companies,
       nums.roles,
@@ -151,10 +152,18 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
       ? [...copy.current.querySelectorAll<HTMLElement>("[data-line]")]
       : [];
 
-    const measure = () => {
-      const travel = el.offsetHeight - window.innerHeight;
-      target = travel > 0 ? clamp(-el.getBoundingClientRect().top / travel) : 0;
+    // Geometry is read once per resize, never in the scroll path: scroll only
+    // reads window.scrollY, so a scroll event can't force a layout.
+    let blockTop = 0,
+      travel = 1;
+    const layoutBlock = () => {
+      blockTop = el.getBoundingClientRect().top + window.scrollY;
+      travel = Math.max(1, el.offsetHeight - window.innerHeight);
     };
+    const measure = () => {
+      target = clamp((window.scrollY - blockTop) / travel);
+    };
+    layoutBlock();
 
     let lastActive = -2;
     const paint = (N: number) => {
@@ -225,7 +234,12 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
       const d = target - cur;
       cur = Math.abs(d) < 8e-5 ? target : cur + d * FOLLOW;
       paint(cur);
-      world?.frame(banked);
+      // While the scroll is moving, every frame renders. At rest only the
+      // ambient motion is left, so it renders every other frame, which is 60
+      // a second on a 120Hz display and halves the GPU load while reading.
+      const moving = Math.abs(target - cur) > 1e-5 || load < 1;
+      odd = !odd;
+      if (moving || odd) world?.frame(banked);
       if (visible && !document.hidden) raf = requestAnimationFrame(frame);
     };
     const kick = () => {
@@ -243,6 +257,7 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
       world?.resize(Math.max(1, r.width), Math.max(1, r.height));
     };
     const onResize = () => {
+      layoutBlock();
       size();
       onScroll();
     };
