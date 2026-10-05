@@ -101,5 +101,5 @@ earns. They stay off both sites until a name is attached.
 Blue Modern Advisory is an enterprise partner of Clay and Perplexity
 (bluemodernadvisory.com, "The enterprise stack"). TTS builds on both through
 BMA. Valuations, always with their dates: Clay $7.1B (Series D, Sept 2026),
-Perplexity $20B (Sept 2025). Never say TTS itself is the partner.
+Perplexity $20B (Sept 2025). Caleb, 2026-10-04: "We are OFFICAL Partners of clay and perplexity through bma." Say "official partners through Blue Modern Advisory", always with the BMA clause.
 

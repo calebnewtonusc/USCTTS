@@ -48,11 +48,11 @@ in the shared hairline family:
 
 **The stack moment** (Caleb 2026-10-04, right after the world's climax, before the numbers band):
 
-- Line: `We build on Clay and Perplexity, through Blue Modern Advisory, an official partner of both.`
-- Two names in type, no logos, each with its valuation counting up on scroll:
+- Line: `We're official Clay and Perplexity partners through Blue Modern Advisory, so as a member you build with both, on real company work.`
+- Official logos (Clay's Kiln kit, Perplexity's mark plus its name in type), each with its valuation counting up on scroll:
   - `Clay` / `$7.1B` / small: `valuation as of Sept 2026`
   - `Perplexity` / `$20B` / small: `valuation as of Sept 2025`
-- Never sum them, never say TTS is the partner, no superlatives.
+- Never sum them, always keep "through Blue Modern Advisory", no superlatives.
 
 **Numbers band** (TroyLabs' stat row, our sourced numbers):
 

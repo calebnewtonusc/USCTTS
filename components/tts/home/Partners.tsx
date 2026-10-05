@@ -3,17 +3,35 @@
 import { useEffect, useRef } from "react";
 import { clamp, easeOut3, prog } from "../engine/math";
 
-/* Clay and Perplexity, through Blue Modern Advisory. Approved by Caleb on
- * 2026-10-04 and sourced in docs/POSITIONING.md: BMA is an enterprise partner
- * of both (bluemodernadvisory.com, "The enterprise stack"), and TTS builds on
- * them through BMA. TTS is never called the partner.
+/* Clay and Perplexity, through Blue Modern Advisory. Caleb, 2026-10-04: "We
+ * are OFFICIAL Partners of clay and perplexity through bma". BMA holds both
+ * partnerships (bluemodernadvisory.com, "The enterprise stack"), so the line
+ * always carries "through Blue Modern Advisory".
  *
- * Two names as type, two valuations counting up as the section scrolls in,
+ * The reader is a USC student: the logos say "I know these" before a word is
+ * read, the valuations say how big they are, and the line says what it means
+ * for a member. Logos are the official files: Clay's from its Kiln logo kit
+ * (assets.clayrun.dev), Perplexity's mark from Simple Icons, with its name set
+ * in type beside it. Two valuations counting up as the section scrolls in,
  * each with its date, and one plain sentence. The numbers are never summed and
  * nothing here says "best". Reduced motion shows the finished numbers. */
 const ROWS = [
-  { name: "Clay", value: 7.1, decimals: 1, asOf: "as of Sept 2026, Series D" },
-  { name: "Perplexity", value: 20, decimals: 0, asOf: "as of Sept 2025" },
+  {
+    name: "Clay",
+    logo: "/tts/partners/clay.svg",
+    wordmark: true,
+    value: 7.1,
+    decimals: 1,
+    asOf: "valued as of Sept 2026, Series D",
+  },
+  {
+    name: "Perplexity",
+    logo: "/tts/partners/perplexity.svg",
+    wordmark: false,
+    value: 20,
+    decimals: 0,
+    asOf: "valued as of Sept 2025",
+  },
 ];
 
 export default function Partners() {
@@ -65,7 +83,15 @@ export default function Partners() {
       <ul className="partners-row">
         {ROWS.map((r, i) => (
           <li key={r.name}>
-            <span className="partners-name">{r.name}</span>
+            <span className="partners-name">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={r.logo}
+                alt={r.wordmark ? r.name : ""}
+                className={r.wordmark ? "partners-wordmark" : "partners-mark"}
+              />
+              {!r.wordmark && r.name}
+            </span>
             <span
               className="partners-n"
               ref={(n) => {
@@ -79,8 +105,8 @@ export default function Partners() {
         ))}
       </ul>
       <p id="partners-line" className="partners-line">
-        We build on Clay and Perplexity, through Blue Modern Advisory, an
-        official partner of both.
+        We&apos;re official Clay and Perplexity partners through Blue Modern
+        Advisory, so as a member you build with both, on real company work.
       </p>
     </section>
   );
