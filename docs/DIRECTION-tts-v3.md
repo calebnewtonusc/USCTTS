@@ -1,5 +1,14 @@
 # TTS direction v3: GTM and AI, epic
 
+**The formula, Caleb 2026-10-04:** "TTS site should be lemma X clay X bma X
+wtv else is tuff X manim or wtv". That means:
+- Lemma's restraint and scroll storytelling
+- Clay's tactile world of objects
+- BMA's sharp operator voice
+- anything else that's tough, found online and recorded in
+  `docs/STEAL-tts.md`
+- manim where a clip is the best way to show something
+
 Caleb, 2026-10-04: "I want TTS site to live laugh love GTM&AI, peep the vibes
 of these images" (`docs/ref/clay-hero.png`, `gtm-course-infographic.png`,
 `bma-hero.png`). "Take BMA copy and make it way cooler and not just GTME but
