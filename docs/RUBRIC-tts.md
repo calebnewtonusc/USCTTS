@@ -76,3 +76,20 @@ Home becomes:
 4. People: leadership, mentors, alumni marks
 5. Two doors: "Join TTS" for students, and "Tell us what's eating your
    team's time" for businesses
+
+## Tell a story, not a textbook (Caleb, 2026-10-05)
+
+"Title / subtitle / Title / subtitle. SOOO basic & ai slop, get creative
+bruh, tell a story not a textbook."
+
+- No beat may be a heading plus a supporting line. The pattern repeated
+  down a page is the tell, however good the words are.
+- Text is part of the story. It reads in sequence across the scenes like
+  one short narrative with a character, and each line picks up where the
+  last left off.
+- Let the scene carry it. Some beats have no caption at all. Some text lives
+  inside the world: the laptop typing, a shop sign, a note taped to a
+  register, a reply drafting itself.
+- Vary scale and placement on purpose, e.g. one huge line, then a whisper,
+  then text the camera flies past. Never the same block in the same spot
+  every screen.
