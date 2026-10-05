@@ -1,0 +1,4 @@
+# renders and caches stay out of git; the film ships from public/tts/machine/
+*.blend1
+renders/
+__pycache__/
