@@ -501,7 +501,7 @@ export default function MembersStory() {
           </div>
         </div>
         <p className="k rise ms-big" style={win(0.47, 0.51, 0.57, 0.61)}>
-          About three months later, the roster was full.
+          About three months later, it had a real roster.
         </p>
       </div>
     </div>
