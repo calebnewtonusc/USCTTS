@@ -2,7 +2,7 @@ import dataset from "@/public/tts/run/portfolio-board-2026-09-15.json";
 import Shell from "./Shell";
 import { WorldHero, WorldWalk, type Numbers } from "./world/WorldScene";
 import Partners from "./home/Partners";
-import { Join, Roster } from "./home/Sections";
+import { Join } from "./home/Sections";
 import { runPipeline, type Dataset } from "./run/pipeline";
 import "./world/world.css";
 import "./home/home.css";
@@ -36,7 +36,6 @@ export default function TTSHome() {
       <WorldHero nums={NUMS} />
       <Partners />
       <WorldWalk />
-      <Roster />
       <Join />
     </Shell>
   );
