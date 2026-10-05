@@ -117,10 +117,11 @@ export function worldColour(world: number, role: ColourRole, out: Rgb): Rgb {
     const v = VIA_PARSED[i][role];
     const [p, q, u] = k < 0.5 ? [a, v, k * 2] : [v, b, (k - 0.5) * 2];
     // Lightness moves linearly; hue and chroma stay with the more saturated
-    // end longer. Rose to cream measured #f9cfb9, a peach, at 90% without it.
+    // end longer. Rose to cream measured #f9cfb9, a peach, at 90% without it;
+    // a square hold still left bg2 at #ffd7d8, chroma 0.044, so it's cubic.
     const cp = Math.hypot(p[1], p[2]);
     const cq = Math.hypot(q[1], q[2]);
-    const w = cq < cp ? u * u : 1 - (1 - u) * (1 - u);
+    const w = cq < cp ? u * u * u : 1 - (1 - u) ** 3;
     return oklabToSrgb([p[0] + (q[0] - p[0]) * u, p[1] + (q[1] - p[1]) * w, p[2] + (q[2] - p[2]) * w], out);
   }
   // Light roles switch over the middle 40% of a segment, so points spend as
