@@ -9,8 +9,8 @@ export default function Footer() {
           <h2>Trojan Tech Solutions</h2>
           <p className="label mt-s">
             A student organization at the University of Southern California.
-            Engineering and GTM engineering for companies, and the people who
-            learn it by doing it.
+            USC&apos;s AI implementation lab: GTM engineering, agents and AI
+            curricula for real organizations, built by the people learning it.
           </p>
         </div>
         <nav aria-label="Footer, the club">

@@ -8,7 +8,7 @@ import "@/components/tts/pages.css";
 export const metadata: Metadata = {
   title: "For companies | Trojan Tech Solutions",
   description:
-    "USC students who build data sets, GTM engines and AI agents for companies, and hand over something running, an owner, the SOP and a number.",
+    "USC's AI implementation lab: students who build GTM engines, AI agents and AI curricula for organizations, and hand over something running, an owner, the SOP and a number.",
 };
 
 const CHIPS = [
@@ -212,6 +212,10 @@ const BUILD = [
     name: "AI inside products",
     job: "These are features your own users touch.",
   },
+  {
+    name: "AI curriculum",
+    job: "This is a course that teaches your people to use AI, built for your context.",
+  },
 ];
 
 const STEPS = [
@@ -247,8 +251,9 @@ export default function WorkWithUsPage() {
             Bring us the work a system should be doing.
           </h1>
           <p className="pg-lead">
-            We&apos;re USC students who build data sets, GTM engines and AI agents
-            for companies, and we hand over something that&apos;s running.
+            We&apos;re USC&apos;s AI implementation lab. We build GTM engines, AI
+            agents and AI curricula for organizations, and we hand over
+            something that&apos;s running.
           </p>
           <div className="pg-actions">
             <a href="#intake" className="btn btn-primary">

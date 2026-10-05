@@ -7,7 +7,7 @@ import "@/components/tts/pages.css";
 export const metadata: Metadata = {
   title: "About | Trojan Tech Solutions",
   description:
-    "USC's GTM and AI club. Members learn to build data sets, GTM engines and AI agents, then build them for real companies.",
+    "USC's AI implementation lab. Members build AI into real organizations, from GTM engines and agents for companies to an AI curriculum for students.",
 };
 
 /* The machine, drawn as a hairline diagram in a 100 x 104 box. One part per
@@ -250,12 +250,13 @@ export default function AboutPage() {
         <section className="pg-step is-first t1" aria-labelledby="about-title">
           <p className="pg-kicker">About</p>
           <h1 id="about-title" className="pg-title">
-            USC&apos;s GTM and AI club.
+            USC&apos;s AI implementation lab.
           </h1>
           <p className="pg-lead">
-            Members learn to build the systems that replace headcount, so data,
-            enrichment, qualification, prompting, agents and automation, and
-            then they build them for real companies.
+            We put AI to work inside real organizations. Sometimes that&apos;s
+            GTM engineering for a startup, sometimes it&apos;s an agent inside a
+            product, and right now one client has us building an AI curriculum
+            for their students. Members learn it by building it.
           </p>
         </section>
 
@@ -297,10 +298,11 @@ export default function AboutPage() {
 
         <section className="pg-step t6" aria-labelledby="a-6">
           <span className="pg-n">05</span>
-          <h2 id="a-6">Teaching all of it</h2>
+          <h2 id="a-6">Teaching AI</h2>
           <p>
-            Every member learns the whole machine by building it, from a first
-            list to a system that runs weekly.{" "}
+            We&apos;re building an AI curriculum for one client&apos;s students,
+            and inside the club every member learns the same way, by building
+            the thing, from a first list to a system that runs weekly.{" "}
             <Link className="link" href="/build">
               The build team&apos;s sessions
             </Link>{" "}

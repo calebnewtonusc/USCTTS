@@ -5,7 +5,7 @@ import "@/components/tts/pages.css";
 
 export const metadata: Metadata = {
   title: "Apply | Trojan Tech Solutions",
-  description: "Apply to Trojan Tech Solutions, USC's GTM and AI club.",
+  description: "Apply to Trojan Tech Solutions, USC's AI implementation lab.",
 };
 
 export default function ApplyPage() {
