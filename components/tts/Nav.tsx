@@ -7,7 +7,6 @@ import TcLink from "./TcLink";
 
 const LINKS = [
   { href: "/members", label: "People" },
-  { href: "/build", label: "Build team" },
   { href: "/work-with-us", label: "For companies" },
 ];
 

@@ -16,7 +16,6 @@ export default function Footer() {
         <nav aria-label="Footer, the club">
           <ul>
             <li><Link className="link" href="/members">People</Link></li>
-            <li><Link className="link" href="/build">Build team</Link></li>
             <li><Link className="link" href="/apply">Join</Link></li>
           </ul>
         </nav>

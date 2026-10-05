@@ -13,7 +13,16 @@ const nextConfig = {
   async redirects() {
     // Caleb, 2026-10-04: "Why are about and home 2 diff pages?" They said the
     // same thing twice, so the home page is the about page now.
-    const about = [{ source: "/about", destination: "/", permanent: true }];
+    // Caleb, same night: "Build tab shouldn't exist if we already have the
+    // main page and the apply tab", and the old meeting slides were "ai
+    // slop". Both routes are gone and their old links land on home.
+    const about = [
+      { source: "/about", destination: "/", permanent: true },
+      { source: "/build", destination: "/", permanent: true },
+      { source: "/build/:path*", destination: "/", permanent: true },
+      { source: "/meetings", destination: "/", permanent: true },
+      { source: "/meetings/:path*", destination: "/", permanent: true },
+    ];
     if (!TC_ORIGIN) return about;
     return [
       ...about,
