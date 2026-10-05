@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { capClip, clamp, easeOut3, prog } from "../engine/math";
 import type { World } from "./world";
+import { worldBridge } from "./bridge";
 
 export interface Numbers {
   companies: number;
@@ -281,6 +282,11 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
         worldT0 = assemble ? performance.now() : 0;
         world.frame(banked);
         setReady(true);
+        worldBridge.qualify = () => {
+          const r = cv.getBoundingClientRect();
+          const q = world ? world.qualifyOnCanvas() : { x: 0.66, y: 0.5 };
+          return { x: r.left + q.x * r.width, y: r.top + q.y * r.height };
+        };
         if (new URLSearchParams(window.location.search).has("capture")) {
           (window as unknown as { __ttsWorld: unknown }).__ttsWorld = {
             still: (n: number, t: number, sweepMs?: number, loadAt?: number) => {
@@ -305,6 +311,7 @@ export default function WorldScene({ nums }: { nums: Numbers }) {
       document.removeEventListener("visibilitychange", kick);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
+      worldBridge.qualify = null;
       world?.dispose();
     };
   }, [reduced, nums]);

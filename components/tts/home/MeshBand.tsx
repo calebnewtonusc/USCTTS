@@ -3,11 +3,10 @@
 import { useEffect, useRef } from "react";
 import { attachMesh } from "../engine/mesh";
 
-/* The join band's ground: the replica's mesh shader, recoloured to the page
- * ink with one low trace of the accent, and slowed down so the band breathes
- * rather than swirls. Paused offscreen, a still frame
+/* The join band's ground: the replica's mesh shader in close cardinals, so the
+ * band the sun became keeps a slow, low movement rather than a swirl. Paused offscreen, a still frame
  * under reduced motion, and the CSS gradient behind it if WebGL is missing. */
-const COLORS = ["#2a1b1e", "#3a272b", "#22161a", "#4f1a24", "#2f2023"];
+const COLORS = ["#a3162b", "#8e1325", "#b31c33", "#7d1020", "#a3162b"];
 
 export default function MeshBand() {
   const host = useRef<HTMLDivElement>(null);

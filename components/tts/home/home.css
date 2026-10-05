@@ -308,22 +308,19 @@
   margin-top: 36px;
 }
 
-/* ---------- join: the one ink band ---------- */
+/* ---------- join: the cardinal band ----------
+ * Cardinal from its first pixel, because the dawn sun of the world rises into
+ * it (SeamToJoin), and a full screen tall so the sun's last frame is all
+ * band. */
 .tts .join {
   position: relative;
   overflow: hidden;
-  margin-top: 160px;
-  min-height: 80vh;
+  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   align-items: flex-end;
   color: var(--paper);
-  background:
-    radial-gradient(
-      80% 90% at 80% 20%,
-      rgba(163, 22, 43, 0.22),
-      transparent 60%
-    ),
-    var(--ink);
+  background: var(--red);
 }
 .tts .join-mesh {
   position: absolute;
@@ -374,7 +371,7 @@
  * translucent secondary, the same states. */
 .tts .join .btn-primary {
   background: var(--paper);
-  color: var(--ink);
+  color: var(--red);
 }
 .tts .join .btn-secondary {
   background: rgba(244, 240, 233, 0.12);
@@ -424,4 +421,100 @@
 .tts #run,
 .tts #learn {
   scroll-margin-top: 80px;
+}
+
+/* ---------- seams (Seams.tsx) ----------
+ * 200vh with -100vh either side: the seam adds no scroll, and its stage is
+ * sticky for exactly the one screen where two sections meet. */
+.tts .seam {
+  position: relative;
+  height: 200vh;
+  margin-block: -100vh;
+  z-index: 30;
+  pointer-events: none;
+}
+.tts .seam-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+.tts .seam-ground {
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  opacity: 0;
+}
+.tts .seam-card,
+.tts .seam-sheet,
+.tts .seam-sun {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  will-change: transform, width, height, opacity;
+}
+.tts .seam-card {
+  background: var(--well);
+  border: var(--line-w) solid var(--rule);
+  padding: 18px 20px;
+  overflow: hidden;
+}
+.tts .seam-card > * {
+  opacity: var(--rows, 1);
+}
+.tts .seam-sheet {
+  background: var(--well);
+  border: var(--line-w) solid var(--rule);
+  overflow: hidden;
+}
+.tts .seam-grid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 100%;
+}
+.tts .seam-grid line {
+  stroke: var(--line-quiet);
+  stroke-width: var(--line-w);
+  vector-effect: non-scaling-stroke;
+}
+.tts .seam-stroke {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+.tts .seam-stroke path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: var(--marker-w);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tts .seam-sun {
+  border-radius: 50%;
+}
+.tts .spine {
+  position: relative;
+}
+.tts .spine-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--marker-w);
+  margin-left: calc(var(--marker-w) / -2);
+  height: 100%;
+  background: var(--accent);
+  transform-origin: 50% 0;
+  transform: scaleY(0);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tts .seam {
+    display: none;
+  }
 }

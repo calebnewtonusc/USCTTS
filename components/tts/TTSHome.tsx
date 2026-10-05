@@ -4,6 +4,7 @@ import WorldScene, { type Numbers } from "./world/WorldScene";
 import RunPanels from "./home/RunPanels";
 import Whiteboard from "./home/Whiteboard";
 import { Join, Roster, TurnDown, WorkLines } from "./home/Sections";
+import { SeamToBoard, SeamToJoin, SeamToRun, SeamToSpine, Spine } from "./home/Seams";
 import type { IntakeRow } from "./run/Intake";
 import { audit, runPipeline, verdict, type Dataset } from "./run/pipeline";
 import "./world/world.css";
@@ -27,6 +28,16 @@ const NUMS: Numbers = {
   shortlist: INITIAL_RUN.shortlistTotal,
 };
 
+// The readout that carries the world into the run panels: the same five
+// numbers the world's qualification station shows.
+const READOUT: [string, number][] = [
+  ["Companies on the board", NUMS.companies],
+  ["Open roles pulled", NUMS.roles],
+  ["Set aside by the check", NUMS.setAside],
+  ["Roles kept", NUMS.kept],
+  ["Shortlisted for a student team", NUMS.shortlist],
+];
+
 const INITIAL_INTAKE: IntakeRow[] = (() => {
   const aside = audit(DATA);
   const rows: IntakeRow[] = [];
@@ -48,11 +59,17 @@ export default function TTSHome() {
   return (
     <Shell>
       <WorldScene nums={NUMS} />
+      <SeamToRun rows={READOUT} />
       <RunPanels initialRun={INITIAL_RUN} initialIntake={INITIAL_INTAKE} total={DATA.roles.length} />
+      <SeamToBoard />
       <Whiteboard />
-      <WorkLines />
-      <TurnDown />
-      <Roster />
+      <SeamToSpine />
+      <Spine>
+        <WorkLines />
+        <TurnDown />
+        <Roster />
+      </Spine>
+      <SeamToJoin />
       <Join />
     </Shell>
   );

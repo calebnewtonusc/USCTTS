@@ -32,3 +32,17 @@ After the block, the page continues on the same chassis:
 | Run it yourself                                | pinned crossfade, the replica's W3 panels: layers switched by class, 500ms ease-out, IntersectionObserver at 0.5 | the in-browser run on the real dataset, with the verify switch |
 | What you learn                                 | pinned 330vh; each of five stations draws itself from one scroll progress                                        | a hand-drawn board in the page's hairline family               |
 | What we build, What we turn down, People, Join | static, with the join band on the replica's mesh shader in page ink                                              | type, the roster's photographs                                 |
+
+## Seams: no hard cut
+
+Every section hands off to the next through one shared object
+(`components/tts/home/Seams.tsx`). Each seam overlaps the last screen of one
+section and the first screen of the next, so it adds no scroll. One progress
+value drives it, so it reverses, and reduced motion hides it.
+
+| Seam | Shared object | What happens |
+|---|---|---|
+| World to run | the qualification readout | It grows out of the station in the world's last frame, holds as a card while the world gives way to the page ground, then lands on the run panel as it rises |
+| Run to whiteboard | the world's ground grid | A lattice seen from a low camera tilts up until it faces the reader, fills in, and lands on the board's surface |
+| Whiteboard to the sections below | the compounding stroke | The board's last curve keeps drawing, arcs over, and runs down the left gutter, where it becomes the cardinal spine that What we build, What we turn down and the roster hang on |
+| Roster to join | the dawn sun | The world's low sun rises from below the page, turning from dawn gold to cardinal, until it is the join band |

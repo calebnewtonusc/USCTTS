@@ -180,6 +180,8 @@ export interface World {
   setLoad(l: number): void;
   frame(timeMs: number): void;
   resize(w: number, h: number): void;
+  /** Where the qualification station sits on the canvas, 0 to 1 each way. */
+  qualifyOnCanvas(): { x: number; y: number };
   dispose(): void;
   /** For still renders: freeze ambient time at t and draw once. With
    * sweepMs, the build is shown that far into its sweep. */
@@ -1024,6 +1026,10 @@ export function createWorld(
       if (n >= ENTER) sweep0 = time - (sweepMs ?? SWEEP_MS + RISE_MS + 1000);
       update(time);
       renderer.render(scene, camera);
+    },
+    qualifyOnCanvas() {
+      const v = new THREE.Vector3(STATIONS.magnifier.x, 12, STATIONS.magnifier.z).project(camera);
+      return { x: (v.x + 1) / 2, y: (1 - v.y) / 2 };
     },
     resize(w, h) {
       renderer.setSize(w, h, false);
