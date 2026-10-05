@@ -340,6 +340,12 @@
     grid-template-columns: 1fr;
   }
 }
+.tts .join .join-cta {
+  /* The payoff: the student's button is the biggest thing in the band. */
+  font-size: 20px;
+  padding: 18px 30px;
+  min-height: 60px;
+}
 .tts .join-actions {
   margin-top: 40px;
   display: flex;
@@ -595,16 +601,10 @@
   margin-inline: auto;
   padding: 18vh var(--gutter) 14vh;
   /* A sky field behind Clay and Perplexity, full bleed through a
-   * border-image outset (paint only, so no sideways scroll), rising out of
-   * the paper and back into it over 120px each way. */
-  border-image: linear-gradient(
-      180deg,
-      var(--paper) 0,
-      #c7def4 120px,
-      #b3d2f0 55%,
-      #c7def4 calc(100% - 120px),
-      var(--paper) 100%
-    )
+   * border-image outset (paint only, so no sideways scroll). The world meets it in this same sky blue at both edges: the intro
+   * rises into it and the story comes down out of it (world/WorldScene.tsx,
+   * PARTNERS_SKY), so there is no edge either way. */
+  border-image: linear-gradient(180deg, #c4ddf3 0, #b3d2f0 50%, #c4ddf3 100%)
     fill 0 / 0 / 0 100vmax;
 }
 .tts .partners-row {

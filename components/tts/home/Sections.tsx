@@ -247,11 +247,11 @@ export function Join() {
         <div className="join-doors">
           <div className="join-door">
             <p>
-              If you&apos;re a USC student, you tell us when you apply if
-              you&apos;d rather build the tools or get them used, and Caleb,
-              Tyler and Emily read every one.
+              If you&apos;re a USC student: you build real AI systems for real
+              businesses, on Clay and Perplexity, with mentors from McKinsey
+              and Google.
             </p>
-            <Link href="/apply" className="btn btn-primary">
+            <Link href="/apply" className="btn btn-primary join-cta">
               Join TTS{" "}
               <span className="arrow" aria-hidden="true">
                 &rarr;
