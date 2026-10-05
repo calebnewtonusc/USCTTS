@@ -10,9 +10,7 @@ const MAILS = [
   { who: "Grace L.", subj: "Can I move my cleaning to Thursday?", t: "9:14" },
   { who: "Daniel P.", subj: "Do you take Delta Dental?", t: "9:09" },
   { who: "Min-ji K.", subj: "Are you open Saturdays?", t: "8:57" },
-  { who: "Sam R.", subj: "Running 10 minutes late, sorry", t: "8:41" },
   { who: "Ana V.", subj: "Could you resend my last invoice?", t: "8:30" },
-  { who: "Chris H.", subj: "Is parking validated?", t: "8:12" },
 ];
 const START = 6;
 const END = 41;
@@ -40,7 +38,7 @@ export default function Inbox() {
   return (
     <figure className="ix-panel" aria-label={`An example front desk inbox with ${END} unread emails`}>
       <div className="ix-bar">
-        <span>Front desk inbox, a dental office, for example</span>
+        <span>A dental office&apos;s inbox, for example</span>
         <span className="ix-count">{n} unread</span>
       </div>
       <ul className="ix-mail">

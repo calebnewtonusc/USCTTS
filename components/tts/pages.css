@@ -1561,3 +1561,65 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* /work-with-us after the inbox: five one-line examples, one sentence, the
+ * button again (Caleb, 2026-10-05: "a FAT wall of text"). */
+.tts .wu-body {
+  padding-bottom: clamp(72px, 9vw, 120px);
+}
+.tts .wu-ex {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+  max-width: 920px;
+}
+.tts .wu-ex li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr);
+  align-items: center;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--rule);
+  transition: background-color 200ms ease;
+}
+.tts .wu-q {
+  font-size: clamp(19px, 1.7vw, 23px);
+  letter-spacing: -0.005em;
+}
+.tts .wu-a {
+  font-size: 17px;
+  color: var(--ink-2);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .wu-ex li:hover {
+    background: linear-gradient(90deg, #e6f2fc, transparent 85%);
+  }
+  .tts .wu-ex li:hover .pg-ex-arrow {
+    background: var(--red);
+  }
+  .tts .wu-ex li:hover .pg-ex-arrow::after {
+    border-color: var(--red);
+  }
+  .tts .wu-ex li:hover .wu-a {
+    color: var(--ink);
+  }
+}
+@media (max-width: 599px) {
+  .tts .wu-ex li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  .tts .wu-ex .pg-ex-arrow {
+    display: none;
+  }
+  .tts .wu-a::before {
+    content: "\2192\00a0";
+    color: var(--red);
+  }
+}
+.tts .wu-how {
+  margin-top: 40px;
+  font-size: clamp(20px, 1.9vw, 25px);
+  line-height: 1.4;
+  max-width: 40ch;
+}

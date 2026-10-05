@@ -88,7 +88,7 @@ export default function PartnerForm() {
       <Choices name="partnerType" legend="What did you have in mind" options={TYPES.map((t) => ({ value: t.value, label: t.label }))} value={values.partnerType} onChange={(v) => set("partnerType", v)} error={errors.partnerType} />
       <p className="pg-route">
         Bringing work you want AI to take on?{" "}
-        <Link className="link" href="/work-with-us#intake">
+        <Link className="link" href="/work-with-us/form">
           Use the project form instead
         </Link>
         .
