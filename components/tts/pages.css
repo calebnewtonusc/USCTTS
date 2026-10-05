@@ -66,13 +66,7 @@
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
-.tts .pg-lead {
-  margin-top: 20px;
-  font-size: 18.5px;
-  line-height: 1.58;
-  color: var(--ink-2);
-  max-width: 46ch;
-}
+
 .tts .pg-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1010,35 +1004,6 @@
   color: #990000;
 }
 
-/* ---------- /work-with-us: the example week ---------- */
-.tts .wk-hand,
-.tts .wk-legend-hand {
-  fill: var(--paper-3);
-}
-.tts .wk-ai {
-  fill: var(--sky);
-  stroke: var(--sky-2);
-  stroke-width: var(--pg-hair);
-}
-.tts .wk-tick {
-  fill: none;
-  stroke: var(--red);
-  stroke-width: 1.5px;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-@keyframes wk-handoff {
-  from {
-    opacity: 0;
-  }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .tts .wk-cell .wk-ai,
-  .tts .wk-cell .wk-tick {
-    animation: wk-handoff 420ms cubic-bezier(0.2, 0.6, 0.2, 1) both;
-    animation-delay: calc(var(--d, 0) * 1ms);
-  }
-}
 
 .tts .pgx > .pg-sec:last-child {
   padding-bottom: clamp(88px, 10vw, 140px);
@@ -1093,17 +1058,12 @@
   grid-column: 1 / -1;
   justify-self: start;
 }
-.tts .pg-hero-in.is-split .pg-lead {
-  margin-top: 0;
-  padding-bottom: 6px;
-}
+
 @media (max-width: 959px) {
   .tts .pg-hero-in.is-split .pg-hero-copy {
     display: block;
   }
-  .tts .pg-hero-in.is-split .pg-lead {
-    margin-top: 20px;
-  }
+  
 }
 .tts .pg-route {
   margin-top: -8px;
@@ -1189,4 +1149,415 @@
   border-left: 3px solid var(--red);
   font-size: 18px;
   max-width: 620px;
+}
+
+/* ---------- v4 openings for the inner pages ----------
+ * Home v4 is LA's street grid as points of light (docs/DIRECTION-tts-v4.md).
+ * The inner pages echo it in CSS, not WebGL: a fine rotated street grid, its
+ * intersections as points, two freeway lines in sky, USC as one cardinal
+ * point, and a mono readout along the bottom. Each opening is one short line
+ * plus something doing the explaining, never a headline over a paragraph
+ * (docs/RUBRIC-tts.md, "No X, Y headline over a subtitle"). */
+.tts .pgx {
+  --mono: var(--tts-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+.tts .ix {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: min(88vh, 860px);
+  display: grid;
+  border-bottom: 1px solid var(--rule);
+  background: #fbfaf7;
+}
+.tts .ix-grid {
+  position: absolute;
+  inset: -30%;
+  z-index: -2;
+  /* LA's grid runs about 9 degrees off north around USC. */
+  rotate: -9deg;
+  background-image:
+    radial-gradient(circle at 0 0, rgba(28, 21, 23, 0.32) 1.1px, transparent 1.6px),
+    linear-gradient(rgba(28, 21, 23, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(28, 21, 23, 0.055) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(70% 70% at 70% 45%, #000 30%, transparent 85%);
+  mask-image: radial-gradient(70% 70% at 70% 45%, #000 30%, transparent 85%);
+}
+.tts .ix-ways {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+}
+.tts .ix-way {
+  fill: none;
+  stroke: #8fbbe6;
+  stroke-width: 2.2;
+  opacity: 0.7;
+  vector-effect: non-scaling-stroke;
+}
+.tts .ix-way.is-thin {
+  stroke-width: 1.2;
+  opacity: 0.5;
+}
+.tts .ix-usc {
+  fill: var(--red);
+}
+.tts .ix-usc-halo {
+  fill: rgba(153, 0, 0, 0.12);
+}
+.tts .ix-in {
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding: clamp(48px, 8vh, 96px) var(--gutter) 88px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  gap: 64px;
+  align-items: center;
+}
+.tts .ix-in.is-solo {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (max-width: 959px) {
+  .tts .ix-in {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+    padding-bottom: 72px;
+  }
+}
+/* The one short line. */
+.tts .ix-line {
+  font-size: clamp(40px, 5vw, 76px);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  max-width: 13ch;
+}
+.tts .ix-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 32px;
+}
+.tts .ix-readout {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 14px var(--gutter);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.01em;
+  color: var(--ink-2);
+  max-width: var(--wide);
+  margin-inline: auto;
+}
+.tts .ix-readout b {
+  font-weight: 400;
+  color: var(--red);
+}
+.tts .ix-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.tts .ix-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+/* An interface panel floating over the grid: crisp, its own ground, one
+ * hairline frame, like the week panel on home. */
+.tts .ix-panel {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(28, 21, 23, 0.12);
+  box-shadow: 0 1px 2px rgba(28, 21, 23, 0.05), 0 30px 60px -36px rgba(44, 106, 166, 0.45);
+  font-size: 14px;
+}
+.tts .ix-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.tts .ix-bar span:last-child {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+.tts .ix-count {
+  color: var(--red) !important;
+  font-variant-numeric: tabular-nums;
+}
+.tts .ix-mail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tts .ix-mail li {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.tts .ix-mail li:last-child {
+  border-bottom: 0;
+}
+.tts .ix-mail .who {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tts .ix-mail .subj {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink-2);
+}
+.tts .ix-mail .t {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+.tts .ix-mail li.is-new .who::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #3f86c9;
+  vertical-align: middle;
+}
+@keyframes ix-arrive {
+  from {
+    opacity: 0;
+    translate: 0 -10px;
+  }
+}
+@keyframes ix-type {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tts .ix-mail li,
+  .tts .ix-rows li {
+    animation: ix-arrive 420ms cubic-bezier(0.2, 0.6, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 340ms + 300ms);
+  }
+  .tts .ix-rows .why {
+    animation: ix-type 700ms steps(24) both;
+    animation-delay: calc(var(--i, 0) * 340ms + 600ms);
+  }
+  .tts .ix-rows .st {
+    animation: ix-arrive 300ms ease both;
+    animation-delay: calc(var(--i, 0) * 340ms + 1200ms);
+  }
+}
+@media (max-width: 599px) {
+  .tts .ix-mail li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .tts .ix-mail .subj {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+/* /apply: the lead list a member builds, filling itself. */
+.tts .ix-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tts .ix-rows li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) auto;
+  gap: 14px;
+  align-items: baseline;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.tts .ix-rows li.is-head {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  padding-block: 8px;
+  animation: none;
+}
+.tts .ix-rows .biz {
+  font-weight: 500;
+}
+/* Same size as the business name: this is one table row, not a card with a
+ * title over a line, and it's set like one. */
+.tts .ix-rows .why {
+  color: var(--ink-2);
+  font-size: 14px;
+}
+.tts .ix-rows .st {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #2c6aa6;
+  background: #e6f2fc;
+  padding: 3px 7px;
+}
+@media (max-width: 599px) {
+  .tts .ix-rows li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .tts .ix-rows .why {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+.tts .ix-signup {
+  margin-top: 28px;
+  max-width: 520px;
+}
+.tts .ix-signup .nf {
+  margin-top: 12px;
+}
+
+/* /partner: three routes out of the club. */
+.tts .ix-routes {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.tts .ix-route {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+.tts .ix-route.is-dash {
+  stroke: var(--ink-3);
+  stroke-dasharray: 4 5;
+}
+.tts .ix-stop {
+  fill: #fff;
+  stroke: var(--ink);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.tts .ix-node {
+  fill: var(--red);
+}
+.tts .ix-lab {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--ink);
+}
+.tts .ix-lab-2 {
+  font-family: var(--serif);
+  font-size: 15px;
+  fill: var(--ink-2);
+}
+@keyframes ix-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tts .ix-routes .ix-route.draw {
+    stroke-dasharray: 1;
+    animation: ix-draw 900ms cubic-bezier(0.2, 0.6, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 180ms + 200ms);
+  }
+}
+
+/* /work-with-us after the opening: no heading-plus-subtitle anywhere. */
+.tts .pg-say {
+  font-size: clamp(26px, 2.8vw, 38px);
+  line-height: 1.2;
+  letter-spacing: -0.012em;
+  max-width: 30ch;
+}
+.tts .pg-mono-note {
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+.tts .pg-nos {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tts .pg-nos li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--paper-2);
+  font-size: 15px;
+}
+.tts .pg-nos li::before {
+  content: "\00d7";
+  color: var(--red);
+  font-size: 17px;
+  line-height: 1;
+}
+.tts .ix.is-short {
+  min-height: 0;
+}
+.tts .ix.is-short .ix-in {
+  padding-block: clamp(48px, 7vh, 88px) 72px;
+}
+.tts .ix .ix-ways .ix-route {
+  stroke-width: 1.6;
+}
+.tts footer.footer .footer-base {
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding: 14px var(--gutter) 24px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--tts-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 11px;
+}
+.tts footer.footer .footer-base a {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 400;
+  color: var(--ink-3);
+}
+@media (max-width: 599px) {
+  .tts .ix-rows li.is-head {
+    display: none;
+  }
+}
+.tts .ix-routes {
+  max-width: 560px;
+}
+.tts .ap-path {
+  display: grid;
+  gap: 64px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 480px);
+  align-items: center;
+}
+@media (max-width: 959px) {
+  .tts .ap-path {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

@@ -1,10 +1,11 @@
 import Link from "next/link";
 import TcLink from "./TcLink";
 import { TC_URL } from "./links";
+import { mono } from "./v4/mono";
 
 export default function Footer() {
   return (
-    <footer className="footer">
+    <footer className={`footer ${mono.variable}`}>
       <div className="footer-inner">
         <div>
           <h2>Trojan Tech Solutions</h2>
@@ -63,6 +64,13 @@ export default function Footer() {
             </li>
           </ul>
         </nav>
+      </div>
+      {/* Home's grid of light is drawn from OpenStreetMap (ODbL), which asks
+       * for this credit wherever the map appears; it sits on every page. */}
+      <div className="footer-base">
+        <a href="https://www.openstreetmap.org/copyright" rel="noreferrer" target="_blank">
+          &copy; OpenStreetMap contributors
+        </a>
       </div>
     </footer>
   );

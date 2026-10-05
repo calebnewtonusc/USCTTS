@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Shell from "@/components/tts/Shell";
+import { mono } from "@/components/tts/v4/mono";
 import "@/components/tts/pages.css";
+import GridEcho from "./work-with-us/GridEcho";
 
 export const metadata: Metadata = {
   title: "Not found | Trojan Tech Solutions",
@@ -13,24 +15,20 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <Shell>
-      <div className="pgx">
-        <section className="pg-hero" aria-labelledby="nf-title">
-          <div className="pg-hero-in is-solo">
-            <div className="pg-hero-copy">
-              <p className="pg-kicker">Page not found</p>
-              <h1 id="nf-title" className="pg-title">
-                There&apos;s no page at this address.
+      <div className={`pgx ${mono.variable}`}>
+        <section className="ix" aria-labelledby="nf-title">
+          <GridEcho />
+          <div className="ix-in is-solo">
+            <div>
+              <h1 id="nf-title" className="ix-line">
+                No route to this page.
               </h1>
-              <p className="pg-lead">
-                It may have moved when we rebuilt the site. If you&apos;re a student, the application is the place to
-                start. If you run a business, tell us what&apos;s eating your team&apos;s time.
-              </p>
-              <div className="pg-actions">
+              <div className="ix-actions">
                 <Link className="btn btn-primary" href="/">
-                  Go to the home page
+                  Back to the home page
                 </Link>
                 <Link className="btn btn-secondary" href="/apply">
-                  Apply to join
+                  Join TTS
                 </Link>
                 <Link className="btn btn-secondary" href="/work-with-us">
                   For companies
@@ -38,6 +36,16 @@ export default function NotFound() {
               </div>
             </div>
           </div>
+          <svg className="ix-ways" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path className="ix-route is-dash" d="M72 46 C80 52 86 60 92 74" />
+            <path className="ix-route" d="M90.6 72 L93.4 76 M93.4 72 L90.6 76" />
+          </svg>
+          <p className="ix-readout">
+            <span>
+              <b>404</b> no route from USC to this address
+            </span>
+            <span>it may have moved when the site was rebuilt</span>
+          </p>
         </section>
       </div>
     </Shell>

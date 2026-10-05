@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Shell from "@/components/tts/Shell";
+import { mono } from "@/components/tts/v4/mono";
 import MembersStory from "./MembersStory";
 import "@/components/tts/pages.css";
 import "./members.css";
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 export default function MembersPage() {
   return (
     <Shell>
-      <div className="pgx">
+      <div className={`pgx ${mono.variable}`}>
         <MembersStory />
         <section className="ms-close" aria-labelledby="close-title">
           <div>

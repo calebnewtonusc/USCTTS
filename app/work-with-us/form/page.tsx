@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Shell from "@/components/tts/Shell";
+import { mono } from "@/components/tts/v4/mono";
 import IntakeForm from "@/components/tts/IntakeForm";
+import GridEcho from "../GridEcho";
+import { CALENDLY_URL } from "@/lib/contact";
 import "@/components/tts/pages.css";
 
 export const metadata: Metadata = {
@@ -12,21 +15,22 @@ export const metadata: Metadata = {
 export default function IntakePage() {
   return (
     <Shell>
-      <div className="pgx">
-        <section className="pg-hero" aria-labelledby="intake-title">
-          <div className="pg-hero-in is-solo">
-            <div className="pg-hero-copy">
-              <p className="pg-kicker">For companies</p>
-              <h1 id="intake-title" className="pg-title">
+      <div className={`pgx ${mono.variable}`}>
+        <section className="ix is-short" aria-labelledby="intake-title">
+          <GridEcho usc={null} />
+          <div className="ix-in is-solo">
+            <div>
+              <h1 id="intake-title" className="ix-line">
                 What&apos;s eating your team&apos;s time?
               </h1>
-              <p className="pg-lead">
-                Tell us in plain words. If it&apos;s not work we can finish, our first reply says so.{" "}
-                <Link className="link" href="/work-with-us">
-                  See examples and how it works
+              <div className="ix-actions">
+                <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+                  Rather talk? Book 30 minutes with Caleb
+                </a>
+                <Link className="btn btn-secondary" href="/work-with-us">
+                  See examples first
                 </Link>
-                .
-              </p>
+              </div>
             </div>
           </div>
         </section>

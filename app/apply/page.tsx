@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import Shell from "@/components/tts/Shell";
+import { mono } from "@/components/tts/v4/mono";
 import { APPLY_FORM_URL, APPLICATIONS_OPEN } from "@/lib/apply";
 import NotifyForm from "./NotifyForm";
+import GridEcho from "../work-with-us/GridEcho";
 import "@/components/tts/pages.css";
 
 export const metadata: Metadata = {
@@ -131,69 +132,93 @@ function Path() {
   );
 }
 
+/* What a member builds, shown working: the lead list from the home page's
+ * example week, a dental office in Koreatown, filling itself row by row with
+ * a reason and a drafted first email. Timed once on load; reduced motion
+ * shows it finished. */
+const LEADS = [
+  { biz: "Orthodontist", where: "Wilshire Blvd", why: "Refers patients for cleanings, two blocks away" },
+  { biz: "Pediatric clinic", where: "Western Ave", why: "Families who need a dentist nearby" },
+  { biz: "Coworking space", where: "Wilshire Blvd", why: "Hundreds of people working next door" },
+  { biz: "Taekwondo studio", where: "Vermont Ave", why: "Kids' classes, parents asking about mouthguards" },
+];
+
+function LeadRun() {
+  return (
+    <figure className="ix-panel" aria-label="An example lead list a member builds, filling itself">
+      <div className="ix-bar">
+        <span>Who&apos;s worth reaching, near a Koreatown dental office</span>
+        <span>{LEADS.length} found, drafts ready</span>
+      </div>
+      <ul className="ix-rows">
+        <li className="is-head" aria-hidden="true">
+          <span>business</span>
+          <span>why it&apos;s worth reaching</span>
+          <span>email</span>
+        </li>
+        {LEADS.map((l, i) => (
+          <li key={l.biz} style={{ ["--i" as string]: i }}>
+            <span className="biz">
+              {l.biz}, {l.where}
+            </span>
+            <span className="why">{l.why}</span>
+            <span className="st">drafted</span>
+          </li>
+        ))}
+      </ul>
+    </figure>
+  );
+}
+
 export default function ApplyPage() {
   return (
     <Shell>
-      <div className="pgx">
-        <section className="pg-hero" aria-labelledby="apply-title">
-          <div className="pg-hero-in">
+      <div className={`pgx ${mono.variable}`}>
+        <section className="ix" aria-labelledby="apply-title">
+          <GridEcho />
+          <div className="ix-in">
             <div className="pg-hero-copy">
-              <p className="pg-kicker">Join TTS</p>
-              <h1 id="apply-title" className="pg-title">
-                Learn to build AI, then build it for{" "}
-                <span className="pg-mark">a real company</span>.
+              <h1 id="apply-title" className="ix-line">
+                You&apos;d learn to build this.
               </h1>
-              <p className="pg-lead">
-                Companies come to us with work they want AI to handle, like
-                answering the same emails all week or keeping their customer
-                list up to date. You learn how in our build sessions, practice
-                on real data, and then do it for them.
-              </p>
-              <div className="pg-actions">
-                <a href="#apply" className="btn btn-primary">
-                  {APPLICATIONS_OPEN ? "How to apply" : "Hear when it opens"}{" "}
-                  <span className="arrow" aria-hidden="true">
-                    &darr;
-                  </span>
-                </a>
-                <Link href="/members" className="btn btn-secondary">
-                  Meet the people
-                </Link>
-              </div>
+              {APPLICATIONS_OPEN ? (
+                <div className="ix-actions">
+                  <a className="btn btn-primary ap-big" href={APPLY_FORM_URL} target="_blank" rel="noreferrer">
+                    Apply on Google Forms{" "}
+                    <span className="arrow" aria-hidden="true">
+                      &rarr;
+                    </span>
+                  </a>
+                </div>
+              ) : (
+                <div className="ix-signup" id="apply">
+                  <p className="ix-status">Applications open soon</p>
+                  <NotifyForm />
+                </div>
+              )}
             </div>
+            <LeadRun />
+          </div>
+          <p className="ix-readout">
+            <span>34.0224&deg; N 118.2851&deg; W</span>
+            <span>USC, University Park</span>
+            <span>
+              <b>&bull;</b> a member&apos;s build, running
+            </span>
+          </p>
+        </section>
+
+        <section className="pg-sec" aria-labelledby="path-title">
+          <div className="pg-split ap-path">
+            <h2 id="path-title" className="pg-say">
+              Once you&apos;re in, it goes from build sessions to practice builds to real work for real companies.
+            </h2>
             <div className="pg-figure">
               <Path />
             </div>
           </div>
         </section>
 
-        <section className="pg-sec" id="apply" aria-labelledby="form-title">
-          <div className="ap-door">
-            {APPLICATIONS_OPEN ? (
-              <>
-                <h2 id="form-title" className="ap-line">
-                  Applications are open, and the whole thing lives on one Google Form.
-                </h2>
-                {/* [NEED: the Google Form's actual questions, so this line can name them.] */}
-                <p className="ap-note">It asks about you and the kind of work you want to do here, and Caleb, Tyler and Emily read every one.</p>
-                <a className="btn btn-primary ap-big" href={APPLY_FORM_URL} target="_blank" rel="noreferrer">
-                  Apply on Google Forms{" "}
-                  <span className="arrow" aria-hidden="true">
-                    &rarr;
-                  </span>
-                </a>
-              </>
-            ) : (
-              <>
-                <h2 id="form-title" className="ap-line">
-                  Applications open soon. Leave your email and you&apos;ll be the first to know.
-                </h2>
-                <NotifyForm />
-                <p className="ap-note">We&apos;ll only use your email to tell you when applications open.</p>
-              </>
-            )}
-          </div>
-        </section>
       </div>
     </Shell>
   );
