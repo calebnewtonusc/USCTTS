@@ -1,0 +1,300 @@
+/* /members: the club's story on one scroll value. MembersStory writes --p
+ * (0 to 1 across the runway) on .ms; each part reads its own window:
+ *   --a..--b  fades and rises in     --c..--d  fades and leaves
+ * so nothing pops in, and scrolling back plays it in reverse. */
+
+.tts .ms {
+  --p: 0;
+  position: relative;
+  /* Eight screens of runway: one per beat with room to read it. */
+  height: 800vh;
+}
+.tts .ms .k {
+  --t: clamp(0, calc((var(--p) - var(--a)) / (var(--b) - var(--a))), 1);
+  --o: clamp(0, calc((var(--p) - var(--c)) / (var(--d) - var(--c))), 1);
+  opacity: calc(var(--t) * (1 - var(--o)));
+}
+/* A drawn line: hidden until its window starts, then the dash runs along
+ * it. pathLength="1" needs the stroke in viewBox units, because
+ * non-scaling-stroke measures the dash in screen px (pages.css learned this
+ * on 2026-10-04). */
+.tts .ms .k.draw {
+  vector-effect: none;
+  opacity: calc(min(1, var(--t) * 40) * (1 - var(--o)));
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: calc(1 - var(--t));
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tts .ms .k.rise {
+    translate: 0 calc((1 - var(--t)) * 28px - var(--o) * 28px);
+  }
+  .tts .ms .k.grow {
+    transform-box: fill-box;
+    transform-origin: center;
+    scale: calc(0.82 + 0.18 * var(--t));
+  }
+  .tts .ms .k.fly {
+    translate: calc((1 - var(--t)) * var(--dx)) calc((1 - var(--t)) * var(--dy));
+  }
+}
+
+.tts .ms-grid {
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: center;
+}
+
+/* The opening line: absolutely placed over the first screen of the runway,
+ * so it scrolls away while the empty roster stays put. */
+.tts .ms-open {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 100vh;
+  z-index: 2;
+  pointer-events: none;
+}
+.tts .ms-h1 {
+  font-size: clamp(40px, 4.8vw, 72px);
+  line-height: 1.06;
+  letter-spacing: -0.022em;
+  max-width: 13ch;
+}
+
+.tts .ms-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding-block: 72px 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(55% 70% at 88% 10%, var(--sky-2), transparent 70%),
+    radial-gradient(35% 45% at 0% 100%, rgba(255, 204, 0, 0.12), transparent 70%),
+    var(--paper);
+}
+.tts .ms-copy {
+  position: relative;
+  height: 100%;
+}
+.tts .ms-beat {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0;
+  font-size: clamp(22px, 2.2vw, 30px);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  max-width: 20ch;
+}
+.tts .ms-b1 {
+  top: 22%;
+}
+.tts .ms-b2 {
+  top: 38%;
+  max-width: 24ch;
+}
+.tts .ms-b4 {
+  bottom: 10%;
+  font-size: clamp(20px, 1.8vw, 24px);
+  max-width: 30ch;
+}
+.tts .ms-b5 {
+  top: 16%;
+  font-size: 18px;
+  color: var(--ink-2);
+  max-width: 26ch;
+}
+/* The one big line, with no picture behind it to lean on. */
+.tts .ms-big {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding-inline: var(--gutter);
+  text-align: center;
+  font-size: clamp(44px, 6.6vw, 112px);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  pointer-events: none;
+}
+
+.tts .ms-fig {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+.tts .ms-svg {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  overflow: visible;
+}
+
+/* The roster recedes for the big line, then leaves for the mentors. */
+.tts .ms-roster {
+  --dim: clamp(0, calc((var(--p) - 0.46) / 0.04), 1);
+  --gone: clamp(0, calc((var(--p) - 0.57) / 0.04), 1);
+  opacity: calc((1 - 0.88 * var(--dim)) * (1 - var(--gone)));
+}
+.tts .ms-seat {
+  fill: rgba(255, 255, 255, 0.6);
+  stroke: var(--ink-3);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  vector-effect: non-scaling-stroke;
+}
+.tts .ms-tag {
+  font-family: var(--serif);
+  font-size: 13px;
+  fill: var(--ink-2);
+}
+.tts .ms-fill {
+  stroke: none;
+}
+.tts .ms-sky .ms-fill {
+  fill: var(--sky);
+}
+.tts .ms-sky .ms-head {
+  fill: var(--sky-2);
+}
+.tts .ms-gold .ms-fill {
+  fill: #fff6cc;
+}
+.tts .ms-gold .ms-head {
+  fill: #ffe580;
+}
+.tts .ms-paper .ms-fill {
+  fill: #fff;
+  stroke: var(--paper-3);
+}
+.tts .ms-paper .ms-head {
+  fill: var(--paper-3);
+}
+.tts .ms-pull {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 0.8;
+}
+.tts .ms-thread {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 1.4;
+}
+.tts .ms-ring {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.tts .ms-name {
+  font-family: var(--serif);
+  font-size: 14px;
+  fill: var(--ink);
+}
+.tts .ms-sub {
+  font-family: var(--serif);
+  font-size: 11.5px;
+  fill: var(--ink-2);
+}
+.tts .ms-cell {
+  fill: #fff;
+  stroke: var(--rule);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.tts .ms-mark {
+  filter: grayscale(1) brightness(0.25);
+  opacity: 0.85;
+}
+
+/* The close: one seat left open. */
+.tts .ms-close {
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding: clamp(80px, 10vw, 144px) var(--gutter);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: center;
+}
+.tts .ms-close h2 {
+  font-size: clamp(44px, 5.6vw, 88px);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+.tts .ms-close .btn {
+  margin-top: 32px;
+  min-height: 56px;
+  padding-inline: 28px;
+  font-size: 17px;
+}
+.tts .ms-close svg {
+  width: 100%;
+  height: auto;
+}
+.tts .ms-open-seat {
+  fill: #fff;
+  stroke: var(--red);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  vector-effect: non-scaling-stroke;
+}
+.tts .ms-you {
+  font-family: var(--serif);
+  font-size: 14px;
+  fill: var(--red);
+}
+
+@media (max-width: 899px) {
+  .tts .ms-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 0.42fr) minmax(0, 0.58fr);
+    gap: 8px;
+    align-items: stretch;
+  }
+  .tts .ms-open .ms-grid {
+    padding-top: 96px;
+    align-items: start;
+  }
+  .tts .ms-h1 {
+    font-size: 38px;
+  }
+  .tts .ms-stage {
+    padding-block: 72px 16px;
+  }
+  .tts .ms-beat,
+  .tts .ms-b4,
+  .tts .ms-b5 {
+    top: 8px;
+    bottom: auto;
+    font-size: 20px;
+    max-width: none;
+  }
+  .tts .ms-b4 {
+    font-size: 18px;
+  }
+  .tts .ms-big {
+    font-size: 42px;
+  }
+  .tts .ms-lab {
+    display: none;
+  }
+  .tts .ms-close {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+}
+.tts .ms-fillc-sky {
+  fill: var(--sky);
+}
+.tts .ms-fillc-gold {
+  fill: #fff6cc;
+}
