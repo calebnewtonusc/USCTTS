@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import Shell from "@/components/tts/Shell";
 import PartnerForm from "@/components/tts/PartnerForm";
 import "@/components/tts/pages.css";
@@ -21,12 +20,8 @@ export default function PartnerPage() {
                 Sponsor the club, speak to it, or hire from it.
               </h1>
               <p className="pg-lead">
-                Tell us which one and a little about it, and the people running the club will reply. If you&apos;re
-                bringing work you want AI to take on,{" "}
-                <Link className="link" href="/work-with-us#intake">
-                  the project form
-                </Link>{" "}
-                is the one you want.
+                Tell us which one and a little about it, like the date you have in mind or the roles you&apos;re hiring
+                for, and the people running the club will reply to the email you leave.
               </p>
             </div>
           </div>
