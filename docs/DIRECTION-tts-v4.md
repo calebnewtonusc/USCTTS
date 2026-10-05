@@ -150,3 +150,18 @@ DESIGN.md, XRAY.md, CLAUDE.md and 111 commits.
    - never scroll-jacked
    - no hard cuts, enforced by a check
    - 60fps or it's capped at "nice"
+
+## Colour, because grey points on paper read monotone (Caleb, 2026-10-05)
+
+"It seems pretty monotone ngl, I want it to be as cool as gavin's site while
+being as futuristic as lemma's." Each chapter owns a bold colour world. The
+shader interpolates continuously by scroll, so there are no seams:
+- the opening: a night navy field with gold streets, sky blue freeways and a
+  cardinal core at USC
+- the stream: a vivid sky blue
+- finding customers: a full cardinal field, with the businesses worth
+  reaching flaring gold
+- the week: warm cream and gold
+- Join: deep cardinal
+
+Text follows `grid.isDark`. The cursor paints light into the grid.
