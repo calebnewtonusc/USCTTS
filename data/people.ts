@@ -89,7 +89,6 @@ export const ADVISORS: Person[] = [
   { name: "Duncan Inganji", role: "Software Engineer", company: "Google", status: "advisor", photo: "/img/duncan_shot.jpeg", logo: "/img/logos/google.png" },
   { name: "Sagar Tiwari", role: "Stanford MBA, ex-McKinsey", company: "Stanford", status: "advisor", photo: "/img/sagar_shot.jpeg", logo: "/img/logos/stanford.png" },
   { name: "Andrew Laffoon", role: "Founder and CEO", company: "Mixbook", status: "advisor", photo: "/img/andrew_shot.jpeg", logo: "/img/logos/mixbook.png" },
-  { name: "Catherine Newton, M.D.", role: "Pediatrician", status: "advisor", photo: "/img/catherine_shot.jpg", logo: "/img/logos/kaiser.png" },
 ];
 
 // Fifteen people who started in this club. This is the proof section: the

@@ -96,6 +96,7 @@ const REST = MENTORS.slice(1);
 const MATTHEW = MENTORS.find((p) => p.name === "Matthew Kim") ?? MENTORS[1];
 
 const MARKS = [
+  { name: "Apple", src: "/tts/alumni/apple.svg", dx: -40, dy: 40 },
   { name: "Reddit", src: "/tts/alumni/reddit.svg", dx: -160, dy: -120 },
   { name: "Bloomberg", src: "/tts/alumni/bloomberg.svg", dx: 40, dy: -200 },
   { name: "Microsoft", src: "/tts/alumni/microsoft.svg", dx: 200, dy: -90 },
@@ -470,7 +471,9 @@ export default function MembersStory() {
               style={win(0.1, 0.16, 0.27, 0.31)}
             >
               Then Matthew Kim graduated, on his way to McKinsey, and handed the
-              whole thing to Caleb Newton and Tyler Larsen.
+              whole thing to Caleb Newton and Tyler Larsen. It used to build IT
+              solutions for companies, and they turned it into a club that
+              builds AI.
             </p>
             <p
               className="k rise ms-beat ms-b2"

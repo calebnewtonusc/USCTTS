@@ -17,7 +17,7 @@ export default function Footer() {
           <p className="footer-head">Students</p>
           <ul>
             <li>
-              <Link href="/apply">Apply to join</Link>
+              <Link href="/apply">Join TTS</Link>
             </li>
             <li>
               <Link href="/members">People</Link>

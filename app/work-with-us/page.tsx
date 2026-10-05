@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Shell from "@/components/tts/Shell";
 import TcLink from "@/components/tts/TcLink";
+import { CALENDLY_URL } from "@/lib/contact";
 import IntakeForm from "@/components/tts/IntakeForm";
 import "@/components/tts/pages.css";
 
@@ -167,14 +168,19 @@ export default function WorkWithUsPage() {
                 on.
               </p>
               <div className="pg-actions">
-                <a href="#intake" className="btn btn-primary">
-                  Tell us the problem{" "}
+                <a
+                  href={CALENDLY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary"
+                >
+                  Book 30 minutes with Caleb{" "}
                   <span className="arrow" aria-hidden="true">
-                    &darr;
+                    &rarr;
                   </span>
                 </a>
-                <a href="#examples" className="btn btn-secondary">
-                  See examples
+                <a href="#intake" className="btn btn-secondary">
+                  Or write it down
                 </a>
               </div>
             </div>

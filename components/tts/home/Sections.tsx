@@ -1,3 +1,4 @@
+import { CALENDLY_URL } from "@/lib/contact";
 import Link from "next/link";
 import MeshBand from "./MeshBand";
 import { ADVISORS, LEADERSHIP, type Person } from "@/data/people";
@@ -161,11 +162,12 @@ function Face({ p, note }: { p: Person; note: string }) {
 
 /* Caleb, 2026-10-04: "Keep mentors, but for alumni just put a bunch of
  * logos". One mark per company an alumnus works at now, or worked at, from
- * data/people.ts. Apple is left out until Susan Nyirenda is verified, and
+ * data/people.ts. Apple is in: Caleb verified Susan Nyirenda on 2026-10-05, and
  * NBCUniversal, Epic, Roxborough and USC Gould have no clean mark on disk yet.
  * Every mark is drawn in ink through a CSS mask, so nine brands read as one
  * row instead of nine colored tiles. The row drifts; reduced motion holds it. */
 const ALUMNI_MARKS = [
+  { name: "Apple", src: "/tts/alumni/apple.svg" },
   { name: "Reddit", src: "/tts/alumni/reddit.svg" },
   { name: "Bloomberg", src: "/tts/alumni/bloomberg.svg" },
   { name: "Microsoft", src: "/tts/alumni/microsoft.svg" },
@@ -264,12 +266,17 @@ export function Join() {
               keeps losing, and we&apos;ll tell you what AI can actually do
               about it.
             </p>
-            <Link href="/work-with-us#intake" className="btn btn-secondary">
-              Tell us what&apos;s eating your team&apos;s time{" "}
+            <a
+              href={CALENDLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary"
+            >
+              Book 30 minutes with Caleb{" "}
               <span className="arrow" aria-hidden="true">
                 &rarr;
               </span>
-            </Link>
+            </a>
           </div>
         </div>
       </div>

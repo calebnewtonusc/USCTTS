@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Shell from "@/components/tts/Shell";
-import ApplyForm from "@/components/tts/ApplyForm";
+import { APPLY_FORM_URL, APPLICATIONS_OPEN } from "@/lib/apply";
+import NotifyForm from "./NotifyForm";
 import "@/components/tts/pages.css";
 
 export const metadata: Metadata = {
   title: "Apply | Trojan Tech Solutions",
   description:
-    "Apply to Trojan Tech Solutions, USC's AI implementation lab. Learn to build AI in build sessions, then build it for real companies.",
+    "Join Trojan Tech Solutions, USC's AI implementation lab. Learn to build AI in build sessions, then build it for real companies.",
 };
 
 /* What happens after you apply, as one rail: the three things a member
@@ -150,7 +151,7 @@ export default function ApplyPage() {
               </p>
               <div className="pg-actions">
                 <a href="#apply" className="btn btn-primary">
-                  Start the application{" "}
+                  {APPLICATIONS_OPEN ? "How to apply" : "Hear when it opens"}{" "}
                   <span className="arrow" aria-hidden="true">
                     &darr;
                   </span>
@@ -167,19 +168,30 @@ export default function ApplyPage() {
         </section>
 
         <section className="pg-sec" id="apply" aria-labelledby="form-title">
-          <div className="pg-head">
-            <h2 id="form-title" className="pg-h2">
-              Six short questions
-            </h2>
-            <p>
-              The last one matters most. It asks for one thing you&apos;ve made
-              or want to make, and it only needs to be yours. You&apos;ll hear
-              back at your email whether it&apos;s a yes or a no.
-            </p>
-            {/* [NEED: the next cohort's application window and reply time. Neither is on record.] */}
-          </div>
-          <div className="pg-formwrap">
-            <ApplyForm />
+          <div className="ap-door">
+            {APPLICATIONS_OPEN ? (
+              <>
+                <h2 id="form-title" className="ap-line">
+                  Applications are open, and the whole thing lives on one Google Form.
+                </h2>
+                {/* [NEED: the Google Form's actual questions, so this line can name them.] */}
+                <p className="ap-note">It asks about you and the kind of work you want to do here, and Caleb, Tyler and Emily read every one.</p>
+                <a className="btn btn-primary ap-big" href={APPLY_FORM_URL} target="_blank" rel="noreferrer">
+                  Apply on Google Forms{" "}
+                  <span className="arrow" aria-hidden="true">
+                    &rarr;
+                  </span>
+                </a>
+              </>
+            ) : (
+              <>
+                <h2 id="form-title" className="ap-line">
+                  Applications open soon. Leave your email and you&apos;ll be the first to know.
+                </h2>
+                <NotifyForm />
+                <p className="ap-note">We&apos;ll only use your email to tell you when applications open.</p>
+              </>
+            )}
           </div>
         </section>
       </div>

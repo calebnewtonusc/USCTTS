@@ -1131,3 +1131,62 @@
     font-size: 12.5px;
   }
 }
+
+/* ---------- /apply: the door ---------- */
+.tts .ap-door {
+  max-width: 860px;
+}
+.tts .ap-line {
+  font-size: clamp(30px, 3.6vw, 52px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  max-width: 22ch;
+}
+.tts .ap-note {
+  margin-top: 16px;
+  font-size: 15px;
+  color: var(--ink-2);
+  max-width: 56ch;
+}
+.tts .ap-big {
+  margin-top: 28px;
+  min-height: 60px;
+  padding-inline: 32px;
+  font-size: 18px;
+}
+.tts .nf {
+  margin-top: 32px;
+  display: grid;
+  gap: 10px;
+  max-width: 620px;
+}
+.tts .nf-label {
+  font-weight: 500;
+  font-size: 15px;
+}
+.tts .nf-row {
+  display: flex;
+  gap: 10px;
+}
+.tts .nf-row .input {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: #fff;
+}
+.tts .nf-row .btn {
+  min-height: 52px;
+  flex: none;
+}
+@media (max-width: 599px) {
+  .tts .nf-row {
+    flex-direction: column;
+  }
+}
+.tts .nf-done {
+  margin-top: 32px;
+  padding: 20px 22px;
+  background: var(--sky);
+  border-left: 3px solid var(--red);
+  font-size: 18px;
+  max-width: 620px;
+}
