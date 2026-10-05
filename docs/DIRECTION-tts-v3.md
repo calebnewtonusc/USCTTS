@@ -107,3 +107,34 @@ never name TroyLabs or any club.
   world, the qualification machine running on real data
 - the people and the forms
 - the honest notes on what TTS refuses
+
+## The point of the site (Caleb, 2026-10-04)
+
+"Remember tts site isn't teaching gtm, it's a site for USC kids to see and
+think HOLY SHIT I NEEDA JOIN THIS." And: "WE gotta mog Clay & Perplexity
+official partners through Blue Modern Advisory, show their valuation or smth
+in a way that isn't arrogant but still makes ppl go DAMNNNNN."
+
+**The reader** is a USC student deciding which club gets their semester.
+Every screen should make them want in. Curriculum detail (the whiteboard's
+bullets, pipeline mechanics) is secondary: a glimpse, never a lesson.
+
+**What makes them want in:**
+- the tools: Clay and Perplexity, through Blue Modern Advisory
+- the companies: three YC companies a semester through T Combinator
+- the people: alumni at Apple, Bloomberg, Reddit and Capital One, and
+  advisors from McKinsey and Google
+- the work: you build real AI agents and GTM systems, not decks
+
+**The Clay and Perplexity moment.** This is now approved by Caleb, and it
+reverses round one's removal. The sourced wording: Blue Modern Advisory is
+an enterprise partner of both Clay and Perplexity (bluemodernadvisory.com,
+"The enterprise stack"), and TTS builds on them through BMA. Valuations:
+- Clay, $7.1B (Series D, September 2026)
+- Perplexity, $20B (September 2025)
+
+Show each with an "as of" note in small type. Make it a moment that lands
+quietly: two names, two numbers counting up, and one plain sentence such as
+"We build on Clay and Perplexity, through Blue Modern Advisory, an official
+partner of both." No "we're the best", no logos implying TTS itself is the
+partner, no summing the valuations into one big number.

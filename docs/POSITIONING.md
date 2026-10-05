@@ -95,3 +95,11 @@ Two more from the outreach, both load-bearing and neither sourced:
 
 A founder who checks one of these and finds nothing costs more than the line
 earns. They stay off both sites until a name is attached.
+
+## Clay and Perplexity, through BMA (approved by Caleb, 2026-10-04)
+
+Blue Modern Advisory is an enterprise partner of Clay and Perplexity
+(bluemodernadvisory.com, "The enterprise stack"). TTS builds on both through
+BMA. Valuations, always with their dates: Clay $7.1B (Series D, Sept 2026),
+Perplexity $20B (Sept 2025). Never say TTS itself is the partner.
+
