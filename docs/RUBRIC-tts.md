@@ -93,3 +93,17 @@ bruh, tell a story not a textbook."
 - Vary scale and placement on purpose, e.g. one huge line, then a whisper,
   then text the camera flies past. Never the same block in the same spot
   every screen.
+
+## No "X, Y" headline over a subtitle (Caleb, 2026-10-05)
+
+"X, Y / subtitle. SO AI SLOP." This is the hero formula on almost every
+generated site: a two-clause headline joined by a comma, with a grey
+paragraph under it explaining the headline. Examples on our own pages:
+- /work-with-us: "Tell us what's eating your team's time, and we'll set up
+  AI to take it on." with a lead paragraph under it
+- /apply: "Learn to build AI, then build it for a real company." with a
+  lead paragraph under it
+
+Openings do something instead. Show the thing, start the story mid-scene,
+or let one short line stand alone with the page's figure doing the
+explaining. No lead paragraph under a headline, anywhere on the site.
