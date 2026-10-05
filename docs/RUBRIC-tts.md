@@ -50,3 +50,29 @@ list. Each line is something he said or flagged in a screenshot that night.
 - tsc and eslint are clean
 - screenshots at 1440, 2360 and 390, looked at by a model that didn't
   build it
+
+## Every section must give a real reader something (Caleb, 2026-10-04, late)
+
+"So many things on this site provide value to NOONE looking at the site,
+especially a business that doesn't know much abt ai but wants help." He
+said this over the "388 open roles" beat.
+
+There are two readers, and each section names which one it serves:
+- a USC student deciding whether to join
+- a business owner who doesn't know much about AI but wants help
+
+Cut anything that serves neither. Internal pipeline stats, our GTM
+curriculum diagrams and run datasets are for us, not for them.
+
+Home becomes:
+1. The hero load-in: who we are, in one line
+2. Clay and Perplexity, through BMA
+3. The walkthrough: plain before-and-after examples a non-technical owner
+   recognizes, and a student would want to build, e.g. "your team answers
+   the same emails all week, and we set up AI to draft them", "your leads
+   live in a spreadsheet, and we set up a CRM that updates itself", "your
+   staff don't know how to use AI, and we teach them". Examples only, never
+   claimed as past client results unless they are in POSITIONING.md
+4. People: leadership, mentors, alumni marks
+5. Two doors: "Join TTS" for students, and "Tell us what's eating your
+   team's time" for businesses
