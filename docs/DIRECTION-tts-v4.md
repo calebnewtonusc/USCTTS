@@ -90,3 +90,63 @@ below.
   at least one beat has none.
 - Performance: one shader pass for the grid, instanced points, no shadows,
   and p99 under 17ms in a headed test.
+
+## What makes Gavin's site incredible, and what we take (studied 2026-10-05)
+
+Read from ~/code/personal/gavin-munroe: reference/STEAL.md, SCOPE.md,
+DESIGN.md, XRAY.md, CLAUDE.md and 111 commits.
+
+1. One idea organises everything, navigation included. "A flight between
+   the places it happened, drawn in the pixels of a Texas sunset." The
+   boarding pass, the split-flap board, the route rail 01 to 05 and "Flight
+   GM 20" are all the flight. Nothing on the page is decoration with no job.
+   Ours: the internet centred on LA, and work going out from USC on a grid
+   of light. The nav rail, the readouts and the transitions all speak it,
+   e.g. the rail reads as stops on a route.
+2. One rendering signature that makes everything his, 3D included. Every
+   scene, even the three.js car and the dunk, prints through the same Bayer
+   dither on a 2px grid with one colour ramp. That is why his 3D never looks
+   cheap: stylisation hides what realism would expose. Ours: everything
+   prints as points of light on paper, the week panel's blocks included.
+   They dissolve into the same points the grid is made of. One signature,
+   no exceptions.
+3. Simulation, not keyframes. The skywriter is a plane flown by a simulated
+   pilot (bank, stall, gusts), so the smoke wavers like a real hand-flown
+   line. The dunk is physics with joint solvers, and a probe fails any
+   overlap over 3cm. Small, honest imperfection reads as alive. Ours: the
+   agent light routes along the real street graph by shortest path, turns
+   at real corners and slows into them. The replies type with a human
+   cadence. Nothing moves on a straight lerp.
+4. Fidelity to the specific. His actual dunk clip rebuilt shot for shot,
+   the DJ he looks like, the verified crowd of 350, the 76 in chemistry.
+   Ours: real LA streets and real business types on the map, and the
+   example week holds the emails a Koreatown dental office really gets.
+   They're labelled examples, but they're specific, never "Lorem".
+5. Each chapter gets its own voice inside the one system. A camera mode per
+   place (point of view on the court, over the shoulder at the decks, a
+   chase cam on the drive) and its own flat colour. Ours:
+   - the opening: high above the basin
+   - the stream: low along a freeway at speed
+   - finding customers: straight down, the map as a map
+   - the week: hovering over one Koreatown block
+6. Toys that reward curiosity, with depth behind a gesture. The split-flap
+   motto spins when you point at it. The x-ray line: drag across a scene and
+   the right side shows the machinery (skeletons, camera rails, the pen path
+   against the flown track). Ours, and the best fit of anything here for an
+   AI implementation lab: an x-ray line on the week. Drag it and the right
+   side shows how each thing is built, the way a member would build it:
+   - the lead table with its enrichment columns
+   - the prompt behind the drafted reply
+   - the workflow graph behind the CRM sync
+   A student sees exactly what they'd learn, and an owner sees it's real.
+   Keep it quiet, a small "x-ray" word, so someone who never touches it
+   loses nothing.
+7. One spectacle, not ten. His globe is the trick and everything else stays
+   quiet so it lands. Ours: the grid is the spectacle. Panels and type stay
+   calm and crisp.
+8. The scroll rules practitioners use, all of which he keeps:
+   - one step, one visible change
+   - everything reversible
+   - never scroll-jacked
+   - no hard cuts, enforced by a check
+   - 60fps or it's capped at "nice"
