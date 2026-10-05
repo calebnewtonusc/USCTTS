@@ -22,21 +22,6 @@ const INITIATIVES = [
   },
 ] as const;
 
-const TRACKS = [
-  {
-    name: "Building",
-    job: "You work on engineering and AI agents, and you're the one who ships the tools.",
-  },
-  {
-    name: "Consulting",
-    job: "You do GTM engineering for real companies, so the lists, the enrichment, the outbound and the CRM.",
-  },
-  {
-    name: "Growing",
-    job: "You handle the marketing, content and design that get the work seen.",
-  },
-];
-
 /* One figure for the three initiatives, not three cards (Caleb on card
  * grids: "Header, subheader X6 screams SO AI"). A single hairline line runs
  * through all three; the live one, T Combinator's three companies, is in
@@ -83,22 +68,12 @@ function InitiativesFigure() {
 }
 
 export function WhatWeDo() {
-  const alumni = ALUMNI.length;
-  const advisors = ADVISORS.length;
   return (
     <section className="lines" aria-labelledby="do-title">
       <div className="lines-head">
         <h2 id="do-title" className="t-h2">
-          What we do
+          What you&apos;d actually do here
         </h2>
-        {/* The numbers in a sentence, not as stat tiles. Both counts come
-         * from data/people.ts. */}
-        <p className="t-lead">
-          {alumni} alumni now at Apple, Bloomberg, Reddit and Capital One, and{" "}
-          {advisors} advisors including McKinsey and Google. We took the club
-          over dormant, with nobody in it, and had a full roster three months
-          later.
-        </p>
       </div>
       <figure className="init-well">
         <InitiativesFigure />
@@ -118,16 +93,6 @@ export function WhatWeDo() {
           ))}
         </ul>
       </figure>
-      <h3 className="roster-sub">
-        Three tracks, and you pick one when you apply
-      </h3>
-      <ul className="plain-sentences">
-        {TRACKS.map((t) => (
-          <li key={t.name}>
-            <b>{t.name}.</b> {t.job}
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }
@@ -201,7 +166,7 @@ export function Roster() {
     <section className="roster" aria-labelledby="roster-title">
       <div className="roster-head">
         <h2 id="roster-title" className="t-h2">
-          Who runs it
+          Who you&apos;d be working with
         </h2>
         <p className="t-lead">
           Caleb Newton and Tyler Larsen are co-presidents, and Emily Zhao leads
@@ -238,8 +203,6 @@ export function Roster() {
 }
 
 export function Join() {
-  const names = LEADERSHIP.map((p) => p.name.split(" ")[0]);
-  const who = `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
   return (
     <section className="join" aria-labelledby="join-title">
       <MeshBand />
@@ -249,19 +212,11 @@ export function Join() {
         </h2>
         {/* [NEED: the next cohort's application date, and how long a reply
          * takes. Neither is on record, so neither is on the page.] */}
-        <ol className="join-steps">
-          <li>
-            <span>1</span>You send the form with your year, your track and one
-            thing you&apos;ve made.
-          </li>
-          <li>
-            <span>2</span>
-            {who} read every application.
-          </li>
-          <li>
-            <span>3</span>You hear back by email either way, yes or no.
-          </li>
-        </ol>
+        <p className="join-tracks">
+          When you apply you pick building, consulting or growing, and Caleb,
+          Tyler and Emily read every one.
+        </p>
+
         <div className="join-actions">
           <Link href="/apply" className="btn btn-primary">
             Apply to join{" "}

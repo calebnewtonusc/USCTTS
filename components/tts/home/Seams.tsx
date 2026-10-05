@@ -122,6 +122,48 @@ export function SeamToRun({ rows }: { rows: [string, number][] }) {
   );
 }
 
+/* ---------- A': the world's horizon becomes the partners' rule ----------
+ * The page ground rises over the world from the bottom like the land coming
+ * up, and the world's horizon, a hairline at the line where sky meets ground,
+ * slides down onto the rule the Clay and Perplexity row sits on. */
+export function SeamToPartners() {
+  const ground = useRef<HTMLDivElement>(null);
+  const line = useRef<HTMLDivElement>(null);
+  const ref = useSeam((p) => {
+    const g = ground.current;
+    const ln = line.current;
+    if (!g || !ln) return;
+    const H = window.innerHeight;
+    const rise = easeInOut3(prog(p, 0.05, 0.4));
+    const show = p > 0.001 && p < 0.999;
+    // The ground hides the world, then gets out of the way of the partners
+    // section, which sits on the same paper underneath it.
+    g.style.opacity = show ? String(1 - prog(p, 0.35, 0.55)) : "0";
+    g.style.clipPath = `inset(${((1 - rise) * H).toFixed(1)}px 0 0 0)`;
+    const target = boxOf(".partners-row");
+    const from = H * 0.46;
+    const to = target ? target.y : H * 0.3;
+    const t = easeInOut3(prog(p, 0.2, 0.75));
+    const y = from + (to - from) * t;
+    // It narrows from the full width of the world to the rule's own width,
+    // so it lands exactly on top of it.
+    const W = window.innerWidth;
+    const x0 = target ? target.x * t : 0;
+    const w = target ? W + (target.w - W) * t : W;
+    ln.style.transform = `translate3d(${x0.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+    ln.style.width = `${w.toFixed(1)}px`;
+    ln.style.opacity = show ? String(prog(p, 0.05, 0.25) * (1 - prog(p, 0.92, 1))) : "0";
+  });
+  return (
+    <div className="seam" ref={ref} aria-hidden="true">
+      <div className="seam-stage">
+        <div className="seam-ground" ref={ground} />
+        <div className="seam-horizon" ref={line} />
+      </div>
+    </div>
+  );
+}
+
 /* ---------- B: the ground grid becomes the whiteboard ----------
  * The world's lattice comes back as a ground plane seen from a low camera.
  * The camera pulls up until the plane faces the reader; the flattened sheet

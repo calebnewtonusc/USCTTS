@@ -135,12 +135,10 @@ const s = (d: string, faint = false): Mark => ({ kind: "stroke", d, faint });
 const STATIONS: Station[] = [
   {
     title: "foundation",
-    line: "Know exactly who you're for.",
+    line: "You figure out exactly who a company sells to.",
     ordered: false,
     items: [
-      "Write the ICP down: industry, size, buyer, pain.",
-      "Write the disqualifiers too, and honor them.",
-      "Name the signals that mean now: hiring, funding, a launch.",
+      "You write the ICP down, the industry, size, buyer and pain, along with the disqualifiers you'll actually honor and the signals that mean now, like hiring, funding or a launch.",
     ],
     // A target with an arrow in it, and one account struck off to the side.
     draw: (r) => [
@@ -162,13 +160,10 @@ const STATIONS: Station[] = [
   },
   {
     title: "qualification",
-    line: "Enrich before you qualify.",
+    line: "You enrich every account before you judge it.",
     ordered: true,
     items: [
-      "Scrape the raw accounts.",
-      "Summarise each one in two lines.",
-      "Score against the ICP, and cut.",
-      "Only then enrich emails, for who's left.",
+      "You scrape the raw accounts, summarize each one in two lines, score them against the ICP and cut, and only then enrich emails for whoever's left.",
     ],
     // Raw accounts pour into a funnel; a few come out, one is cut.
     draw: (r) => [
@@ -229,13 +224,10 @@ const STATIONS: Station[] = [
   },
   {
     title: "prompting",
-    line: "Make the model show its work.",
+    line: "You get the model to show its work.",
     ordered: false,
     items: [
-      "Criteria written out, and a reason on every verdict.",
-      "Return none, never invent.",
-      "Test on 50 records before the whole list.",
-      "Cheap model first. Escalate only the hard ones.",
+      "You write the criteria out with a reason on every verdict, have the model return none instead of inventing, test on 50 records before the whole list, and start with a cheap model, escalating only the hard ones.",
     ],
     // A prompt card: criteria with boxes, and the honest answer at the foot.
     draw: (r) => [
@@ -295,13 +287,10 @@ const STATIONS: Station[] = [
   },
   {
     title: "systems",
-    line: "Build them in this order.",
+    line: "You build the pieces in the order they run.",
     ordered: true,
     items: [
-      "Enrichment, so every row is complete.",
-      "Scoring, against the written criteria.",
-      "Routing, to the right owner.",
-      "Signals that restart it, and reporting on every stage.",
+      "You build enrichment first so every row is complete, then scoring against the written criteria, routing to the right owner, and the signals and reporting that keep it running.",
     ],
     // Five boxes and the arrows between them, snaking down the board.
     draw: (r) => {
@@ -365,12 +354,10 @@ const STATIONS: Station[] = [
   },
   {
     title: "compounding",
-    line: "Keep everything you build.",
+    line: "You keep everything, so the next build starts ahead.",
     ordered: false,
     items: [
-      "Save every prompt, table and play to a shared library.",
-      "The next project starts from the last one.",
-      "Write it up, so the next member starts ahead.",
+      "You save every prompt, table and play to a shared library and write it up, so the next project and the next member start from where you left off.",
     ],
     // Axes, a straight line for starting over, and the curve that compounds.
     draw: (r) => [
@@ -411,15 +398,16 @@ const STATIONS: Station[] = [
  *   heading wipes on      0.00 to 0.14
  *   its underline         0.08 to 0.22
  *   the one-line          0.16 to 0.28
- *   the drawing           0.24 to 0.66, its marks in equal slots, in order
- *   the bullets           0.62 to 0.97, each in its own slot
+ *   the drawing           0.24 to 0.90, its marks in equal slots, in order
+ *   (the bullets moved behind "How we teach it", closed by default:
+ *   Caleb, 2026-10-04, "Way too text heavy")
  *   the divider onward    0.90 to 1.00
  * guessed, then checked by eye at 25/50/75% on 2026-10-04. */
 const T = {
   head: [0, 0.14],
   under: [0.08, 0.22],
   line: [0.16, 0.28],
-  art: [0.24, 0.66],
+  art: [0.24, 0.9],
   items: [0.62, 0.97],
   div: [0.9, 1],
 } as const;
@@ -603,9 +591,8 @@ export default function Whiteboard() {
     >
       <div className="wbd-pin">
         <div className="wbd-head">
-          <p className="kicker">What you learn</p>
           <h2 id="wbd-title" className="t-h2">
-            Five stations, from a written ICP to a library that compounds.
+            What you&apos;ll learn to build
           </h2>
         </div>
         <ol className="wbd-board">
@@ -682,50 +669,6 @@ export default function Whiteboard() {
                     );
                   })}
                 </svg>
-                <ul className="wbd-items">
-                  {st.items.map((t, k) => {
-                    const w = slot(T.items, k, st.items.length, 1.2);
-                    // The mark draws in the first half of the slot, the words follow it.
-                    const mark = [w[0], w[0] + (w[1] - w[0]) * 0.55] as const;
-                    return (
-                      <li key={k} className="wbd-item">
-                        {st.ordered ? (
-                          <span
-                            className="wbd-n"
-                            data-a={win(mark)}
-                            data-s={i}
-                            data-k="wipe"
-                            aria-hidden="true"
-                          >
-                            {k + 1}
-                          </span>
-                        ) : (
-                          <svg
-                            className="wbd-tick"
-                            viewBox="0 0 20 18"
-                            aria-hidden="true"
-                          >
-                            <path
-                              d={a.ticks[k]}
-                              pathLength={1}
-                              className="wbd-ink"
-                              data-a={win(mark)}
-                              data-s={i}
-                              data-k="stroke"
-                            />
-                          </svg>
-                        )}
-                        <span
-                          data-a={win([w[0] + 0.02, w[1]])}
-                          data-s={i}
-                          data-k="fade"
-                        >
-                          {t}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
                 {i < STATIONS.length - 1 && (
                   <svg
                     className="wbd-div"
@@ -747,6 +690,17 @@ export default function Whiteboard() {
             );
           })}
         </ol>
+        <details className="wbd-more">
+          <summary>How we teach it</summary>
+          <ol className="wbd-more-list">
+            {STATIONS.map((st) => (
+              <li key={st.title}>
+                <b>{st.title[0].toUpperCase() + st.title.slice(1)}.</b>{" "}
+                {st.items.join(" ")}
+              </li>
+            ))}
+          </ol>
+        </details>
       </div>
     </section>
   );

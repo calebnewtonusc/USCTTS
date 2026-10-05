@@ -544,3 +544,243 @@
 .tts .spine > :last-child {
   padding-bottom: 50vh;
 }
+
+/* ---------- the horizon seam ---------- */
+.tts .seam-horizon {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: var(--line-w);
+  background: var(--line);
+  opacity: 0;
+}
+
+/* ---------- Clay and Perplexity, through BMA ----------
+ * Two names as type and two numbers, on the shared rule, then one sentence.
+ * Big enough to land, quiet enough not to shout: weight 400, ink, no accent. */
+.tts .partners {
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding: 18vh var(--gutter) 14vh;
+}
+.tts .partners-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: var(--line-w) solid var(--line);
+}
+.tts .partners-row li {
+  padding: 28px 32px 0 0;
+  display: grid;
+  gap: 6px;
+}
+.tts .partners-name {
+  font-size: clamp(18px, 1.6vw, 22px);
+  color: var(--ink-2);
+}
+.tts .partners-n {
+  font-size: clamp(64px, 10vw, 160px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.tts .partners-asof {
+  font-size: 14px;
+  color: var(--ink-3);
+}
+.tts .partners-line {
+  margin-top: 48px;
+  max-width: 40ch;
+  font-size: clamp(20px, 1.8vw, 26px);
+  line-height: 1.4;
+}
+@media (max-width: 767px) {
+  .tts .partners-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- the run, five beats ---------- */
+.tts .rb {
+  position: relative;
+}
+.tts .rb-pin {
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  height: calc(100svh - 64px);
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding: 32px var(--gutter);
+  display: flex;
+  flex-direction: column;
+}
+.tts .rb-kicker {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+.tts .rb-stage {
+  position: relative;
+  flex: 1;
+}
+.tts .rb-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 500ms cubic-bezier(0, 0, 0.2, 1),
+    visibility 0s linear 500ms;
+}
+.tts .rb-layer.is-on {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 500ms cubic-bezier(0, 0, 0.2, 1),
+    visibility 0s;
+}
+.tts .rb-beat {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 64px;
+  align-items: center;
+}
+.tts .rb-n {
+  display: block;
+  font-size: clamp(96px, 14vw, 220px);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+.tts .rb-line {
+  margin-top: 24px;
+  max-width: 30ch;
+  font-size: clamp(20px, 1.8vw, 26px);
+  line-height: 1.4;
+}
+.tts .rb-fig {
+  border: var(--line-w) solid var(--rule);
+  background: var(--well);
+  padding: 24px;
+}
+.tts .rb-grid {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.tts .rb-cell {
+  fill: var(--line);
+  stroke: none;
+  transition: fill 400ms cubic-bezier(0, 0, 0.2, 1), opacity 400ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .rb-co {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 0.8;
+}
+.tts .rb-off {
+  opacity: 0.12;
+}
+.tts .rb-quiet {
+  opacity: 0.3;
+}
+.tts .rb-live {
+  fill: var(--accent);
+}
+.tts .rb-bars ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.tts .rb-bars li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  gap: 4px 12px;
+  align-items: center;
+}
+.tts .rb-bar-label {
+  grid-column: 1 / -1;
+  font-size: 15px;
+  color: var(--ink-2);
+}
+.tts .rb-bar {
+  height: 12px;
+  background: var(--paper-2);
+}
+.tts .rb-bar span {
+  display: block;
+  height: 100%;
+  background: var(--line);
+  transition: width 500ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .rb-bars li.is-bad .rb-bar span {
+  background: var(--accent);
+}
+.tts .rb-bars li.is-bad .rb-bar-label {
+  color: var(--accent);
+}
+.tts .rb-bar-n {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.tts .rb-toggle {
+  margin-top: 24px;
+}
+.tts .rb-all {
+  width: 100%;
+  max-width: var(--wide);
+  margin: 0 auto;
+  padding: 0 var(--gutter) 40px;
+}
+.tts .rb-all summary {
+  cursor: pointer;
+  display: inline-block;
+  padding: 6px 0;
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .rb-all summary:hover,
+.tts .rb-all summary:focus-visible {
+  text-decoration-color: var(--ink);
+}
+.tts .rb-all table {
+  margin-top: 12px;
+  max-width: var(--narrow);
+}
+@media (max-width: 767px) {
+  .tts .rb-beat {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    align-content: center;
+  }
+  .tts .rb-fig {
+    padding: 12px;
+  }
+}
+.tts .rb-still .rb-pin {
+  position: static;
+  height: auto;
+}
+.tts .rb-still .rb-beat {
+  height: auto;
+  padding-block: 48px;
+}
+
+/* ---------- join: the tracks line ---------- */
+.tts .join-tracks {
+  margin-top: 28px;
+  max-width: 44ch;
+  font-size: 19px;
+  line-height: 1.5;
+  color: rgba(244, 240, 233, 0.86);
+}

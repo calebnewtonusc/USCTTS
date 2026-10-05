@@ -82,8 +82,8 @@
 .tts .wbd-art {
   display: block;
   width: 100%;
-  max-height: 24vh;
-  margin: 18px 0 22px;
+  max-height: 40vh;
+  margin: 24px 0 8px;
   overflow: visible;
 }
 .tts .wbd-label {
@@ -198,8 +198,8 @@
     padding-block: 24px 28px;
   }
   .tts .wbd-art {
-    max-height: 19vh;
-    margin-block: 12px 16px;
+    max-height: 30vh;
+    margin-block: 16px 8px;
   }
   .tts .wbd-items {
     gap: 8px;
@@ -251,4 +251,37 @@
   .tts .wbd-div {
     display: none;
   }
+}
+
+/* "How we teach it": the detail, closed by default (Caleb, 2026-10-04: "Way
+ * too text heavy"). The drawings carry the board; this is for whoever asks. */
+.tts .wbd-more {
+  margin-top: 20px;
+  max-width: 72ch;
+}
+.tts .wbd-more summary {
+  cursor: pointer;
+  display: inline-block;
+  padding: 6px 0;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .wbd-more summary:hover,
+.tts .wbd-more summary:focus-visible {
+  text-decoration-color: var(--ink);
+}
+.tts .wbd-more-list {
+  margin: 8px 0 0;
+  padding-left: 1.4em;
+  color: var(--ink-2);
+}
+.tts .wbd-more-list li {
+  padding: 8px 0;
+}
+.tts .wbd-more-list b {
+  font-weight: 500;
+  color: var(--ink);
 }

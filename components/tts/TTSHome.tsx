@@ -1,23 +1,12 @@
 import dataset from "@/public/tts/run/portfolio-board-2026-09-15.json";
 import Shell from "./Shell";
 import WorldScene, { type Numbers } from "./world/WorldScene";
-import RunPanels from "./home/RunPanels";
+import Partners from "./home/Partners";
+import RunBeats, { type RunBeatsData } from "./home/RunBeats";
 import Whiteboard from "./home/Whiteboard";
-import {
-  Join,
-  Roster,
-  TurnDown,
-  WhatWeDo,
-} from "./home/Sections";
-import {
-  SeamToBoard,
-  SeamToJoin,
-  SeamToRun,
-  SeamToSpine,
-  Spine,
-} from "./home/Seams";
-import type { IntakeRow } from "./run/Intake";
-import { audit, runPipeline, verdict, type Dataset } from "./run/pipeline";
+import { Join, Roster, TurnDown, WhatWeDo } from "./home/Sections";
+import { SeamToBoard, SeamToJoin, SeamToPartners, SeamToSpine, Spine } from "./home/Seams";
+import { audit, runPipeline, type Dataset } from "./run/pipeline";
 import "./world/world.css";
 import "./home/home.css";
 
@@ -27,57 +16,46 @@ const DATA = dataset as unknown as Dataset;
 
 // Computed on the server so the static HTML carries the finished result: an
 // animated number always ships its final value.
-const INITIAL_RUN = runPipeline(DATA, true);
+const RUN = runPipeline(DATA, true);
+const RUN_OFF = runPipeline(DATA, false);
 
-// Every number the world shows comes from the same run, so no figure on the
-// page is typed in by hand.
+// Every number the world and the run beats show comes from the same run, so
+// no figure on the page is typed in by hand.
 const NUMS: Numbers = {
-  companies: INITIAL_RUN.stages[0].count,
-  roles: INITIAL_RUN.stages[1].count,
-  kept: INITIAL_RUN.stages[2].count,
-  setAside: INITIAL_RUN.setAside?.listings ?? 0,
-  shortlist: INITIAL_RUN.shortlistTotal,
+  companies: RUN.stages[0].count,
+  roles: RUN.stages[1].count,
+  kept: RUN.stages[2].count,
+  setAside: RUN.setAside?.listings ?? 0,
+  shortlist: RUN.shortlistTotal,
 };
 
-// The readout that carries the world into the run panels: the same five
-// numbers the world's qualification station shows.
-const READOUT: [string, number][] = [
-  ["Companies on the board", NUMS.companies],
-  ["Open roles pulled", NUMS.roles],
-  ["Set aside by the check", NUMS.setAside],
-  ["Roles kept", NUMS.kept],
-  ["Shortlisted for a student team", NUMS.shortlist],
-];
-
-const INITIAL_INTAKE: IntakeRow[] = (() => {
+const BEATS: RunBeatsData = (() => {
   const aside = audit(DATA);
-  const rows: IntakeRow[] = [];
-  for (let n = 7; n >= 0; n--) {
-    const role = DATA.roles[(n * 61) % DATA.roles.length];
-    rows.push({
-      n,
-      title: role[2],
-      sector: aside.has(role[0])
-        ? ""
-        : DATA.sectors[DATA.companies[role[0]][0]],
-      days: role[1],
-      verdict: verdict(role, aside),
-      live: false,
-    });
-  }
-  return rows;
+  const flags = DATA.roles.map((r) => (aside.has(r[0]) ? 1 : r[4] === 1 ? 2 : 0));
+  const label = (r: { sector: string; flagged: boolean }) =>
+    r.flagged ? "The feed pointed at the wrong company" : r.sector ? `A company in ${r.sector}` : "A company";
+  const top3 = (rank: typeof RUN.ranking) =>
+    rank.slice(0, 3).map((r) => ({ label: label(r), open: r.open, bad: r.flagged }));
+  const list = DATA.roles
+    .filter((r) => !aside.has(r[0]) && r[4] === 1)
+    .sort((a, b) => b[1] - a[1])
+    .map((r) => ({ title: r[2], sector: DATA.sectors[DATA.companies[r[0]][0]], days: r[1] }));
+  return {
+    ...NUMS,
+    flags,
+    rankOn: top3(RUN.ranking),
+    rankOff: top3(RUN_OFF.ranking),
+    list,
+  };
 })();
 
 export default function TTSHome() {
   return (
     <Shell>
       <WorldScene nums={NUMS} />
-      <SeamToRun rows={READOUT} />
-      <RunPanels
-        initialRun={INITIAL_RUN}
-        initialIntake={INITIAL_INTAKE}
-        total={DATA.roles.length}
-      />
+      <SeamToPartners />
+      <Partners />
+      <RunBeats d={BEATS} />
       <SeamToBoard />
       <Whiteboard />
       <SeamToSpine />
