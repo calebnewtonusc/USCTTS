@@ -170,7 +170,7 @@ export function Join() {
       <MeshBand />
       <div className="join-inner">
         <h2 id="join-title" className="join-title">
-          Learn the machine. Then build it for real.
+          Join TTS, learn to build all of this, and build it for a real company.
         </h2>
         {/* [NEED: the next cohort's application date, and how long a reply
          * takes. Neither is on record, so neither is on the page.] */}

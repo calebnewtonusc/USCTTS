@@ -15,7 +15,7 @@ export default function ApplyPage() {
         <div className="pg-head">
           <p className="pg-kicker">Join</p>
           <h1 id="apply-title" className="pg-title">
-            Learn the machine. Then build it for real.
+            Join TTS, learn to build all of this, and build it for a real company.
           </h1>
           <p className="pg-lead">
             Six short questions. The last one matters most: one thing you&apos;ve made, or want to make. It only
