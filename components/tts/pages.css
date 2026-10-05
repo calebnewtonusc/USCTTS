@@ -1,0 +1,837 @@
+/* TTS subpages: about, people, build, meetings, for companies, apply,
+ * partner. Scoped under .tts and built on the tokens in tts.css, so these
+ * pages share the home page's ground, ink and one accent.
+ *
+ * Every figure is the same family: hairline ink strokes in a padded well
+ * inside a 1px frame, and cardinal for exactly one meaning, "this is running,
+ * or your browser just computed it".
+ *
+ * The scroll scenes are CSS scroll-driven animations, not JS: each step names
+ * a view timeline (--t1 to --t9) and the figure's parts animate against it.
+ * Where a browser lacks timeline-scope, under reduced motion and below 960px,
+ * none of it applies and every figure shows its finished state. */
+
+/* ---------- shared type ---------- */
+.tts .pg-kicker {
+  font-size: 15px;
+  color: var(--ink-2);
+  margin-bottom: 12px;
+}
+.tts .pg-title {
+  font-size: clamp(40px, 5.2vw, 72px);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+}
+.tts .pg-lead {
+  margin-top: 16px;
+  font-size: 18px;
+  line-height: 1.56;
+  color: var(--ink-2);
+  max-width: 40ch;
+}
+.tts .pg-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 32px;
+}
+
+/* ---------- the scene: copy steps beside one pinned figure ---------- */
+.tts .pg-scene {
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  display: grid;
+  grid-template-columns: 384px minmax(0, 1fr);
+  column-gap: 64px;
+  grid-auto-flow: row;
+}
+.tts .pg-step {
+  grid-column: 1;
+  min-height: 74vh;
+  padding-top: 20vh;
+}
+.tts .pg-step.is-first {
+  min-height: 82vh;
+  padding-top: clamp(40px, 7vh, 88px);
+}
+.tts .pg-step.is-last {
+  min-height: 0;
+  padding-bottom: 22vh;
+}
+.tts .pg-n {
+  display: block;
+  font-size: 15px;
+  color: var(--ink-2);
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.tts .pg-step h2 {
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.tts .pg-step p {
+  margin-top: 12px;
+  color: var(--ink-2);
+  max-width: 40ch;
+}
+.tts .pg-step .pg-list {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  border-bottom: 1px solid var(--rule);
+}
+.tts .pg-list li {
+  padding: 12px 0;
+  border-top: 1px solid var(--rule);
+}
+.tts .pg-list b {
+  display: block;
+  font-weight: 400;
+}
+.tts .pg-list span {
+  display: block;
+  font-size: 15px;
+  color: var(--ink-2);
+}
+.tts .pg-stage {
+  grid-column: 2;
+  grid-row: 1 / span 12;
+  align-self: start;
+  position: sticky;
+  top: 96px;
+  height: calc(100vh - 128px);
+  max-height: 780px;
+  min-height: 560px;
+  margin-top: 24px;
+}
+.tts .pg-well {
+  height: 100%;
+  border: 1px solid var(--rule);
+  background: var(--well);
+  padding: 10px;
+}
+.tts .pg-well > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+@media (max-width: 959px) {
+  .tts .pg-scene {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tts .pg-step,
+  .tts .pg-step.is-first {
+    min-height: 0;
+    padding-top: 56px;
+  }
+  .tts .pg-step.is-first {
+    padding-top: 32px;
+  }
+  .tts .pg-step.is-last {
+    padding-bottom: 0;
+  }
+  .tts .pg-stage {
+    grid-column: 1;
+    grid-row: 2;
+    position: static;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    margin-top: 32px;
+  }
+  .tts .pg-well > svg {
+    height: auto;
+  }
+}
+
+/* ---------- the figure family ---------- */
+.tts .f {
+  overflow: visible;
+}
+.tts .f * {
+  vector-effect: non-scaling-stroke;
+}
+.tts .f-ink {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.25px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tts .f-mute {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1px;
+  stroke-linecap: round;
+}
+.tts .f-dash {
+  stroke-dasharray: 4 4;
+}
+.tts .f-fill {
+  fill: var(--ink);
+  stroke: none;
+}
+.tts .f-paper {
+  fill: var(--well);
+}
+.tts .f-live {
+  fill: none;
+  stroke: var(--live);
+  stroke-width: 1.75px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tts .f-live-fill {
+  fill: var(--live);
+  stroke: none;
+}
+.tts .f-label {
+  font-family: var(--serif);
+  font-size: 2.5px;
+  fill: var(--ink-2);
+}
+.tts .f-label-ink {
+  fill: var(--ink);
+}
+.tts .f-big {
+  font-size: 3.4px;
+  fill: var(--ink);
+}
+/* A stroke that draws itself in: give the path pathLength="1". The dash has
+ * to be measured along the path, which non-scaling-stroke breaks (it turned
+ * the dash into 1px screen dashes), so these strokes are in viewBox units:
+ * 0.2 is the hairline band the craft measured on Lemma (0.12 to 0.25). */
+.tts .f .f-draw {
+  vector-effect: none;
+  stroke-width: 0.2;
+  stroke-dasharray: 1 1;
+}
+/* Labels in viewBox units shrink with the figure; under 600px they would
+ * render at about 8px, so the small ones go and the shapes carry it. */
+@media (max-width: 599px) {
+  .tts .f-label:not(.f-big) {
+    display: none;
+  }
+}
+
+/* Hot parts are off at rest; the finished state shows only the ones marked
+ * as the end of the story. */
+.tts .f [class*="s-hot"] {
+  opacity: 0;
+  visibility: hidden;
+}
+.tts .f .s-hot-end {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ---------- scroll-driven state, where the browser has it ---------- */
+@keyframes pg-on {
+  from {
+    opacity: 0.16;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pg-hot {
+  0% {
+    opacity: 0;
+    visibility: hidden;
+  }
+  22%,
+  78% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@keyframes pg-stay {
+  from {
+    opacity: 0;
+    visibility: hidden;
+  }
+  to {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+@keyframes pg-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes pg-focus {
+  0% {
+    opacity: 0.3;
+  }
+  30%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+@keyframes pg-rise {
+  from {
+    translate: 0 48px;
+  }
+  to {
+    translate: 0 -48px;
+  }
+}
+
+@supports (timeline-scope: --t1) and (animation-range: cover 0% cover 100%) {
+  @media (min-width: 960px) and (prefers-reduced-motion: no-preference) {
+    .tts .pg-scene {
+      timeline-scope: --t1, --t2, --t3, --t4, --t5, --t6, --t7, --t8, --t9;
+    }
+    .tts .pg-step.t1 {
+      view-timeline-name: --t1;
+    }
+    .tts .pg-step.t2 {
+      view-timeline-name: --t2;
+    }
+    .tts .pg-step.t3 {
+      view-timeline-name: --t3;
+    }
+    .tts .pg-step.t4 {
+      view-timeline-name: --t4;
+    }
+    .tts .pg-step.t5 {
+      view-timeline-name: --t5;
+    }
+    .tts .pg-step.t6 {
+      view-timeline-name: --t6;
+    }
+    .tts .pg-step.t7 {
+      view-timeline-name: --t7;
+    }
+    .tts .pg-step.t8 {
+      view-timeline-name: --t8;
+    }
+    .tts .pg-step.t9 {
+      view-timeline-name: --t9;
+    }
+
+    /* The step being read is at full ink; the rest recede. */
+    .tts .pg-step:not(.is-first) > * {
+      animation: pg-focus linear both;
+      animation-timeline: view();
+      animation-range: cover 5% cover 95%;
+    }
+
+    .tts .pg-scene [class*="s-on"],
+    .tts .pg-scene [class*="s-stay"] {
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-range: entry 40% cover 48%;
+    }
+    .tts .pg-scene [class*="s-hot"] {
+      animation: pg-hot linear both;
+      animation-range: cover 18% cover 82%;
+    }
+    .tts .pg-scene [class*="s-draw"] {
+      animation: pg-draw linear both;
+      animation-range: entry 40% cover 50%;
+    }
+    .tts .pg-scene .s-hot-end {
+      animation-name: pg-stay;
+      animation-range: entry 40% cover 48%;
+    }
+    .tts .pg-scene [class*="s-on"] {
+      animation-name: pg-on;
+    }
+    .tts .pg-scene [class*="s-stay"] {
+      animation-name: pg-stay;
+    }
+
+    .tts .pg-scene .s-on2,
+    .tts .pg-scene .s-hot2,
+    .tts .pg-scene .s-draw2,
+    .tts .pg-scene .s-stay2 {
+      animation-timeline: --t2;
+    }
+    .tts .pg-scene .s-on3,
+    .tts .pg-scene .s-hot3,
+    .tts .pg-scene .s-draw3,
+    .tts .pg-scene .s-stay3 {
+      animation-timeline: --t3;
+    }
+    .tts .pg-scene .s-on4,
+    .tts .pg-scene .s-hot4,
+    .tts .pg-scene .s-draw4,
+    .tts .pg-scene .s-stay4 {
+      animation-timeline: --t4;
+    }
+    .tts .pg-scene .s-on5,
+    .tts .pg-scene .s-hot5,
+    .tts .pg-scene .s-draw5,
+    .tts .pg-scene .s-stay5 {
+      animation-timeline: --t5;
+    }
+    .tts .pg-scene .s-on6,
+    .tts .pg-scene .s-hot6,
+    .tts .pg-scene .s-draw6,
+    .tts .pg-scene .s-stay6 {
+      animation-timeline: --t6;
+    }
+    .tts .pg-scene .s-on7,
+    .tts .pg-scene .s-hot7,
+    .tts .pg-scene .s-draw7,
+    .tts .pg-scene .s-stay7 {
+      animation-timeline: --t7;
+    }
+    .tts .pg-scene .s-on8,
+    .tts .pg-scene .s-hot8,
+    .tts .pg-scene .s-draw8,
+    .tts .pg-scene .s-stay8 {
+      animation-timeline: --t8;
+    }
+    .tts .pg-scene .s-on9,
+    .tts .pg-scene .s-hot9,
+    .tts .pg-scene .s-draw9,
+    .tts .pg-scene .s-stay9 {
+      animation-timeline: --t9;
+    }
+  }
+}
+
+/* Figures outside a scene draw in once, against their own view. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .tts .pg-view .f-draw {
+      animation: pg-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 45%;
+    }
+    .tts .pg-drift {
+      animation: pg-rise linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+/* ---------- a plain page section ---------- */
+.tts .pg-sec {
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  padding-top: clamp(88px, 10vw, 144px);
+}
+.tts .pg-sec:last-child {
+  padding-bottom: clamp(88px, 10vw, 160px);
+}
+.tts .pg-head {
+  max-width: var(--narrow);
+}
+.tts .pg-head h2 {
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.tts .pg-head p {
+  margin-top: 8px;
+  color: var(--ink-2);
+  max-width: 56ch;
+  font-size: 18px;
+}
+
+/* Copy beside a figure, the 384 + 64 grid. */
+.tts .pg-split {
+  display: grid;
+  grid-template-columns: 384px minmax(0, 1fr);
+  gap: 64px;
+  align-items: start;
+}
+.tts .pg-sec.is-top {
+  padding-top: clamp(24px, 4vh, 56px);
+}
+.tts .pg-split.is-hero {
+  align-items: center;
+  min-height: calc(100vh - 180px);
+}
+@media (max-width: 959px) {
+  .tts .pg-split,
+  .tts .pg-split.is-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+    min-height: 0;
+  }
+}
+.tts .pg-figure {
+  border: 1px solid var(--rule);
+  background: var(--well);
+  padding: 10px;
+}
+.tts .pg-figure > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---------- the closing band ---------- */
+.tts .pg-close {
+  margin-top: 48px;
+  background:
+    radial-gradient(
+      70% 120% at 85% 0%,
+      rgba(163, 22, 43, 0.2),
+      transparent 60%
+    ),
+    var(--ink);
+  color: var(--paper);
+}
+.tts .pg-close-inner {
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding: clamp(88px, 10vw, 140px) var(--gutter);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 32px;
+  align-items: end;
+}
+.tts .pg-close h2 {
+  font-size: clamp(36px, 4.6vw, 64px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  max-width: 16ch;
+}
+.tts .pg-close p {
+  margin-top: 16px;
+  color: rgba(244, 240, 233, 0.72);
+  max-width: 48ch;
+}
+.tts .pg-close .btn-primary {
+  background: var(--paper);
+  color: var(--ink);
+}
+.tts .pg-close .btn-secondary {
+  background: rgba(244, 240, 233, 0.12);
+  color: var(--paper);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .pg-close .btn-primary:hover {
+    background: #ffffff;
+  }
+  .tts .pg-close .btn-secondary:hover {
+    background: rgba(244, 240, 233, 0.2);
+  }
+}
+.tts .pg-close .btn:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--ink),
+    0 0 0 4px var(--paper);
+}
+@media (max-width: 767px) {
+  .tts .pg-close-inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- people ---------- */
+.tts .pg-lead-grid {
+  list-style: none;
+  margin: 32px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.tts .pg-cards {
+  list-style: none;
+  margin: 32px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+  gap: 32px 20px;
+}
+@media (max-width: 767px) {
+  .tts .pg-lead-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .tts .pg-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 12px;
+  }
+}
+.tts .pg-card {
+  position: relative;
+}
+.tts .pg-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border: 1px solid var(--rule);
+  background: var(--well);
+  padding: 6px;
+  overflow: hidden;
+}
+.tts .pg-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.02);
+  transition: filter 400ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .pg-card:hover .pg-photo img,
+.tts .pg-card:focus-within .pg-photo img {
+  filter: none;
+}
+.tts .pg-ph {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 40px;
+  color: var(--ink-3);
+}
+.tts .pg-name {
+  display: block;
+  margin-top: 12px;
+  font-size: 17px;
+  line-height: 1.3;
+}
+.tts .pg-lead-grid .pg-name {
+  font-size: 22px;
+}
+.tts .pg-role {
+  display: block;
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.tts .pg-at {
+  display: block;
+  margin-top: 6px;
+  font-size: 14.5px;
+  line-height: 1.3;
+  color: var(--ink);
+}
+.tts .pg-at::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 1px;
+  margin-right: 8px;
+  vertical-align: middle;
+  background: var(--ink-3);
+}
+.tts .pg-tag {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  border: 1px solid var(--rule);
+  padding: 3px 6px 2px;
+}
+/* A linked name: the whole card is the target, the name carries the line. */
+.tts .pg-card a.pg-name::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* ---------- the structure (build) ---------- */
+.tts .pg-rows {
+  list-style: none;
+  margin: 40px 0 0;
+  padding: 0;
+  border-bottom: 1px solid var(--rule);
+}
+.tts .pg-row {
+  display: grid;
+  grid-template-columns: 384px minmax(0, 1fr);
+  gap: 64px;
+  align-items: baseline;
+  padding: 22px 0;
+  border-top: 1px solid var(--rule);
+}
+.tts .pg-row-name {
+  font-size: clamp(22px, 2.2vw, 30px);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.tts .pg-row-job {
+  color: var(--ink-2);
+  max-width: 52ch;
+}
+.tts .pg-row-job a {
+  color: var(--ink);
+}
+@media (max-width: 767px) {
+  .tts .pg-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+.tts .pg-checks {
+  list-style: none;
+  margin: 32px 0 0;
+  padding: 0;
+  counter-reset: pgc;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 64px;
+}
+.tts .pg-checks li {
+  counter-increment: pgc;
+  padding: 18px 0 18px 44px;
+  border-top: 1px solid var(--rule);
+  position: relative;
+}
+.tts .pg-checks li::before {
+  content: counter(pgc, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 20px;
+  font-size: 14px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.tts .pg-checks b {
+  display: block;
+  font-weight: 400;
+  font-size: 18px;
+}
+.tts .pg-checks span {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink-2);
+  font-size: 15.5px;
+}
+.tts .pg-checks a {
+  color: var(--ink);
+}
+@media (max-width: 767px) {
+  .tts .pg-checks {
+    grid-template-columns: 1fr;
+  }
+}
+.tts .pg-table {
+  margin-top: 32px;
+  border-top: 1px solid var(--rule);
+}
+.tts .pg-table .ledger {
+  width: 100%;
+}
+
+/* ---------- forms with a live figure ---------- */
+.tts .pg-form {
+  display: grid;
+  grid-template-columns: minmax(0, 560px) minmax(0, 1fr);
+  gap: 64px;
+  align-items: start;
+  margin-top: 40px;
+}
+.tts .pg-form-fig {
+  position: sticky;
+  top: 112px;
+}
+@media (max-width: 959px) {
+  .tts .pg-form {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+  .tts .pg-form-fig {
+    position: static;
+    max-width: 360px;
+  }
+}
+/* A field row: dim until the browser says the answer is valid, then lit in
+ * the accent, because that verdict was just computed in your browser. */
+.tts .fr .fr-box {
+  fill: var(--well);
+  stroke: var(--ink-3);
+  stroke-width: 1.25px;
+  transition:
+    fill 220ms cubic-bezier(0, 0, 0.2, 1),
+    stroke 220ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .fr .fr-wire {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1px;
+  transition: stroke 220ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .fr .f-label {
+  transition: fill 220ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .fr.is-ok .fr-box,
+.tts .pg-form[data-state="sent"] .fr .fr-box {
+  fill: var(--live);
+  stroke: var(--live);
+}
+.tts .fr.is-ok .fr-wire,
+.tts .pg-form[data-state="sent"] .fr .fr-wire {
+  stroke: var(--live);
+  stroke-width: 1.5px;
+}
+.tts .fr.is-ok .f-label {
+  fill: var(--ink);
+}
+.tts .fo-out {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1.25px;
+  stroke-dasharray: 3 3;
+}
+.tts .fo-node {
+  fill: var(--well);
+  stroke: var(--ink);
+  stroke-width: 1.25px;
+}
+.tts .fo-break,
+.tts .fo-sent {
+  opacity: 0;
+  transition: opacity 220ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .pg-form[data-state="sent"] .fo-out {
+  stroke: var(--live);
+  stroke-dasharray: none;
+}
+.tts .pg-form[data-state="sent"] .fo-node {
+  fill: var(--live);
+  stroke: var(--live);
+}
+.tts .pg-form[data-state="sent"] .fo-sent,
+.tts .pg-form[data-state="failed"] .fo-break {
+  opacity: 1;
+}
+.tts .pg-form[data-state="failed"] .fo-out {
+  stroke: var(--ink);
+}
+.tts .pg-form[data-state="sending"] .fo-out {
+  stroke: var(--ink);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tts .pg-form[data-state="sending"] .fo-out {
+    animation: pg-flow 900ms linear infinite;
+  }
+}
+@keyframes pg-flow {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+.tts .pg-fig-cap {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--ink-2);
+  max-width: 44ch;
+}

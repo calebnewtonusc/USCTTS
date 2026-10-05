@@ -186,3 +186,63 @@ export function asText(values: Record<string, unknown>) {
     .join("\n");
 }
 
+
+export type FormState = "idle" | "sending" | "sent" | "failed";
+
+/* The live figure beside each form: one row per answer, lit in the accent
+ * once the same check the form runs on submit passes, because that verdict
+ * was just computed in the visitor's browser. The wires gather at one node,
+ * and the line out of it shows what the send actually did: flowing while it
+ * sends, solid when it landed, broken when it did not. */
+export function FormFigure({
+  rows,
+  ok,
+  dest,
+  caption,
+}: {
+  rows: { key: string; label: string }[];
+  ok: Record<string, boolean>;
+  dest: string;
+  caption: string;
+}) {
+  const top = 10;
+  const step = 10;
+  const h = top + rows.length * step + 34;
+  const nodeY = top + ((rows.length - 1) * step) / 2 + 2.5;
+  const done = rows.filter((r) => ok[r.key]).length;
+  return (
+    <figure className="pg-form-fig">
+      <div className="pg-figure">
+        <svg className="f" viewBox={`0 0 100 ${h}`} role="img" aria-label={`${done} of ${rows.length} answers ready`}>
+          <text className="f-label" x="6" y="5.5">
+            {done} of {rows.length} ready
+          </text>
+          {rows.map((r, i) => {
+            const y = top + i * step;
+            return (
+              <g key={r.key} className={`fr${ok[r.key] ? " is-ok" : ""}`}>
+                <rect className="fr-box" x="6" y={y} width="5" height="5" rx="0.6" />
+                <text className="f-label" x="15" y={y + 3.9}>
+                  {r.label}
+                </text>
+                <path className="fr-wire" d={`M46 ${y + 2.5} C66 ${y + 2.5} 66 ${nodeY} 80 ${nodeY}`} />
+              </g>
+            );
+          })}
+          <path className="fo-out" d={`M84 ${nodeY + 4} L84 ${h - 12}`} />
+          <circle className="fo-node" cx="84" cy={nodeY} r="4" />
+          <g className="fo-break">
+            <path className="f-ink" d={`M81 ${h - 24} L87 ${h - 18} M87 ${h - 24} L81 ${h - 18}`} />
+          </g>
+          <text className="f-label f-label-ink" x="94" y={h - 5} textAnchor="end">
+            {dest}
+          </text>
+          <text className="f-label fo-sent" x="90" y={nodeY + 1}>
+            Sent
+          </text>
+        </svg>
+      </div>
+      <figcaption className="pg-fig-cap">{caption}</figcaption>
+    </figure>
+  );
+}

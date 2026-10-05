@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors, FormFailure, asText } from "./forms";
+import { LEADERSHIP } from "@/data/people";
+import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors, FormFailure, asText, FormFigure, type FormState } from "./forms";
 
 // Values must match the enums in app/api/apply/route.ts exactly.
 const YEARS = ["Freshman", "Sophomore", "Junior", "Senior", "Graduate"] as const;
@@ -22,6 +23,33 @@ export default function ApplyForm() {
   const [sending, setSending] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+
+  // The same rules validate() enforces, per field, for the live figure.
+  const ok = {
+    name: Boolean(values.name.trim()),
+    email: EMAIL.test(values.email.trim()),
+    major: Boolean(values.major.trim()),
+    year: Boolean(values.year),
+    track: Boolean(values.track),
+    why: values.why.trim().length >= 20 && values.why.length <= 1000,
+  };
+  const state: FormState = done ? "sent" : sending ? "sending" : failure ? "failed" : "idle";
+  const readers = LEADERSHIP.map((p) => p.name.split(" ")[0]);
+  const figure = (
+    <FormFigure
+      rows={[
+        { key: "name", label: "Name" },
+        { key: "email", label: "Email" },
+        { key: "major", label: "Major" },
+        { key: "year", label: "Year" },
+        { key: "track", label: "Which half" },
+        { key: "why", label: "One thing you made" },
+      ]}
+      ok={ok}
+      dest={`Read by ${readers.slice(0, -1).join(", ")} and ${readers[readers.length - 1]}`}
+      caption="Each answer lights once it passes the same check the form runs when you send it."
+    />
+  );
 
   const validate = () => {
     const e: Errors<Key> = {};
@@ -50,6 +78,7 @@ export default function ApplyForm() {
 
   if (done) {
     return (
+      <div className="pg-form" data-state={state}>
       <div className="form-done" role="status">
         <h2 className="t-h3">Got it, {values.name.split(" ")[0]}.</h2>
         <p>
@@ -62,10 +91,13 @@ export default function ApplyForm() {
           </Link>
         </p>
       </div>
+      {figure}
+      </div>
     );
   }
 
   return (
+    <div className="pg-form" data-state={state}>
     <form className="form" onSubmit={submit} noValidate>
       <Field id="name" label="Name" error={errors.name}>
         <input className="input" autoComplete="name" value={values.name} onChange={(e) => set("name", e.target.value)} {...describe("name", false, errors.name)} />
@@ -93,5 +125,7 @@ export default function ApplyForm() {
         </button>
       </div>
     </form>
+    {figure}
+    </div>
   );
 }

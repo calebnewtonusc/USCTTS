@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors, FormFailure, asText } from "./forms";
+import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors, FormFailure, asText, FormFigure, type FormState } from "./forms";
 
 const SERVICES = [
   "An internal tool",
@@ -33,6 +33,32 @@ export default function IntakeForm() {
   const [failure, setFailure] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
+  // The same rules submit() enforces, per field, for the live figure.
+  const ok = {
+    orgName: Boolean(values.orgName.trim()),
+    orgDescription: values.orgDescription.trim().length >= 10,
+    services: values.services.length > 0,
+    timeline: Boolean(values.timeline),
+    contactName: Boolean(values.contactName.trim()),
+    contactEmail: EMAIL.test(values.contactEmail.trim()),
+  };
+  const state: FormState = done ? "sent" : sending ? "sending" : failure ? "failed" : "idle";
+  const figure = (
+    <FormFigure
+      rows={[
+        { key: "orgName", label: "Company" },
+        { key: "orgDescription", label: "The problem" },
+        { key: "services", label: "Kind of work" },
+        { key: "timeline", label: "When" },
+        { key: "contactName", label: "Your name" },
+        { key: "contactEmail", label: "Your email" },
+      ]}
+      ok={ok}
+      dest="First reply: yes or no"
+      caption="Each answer lights once it passes the same check the form runs when you send it."
+    />
+  );
+
   const toggleService = (s: Service) =>
     set("services", values.services.includes(s) ? values.services.filter((x) => x !== s) : [...values.services, s]);
 
@@ -61,6 +87,7 @@ export default function IntakeForm() {
 
   if (done) {
     return (
+      <div className="pg-form" data-state={state}>
       <div className="form-done" role="status">
         <h2 className="t-h3">Thanks. It is with us.</h2>
         <p>
@@ -73,10 +100,13 @@ export default function IntakeForm() {
           </Link>
         </p>
       </div>
+      {figure}
+      </div>
     );
   }
 
   return (
+    <div className="pg-form" data-state={state}>
     <form className="form" onSubmit={submit} noValidate>
       <Field id="orgName" label="Company or organization" error={errors.orgName}>
         <input className="input" autoComplete="organization" value={values.orgName} onChange={(e) => set("orgName", e.target.value)} {...describe("orgName", false, errors.orgName)} />
@@ -105,5 +135,7 @@ export default function IntakeForm() {
         </button>
       </div>
     </form>
+    {figure}
+    </div>
   );
 }

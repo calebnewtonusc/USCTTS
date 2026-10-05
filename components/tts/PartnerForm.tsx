@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors, FormFailure, asText } from "./forms";
+import { Choices, describe, EMAIL, Field, focusFirstError, postJson, useForm, type Errors, FormFailure, asText, FormFigure, type FormState } from "./forms";
 
 // Values must match the enum in app/api/partner/route.ts exactly.
 const TYPES = [
@@ -21,6 +21,30 @@ export default function PartnerForm() {
   const [sending, setSending] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+
+  // The same rules submit() enforces, per field, for the live figure.
+  const ok = {
+    partnerType: Boolean(values.partnerType),
+    orgName: Boolean(values.orgName.trim()),
+    contactName: Boolean(values.contactName.trim()),
+    email: EMAIL.test(values.email.trim()),
+    description: values.description.trim().length >= 10,
+  };
+  const state: FormState = done ? "sent" : sending ? "sending" : failure ? "failed" : "idle";
+  const figure = (
+    <FormFigure
+      rows={[
+        { key: "partnerType", label: "What you have in mind" },
+        { key: "orgName", label: "Company" },
+        { key: "contactName", label: "Your name" },
+        { key: "email", label: "Email" },
+        { key: "description", label: "Tell us more" },
+      ]}
+      ok={ok}
+      dest="A reply from the people running it"
+      caption="Each answer lights once it passes the same check the form runs when you send it."
+    />
+  );
 
   const submit = async (ev: React.FormEvent) => {
     ev.preventDefault();
@@ -42,6 +66,7 @@ export default function PartnerForm() {
 
   if (done) {
     return (
+      <div className="pg-form" data-state={state}>
       <div className="form-done" role="status">
         <h2 className="t-h3">Thanks, {values.contactName.split(" ")[0]}.</h2>
         <p>We have it, and we will reply to {values.email.trim()}.</p>
@@ -51,10 +76,13 @@ export default function PartnerForm() {
           </Link>
         </p>
       </div>
+      {figure}
+      </div>
     );
   }
 
   return (
+    <div className="pg-form" data-state={state}>
     <form className="form" onSubmit={submit} noValidate>
       <Choices name="partnerType" legend="What did you have in mind" options={TYPES.map((t) => ({ value: t.value, label: t.label }))} value={values.partnerType} onChange={(v) => set("partnerType", v)} error={errors.partnerType} />
       <Field id="orgName" label="Company or organization" error={errors.orgName}>
@@ -76,5 +104,7 @@ export default function PartnerForm() {
         </button>
       </div>
     </form>
+    {figure}
+    </div>
   );
 }
