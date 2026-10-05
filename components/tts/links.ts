@@ -16,3 +16,6 @@
 export const TC_PENDING_ORIGIN = "https://tcombinator-production.up.railway.app";
 export const TC_ORIGIN = process.env.NEXT_PUBLIC_TC_ORIGIN ?? "";
 export const TC_URL: string | null = TC_ORIGIN ? "/tc" : null;
+
+// The club's Instagram, used by the footer and home's student door.
+export const INSTAGRAM_URL = "https://www.instagram.com/trojantechsolutions";

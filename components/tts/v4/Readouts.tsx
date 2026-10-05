@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { clamp, prog, smooth } from "../engine/math";
-import { BEAT, beatAt, glideTo, onFrame, P, store, travelT } from "./choreo";
+import { glideTo, onFrame, P, phaseAt, store, travelT, WEEK } from "./choreo";
 import { KOREATOWN } from "../grid/store";
 import { attachFlap } from "./flap";
 
@@ -41,8 +41,8 @@ const STOPS: Stop[] = [
       return e ? topOf(e) + e.offsetHeight / 2 - window.innerHeight / 2 : 0;
     },
   },
-  { label: "Koreatown", at: () => weekAt(BEAT.gtm[0] + 0.04) },
-  { label: "Friday, 3pm", at: () => weekAt(0.97) },
+  { label: "Koreatown", at: () => weekAt(WEEK.heat[1]) },
+  { label: "The machine", at: () => weekAt(WEEK.film[0] + 0.05) },
   {
     label: "Your turn",
     at: () => {
@@ -55,17 +55,21 @@ const STOPS: Stop[] = [
 function status(): string {
   if (P.join > 0.35) return "your turn";
   if (P.weekIn > 0.6) {
-    const b = beatAt(P.week);
-    if (b === "intro") return "example: a dental office in Koreatown";
-    if (b === "travel") {
+    // The mono labels name the skill or the tool (SCRIPT-v5).
+    const ph = phaseAt(P.week);
+    if (ph === "intro") return "example: a dental office in Koreatown";
+    if (ph === "travel") {
       const left = KTOWN_KM * (1 - travelT());
       return left > 0.05 ? `en route to Koreatown, ${left.toFixed(1)} km` : "arrived in Koreatown";
     }
-    if (b === "gtm") return "finding who's worth reaching";
-    if (b === "email") return "drafting replies";
-    if (b === "sheet") return "moving the sheet into a CRM";
-    if (b === "teach") return "teaching the front desk";
-    return "week clear";
+    if (ph === "dive") return "into one point of light";
+    if (ph === "tray") return "finding leads, in Clay";
+    if (ph === "sorter") return "qualifying, with Perplexity research";
+    if (ph === "typewriter") return "prompting";
+    if (ph === "mailbox") return "sent";
+    if (ph === "blocks") return "the CRM";
+    if (ph === "pullback") return "teaching the office";
+    return "back on the map";
   }
   if (P.partners > 0.25) return "building on Clay and Perplexity, through BMA";
   if (store.load < 1) return `assembling LA, ${Math.round(store.load * 100)}%`;
@@ -73,8 +77,8 @@ function status(): string {
   // going out to businesses across LA. The status line says it as it runs.
   if (store.stream > 0.55) return "sending work out to LA: automations, CRMs, training";
   if (store.stream > 0.04) return "students at USC, streaming in on the 110 and the 10";
-  if (store.pulse < 1) return "signal out from USC";
-  return "live";
+  // What the club is, to a student, in the readout (STUDENT-POV, 1).
+  return "students who build real AI for real LA businesses";
 }
 
 const clock = (secs: boolean) =>

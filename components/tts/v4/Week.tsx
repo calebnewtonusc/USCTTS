@@ -1,176 +1,90 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { clamp, easeInOut3, lerp, prog, smooth } from "../engine/math";
 import {
-  clamp,
-  easeInOut3,
-  easeOut3,
-  lerp,
-  prog,
-  rng,
-  smooth,
-} from "../engine/math";
-import { attachFlap } from "./flap";
-import { attachMachine } from "./machine";
-import { BEAT, beatAt, kick, onFrame, P, store } from "./choreo";
-import XrayViews from "./Xray";
-import {
-  ASK,
-  BLOCKS,
-  DAYS,
-  HOURS,
-  INBOX,
-  LEADS,
-  LESSON,
-  REPLY,
+  FILM_FRAMES,
+  filmShare,
+  kick,
+  onFrame,
+  P,
   STAGES,
-  KEPT_HOURS,
-  TOTAL_HOURS,
-  type Kind,
-} from "./weekData";
+  WEEK,
+  type Stage,
+} from "./choreo";
+import XrayViews from "./Xray";
+import { attachXray } from "./xrayLine";
 
 /*
- * The week (DIRECTION-tts-v4.md, beat 3). Reader: a business owner who
- * doesn't know much about AI, and a student deciding whether this is what
- * they want to build. One example week, packed, and the AI work as the
- * character: it leaves USC on the grid, arrives in Koreatown, and each thing
- * it builds dissolves a set of blocks into the grid's own points of light,
- * until Friday afternoon is empty.
+ * The dive and the machine (docs/SCRIPT-v5.md, beats 4 to 6). The grid is
+ * the city and the clay machine is what happens inside one point of it. The
+ * camera dives through the Koreatown point, its glow fills the screen in the
+ * film's ground colour, and the film's first frame, the same colour, racks
+ * into focus. The film plays under the scroll, one stage per caption. At the
+ * end it pulls back to a point of light on the grid, and the rain begins.
  *
- * One scroll value drives all of it, P.week from choreo.ts. Every state
- * below is a pure function of that value, so scrolling back rebuilds the
- * week exactly.
+ * Reader: a USC student. They're the main character; the dental office is
+ * the client, and an example. One scroll value drives all of it, P.week.
  */
 
-const BEAT_OF: Record<Kind, readonly [number, number]> = {
-  gtm: BEAT.gtm,
-  email: BEAT.email,
-  sheet: BEAT.sheet,
-  teach: BEAT.teach,
-};
+/* The film. FILM_READY flips when the Blender render lands in
+ * public/tts/machine/ (machine.mp4 with every frame a keyframe, machine.webm,
+ * poster.jpg, stages.json, and a portrait cut if there is one). Until then a
+ * placeholder of the same length, 300 frames at 30 fps, stands in, so no
+ * request ever 404s. */
+const FILM_READY = false;
+const FILM = FILM_READY
+  ? {
+      sources: [
+        { src: "/tts/machine/machine.mp4", type: "video/mp4" },
+        { src: "/tts/machine/machine.webm", type: "video/webm" },
+      ],
+      portrait: [] as { src: string; type: string }[],
+      poster: "/tts/machine/poster.jpg",
+      stages: "/tts/machine/stages.json",
+    }
+  : {
+      sources: [
+        { src: "/tts/machine-placeholder/placeholder.mp4", type: "video/mp4" },
+      ],
+      portrait: [] as { src: string; type: string }[],
+      poster: "/tts/machine-placeholder/placeholder.jpg",
+      stages: "",
+    };
 
-/* Each kind's blocks go in the order the week reads, staggered over the
- * second half of their beat, after the panel has shown what replaced them. */
-const WINDOWS = (() => {
-  const byKind: Record<Kind, number[]> = {
-    gtm: [],
-    email: [],
-    sheet: [],
-    teach: [],
-  };
-  BLOCKS.forEach((x, i) => {
-    if (!x.keep) byKind[x.kind].push(i);
-  });
-  // Blocks the work doesn't take stay for the whole week.
-  const out: [number, number][] = BLOCKS.map(() => [9, 10]);
-  (Object.keys(byKind) as Kind[]).forEach((k) => {
-    const [a, z] = BEAT_OF[k];
-    const s0 = a + (z - a) * 0.3;
-    const span = (z - a) * 0.62;
-    const ids = byKind[k];
-    ids.forEach((id, j) => {
-      const start = s0 + (span * 0.55 * j) / Math.max(1, ids.length - 1);
-      out[id] = [start, start + span * 0.45];
-    });
-  });
-  return out;
-})();
-
-/* A person types in bursts: a beat after a comma, a longer one after a
- * full stop. And they slip: "Thrusday" goes in, sits there a moment, gets
- * backspaced and fixed. The reply is a list of screen states, each with
- * the time it took to get there, and the scroll walks that list, so the
- * slip plays backward when you scroll back. */
-const TYPING = (() => {
-  const states: string[] = [];
-  const weights: number[] = [];
-  const add = (str: string, w: number) => {
-    states.push(str);
-    weights.push(w);
-  };
-  const weigh = (ch: string) =>
-    ch === "," ? 4 : ch === "." || ch === "?" ? 7 : ch === " " ? 1.3 : 1;
-  const fix = REPLY.indexOf("Thursday") + 2;
-  for (let i = 1; i <= fix; i++) add(REPLY.slice(0, i), weigh(REPLY[i - 1]));
-  const slip = "rusday";
-  for (let i = 1; i <= slip.length; i++) add(REPLY.slice(0, fix) + slip.slice(0, i), 1);
-  // the pause where they notice, then the backspaces
-  for (let i = slip.length - 1; i >= 0; i--)
-    add(REPLY.slice(0, fix) + slip.slice(0, i), i === slip.length - 1 ? 9 : 0.55);
-  for (let i = fix + 1; i <= REPLY.length; i++) add(REPLY.slice(0, i), weigh(REPLY[i - 1]));
-  const total = weights.reduce((x, y) => x + y, 0);
-  let acc = 0;
-  const at = weights.map((w) => (acc += w) / total);
-  return { states, at };
-})();
-
-/* A little physics for each block as it lets go: it lifts a few pixels,
- * then falls under something like gravity, drifting and turning by its own
- * amount, so no two leave the same way. Seeded, so it's the same every load. */
-const FALL = (() => {
-  const r = rng(20261005);
-  return BLOCKS.map(() => ({ vx: (r() - 0.5) * 22, rot: (r() - 0.5) * 14 }));
-})();
-
-/* The story, one running line at a time (RUBRIC: never title plus
- * subtitle). Windows are on the week's progress, nudged earlier by the
- * arrival so the first line is already there when the panel lands. The
- * spreadsheet beat has no words: the rows settling into cards say it. */
-const LINES = [
+/* One line per stage, verbatim from the script, each with its mono label
+ * naming the skill or the tool. The mailbox has no words: the flag pops. */
+const CAPTIONS: { stage: Stage; line: string; label?: string; at: string }[] = [
   {
-    a: -0.07,
-    b: 0.11,
-    size: "huge",
-    text: "Say you run a dental office in Koreatown, and every hour of your week is already spoken for.",
+    stage: "tray",
+    line: "First you find every business nearby that could use them.",
+    label: "finding leads, in Clay",
+    at: "is-bl is-big",
   },
   {
-    a: 0.1,
-    b: 0.19,
-    size: "small",
-    text: "So a few of us head over from USC.",
+    stage: "sorter",
+    line: "Then you decide who's actually worth reaching, and teach the AI why.",
+    label: "qualifying, with Perplexity research",
+    at: "is-tr is-mid",
   },
   {
-    a: 0.19,
-    b: 0.37,
-    size: "mid",
-    fly: true,
-    text: "First we find who's actually worth reaching, and most of them are a few blocks away.",
+    stage: "typewriter",
+    line: "It drafts the first email. You fix it until it sounds like a person.",
+    label: "prompting",
+    at: "is-bl is-mid",
   },
   {
-    a: 0.38,
-    b: 0.57,
-    size: "small",
-    text: "Then the emails you answer every single day start writing themselves.",
+    stage: "blocks",
+    line: "Every reply lands in a CRM you wired up, so nothing gets lost.",
+    label: "the CRM",
+    at: "is-tr is-small",
   },
   {
-    a: 0.76,
-    b: 0.92,
-    size: "mid",
-    text: "And we don't leave until your front desk can run all of it without us.",
+    stage: "pullback",
+    line: "Then you teach the office to run it without you.",
+    at: "is-tl is-big",
   },
-  {
-    a: 0.9,
-    b: 1.25,
-    size: "huge",
-    text: "So it's Friday afternoon, and there's nothing on it.",
-  },
-] as const;
-
-/* Which station is open: each opens as the records from the one before
- * land in it, and stays open until the next one takes over. */
-const OPEN = [
-  { a: -1, b: BEAT.email[0] },
-  { a: BEAT.email[0], b: BEAT.sheet[0] },
-  { a: BEAT.sheet[0], b: BEAT.teach[0] },
-  { a: BEAT.teach[0], b: 2 },
 ];
-
-/* Where the "now" line sits: Monday 9am at the start, Friday 3pm at the end. */
-const NOW_END = 4 * 8 + 6;
-
-const setText = (el: HTMLElement | null, s: string) => {
-  if (el && el.textContent !== s) el.textContent = s;
-};
 
 export default function Week() {
   const root = useRef<HTMLElement>(null);
@@ -181,595 +95,161 @@ export default function Week() {
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    const all = <T extends HTMLElement>(s: string) => [
-      ...el.querySelectorAll<T>(s),
-    ];
-    const one = <T extends HTMLElement>(s: string) => el.querySelector<T>(s);
+    const intro = el.querySelector<HTMLElement>(".w5-intro");
+    const glow = el.querySelector<HTMLElement>(".w5-glow");
+    const film = el.querySelector<HTMLElement>(".w5-film");
+    const box = el.querySelector<HTMLElement>(".w4-film");
+    const caps = [...el.querySelectorAll<HTMLElement>(".w5-cap")];
 
-    const panel = one(".w4-panel");
-    const blocks = all(".w4-blk");
-    const lines = all(".w4-line");
-    const stations = all(".w4-st");
-    const stBodies = all(".w4-st-body");
-    const stCounts = all(".w4-st-n");
-    const sideEl = one(".w4-side");
-    const stageEl = one(".w4-stage");
-    const machine = stageEl ? attachMachine(stageEl, reduced) : () => {};
-    const leads = all(".w4-lead");
-    const rows = all(".w4-mail");
-    const reply = one(".w4-reply-text");
-    const replyTag = one(".w4-reply-tag");
-    const cards = all(".w4-card");
-    const stageHeads = all(".w4-col");
-    const sheetName = one(".w4-sheetname");
-    const steps = all(".w4-step");
-    const meter = one(".w4-meter");
-    const now = one(".w4-now");
-    const free = one(".w4-free");
-    const views = all(".xr-view");
-    const lane = one(".w4-lane");
-    let flyPx = 90;
-    const measureLane = () => {
-      // The flying line travels a fifth of its lane, so on a phone it
-      // never crosses into the panel.
-      flyPx = Math.min(90, (lane?.clientHeight ?? 450) * 0.2);
-    };
-    measureLane();
-
-    const gone = blocks.map(() => false);
-    const lastK = blocks.map(() => -1);
-    let view = "";
-
-    /* ---- the x-ray line (after Gavin's assets/xray.js) ---- */
-    const body = one(".w4-body");
-    const word = one<HTMLButtonElement>(".w4-xword");
-    const xline = one(".xr-line");
-    const grip = one(".xr-grip");
-    const side = one(".xr-side");
-    /* The manim clips behind each beat (public/tts/manim, manim/README.md).
-     * Nothing is requested until the x-ray first opens, so a visitor who
-     * never taps the word downloads none of them. They never play on
-     * their own: the beat's scroll progress sets their time. Under
-     * reduced motion each one is its poster, the finished frame. */
-    let clipsLoaded = false;
-    const clipEls: HTMLElement[] = [];
-    // Only the beat on screen: its view's clip box is filled the first
-    // time the x-ray is open on that beat (review 3: one beat's bytes, not
-    // all five).
-    const loadClips = () => {
-      clipsLoaded = true;
-      el.querySelectorAll<HTMLElement>(".xr-view.is-on .xr-clip:not([data-loaded])").forEach((box) => {
-        box.dataset.loaded = "1";
-        for (const name of (box.dataset.clips ?? "").split(" ").filter(Boolean)) {
-          let m: HTMLElement;
-          if (reduced) {
-            const img = document.createElement("img");
-            img.src = `/tts/manim/${name}.png`;
-            img.alt = "";
-            m = img;
-          } else {
-            const v = document.createElement("video");
-            v.muted = true;
-            v.playsInline = true;
-            v.preload = "auto";
-            v.poster = `/tts/manim/${name}.png`;
-            // HEVC first: Safari takes it, everyone else skips to the WebM.
-            const mov = document.createElement("source");
-            mov.src = `/tts/manim/${name}.mov`;
-            mov.type = 'video/mp4; codecs="hvc1"';
-            const webm = document.createElement("source");
-            webm.src = `/tts/manim/${name}.webm`;
-            webm.type = "video/webm";
-            v.append(mov, webm);
-            // The scroll loop only runs on scroll, so a clip that finishes
-            // loading while the page sits still asks for one frame to be
-            // set to the right time.
-            v.addEventListener("loadedmetadata", kick);
-            m = v;
-          }
-          m.className = "xr-media";
-          m.dataset.name = name;
-          m.setAttribute("aria-hidden", "true");
-          box.append(m);
-          clipEls.push(m);
-        }
-      });
-    };
-    const v4root = el.closest<HTMLElement>(".v4");
-    let split = 1;
-    let glideId = 0;
-    let dragging = false;
-    const setSplit = (v: number) => {
-      split = clamp(v);
-      if (!body || !xline || !side || !grip || !word) return;
-      const w = body.clientWidth;
-      const on = split < 1;
-      xline.style.transform = `translateX(${Math.round(split * w)}px)`;
-      side.style.clipPath = `inset(0 0 0 ${(split * 100).toFixed(2)}%)`;
-      // The views lay out to the width the line uncovers, so the x-ray
-      // reads whole wherever the line is parked.
-      side.style.setProperty("--vis", `${Math.round((1 - split) * w)}px`);
-      body.classList.toggle("is-xray", on);
-      if (on) loadClips();
-      word.setAttribute("aria-pressed", String(on));
-      const pct = Math.round(split * 100);
-      grip.setAttribute("aria-valuenow", String(pct));
-      grip.setAttribute(
-        "aria-valuetext",
-        on ? `x-ray, ${100 - pct}% of the panel` : "parked",
-      );
-    };
-    const glide = (to: number) => {
-      cancelAnimationFrame(glideId);
-      // Reduced motion: the line moves, it just doesn't glide.
-      if (reduced) {
-        setSplit(to);
-        return;
+    /* The film: a poster under reduced motion, or if the video can't play;
+     * otherwise a video whose time the scroll sets, at most one seek per
+     * frame and never while the last one is still landing. */
+    let video: HTMLVideoElement | null = null;
+    const showPoster = () => {
+      if (!box) return;
+      box.querySelector("video")?.remove();
+      if (!box.querySelector("img")) {
+        const img = document.createElement("img");
+        img.src = FILM.poster;
+        img.alt = "";
+        img.className = "w4-media";
+        box.append(img);
       }
-      const from = split;
-      const ms = to < from ? 240 : 200;
-      const t0 = performance.now();
-      const step = (t: number) => {
-        const k = easeOut3(clamp((t - t0) / ms));
-        setSplit(lerp(from, to, k));
-        if (k < 1) glideId = requestAnimationFrame(step);
-      };
-      glideId = requestAnimationFrame(step);
+      video = null;
     };
-    // On a phone the panel is too narrow to read half of it, so the line
-    // comes out further.
-    const onWord = () => glide(split < 1 ? 1 : (body?.clientWidth ?? 0) < 560 ? 0.12 : 0.5);
-    const onDown = (e: PointerEvent) => {
-      cancelAnimationFrame(glideId);
-      dragging = true;
-      grip?.setPointerCapture(e.pointerId);
-      e.preventDefault();
-    };
-    const onMove = (e: PointerEvent) => {
-      if (!dragging || !body) return;
-      const r = body.getBoundingClientRect();
-      // a drag never parks it: the word, End and Escape do
-      setSplit(Math.min(0.99, (e.clientX - r.left) / r.width));
-    };
-    const onUp = () => {
-      dragging = false;
-    };
-    const onKey = (e: KeyboardEvent) => {
-      const dir: Record<string, number> = {
-        ArrowLeft: -1,
-        ArrowDown: -1,
-        ArrowRight: 1,
-        ArrowUp: 1,
-      };
-      if (dir[e.key]) {
-        cancelAnimationFrame(glideId);
-        setSplit(Math.min(0.95, Math.round(split * 20 + dir[e.key]) / 20));
-      } else if (e.key === "Home") setSplit(0);
-      else if (e.key === "End" || e.key === "Escape") {
-        setSplit(1);
-        word?.focus();
-      } else return;
-      e.preventDefault();
-    };
-    const onResize = () => {
-      setSplit(split);
-      measureLane();
-    };
-    const offFlap = word ? attachFlap(word) : () => {};
-    word?.addEventListener("click", onWord);
-    grip?.addEventListener("pointerdown", onDown);
-    grip?.addEventListener("pointermove", onMove);
-    grip?.addEventListener("pointerup", onUp);
-    grip?.addEventListener("pointercancel", onUp);
-    grip?.addEventListener("keydown", onKey);
-    window.addEventListener("resize", onResize);
-    setSplit(1);
+    if (reduced || !box) showPoster();
+    else {
+      const v = document.createElement("video");
+      v.className = "w4-media";
+      v.muted = true;
+      v.playsInline = true;
+      v.preload = "auto";
+      v.poster = FILM.poster;
+      v.setAttribute("aria-hidden", "true");
+      const list =
+        window.innerWidth < 768 && FILM.portrait.length
+          ? FILM.portrait
+          : FILM.sources;
+      list.forEach((s, i) => {
+        const src = document.createElement("source");
+        src.src = s.src;
+        src.type = s.type;
+        // The last source failing means nothing can play: show the poster.
+        if (i === list.length - 1) src.addEventListener("error", showPoster);
+        v.append(src);
+      });
+      v.addEventListener("error", showPoster);
+      v.addEventListener("loadedmetadata", kick);
+      v.addEventListener("seeked", kick);
+      box.append(v);
+      video = v;
+    }
 
-    const off = onFrame(() => {
-      // The arrival nudges everything a little earlier, so the panel lands
-      // already reading.
-      const q = P.week - (1 - P.weekIn) * 0.1;
+    /* The real film's stage frames replace the placeholder's. */
+    if (FILM.stages) {
+      fetch(FILM.stages)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j: unknown) => {
+          const o = j as {
+            frames?: number;
+            stages?: { name: Stage; from: number; to: number }[];
+          } | null;
+          if (!o?.stages?.length) return;
+          STAGES.splice(0, STAGES.length, ...o.stages);
+          if (o.frames) FILM_FRAMES.n = o.frames;
+          kick();
+        })
+        .catch(() => {});
+    }
+
+    const xray = attachXray(el, reduced);
+
+    const off = onFrame((f) => {
       const p = P.week;
+      const q = p - (1 - P.weekIn) * 0.1;
 
-      // The panel condenses out of the field as the section arrives.
-      if (panel) {
-        const a = smooth(prog(P.weekIn, 0.25, 0.85));
-        panel.style.opacity = a.toFixed(3);
-        panel.style.transform = reduced
-          ? ""
-          : `translate3d(0, ${((1 - a) * 48).toFixed(1)}px, 0)`;
+      // "Say your first project is..." rides the travel and the heat map.
+      if (intro) {
+        const t = prog(q, -0.06, WEEK.dive[0] + 0.02);
+        const o = smooth(prog(t, 0, 0.15)) * (1 - smooth(prog(t, 0.8, 1)));
+        intro.style.opacity = o.toFixed(3);
+        intro.style.visibility = o > 0.002 ? "visible" : "hidden";
+        if (!reduced)
+          intro.style.transform = `translate3d(0, ${lerp(30, -30, clamp(t)).toFixed(1)}px, 0)`;
       }
 
-      // The x-ray line parks itself when the week leaves the screen.
-      if (split < 1 && (P.weekIn < 0.5 || p >= 1) && !dragging) setSplit(1);
-
-      // Lines of the story.
-      lines.forEach((ln, i) => {
-        const L = LINES[i];
-        const t = (q - L.a) / (L.b - L.a);
-        const inn = smooth(prog(t, 0, 0.2));
-        const out = smooth(prog(t, 0.8, 1));
-        const o = inn * (1 - out);
-        ln.style.opacity = o.toFixed(3);
-        ln.style.visibility = o > 0.002 ? "visible" : "hidden";
-        if (reduced) return;
-        const fly = "fly" in L && L.fly;
-        const dy = fly
-          ? lerp(flyPx, -flyPx, clamp(t))
-          : (1 - inn) * 24 - out * 24 - (clamp(t) - 0.5) * 14;
-        ln.style.transform = `translate3d(0, ${dy.toFixed(1)}px, 0)`;
-      });
-
-      // The stations open and close on the scroll value: the open one
-      // takes the side's spare height, the rest fold to their header line.
-      if (sideEl && stations.length === 4) {
-        const head = stations[0].querySelector<HTMLElement>(".w4-st-head");
-        const spare = Math.max(0, sideEl.clientHeight - 4 * (head?.offsetHeight ?? 26));
-        stBodies.forEach((bd, i) => {
-          const W = OPEN[i];
-          const o =
-            smooth(prog(p, W.a - 0.02, W.a + 0.012)) *
-            (1 - smooth(prog(p, W.b - 0.02, W.b + 0.012)));
-          bd.style.height = `${(o * spare).toFixed(1)}px`;
-          bd.style.opacity = smooth(clamp(o * 1.6 - 0.3)).toFixed(3);
-          // Folded, its contents leave the page, not just the clip.
-          bd.style.visibility = o > 0.02 ? "visible" : "hidden";
-          stations[i].classList.toggle("is-open", o > 0.5);
-        });
-      }
-
-      // Finding customers: the list builds as the map lights them up.
-      leads.forEach((li, j) => {
-        const k = easeOut3(
-          prog(
-            p,
-            BEAT.gtm[0] + 0.018 + j * 0.016,
-            BEAT.gtm[0] + 0.034 + j * 0.016,
-          ),
+      // Through the point: its glow grows from the screen's centre until
+      // it's the whole frame, in the film's ground colour.
+      if (glow) {
+        const g = easeInOut3(
+          prog(p, WEEK.dive[0] + 0.02, WEEK.filmIn[1] - 0.01),
         );
-        li.style.opacity = k.toFixed(3);
-        li.style.transform = reduced
-          ? ""
-          : `translate3d(${((1 - k) * 12).toFixed(1)}px, 0, 0)`;
-      });
-
-      // The emails: a reply drafts itself at a person's pace.
-      const typed = prog(p, BEAT.email[0] + 0.02, BEAT.email[0] + 0.11);
-      let n = 0;
-      while (n < TYPING.at.length && TYPING.at[n] <= typed) n++;
-      const last = n >= TYPING.states.length;
-      setText(reply, n > 0 ? TYPING.states[n - 1] : "");
-      reply?.parentElement?.classList.toggle("is-typing", n > 0 && !last);
-      setText(
-        replyTag,
-        last ? "Draft ready. A person sends it." : n > 0 ? "Drafting" : "New",
-      );
-      rows.forEach((r, j) => {
-        const ready = p > BEAT.email[0] + 0.11 + j * 0.02;
-        const tag = r.querySelector<HTMLElement>(".w4-mail-tag");
-        setText(
-          tag,
-          ready
-            ? "draft ready"
-            : p > BEAT.email[0] + 0.02
-              ? "drafting"
-              : "unread",
-        );
-        r.classList.toggle("is-ready", ready);
-      });
-
-      // The spreadsheet: rows settle into CRM cards. No words on this one.
-      const colsIn = smooth(
-        prog(p, BEAT.sheet[0] + 0.04, BEAT.sheet[0] + 0.08),
-      );
-      stageHeads.forEach((h) => (h.style.opacity = colsIn.toFixed(3)));
-      if (sheetName) sheetName.style.opacity = (1 - colsIn).toFixed(3);
-      const perCol = [0, 0, 0];
-      cards.forEach((c, j) => {
-        const L = LEADS[j];
-        const k = easeInOut3(
-          prog(
-            p,
-            BEAT.sheet[0] + 0.016 + j * 0.01,
-            BEAT.sheet[0] + 0.066 + j * 0.01,
-          ),
-        );
-        const row = perCol[L.stage]++;
-        const left = lerp(0, L.stage * 33.333, k);
-        const width = lerp(100, 33.333, k);
-        const top = lerp(26 + j * 26, 26 + row * 56, k);
-        const h = lerp(24, 50, k);
-        c.style.left = `${left.toFixed(3)}%`;
-        c.style.width = `${width.toFixed(3)}%`;
-        c.style.top = `${top.toFixed(1)}px`;
-        c.style.height = `${h.toFixed(1)}px`;
-        c.classList.toggle("is-card", k > 0.5);
-      });
-
-      // Teaching the staff: the lesson checks off.
-      steps.forEach((s, j) => {
-        s.classList.toggle("is-done", p > BEAT.teach[0] + 0.03 + j * 0.03);
-      });
-
-      // Each station's count, read off what's actually on screen in it.
-      const count = (els: HTMLElement[], test: (e: HTMLElement) => boolean) =>
-        els.filter(test).length;
-      setText(stCounts[0] ?? null, `${count(leads, (e) => parseFloat(e.style.opacity || "0") > 0.5)} found`);
-      setText(stCounts[1] ?? null, `${count(rows, (e) => e.classList.contains("is-ready"))} drafted`);
-      setText(stCounts[2] ?? null, `${count(cards, (e) => e.classList.contains("is-card"))} cards`);
-      setText(stCounts[3] ?? null, `${count(steps, (e) => e.classList.contains("is-done"))} of 3`);
-      machine();
-
-      // Blocks dissolve into points. When one lets go going forward, the
-      // field gets a burst in the same place, so the light the block turns
-      // into is the grid's own.
-      let left = 0;
-      blocks.forEach((blk, i) => {
-        const [a, z] = WINDOWS[i];
-        const k = smooth(prog(q, a, z));
-        left += BLOCKS[i].hours * (1 - k);
-        if (Math.abs(k - lastK[i]) < 0.001) return;
-        lastK[i] = k;
-        blk.style.setProperty("--k", k.toFixed(3));
-        blk.classList.toggle("is-going", k > 0 && k < 1);
-        blk.classList.toggle("is-gone", k >= 1);
-        if (k > 0.5 && !gone[i]) {
-          gone[i] = true;
-          if (!reduced) {
-            const r = blk.getBoundingClientRect();
-            store.bursts.push({
-              x: r.left,
-              y: r.top,
-              w: r.width,
-              h: r.height,
-              t0: performance.now(),
-            });
-          }
-        } else if (k < 0.15) gone[i] = false;
-      });
-      const hrs = Math.round(left);
-      setText(
-        meter,
-        hrs <= KEPT_HOURS
-          ? `${hrs} hrs of busywork left`
-          : `${hrs} of ${TOTAL_HOURS} hrs are busywork`,
-      );
-
-      // Time passes as the week clears.
-      if (now) {
-        const H = lerp(0, NOW_END, prog(p, 0.02, 0.96));
-        const d = Math.min(4, Math.floor(H / 8));
-        now.style.setProperty("--d", String(d));
-        now.style.setProperty("--h", (H - d * 8).toFixed(3));
-        now.style.opacity = smooth(prog(P.weekIn, 0.7, 1)).toFixed(3);
-      }
-      if (free)
-        free.style.opacity = smooth(
-          prog(p, BEAT.end[0], BEAT.end[0] + 0.04),
-        ).toFixed(3);
-
-      // The x-ray's clip for the beat on screen, scrubbed by the beat's
-      // own progress, and the cardinal cut while the world is cardinal.
-      if (split < 1) loadClips();
-      if (clipsLoaded && split < 1) {
-        const cardinal = v4root?.dataset.world === "cardinal";
-        const bk = beatAt(p);
-        const win =
-          bk === "gtm" || bk === "email" || bk === "sheet" || bk === "teach"
-            ? BEAT[bk]
-            : bk === "end"
-              ? BEAT.teach
-              : null;
-        const kb = win ? prog(p, win[0], win[1] - 0.02) : 0;
-        for (const m of clipEls) {
-          const name = m.dataset.name ?? "";
-          const isGtm = name.startsWith("gtm_score");
-          m.classList.toggle(
-            "is-on",
-            !isGtm || (name === "gtm_score_on_cardinal") === cardinal,
-          );
-          if (!(m instanceof HTMLVideoElement)) continue;
-          const mine =
-            (isGtm && bk === "gtm") ||
-            (name === "email_draft" && bk === "email") ||
-            (name === "crm_merge" && bk === "sheet") ||
-            (name === "teach_curve" && (bk === "teach" || bk === "end"));
-          if (!mine || m.readyState < 1 || m.seeking || !m.duration) continue;
-          const tgt = kb * (m.duration - 0.05);
-          if (Math.abs(m.currentTime - tgt) > 1 / 30) m.currentTime = tgt;
-        }
+        const gone = smooth(prog(p, WEEK.filmIn[1], WEEK.filmIn[1] + 0.01));
+        const o = smooth(prog(g, 0, 0.3)) * (1 - gone);
+        glow.style.opacity = o.toFixed(3);
+        glow.style.visibility = o > 0.002 ? "visible" : "hidden";
+        glow.style.transform = `translate(-50%, -50%) scale(${lerp(0.02, 2.4, g).toFixed(3)})`;
       }
 
-      // The x-ray shows the beat on screen.
-      const b = beatAt(p);
-      const v =
-        b === "travel" || b === "intro" ? "intro" : b === "end" ? "teach" : b;
-      if (v !== view) {
-        view = v;
-        views.forEach((x) => x.classList.toggle("is-on", x.dataset.view === v));
+      // The film crossfades in over the glow, then at the end shrinks back
+      // to the point it came from as the grid returns around it.
+      if (film) {
+        const a = smooth(prog(p, WEEK.filmIn[0], WEEK.filmIn[1]));
+        const shrink = easeInOut3(prog(p, WEEK.out[0], WEEK.out[1]));
+        const o = a * (1 - smooth(prog(shrink, 0.85, 1)));
+        film.style.opacity = o.toFixed(3);
+        film.style.visibility = o > 0.002 ? "visible" : "hidden";
+        const r = Math.hypot(f.vw, f.vh) * 0.6 * (1 - shrink) + 6;
+        film.style.setProperty("--r", `${r.toFixed(0)}px`);
+        film.classList.toggle("is-shrinking", shrink > 0);
       }
+
+      // One seek per frame at most, and none while one is landing.
+      const v = video;
+      if (v && v.readyState >= 1 && v.duration && !v.seeking) {
+        const tgt = filmShare(p) * (v.duration - 0.04);
+        if (Math.abs(v.currentTime - tgt) > 1 / 60) v.currentTime = tgt;
+      }
+
+      // Each caption rides its stage's frames.
+      const fr = filmShare(p) * FILM_FRAMES.n;
+      caps.forEach((c, i) => {
+        const st = STAGES.find((x) => x.name === CAPTIONS[i].stage);
+        if (!st) return;
+        const t = prog(fr, st.from, st.to);
+        const o = smooth(prog(t, 0, 0.18)) * (1 - smooth(prog(t, 0.82, 1)));
+        c.style.opacity = o.toFixed(3);
+        c.style.visibility = o > 0.002 ? "visible" : "hidden";
+        if (!reduced)
+          c.style.transform = `translate3d(0, ${lerp(26, -26, t).toFixed(1)}px, 0)`;
+      });
+
+      xray.frame(p);
     });
 
     return () => {
       off();
-      offFlap();
-      cancelAnimationFrame(glideId);
-      word?.removeEventListener("click", onWord);
-      grip?.removeEventListener("pointerdown", onDown);
-      grip?.removeEventListener("pointermove", onMove);
-      grip?.removeEventListener("pointerup", onUp);
-      grip?.removeEventListener("pointercancel", onUp);
-      grip?.removeEventListener("keydown", onKey);
-      window.removeEventListener("resize", onResize);
+      xray.dispose();
     };
   }, []);
 
   return (
-    <section ref={root} id="v4-week" className="w4" aria-labelledby="w4-title">
-      <div className="w4-stage">
-        <div className="w4-lane">
-          {LINES.map((l) => (
-            <p key={l.text} className={`w4-line is-${l.size}`}>
-              {l.text}
-            </p>
-          ))}
-        </div>
+    <section ref={root} id="v4-week" className="w5" aria-labelledby="w5-intro">
+      <div className="w5-stage">
+        <h2 id="w5-intro" className="w5-intro">
+          Say your first project is a dental office in Koreatown, for example.
+        </h2>
 
-        <div className="w4-panel">
-          <header className="w4-head">
-            <h2 id="w4-title" className="w4-title">
-              A dental office in Koreatown, for example
-            </h2>
-            <span className="w4-meter">
-              {TOTAL_HOURS} of {TOTAL_HOURS} hrs are busywork
-            </span>
-            <button
-              type="button"
-              className="w4-xword"
-              aria-pressed="false"
-              aria-controls="w4-xray"
-            >
-              x-ray
-            </button>
-          </header>
+        <div
+          className="w5-glow"
+          aria-hidden="true"
+         
+        />
 
+        <div className="w5-film">
           <div className="w4-body">
-            <div
-              className="w4-cal"
-              aria-label="The front desk's week, Monday to Friday, 9 to 5"
-            >
-              {DAYS.map((d, i) => (
-                <span key={d} className="w4-day" style={{ gridColumn: i + 2 }}>
-                  {d}
-                </span>
-              ))}
-              {HOURS.map((h, i) => (
-                <span key={h} className="w4-hr" style={{ gridRow: i + 2 }}>
-                  {h}
-                </span>
-              ))}
-              {BLOCKS.map((x, i) => (
-                <div
-                  key={i}
-                  className={`w4-blk is-${x.kind}`}
-                  style={{
-                    gridColumn: x.day + 2,
-                    gridRow: `${x.start + 2} / span ${x.hours}`,
-                    ["--vx" as string]: FALL[i].vx.toFixed(1),
-                    ["--rot" as string]: FALL[i].rot.toFixed(1),
-                  }}
-                >
-                  <span>{x.label}</span>
-                </div>
-              ))}
-              <div
-                className="w4-free"
-                style={{ gridColumn: 6, gridRow: "7 / span 3" }}
-              >
-                <span>Free</span>
-              </div>
-              <div className="w4-now" aria-hidden="true" />
-            </div>
-
-            {/* The side is one machine of four stations, top to bottom. The
-             * open station is the beat on screen; the conduits between their
-             * nodes are drawn by machine.ts. */}
-            <div className="w4-side">
-              <div className="w4-st">
-                <p className="w4-st-head">
-                  <i className="w4-node" aria-hidden="true" />
-                  <span>Worth reaching</span>
-                  <span className="w4-st-n">0 found</span>
-                </p>
-                <div className="w4-st-body">
-                  <ul className="w4-leads">
-                    {LEADS.map((l) => (
-                      <li key={l.who} className="w4-lead">
-                        <i aria-hidden="true" />
-                        <span>
-                          {l.who}, {l.where}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="w4-st">
-                <p className="w4-st-head">
-                  <i className="w4-node" aria-hidden="true" />
-                  <span>Replies</span>
-                  <span className="w4-st-n">0 drafted</span>
-                </p>
-                <div className="w4-st-body">
-                  <ul className="w4-inbox">
-                    {INBOX.map((m) => (
-                      <li key={m.subject} className="w4-mail">
-                        <span className="w4-mail-subj">{m.subject}</span>
-                        <span className="w4-mail-tag">unread</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="w4-thread">
-                    <p className="w4-ask">{ASK}</p>
-                    <div className="w4-reply">
-                      <span className="w4-reply-tag">New</span>
-                      <p>
-                        <span className="w4-reply-text" />
-                        <span className="w4-caret" aria-hidden="true" />
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="w4-st">
-                <p className="w4-st-head">
-                  <i className="w4-node" aria-hidden="true" />
-                  <span>CRM</span>
-                  <span className="w4-st-n">0 cards</span>
-                </p>
-                <div className="w4-st-body">
-                  <div className="w4-crm">
-                    <span className="w4-sheetname">leads_FINAL_v3.xlsx</span>
-                    {STAGES.map((st, i) => (
-                      <span
-                        key={st}
-                        className="w4-col"
-                        style={{ left: `${i * 33.333}%` }}
-                      >
-                        {st}
-                      </span>
-                    ))}
-                    {LEADS.map((l) => (
-                      <div key={l.who} className="w4-card">
-                        <b>{l.who}</b>
-                        <span>{l.person}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="w4-st">
-                <p className="w4-st-head">
-                  <i className="w4-node" aria-hidden="true" />
-                  <span>Lesson, 20 min</span>
-                  <span className="w4-st-n">0 of 3</span>
-                </p>
-                <div className="w4-st-body">
-                  <ol className="w4-steps">
-                    {LESSON.map((st) => (
-                      <li key={st} className="w4-step">
-                        <i aria-hidden="true" />
-                        <span>{st}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              </div>
-            </div>
-
+            {/* The video or its poster goes in here (the effect above). */}
+            <div className="w4-film" />
             <div id="w4-xray" className="xr-side" aria-label="How it's built">
               <XrayViews />
             </div>
@@ -786,6 +266,20 @@ export default function Week() {
               />
             </div>
           </div>
+          <button
+            type="button"
+            className="w4-xword w5-xword"
+            aria-pressed="false"
+            aria-controls="w4-xray"
+          >
+            x-ray
+          </button>
+          {CAPTIONS.map((c) => (
+            <div key={c.stage} className={`w5-cap ${c.at}`}>
+              {c.label && <p className="w5-label">{c.label}</p>}
+              <p className="w5-line">{c.line}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

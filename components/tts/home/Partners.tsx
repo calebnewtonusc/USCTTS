@@ -50,6 +50,7 @@ export default function Partners() {
     const nums = [...el.querySelectorAll<HTMLElement>(".pt-n")];
     const rows = [...el.querySelectorAll<HTMLElement>(".pt-row > li")];
     const line = el.querySelector<HTMLElement>(".pt-line");
+    const small = el.querySelector<HTMLElement>(".pt-small");
     if (reduced) return;
     const rowList = el.querySelector<HTMLElement>(".pt-row");
     return onFrame((f) => {
@@ -69,9 +70,10 @@ export default function Partners() {
         rows[i].style.transform = `translate3d(0, ${((0.5 - p) * depth).toFixed(1)}px, 0)`;
         rows[i].style.opacity = smooth(prog(p, 0.08 + i * 0.04, 0.3 + i * 0.04)).toFixed(3);
       });
-      if (line) {
-        line.style.transform = `translate3d(0, ${((0.5 - p) * 50).toFixed(1)}px, 0)`;
-        line.style.opacity = (smooth(prog(p, 0.22, 0.4)) * (1 - smooth(prog(p, 0.8, 0.95)))).toFixed(3);
+      for (const l of [line, small]) {
+        if (!l) continue;
+        l.style.transform = `translate3d(0, ${((0.5 - p) * 50).toFixed(1)}px, 0)`;
+        l.style.opacity = (smooth(prog(p, 0.22, 0.4)) * (1 - smooth(prog(p, 0.8, 0.95)))).toFixed(3);
       }
     });
   }, []);
@@ -98,10 +100,15 @@ export default function Partners() {
             </li>
           ))}
         </ul>
+        {/* What a member gets, in one plain line (STUDENT-POV, 3); the
+         * "only university club" claim stays, small. */}
         <p id="pt-line" className="pt-line">
-          We&apos;re official Clay and Perplexity partners through Blue Modern
-          Advisory. As far as we know, we&apos;re the only university club
-          building on them.
+          You build on Clay and Perplexity, the same tools real GTM teams pay
+          for, through our partner Blue Modern Advisory.
+        </p>
+        <p className="pt-small">
+          as far as we know, we&apos;re the only university club building on
+          both
         </p>
       </div>
     </section>

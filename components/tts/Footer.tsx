@@ -1,6 +1,6 @@
 import Link from "next/link";
 import TcLink from "./TcLink";
-import { TC_URL } from "./links";
+import { INSTAGRAM_URL, TC_URL } from "./links";
 import { mono } from "./v4/mono";
 
 /* Two shapes. "full" is the white closing block every inner page ends on.
@@ -42,7 +42,7 @@ export default function Footer({ variant = "full" }: { variant?: "full" | "endin
             </li>
             <li>
               <a
-                href="https://www.instagram.com/trojantechsolutions"
+                href={INSTAGRAM_URL}
                 rel="noreferrer"
                 target="_blank"
               >
@@ -115,7 +115,7 @@ export default function Footer({ variant = "full" }: { variant?: "full" | "endin
             </li>
             <li>
               <a
-                href="https://www.instagram.com/trojantechsolutions"
+                href={INSTAGRAM_URL}
                 rel="noreferrer"
                 target="_blank"
               >

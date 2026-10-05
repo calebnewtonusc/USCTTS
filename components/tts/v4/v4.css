@@ -515,14 +515,6 @@
   letter-spacing: 0;
   min-width: 0;
 }
-.tts .w4-meter {
-  margin-left: auto;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  color: var(--ink-2);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
 .tts .w4-xword {
   min-width: 44px;
   min-height: 44px;
@@ -559,11 +551,7 @@
     flex: 1 1 100%;
     font-size: 14px;
   }
-  .tts .w4-meter {
-    margin-left: 0;
-    font-size: 10.5px;
-  }
-  .tts .w4-xword {
+    .tts .w4-xword {
     margin-left: auto;
     min-height: 36px;
   }
@@ -573,517 +561,22 @@
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 272px;
   overflow: hidden;
 }
-@media (min-width: 1280px) {
-  .tts .w4-body {
-    grid-template-columns: minmax(0, 1fr) 320px;
-  }
-}
-@media (max-width: 767px) {
-  .tts .w4-body {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) 236px;
-  }
-}
-
-/* the calendar */
-.tts .w4-cal {
-  position: relative;
-  display: grid;
-  grid-template-columns: 26px repeat(5, minmax(0, 1fr));
-  grid-template-rows: 24px repeat(8, minmax(0, 1fr));
-  padding: 6px 10px 10px 8px;
-  border-right: 1px solid var(--rule);
-  min-height: 0;
-}
-@media (max-width: 767px) {
-  .tts .w4-cal {
-    border-right: 0;
-    border-bottom: 1px solid var(--rule);
-    padding: 4px 6px 6px 4px;
-    grid-template-columns: 20px repeat(5, minmax(0, 1fr));
-    grid-template-rows: 20px repeat(8, minmax(0, 1fr));
-  }
-}
-.tts .w4-day {
-  grid-row: 1;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--ink-2);
-  padding-left: 4px;
-  align-self: center;
-}
-.tts .w4-hr {
-  grid-column: 1 / -1;
-  border-top: 1px solid rgba(42, 27, 30, 0.08);
-  font-family: var(--mono);
-  font-size: 9.5px;
-  line-height: 1;
-  color: var(--ink-3);
-  padding-top: 3px;
-}
-.tts .w4-blk {
-  --k: 0;
-  --glow: var(--sky-soft);
-  position: relative;
-  z-index: 1;
-  margin: 2px 3px;
-  padding: 4px 6px;
-  min-height: 0;
-  overflow: hidden;
-  background: color-mix(
-    in oklab,
-    #e9e2d7 calc(100% - var(--k) * 100%),
-    var(--glow)
-  );
-  border-left: 2px solid rgba(42, 27, 30, 0.32);
-  font-size: 11.5px;
-  line-height: 1.25;
-  color: var(--ink);
-  opacity: calc(1 - var(--k) * var(--k));
-  transform: translate3d(
-      calc(var(--vx, 0) * var(--k) * 1px),
-      calc((var(--k) * var(--k) * 46 - var(--k) * 12) * 1px),
-      0
-    )
-    rotate(calc(var(--rot, 0) * var(--k) * var(--k) * 1deg));
-}
-.tts .w4-blk.is-gtm {
-  --glow: #e7a3ad;
-}
-.tts .w4-blk span {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-/* Dissolving: the block breaks into a lattice of points that shrink to
- * nothing, the same points the field is made of. */
-.tts .w4-blk.is-going {
-  --r: calc((1 - var(--k)) * 4px);
-  -webkit-mask-image: radial-gradient(
-    circle at center,
-    #000 var(--r),
-    transparent calc(var(--r) + 0.8px)
-  );
-  mask-image: radial-gradient(
-    circle at center,
-    #000 var(--r),
-    transparent calc(var(--r) + 0.8px)
-  );
-  -webkit-mask-size: 4px 4px;
-  mask-size: 4px 4px;
-}
-.tts .w4-blk.is-going span {
-  opacity: calc(1 - var(--k) * 2.4);
-}
-.tts .w4-blk.is-gone {
-  visibility: hidden;
-}
-@media (max-width: 599px) {
-  .tts .w4-blk {
-    margin: 1px 2px;
-    padding: 2px 3px;
-    font-size: 9.5px;
-    line-height: 1.15;
-    border-left-width: 1.5px;
-  }
-  .tts .w4-day {
-    font-size: 10px;
-    padding-left: 2px;
-  }
-  .tts .w4-hr {
-    font-size: 8.5px;
-  }
-}
-.tts .w4-free {
-  position: relative;
-  z-index: 0;
-  margin: 2px 3px;
-  padding: 6px 8px;
-  background: rgba(255, 204, 0, 0.16);
-  border-left: 2px solid var(--gold);
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--ink-2);
-  opacity: 0;
-}
-.tts .w4-now {
-  --d: 0;
-  --h: 0;
+/* The machine film, scrubbed by scroll (Week.tsx). Contained, on the
+ * film's own paper, so nothing of it is cropped at any width. */
+.tts .w4-film {
   position: absolute;
-  z-index: 2;
-  left: calc(8px + 26px + (100% - 44px) * var(--d) / 5);
-  top: calc(6px + 24px + (100% - 40px) * var(--h) / 8);
-  width: calc((100% - 44px) / 5);
-  height: 2px;
-  background: var(--red);
-  opacity: 0;
-  pointer-events: none;
+  inset: 0;
+  background: #fbfaf7;
 }
-.tts .w4-now::before {
-  content: "";
-  position: absolute;
-  left: -3px;
-  top: -2px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--red);
-}
-@media (max-width: 767px) {
-  .tts .w4-now {
-    left: calc(4px + 20px + (100% - 30px) * var(--d) / 5);
-    top: calc(4px + 20px + (100% - 30px) * var(--h) / 8);
-    width: calc((100% - 30px) / 5);
-  }
-}
-
-/* the side panes */
-.tts .w4-side {
-  position: relative;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-/* Four stations stacked; the open one takes the spare height (Week.tsx
- * sets each body's height from the scroll value), the others fold to one
- * header line. The left 30px is the conduits' margin (machine.ts). */
-.tts .w4-st {
-  flex: none;
-  border-bottom: 1px solid var(--rule);
-}
-.tts .w4-st:last-child {
-  border-bottom: 0;
-}
-.tts .w4-st-head {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 30px;
-  padding: 0 14px 0 30px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--ink-3);
-  transition: color 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .w4-st.is-open .w4-st-head {
-  color: var(--ink);
-}
-.tts .w4-st-n {
-  margin-left: auto;
-  font-variant-numeric: tabular-nums;
-}
-.tts .w4-node {
-  position: absolute;
-  left: 22px;
-  top: 50%;
-  width: 7px;
-  height: 7px;
-  margin: -3.5px 0 0 -3.5px;
-  border-radius: 50%;
-  background: var(--paper);
-  border: 1.5px solid var(--ink-3);
-  transition:
-    background-color 200ms cubic-bezier(0, 0, 0.2, 1),
-    border-color 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .w4-st.is-open .w4-node {
-  background: var(--red);
-  border-color: var(--red);
-}
-.tts .w4-st-body {
-  position: relative;
-  height: 0;
-  overflow: hidden;
-  padding: 0 14px 0 30px;
-}
-.tts .w4-st-body > :first-child {
-  margin-top: 4px;
-}
-@media (max-width: 767px) {
-  .tts .w4-st-head {
-    height: 24px;
-    font-size: 10.5px;
-    padding-right: 10px;
-  }
-  .tts .w4-st-body {
-    padding-right: 10px;
-  }
-}
-/* The conduits and the records riding them, over the whole stage. */
-.tts .w4-machine {
+.tts .w4-media {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 3;
-  pointer-events: none;
-  overflow: visible;
-  transition: opacity 300ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .w4-machine .mc-base {
-  fill: none;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-}
-.tts .w4-machine .mc-flow {
-  fill: none;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-dasharray: 1.5 7;
-  opacity: 0;
-  animation: mc-flow 900ms linear infinite;
-}
-@keyframes mc-flow {
-  to {
-    stroke-dashoffset: -17;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .tts .w4-machine .mc-flow {
-    animation: none;
-  }
-}
-.tts .w4-machine .mc-rec {
-  opacity: 0;
-}
-.tts .w4-leads {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 9px;
-}
-.tts .w4-lead {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13.5px;
-  line-height: 1.3;
-  opacity: 0;
-}
-.tts .w4-lead i {
-  flex: none;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--red);
-  box-shadow: 0 0 0 3px rgba(163, 22, 43, 0.14);
-}
-@media (max-width: 767px) {
-  .tts .w4-leads {
-    grid-template-columns: 1fr 1fr;
-    gap: 6px 12px;
-  }
-  .tts .w4-lead {
-    font-size: 12px;
-    gap: 7px;
-  }
-  }
-
-.tts .w4-inbox {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.tts .w4-mail {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 10px;
-  padding: 7px 0;
-  border-bottom: 1px solid var(--rule);
-  font-size: 13px;
-  line-height: 1.3;
-}
-.tts .w4-mail-subj {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.tts .w4-mail .w4-mail-tag {
-  flex: none;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  color: var(--ink-3);
-}
-.tts .w4-mail.is-ready .w4-mail-tag {
-  color: var(--sky-2);
-}
-.tts .w4-thread {
-  margin-top: 14px;
-}
-.tts .w4-ask {
-  font-size: 12.5px;
-  line-height: 1.45;
-  color: var(--ink-2);
-  background: var(--paper-2);
-  padding: 8px 10px;
-}
-.tts .w4-reply {
-  margin-top: 10px;
-  padding: 6px 10px 8px;
-  border-left: 2px solid var(--sky);
-  min-height: 84px;
-}
-.tts .w4-reply-tag {
+  object-fit: contain;
   display: block;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  color: var(--sky-2);
-  margin-bottom: 4px;
-}
-.tts .w4-reply p {
-  font-size: 13px;
-  line-height: 1.45;
-}
-.tts .w4-caret {
-  display: none;
-  width: 1.5px;
-  height: 1.05em;
-  margin-left: 1px;
-  vertical-align: -0.15em;
-  background: var(--sky);
-}
-.tts .w4-reply.is-typing .w4-caret {
-  display: inline-block;
-}
-@media (max-width: 767px) {
-  .tts .w4-inbox li:nth-child(n + 3) {
-    display: none;
-  }
-  .tts .w4-mail {
-    padding: 4px 0;
-    font-size: 12px;
-  }
-  .tts .w4-thread {
-    margin-top: 6px;
-  }
-  .tts .w4-ask {
-    display: none;
-  }
-  .tts .w4-reply {
-    margin-top: 6px;
-    min-height: 0;
-  }
-  .tts .w4-reply p {
-    font-size: 12px;
-  }
-}
-
-.tts .w4-crm {
-  position: relative;
-  height: 150px;
-}
-.tts .w4-sheetname,
-.tts .w4-col {
-  position: absolute;
-  top: 0;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  color: var(--ink-2);
-}
-.tts .w4-sheetname {
-  left: 0;
-}
-.tts .w4-col {
-  width: 33.333%;
-  opacity: 0;
-}
-.tts .w4-card {
-  position: absolute;
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 3px 12px 3px 6px;
-  font-size: 12px;
-  line-height: 1.3;
-  overflow: hidden;
-  border-bottom: 1px solid var(--rule);
-  white-space: nowrap;
-}
-.tts .w4-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 6px 6px 0;
-  border: 1px solid transparent;
-  background: transparent;
-  transition:
-    border-color 200ms cubic-bezier(0, 0, 0.2, 1),
-    background-color 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .w4-card > * {
-  position: relative;
-}
-.tts .w4-card b {
-  font-weight: 500;
-  font-size: 12px;
-}
-.tts .w4-card span {
-  color: var(--ink-2);
-  font-size: 12px;
-}
-.tts .w4-card.is-card {
-  flex-direction: column;
-  gap: 0;
-  padding: 6px 12px 6px 7px;
-  border-bottom-color: transparent;
-  white-space: normal;
-}
-.tts .w4-card.is-card::before {
-  border-color: var(--rule);
-  background: #ffffff;
-}
-.tts .w4-card.is-card b,
-.tts .w4-card.is-card span {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.tts .w4-steps {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 12px;
-}
-.tts .w4-step {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  font-size: 13.5px;
-  line-height: 1.35;
-}
-.tts .w4-step i {
-  flex: none;
-  width: 14px;
-  height: 14px;
-  margin-top: 2px;
-  border: 1.5px solid var(--ink-3);
-  transition:
-    background-color 200ms cubic-bezier(0, 0, 0.2, 1),
-    border-color 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .w4-step.is-done i {
-  background: var(--sky);
-  border-color: var(--sky);
-}
-@media (max-width: 767px) {
-  .tts .w4-steps {
-    gap: 7px;
-  }
-  .tts .w4-step {
-    font-size: 12.5px;
-  }
 }
 
 /* ---------- the x-ray ---------- */
@@ -1354,10 +847,10 @@
   transition: translate 150ms cubic-bezier(0, 0, 0.2, 1);
 }
 @media (hover: hover) and (pointer: fine) {
-  .tts .jn-door:hover {
+  .tts a.jn-door:hover {
     background-color: rgba(251, 247, 240, 0.1);
   }
-  .tts .v4:not(.is-dark) .jn-door:hover {
+  .tts .v4:not(.is-dark) a.jn-door:hover {
     background-color: rgba(42, 27, 30, 0.05);
   }
   .tts .jn-door:hover .arrow {
@@ -1403,30 +896,11 @@
   .tts .w4-panel {
     height: min(900px, 100%);
   }
-  .tts .w4-body {
-    grid-template-columns: minmax(0, 1fr) 400px;
-  }
   .tts .w4-title {
     font-size: 18px;
   }
-  .tts .w4-meter,
-  .tts .w4-xword,
-  .tts .w4-day,
-    .tts .w4-blk {
-    font-size: 14px;
-    padding: 6px 8px;
-  }
-  .tts .w4-lead,
-  .tts .w4-step,
-  .tts .w4-mail,
-  .tts .w4-reply p {
-    font-size: 16px;
-  }
-  .tts .w4-card,
-  .tts .w4-card b,
-  .tts .w4-card span,
-  .tts .w4-ask {
-    font-size: 14.5px;
+  .tts .w4-xword {
+    font-size: 13px;
   }
   .tts .w4-line.is-huge {
     font-size: 60px;
@@ -1552,4 +1026,265 @@
 }
 .tts .xr-media.is-on {
   opacity: 1;
+}
+
+/* ---------- STUDENT-POV pass (2026-10-05) ---------- */
+/* The "you" line the camera flies past as the light leaves USC. */
+.tts .v4-you {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 38%;
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+  max-width: 18ch;
+  text-align: center;
+  font-size: clamp(34px, 5vw, 80px);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+.tts .pt-small {
+  margin: 14px auto 0;
+  max-width: 40ch;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+/* The student door holds the signup itself. */
+.tts .jn-door.is-student {
+  align-content: start;
+  gap: 22px;
+}
+.tts .jn-door.is-student .nf {
+  max-width: 440px;
+  width: 100%;
+}
+.tts .jn .nf-label {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+.tts .jn .nf-row .input {
+  background: rgba(251, 247, 240, 0.1);
+  border-color: rgba(251, 247, 240, 0.5);
+  color: var(--ink);
+}
+.tts .jn .nf-row .input::placeholder {
+  color: rgba(251, 247, 240, 0.55);
+}
+.tts .jn .nf-row .input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.tts .v4.is-dark .jn .nf-row .btn-primary {
+  background: #fbf7f0;
+  color: #85101f;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .v4.is-dark .jn .nf-row .btn-primary:hover {
+    background: #ffffff;
+  }
+}
+.tts .v4.is-dark .jn .nf-row .btn-primary:focus-visible {
+  box-shadow:
+    0 0 0 2px #85101f,
+    0 0 0 4px #fbf7f0;
+}
+.tts .jn .field-error,
+.tts .jn .nf-done p,
+.tts .jn .form-alert p {
+  color: var(--ink);
+}
+.tts .jn .jn-ig {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  padding-block: 10px;
+  transition: text-decoration-thickness 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .jn .jn-ig:hover {
+    text-decoration-thickness: 2px;
+  }
+}
+.tts .jn .jn-ig:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+/* The x-ray covers the film, not a calendar: on a phone the film is
+ * short, so its views scroll inside it. */
+@media (max-width: 767px) {
+  .tts .xr-view {
+    overflow-y: auto;
+  }
+}
+
+/* ---------- v5: the dive and the machine (docs/SCRIPT-v5.md) ---------- */
+.tts .w5 {
+  position: relative;
+  height: 1000vh;
+}
+.tts .w5-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+/* The script's line for the dive, on the grid while the agent travels. */
+.tts .w5-intro {
+  position: absolute;
+  left: max(var(--gutter), calc((100vw - var(--wide)) / 2 + var(--gutter)));
+  right: var(--gutter);
+  bottom: calc(var(--strip-h) + 10vh);
+  max-width: 20ch;
+  font-size: clamp(30px, 3.6vw, 56px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+}
+/* The point of light's glow, in the film's ground colour #F4EFE6
+ * (blender/machine.py), so the film's first frame is the same field. */
+.tts .w5-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100vmax;
+  height: 100vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle, #f4efe6 0 45%, rgba(244, 239, 230, 0) 70%);
+  transform: translate(-50%, -50%) scale(0.02);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+/* The film fills the stage under the nav, on its own ground, so its edges
+ * never show at any aspect. */
+.tts .w5-film {
+  --r: 2000px;
+  position: absolute;
+  inset: var(--nav-h) 0 0 0;
+  background: #f4efe6;
+  color: #2a1b1e;
+  opacity: 0;
+  visibility: hidden;
+  --ink: #2a1b1e;
+  --ink-2: #6f6264;
+  --ink-3: #a1969a;
+  --rule: rgba(42, 27, 30, 0.14);
+}
+/* Pulling back out: the film closes to the point it came from. */
+.tts .w5-film.is-shrinking {
+  -webkit-mask-image: radial-gradient(circle at 50% calc(50% - var(--nav-h) / 2), #000 calc(var(--r) - 40px), transparent var(--r));
+  mask-image: radial-gradient(circle at 50% calc(50% - var(--nav-h) / 2), #000 calc(var(--r) - 40px), transparent var(--r));
+}
+.tts .w5-film .w4-body {
+  position: absolute;
+  inset: 0;
+}
+.tts .w5-film .w4-film {
+  background: #f4efe6;
+}
+.tts .w5-xword {
+  position: absolute;
+  top: 8px;
+  right: calc(var(--gutter) - 8px);
+  z-index: 8;
+}
+.tts .w5-cap {
+  position: absolute;
+  z-index: 4;
+  max-width: min(520px, calc(100% - 2 * var(--gutter)));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.tts .w5-cap.is-bl {
+  left: var(--gutter);
+  bottom: calc(var(--strip-h) + 32px);
+}
+.tts .w5-cap.is-tr {
+  right: var(--gutter);
+  top: 56px;
+  text-align: right;
+}
+.tts .w5-cap.is-tl {
+  left: var(--gutter);
+  top: 56px;
+}
+.tts .w5-label {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: #6f6264;
+  margin-bottom: 8px;
+}
+.tts .w5-line {
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.tts .w5-cap.is-big .w5-line {
+  font-size: clamp(28px, 3.2vw, 52px);
+  line-height: 1.08;
+}
+.tts .w5-cap.is-mid .w5-line {
+  font-size: clamp(22px, 2.2vw, 34px);
+  line-height: 1.2;
+}
+.tts .w5-cap.is-small .w5-line {
+  font-size: 19px;
+  line-height: 1.4;
+}
+@media (min-width: 1800px) {
+  .tts .w5-label {
+    font-size: 13.5px;
+  }
+  .tts .w5-cap {
+    max-width: 680px;
+  }
+  .tts .w5-cap.is-small .w5-line {
+    font-size: 24px;
+  }
+}
+@media (max-width: 767px) {
+  .tts .w5-cap.is-tr,
+  .tts .w5-cap.is-tl {
+    top: 48px;
+    left: var(--gutter);
+    right: var(--gutter);
+    text-align: left;
+  }
+  .tts .w5-cap.is-bl {
+    bottom: calc(var(--strip-h) + 20px);
+  }
+}
+.tts .v4-field > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Captions sit straight on the film. A halo of its own ground keeps them
+ * readable where a part of the machine passes behind, without a card. */
+.tts .w5-cap .w5-line,
+.tts .w5-cap .w5-label {
+  text-shadow:
+    0 0 6px #f4efe6,
+    0 0 14px #f4efe6,
+    0 0 28px #f4efe6;
+}
+/* The "you" line grows as it flies past; at 390 it grew 35px past the
+ * screen's edge and the page scrolled sideways. */
+.tts .v4-open-stage {
+  overflow: hidden;
 }

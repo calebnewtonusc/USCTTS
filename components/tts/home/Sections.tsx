@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Link from "next/link";
+import NotifyForm from "@/app/apply/NotifyForm";
+import { INSTAGRAM_URL } from "../links";
 import { CALENDLY_URL } from "@/lib/contact";
 import { easeOut3, prog } from "../engine/math";
 import { onFrame, P } from "../v4/choreo";
@@ -38,17 +39,24 @@ export function Join() {
   return (
     <section ref={sec} id="v4-join" className="jn" aria-label="Two ways in">
       <div className="jn-inner">
-        <Link href="/apply" className="jn-door">
-          <span className="jn-say">
-            I&apos;m at USC. Teach me to build that.
-          </span>
-          <span className="jn-meta">
-            applications open soon{" "}
-            <span className="arrow" aria-hidden="true">
-              &rarr;
-            </span>
-          </span>
-        </Link>
+        {/* The student door: something to do today (STUDENT-POV, 5). The
+         * email signup is right here, no extra click, and the club's
+         * Instagram to follow now. No dates until a real one exists. */}
+        <div className="jn-door is-student">
+          <p className="jn-say">I&apos;m at USC. Teach me to build that.</p>
+          <NotifyForm />
+          <p className="jn-meta">
+            applications open soon.{" "}
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="jn-ig"
+            >
+              Follow us on Instagram
+            </a>
+          </p>
+        </div>
         <a
           href={CALENDLY_URL}
           target="_blank"

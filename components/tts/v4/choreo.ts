@@ -36,28 +36,53 @@ export const P = {
 };
 
 /*
- * The week's beats on P.week. Each one is about an eighth of the runway, so
- * at 800vh every beat gets a screen or more of scroll, enough to read the
- * one line it carries before the next arrives.
+ * The week's runway, P.week (docs/SCRIPT-v5.md, beats 4 to 6). The grid
+ * carries the agent from USC to Koreatown and lights up who's worth
+ * reaching, the camera dives through the Koreatown point into the clay
+ * machine film, the film plays under the scroll stage by stage, then pulls
+ * back to a point of light on the grid and the rain begins.
  */
-export const BEAT = {
-  travel: [0.03, 0.17],
-  gtm: [0.19, 0.37],
-  email: [0.38, 0.57],
-  sheet: [0.58, 0.75],
-  teach: [0.76, 0.91],
-  end: [0.92, 1],
+export const WEEK = {
+  travel: [0.02, 0.11],
+  heat: [0.06, 0.15],
+  dive: [0.15, 0.235],
+  filmIn: [0.205, 0.245],
+  film: [0.24, 0.95],
+  out: [0.925, 0.995],
 } as const;
-export type BeatName = keyof typeof BEAT;
 
-export function beatAt(p: number): BeatName | "intro" {
-  if (p < BEAT.travel[0]) return "intro";
-  if (p < BEAT.gtm[0]) return "travel";
-  if (p < BEAT.email[0]) return "gtm";
-  if (p < BEAT.sheet[0]) return "email";
-  if (p < BEAT.teach[0]) return "sheet";
-  if (p < BEAT.end[0]) return "teach";
-  return "end";
+/* The film's stages, in frames of a 300-frame, 30 fps film. Replaced by
+ * public/tts/machine/stages.json once the real film lands (Week.tsx). */
+export type Stage = "tray" | "sorter" | "typewriter" | "mailbox" | "blocks" | "pullback";
+export const STAGES: { name: Stage; from: number; to: number }[] = [
+  { name: "tray", from: 30, to: 75 },
+  { name: "sorter", from: 75, to: 120 },
+  { name: "typewriter", from: 120, to: 165 },
+  { name: "mailbox", from: 165, to: 195 },
+  { name: "blocks", from: 195, to: 240 },
+  { name: "pullback", from: 240, to: 300 },
+];
+export const FILM_FRAMES = { n: 300 };
+
+/** Share of the film at a point of the week's scroll. */
+export const filmShare = (p: number) => prog(p, WEEK.film[0], WEEK.film[1]);
+
+export type Phase = "intro" | "travel" | "dive" | Stage | "out";
+export function phaseAt(p: number): Phase {
+  if (p < WEEK.travel[0]) return "intro";
+  if (p < WEEK.dive[0]) return "travel";
+  if (p < WEEK.film[0]) return "dive";
+  if (p >= WEEK.out[0] + 0.02) return "out";
+  const f = filmShare(p) * FILM_FRAMES.n;
+  let cur: Stage = STAGES[0].name;
+  for (const st of STAGES) if (f >= st.from) cur = st.name;
+  return f < STAGES[0].from ? "dive" : cur;
+}
+/** 0..1 through a stage, for clips scrubbed under it. */
+export function stageProgress(p: number, name: Stage) {
+  const st = STAGES.find((x) => x.name === name);
+  if (!st) return 0;
+  return prog(filmShare(p) * FILM_FRAMES.n, st.from, st.to);
 }
 
 const entries: Entry[] = [];
@@ -136,7 +161,7 @@ export const bump = (p: number, a: number, b: number, c: number, d: number) =>
   smooth(prog(p, a, b)) * (1 - smooth(prog(p, c, d)));
 
 /** Where the agent light is, in metres from USC, as the travel beat runs. */
-export const travelT = () => easeInOut3(prog(P.week, ...BEAT.travel));
+export const travelT = () => easeInOut3(prog(P.week, ...WEEK.travel));
 
 /*
  * Region progress, then the grid. Order 0 so every DOM updater reads this
@@ -177,43 +202,28 @@ function regions(f: Frame) {
   const ax = lerp(0, KOREATOWN[0], t);
   const ay = lerp(0, KOREATOWN[1], t);
   // The dive (the cardinal to cream change, grid/transitions.ts): the
-  // camera drops straight onto the office's block, through its light, and
-  // comes to rest hovering over it.
-  const D0 = BEAT.gtm[1] - 0.04;
-  const D1 = BEAT.gtm[1] + 0.015;
+  // camera drops through the Koreatown point; Week.tsx fills the screen
+  // with its glow and crossfades into the film. At the end it pulls back
+  // out to the point, which is the agent's light at the screen's centre.
+  const [D0, D1] = WEEK.dive;
   const dive = easeInOut3(prog(P.week, D0, D1));
+  const pull = easeInOut3(prog(P.week, WEEK.out[0], WEEK.out[1]));
   // Topdown zoom: 1 is 9 km across the screen. Following the agent the
-  // camera holds about 5.5 km (USC and Koreatown both in frame), then closes
-  // to about 3.5 km while the map finds customers.
-  const wz = lerp(1.6, 2.6, smooth(prog(P.week, BEAT.gtm[0] - 0.03, BEAT.gtm[0] + 0.05)));
-  // On a wide screen the panel covers the right two thirds, so the camera
-  // sits east of the agent and puts it in the open left lane.
-  const lane = f.vw >= 1024 ? 0.27 * (9000 / wz) : 0;
-  // Below 1024 the panel fills the lower three quarters and the story
-  // lane sits on top, so the camera sits south of the agent and puts it
-  // about 14% down the screen, above the story's lines, where the map's finds are visible and their
-  // conduits run down the gutter instead of across the calendar. Spans are
-  // the engine's: 6.5 km tall in portrait, 9 km wide in landscape.
-  const vSpan = (f.vh > f.vw ? 6500 : (9000 * f.vh) / f.vw) / wz;
-  const up = f.vw < 1024 ? 0.36 * vSpan : 0;
-  x = lerp(x, lerp(ax + lane, KOREATOWN[0], dive), wi);
-  y = lerp(y, lerp(ay - up, KOREATOWN[1], dive), wi);
-  zoom = lerp(zoom, lerp(wz, 12, dive), wi);
+  // camera holds about 5.5 km, then closes to about 3.5 km as the map
+  // lights who's worth reaching.
+  const wz = lerp(1.6, 2.6, smooth(prog(P.week, WEEK.heat[0], WEEK.heat[1])));
+  // Through the point: zoom 60 is 150 m across, the inside of one block.
+  const z = lerp(lerp(wz, 60, dive), 4, pull);
+  x = lerp(x, lerp(ax, KOREATOWN[0], dive), wi);
+  y = lerp(y, lerp(ay, KOREATOWN[1], dive), wi);
+  zoom = lerp(zoom, z, wi);
   tilt = lerp(tilt, 0, wi);
-  if (wi > 0.35) mode = P.week > D1 ? "block" : "topdown";
-  // The panel needs a quiet field behind it, except while the map itself
-  // is doing the work of finding customers.
-  const mapWorks = bump(
-    P.week,
-    BEAT.gtm[0] - 0.01,
-    BEAT.gtm[0] + 0.03,
-    BEAT.gtm[1] - 0.03,
-    BEAT.gtm[1],
-  );
-  dim = lerp(dim, 0.55 - 0.27 * mapWorks, wi);
-  store.highlight = smooth(
-    prog(P.week, BEAT.gtm[0] + 0.01, BEAT.gtm[0] + 0.12),
-  );
+  if (wi > 0.35) mode = "topdown";
+  // The field reads at full strength while it's the stage; the film covers
+  // it from the dive to the pull-back.
+  const mapWorks = bump(P.week, WEEK.heat[0], WEEK.heat[0] + 0.03, D0, D0 + 0.03);
+  dim = lerp(dim, 0.4 - 0.25 * mapWorks, wi);
+  store.highlight = smooth(prog(P.week, WEEK.heat[0], WEEK.heat[1]));
   store.agent.from = [0, 0];
   store.agent.to = KOREATOWN;
   store.agent.t = t;
@@ -245,7 +255,7 @@ function regions(f: Frame) {
     // Sunrise, over most of the opening's runway.
     smooth(prog(P.open, 0.1, 0.95)),
     // The heat map, as the agent arrives and the map lights its finds.
-    smooth(prog(P.week, BEAT.gtm[0] - 0.06, BEAT.gtm[0] + 0.08)),
+    smooth(prog(P.week, ...WEEK.heat)),
     // The dive, on the camera's own clock.
     prog(P.week, D0, D1),
     // Rain, finished across the whole city by Join's 0.4, before the camera
@@ -253,7 +263,7 @@ function regions(f: Frame) {
     // It starts as Friday clears (the week's last screen) and runs on into
     // Join; P.week reaches 1 the moment P.join starts, so the two halves
     // join without a seam.
-    0.4 * prog(P.week, 0.955, 1) + 0.6 * prog(P.join, 0, 0.4),
+    0.4 * prog(P.week, WEEK.out[1] - 0.02, 1) + 0.6 * prog(P.join, 0, 0.4),
   ];
   const world = seg[0] + seg[1] + seg[2] + seg[3];
   store.world = world;

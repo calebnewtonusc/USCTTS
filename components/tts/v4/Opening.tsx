@@ -20,6 +20,7 @@ export default function Opening() {
     if (!el) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const lines = [...el.querySelectorAll<HTMLElement>(".v4-h1-l")];
+    const you = el.parentElement?.querySelector<HTMLElement>(".v4-you");
     return onFrame(() => {
       // Gone before the world under it turns: the wave reaches half the
       // screen around 0.5, and a headline fading through that flip lost
@@ -27,6 +28,17 @@ export default function Opening() {
       const o = 1 - smooth(prog(P.open, 0.12, 0.46));
       el.style.opacity = o.toFixed(3);
       el.style.visibility = o > 0.002 ? "visible" : "hidden";
+      // The "you" moment (docs/STUDENT-POV.md, section 2): once the
+      // headline has gone, one line flies past as the light leaves USC,
+      // growing as it comes toward you.
+      if (you) {
+        const t = prog(P.open, 0.42, 1);
+        const vo = smooth(prog(t, 0, 0.25)) * (1 - smooth(prog(t, 0.75, 1)));
+        you.style.opacity = vo.toFixed(3);
+        you.style.visibility = vo > 0.002 ? "visible" : "hidden";
+        if (!reduced)
+          you.style.transform = `translate3d(0, ${lerp(120, -120, t).toFixed(1)}px, 0) scale(${lerp(0.82, 1.18, t).toFixed(3)})`;
+      }
       if (reduced) return;
       el.style.transform = `translate3d(0, ${(-P.open * 64).toFixed(1)}px, 0)`;
       // The headline stretches as it leaves, after the one on Gavin's
@@ -55,6 +67,9 @@ export default function Opening() {
             </span>
           </h1>
         </div>
+        <p className="v4-you" aria-hidden="true">
+          This is you, a few weeks from now.
+        </p>
       </div>
     </section>
   );

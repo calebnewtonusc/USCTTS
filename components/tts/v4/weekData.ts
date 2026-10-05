@@ -157,13 +157,27 @@ export const LESSON = [
 ];
 
 /* What the x-ray shows: how a member would build each beat. */
+/* The qualifying prompt: how the AI decides who's worth reaching, from
+ * each lead's Perplexity research. An example, for the x-ray. */
+export const QUALIFY = [
+  ["goal", "new patients for a Koreatown dental office"],
+  ["reads", "each lead's site and recent news, from Perplexity"],
+  ["keep", "within two miles, with a reason to talk now"],
+  ["drop", "chains that already run their own dental plan"],
+  ["write", "one line on why each is worth reaching"],
+] as const;
+
+/* The first email, as the AI drafts it, and the prompt behind it. */
+export const DRAFT =
+  "Hi Pastor Kim, I'm with a dental office on Western. Your monthly health fair looks great, and we'd love to bring a free screening table to the next one. Could I call you Thursday to set it up?";
+
 export const PROMPT = [
-  ["role", "front desk at a Koreatown dental office"],
-  ["reads", "the email, this week's open slots, the insurance list"],
-  ["rule", "answer in the language they wrote in, Korean or English"],
-  ["rule", "offer two open times, never more"],
-  ["rule", "insurance not on the list? say so, and attach the cash prices"],
-  ["rule", "never book anything. draft it, and a person sends it"],
+  ["role", "writes as the office manager at a Koreatown dental office"],
+  ["reads", "the lead's row: who, the signal, why it's worth reaching"],
+  ["rule", "open on their signal, in one specific line"],
+  ["rule", "ask for one small next step"],
+  ["rule", "under 90 words"],
+  ["rule", "never sends. a person reads it first"],
 ] as const;
 
 export const FLOW = [

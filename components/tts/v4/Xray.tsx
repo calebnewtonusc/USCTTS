@@ -4,8 +4,10 @@ import {
   FLOW,
   hoursOf,
   LEADS,
+  DRAFT,
   OUTLINE,
   PROMPT,
+  QUALIFY,
   TOTAL_HOURS,
   type Kind,
 } from "./weekData";
@@ -25,7 +27,7 @@ const KIND_NAMES: [Kind, string][] = [
   ["teach", "learning new tools"],
 ];
 
-export const XRAY_VIEWS = ["intro", "gtm", "email", "sheet", "teach"] as const;
+export const XRAY_VIEWS = ["intro", "gtm", "qualify", "email", "sheet", "teach"] as const;
 
 export default function XrayViews() {
   return (
@@ -56,7 +58,7 @@ export default function XrayViews() {
       <div className="xr-view" data-view="gtm">
         <div className="xr-row">
           {/* Filled with the manim clip on the first x-ray open (Week.tsx). */}
-          <div className="xr-clip" data-clips="gtm_score gtm_score_on_cardinal" />
+          <div className="xr-clip" />
           <div className="xr-detail">
             <p className="xr-cap">a Clay table, researched with Perplexity</p>
             <table className="xr-table">
@@ -86,12 +88,31 @@ export default function XrayViews() {
         </div>
       </div>
 
+      <div className="xr-view" data-view="qualify">
+        <div className="xr-row">
+          <div className="xr-clip" data-clips="gtm_score gtm_score_on_cardinal" />
+          <div className="xr-detail">
+            <p className="xr-cap">the qualifying prompt</p>
+            <dl className="xr-prompt">
+              {QUALIFY.map(([k, v], i) => (
+                <div key={i}>
+                  <dt>{k}</dt>
+                  <dd>{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+      </div>
+
       <div className="xr-view" data-view="email">
         <div className="xr-row">
           {/* Filled with the manim clip on the first x-ray open (Week.tsx). */}
           <div className="xr-clip" data-clips="email_draft" />
           <div className="xr-detail">
-            <p className="xr-cap">the prompt behind every draft</p>
+            <p className="xr-cap">the first email, as drafted</p>
+            <p className="xr-draft">{DRAFT}</p>
+            <p className="xr-cap">the prompt behind it</p>
             <dl className="xr-prompt">
               {PROMPT.map(([k, v], i) => (
                 <div key={i}>
