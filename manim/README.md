@@ -6,7 +6,7 @@ clip carries one idea, and the picture makes the argument.
 
 | Clip                    | Shows                                                                                                                                        | Length |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `gtm_score`             | 40 businesses on "nearby" and "growing". A decision line rotates to fit, the ones above it turn cardinal and lift, and a counter ticks to 7 | 8.9s   |
+| `gtm_score`             | 40 businesses on "nearby" and "growing". A decision line rotates to fit, the ones above it turn cardinal and lift, and a counter ticks to 5, matching the 5-row lead table beside it | 8.9s   |
 | `gtm_score_on_cardinal` | The same clip for the page's full-cardinal "finding customers" world: paper ink, and the picks flare gold                                    | 8.9s   |
 | `email_draft`           | A patient asks to move a cleaning. The reply builds word by word from candidates with probability bars, then "a person checks it"            | 10.2s  |
 | `crm_merge`             | Three messy rows for Dan Ortiz. Matching fields light up and link, then the table folds into one clean card                                  | 7.2s   |

@@ -125,6 +125,9 @@ def normal_of(angle_deg):
     return np.array([-np.sin(a), np.cos(a), 0.0])
 
 
+PICKED = 5
+
+
 class GtmScore(TTSScene):
     fg, pick = INK, CARDINAL
 
@@ -149,7 +152,10 @@ class GtmScore(TTSScene):
         # Seeded so every render is the same picture. 24 dots of radius 0.16
         # at least 0.85 units apart: at 400px wide that is a 9px dot with a
         # 24px gap, the smallest that stayed distinct when downscaled.
-        rng = np.random.default_rng(5)
+        # Seed 51 because seed 5 had no exactly-5 split: its best line ran
+        # 0.09 units from a dot centre, inside the dot. Of seeds 0 to 59,
+        # 51 gives 0.46 clearance at a natural -33 deg diagonal.
+        rng = np.random.default_rng(51)
         spots = []
         while len(spots) < 24:
             p = at(*rng.uniform(0.07, 0.93, 2))
@@ -158,8 +164,9 @@ class GtmScore(TTSScene):
         dots = VGroup(*[Dot(p, radius=0.16, color=fg).set_fill(opacity=0.5) for p in spots])
 
         # The fitted line: the angle and pivot, from a small grid, that pick
-        # 7 to 9 businesses and leave the most room between the line and the
-        # nearest dot, so nothing sits ambiguously on it.
+        # exactly 5 businesses, matching the 5-row lead table beside this clip
+        # in the x-ray panel, and leave the most room between the line and
+        # the nearest dot, so nothing sits ambiguously on it.
         best = None
         for ang in np.arange(-44, -27, 1.0):
             for fu in np.arange(0.40, 0.62, 0.02):
@@ -168,9 +175,10 @@ class GtmScore(TTSScene):
                     m = [float(np.dot(n, s - p0)) for s in spots]
                     k = sum(x > 0 for x in m)
                     clear = min(abs(x) for x in m)
-                    if 7 <= k <= 9 and (best is None or clear > best[0]):
+                    if k == PICKED and (best is None or clear > best[0]):
                         best = (clear, ang, p0)
-        _, final_angle, final_p = best
+        assert best is not None, "no line in the grid picks exactly PICKED dots"
+        clearance, final_angle, final_p = best
 
         count = ValueTracker(0)
         number = always_redraw(
