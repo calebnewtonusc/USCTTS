@@ -6,7 +6,7 @@ clip carries one idea, and the picture makes the argument.
 
 | Clip                    | Shows                                                                                                                                        | Length |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `gtm_score`             | 40 businesses on "nearby" and "growing". A decision line rotates to fit, the ones above it turn cardinal and lift, and a counter ticks to 15 | 8.9s   |
+| `gtm_score`             | 40 businesses on "nearby" and "growing". A decision line rotates to fit, the ones above it turn cardinal and lift, and a counter ticks to 7 | 8.9s   |
 | `gtm_score_on_cardinal` | The same clip for the page's full-cardinal "finding customers" world: paper ink, and the picks flare gold                                    | 8.9s   |
 | `email_draft`           | A patient asks to move a cleaning. The reply builds word by word from candidates with probability bars, then "a person checks it"            | 10.2s  |
 | `crm_merge`             | Three messy rows for Dan Ortiz. Matching fields light up and link, then the table folds into one clean card                                  | 7.2s   |
@@ -15,6 +15,12 @@ clip carries one idea, and the picture makes the argument.
 Finished files are in `public/tts/manim/`: `<name>.webm` (VP9 with alpha),
 `<name>.mov` (HEVC with alpha, for Safari) and `<name>.png` (the final frame
 with alpha, for a poster). Each video is under 1.4MB.
+
+## Size
+
+Laid out for the x-ray panel, which shows a clip 360 to 480px wide: body type
+is 52pt and up at 1080p, with no corner titles or column headers. Check a change
+by downscaling frames to 400px wide before shipping it.
 
 ## Using them on the page
 
