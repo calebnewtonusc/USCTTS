@@ -46,7 +46,9 @@ export default function Partners() {
   useEffect(() => {
     const el = sec.current;
     if (!el) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     const nums = [...el.querySelectorAll<HTMLElement>(".pt-n")];
     const rows = [...el.querySelectorAll<HTMLElement>(".pt-row > li")];
     const line = el.querySelector<HTMLElement>(".pt-line");
@@ -62,24 +64,37 @@ export default function Partners() {
       const bottom = rowList?.getBoundingClientRect().bottom ?? f.vh;
       const clear = f.vh - 52 - 16 - bottom;
       ROWS.forEach((r, i) => {
-        const k = easeOut3(prog(clear, i * 0.03 * f.vh, (0.25 + i * 0.03) * f.vh));
+        const k = easeOut3(
+          prog(clear, i * 0.03 * f.vh, (0.25 + i * 0.03) * f.vh),
+        );
         const s = `$${(r.value * k).toFixed(r.decimals)}B`;
         if (nums[i] && nums[i].textContent !== s) nums[i].textContent = s;
         // Two depths: the rows travel 90 and 130px across the region.
         const depth = i === 0 ? 90 : 130;
-        rows[i].style.transform = `translate3d(0, ${((0.5 - p) * depth).toFixed(1)}px, 0)`;
-        rows[i].style.opacity = smooth(prog(p, 0.08 + i * 0.04, 0.3 + i * 0.04)).toFixed(3);
+        rows[i].style.transform =
+          `translate3d(0, ${((0.5 - p) * depth).toFixed(1)}px, 0)`;
+        rows[i].style.opacity = smooth(
+          prog(p, 0.08 + i * 0.04, 0.3 + i * 0.04),
+        ).toFixed(3);
       });
       for (const l of [line, small]) {
         if (!l) continue;
         l.style.transform = `translate3d(0, ${((0.5 - p) * 50).toFixed(1)}px, 0)`;
-        l.style.opacity = (smooth(prog(p, 0.22, 0.4)) * (1 - smooth(prog(p, 0.8, 0.95)))).toFixed(3);
+        l.style.opacity = (
+          smooth(prog(p, 0.22, 0.4)) *
+          (1 - smooth(prog(p, 0.8, 0.95)))
+        ).toFixed(3);
       }
     });
   }, []);
 
   return (
-    <section ref={sec} id="v4-partners" className="pt" aria-labelledby="pt-line">
+    <section
+      ref={sec}
+      id="v4-partners"
+      className="pt"
+      aria-labelledby="pt-line"
+    >
       <div className="pt-inner">
         <ul className="pt-row">
           {ROWS.map((r) => (
@@ -93,9 +108,7 @@ export default function Partners() {
                 />
                 {!r.wordmark && r.name}
               </span>
-              <span className="pt-n">
-                ${r.value.toFixed(r.decimals)}B
-              </span>
+              <span className="pt-n">${r.value.toFixed(r.decimals)}B</span>
               <span className="pt-asof">{r.asOf}</span>
             </li>
           ))}
@@ -103,10 +116,9 @@ export default function Partners() {
         {/* What a member gets, in one plain line (STUDENT-POV, 3); the
          * "only university club" claim stays, small. */}
         <p id="pt-line" className="pt-line">
-          You build on Clay and Perplexity, the same tools real GTM teams (the
-          people who find a business its customers) pay for, through our
-          partner Blue Modern Advisory. You walk away knowing how to use both
-          on a real business.
+          You build on Clay and Perplexity, the tools real companies pay for to
+          find their customers, through our partner Blue Modern Advisory, and
+          you walk away knowing how to run both on a real business.
         </p>
         <p className="pt-small">
           as far as we know, we&apos;re the only university club building on
