@@ -103,8 +103,10 @@ export default function Partners() {
         {/* What a member gets, in one plain line (STUDENT-POV, 3); the
          * "only university club" claim stays, small. */}
         <p id="pt-line" className="pt-line">
-          You build on Clay and Perplexity, the same tools real GTM teams pay
-          for, through our partner Blue Modern Advisory.
+          You build on Clay and Perplexity, the same tools real GTM teams (the
+          people who find a business its customers) pay for, through our
+          partner Blue Modern Advisory. You walk away knowing how to use both
+          on a real business.
         </p>
         <p className="pt-small">
           as far as we know, we&apos;re the only university club building on

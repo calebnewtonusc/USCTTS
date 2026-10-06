@@ -43,12 +43,23 @@ export const P = {
  * back to a point of light on the grid and the rain begins.
  */
 export const WEEK = {
-  travel: [0.02, 0.11],
-  heat: [0.06, 0.15],
-  dive: [0.15, 0.235],
-  filmIn: [0.205, 0.245],
-  film: [0.24, 0.95],
-  out: [0.925, 0.995],
+  // The agent leaves USC as the week arrives, under the script's line.
+  travel: [0.0, 0.03],
+  // Through the point: the camera dives and the glow fills the frame in
+  // the film's #F4EFE6 straight from the blue map (review 4: no red world
+  // here, no blank hold after).
+  dive: [0.0, 0.04],
+  // The film crossfades in over the full-frame glow, and its focus pull
+  // starts the same moment. With the line riding the section's arrival,
+  // the film starts about 2.4 screens down at 1440 (freshman review 2 asked
+  // for 2.5 to 3; it was 4.4).
+  filmIn: [0.032, 0.044],
+  film: [0.032, 0.95],
+  // The pull-back to a point of light, then the rain into Join. Short: the
+  // zoomed-out diorama read as a dead screen (freshman review 2).
+  out: [0.945, 0.99],
+  // Kept for the camera's zoom while travelling; no heat map any more.
+  heat: [0.0, 0.03],
 } as const;
 
 /* The film's stages, in frames at 30 fps: public/tts/machine/stages.json,
@@ -65,7 +76,15 @@ export const STAGES: { name: Stage; from: number; to: number }[] = [
 export const FILM_FRAMES = { n: 375 };
 
 /** Share of the film at a point of the week's scroll. */
-export const filmShare = (p: number) => prog(p, WEEK.film[0], WEEK.film[1]);
+/* The film's first 22 frames are its rack focus out of the flat field.
+ * They pass in the first 4% of the film's scroll, so the tray reads as a
+ * city sooner (review 4: a screen of blur under the first caption). */
+const RACK = { frames: 22, share: 0.04 };
+export const filmShare = (p: number) => {
+  const k = prog(p, WEEK.film[0], WEEK.film[1]);
+  const r = RACK.frames / FILM_FRAMES.n;
+  return k < RACK.share ? (k / RACK.share) * r : r + ((k - RACK.share) / (1 - RACK.share)) * (1 - r);
+};
 
 export type Phase = "intro" | "travel" | "dive" | Stage | "out";
 export function phaseAt(p: number): Phase {
@@ -223,7 +242,9 @@ function regions(f: Frame) {
   // it from the dive to the pull-back.
   const mapWorks = bump(P.week, WEEK.heat[0], WEEK.heat[0] + 0.03, D0, D0 + 0.03);
   dim = lerp(dim, 0.4 - 0.25 * mapWorks, wi);
-  store.highlight = smooth(prog(P.week, WEEK.heat[0], WEEK.heat[1]));
+  // No heat map in v5: the worth-reaching flare read as a red blob above
+  // the script's line (freshman review 2).
+  store.highlight = 0;
   store.agent.from = [0, 0];
   store.agent.to = KOREATOWN;
   store.agent.t = t;
@@ -254,16 +275,19 @@ function regions(f: Frame) {
   const seg = [
     // Sunrise, over most of the opening's runway.
     smooth(prog(P.open, 0.1, 0.95)),
-    // The heat map, as the agent arrives and the map lights its finds.
-    smooth(prog(P.week, ...WEEK.heat)),
-    // The dive, on the camera's own clock.
-    prog(P.week, D0, D1),
+    // Sky to cardinal to cream both pass while the glow covers the whole
+    // frame, so the reader goes from the blue map straight to the film's
+    // cream and never sees the red world at the dive (review 4).
+    smooth(prog(P.week, WEEK.filmIn[0] + 0.002, WEEK.filmIn[0] + 0.006)),
+    smooth(prog(P.week, WEEK.filmIn[0] + 0.006, WEEK.filmIn[0] + 0.01)),
     // Rain, finished across the whole city by Join's 0.4, before the camera
     // lifts and the doors come up (review 3: the ending must be clean).
     // It starts as Friday clears (the week's last screen) and runs on into
     // Join; P.week reaches 1 the moment P.join starts, so the two halves
     // join without a seam.
-    0.4 * prog(P.week, WEEK.out[1] - 0.02, 1) + 0.6 * prog(P.join, 0, 0.4),
+    // Mostly inside Join, so the doors rise with the wash and there's no
+    // empty red screen before them (review 4).
+    0.15 * prog(P.week, WEEK.out[1] - 0.02, 1) + 0.85 * prog(P.join, 0, 0.3),
   ];
   const world = seg[0] + seg[1] + seg[2] + seg[3];
   store.world = world;

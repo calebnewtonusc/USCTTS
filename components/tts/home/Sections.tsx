@@ -22,10 +22,10 @@ export function Join() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const doors = [...el.querySelectorAll<HTMLElement>(".jn-door")];
     return onFrame(() => {
-      const k = easeOut3(prog(P.join, 0.1, 0.9));
-      // The doors only come up once the city has turned cardinal behind
-      // them (choreo.ts finishes that change at 0.4).
-      const o = prog(P.join, 0.42, 0.7);
+      const k = easeOut3(prog(P.join, 0.05, 0.5));
+      // The doors rise while the cardinal washes in (review 4: an empty
+      // red screen held before them).
+      const o = prog(P.join, 0.04, 0.28);
       doors.forEach((d, i) => {
         d.style.transform = `translate3d(0, ${((1 - k) * (60 + i * 50)).toFixed(1)}px, 0)`;
         d.style.opacity = o.toFixed(3);

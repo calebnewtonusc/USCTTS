@@ -285,9 +285,10 @@
 .tts .v4-open {
   position: relative;
   /* 165 left about a screen of empty map before Partners at 2360 (review
-   * 3); 125 keeps a quarter screen of stream after the headline. */
-  height: 125vh;
-  height: 125svh;
+   * 3); 140 holds the "you" line for about half a screen, with the
+   * stage's scroll-away (review 4). */
+  height: 140vh;
+  height: 140svh;
 }
 .tts .v4-open-stage {
   position: sticky;
@@ -336,7 +337,7 @@
 .tts .pt {
   /* Top-aligned, so the numbers rise into view right as the headline hands
    * off instead of after half a screen of empty map (review 3). */
-  min-height: 100vh;
+  min-height: 70vh;
   display: grid;
   align-content: start;
   padding-top: 8vh;
@@ -791,14 +792,12 @@
 
 /* ---------- 4. join ---------- */
 .tts .jn {
-  min-height: 100vh;
-  min-height: 100svh;
+  /* No full-screen minimum: the doors come up with the cardinal wash
+   * instead of after a screen of empty red (review 4), and the footer
+   * follows straight after them. */
   display: flex;
-  /* The doors sit at the bottom of the screen and the footer follows right
-   * after the last mono line: centred, the leftover height showed as an
-   * empty cardinal band above the footer (review, 2026-10-05, at 390). */
   align-items: flex-end;
-  padding-block: 120px 16px;
+  padding-block: 14vh 16px;
 }
 .tts .jn-inner {
   width: 100%;
@@ -1140,6 +1139,8 @@
 /* The script's line for the dive, on the grid while the agent travels. */
 .tts .w5-intro {
   position: absolute;
+  /* Above the glow, so the line reads on until the film arrives. */
+  z-index: 2;
   left: max(var(--gutter), calc((100vw - var(--wide)) / 2 + var(--gutter)));
   right: var(--gutter);
   bottom: calc(var(--strip-h) + 10vh);
@@ -1349,4 +1350,22 @@
   .tts .xr-draft {
     font-size: 14px;
   }
+}
+/* The x-ray word, still quiet but readable over the film: ink at 13px
+ * with a halo of the film's ground (review 4: grey 11.5px vanished). */
+.tts .w5-film .w5-xword {
+  color: #2a1b1e;
+  font-size: 13px;
+  text-shadow:
+    0 0 6px #f4efe6,
+    0 0 12px #f4efe6;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .w5-film .w5-xword:hover {
+    color: var(--red);
+  }
+}
+.tts .w5-film .w5-xword[aria-pressed="true"] {
+  color: var(--sky-soft);
+  text-shadow: none;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { easeIn3, lerp, prog, smooth } from "../engine/math";
+import { easeIn3, easeOut3, lerp, prog, smooth } from "../engine/math";
 import { onFrame, P } from "./choreo";
 
 /*
@@ -25,19 +25,22 @@ export default function Opening() {
       // Gone before the world under it turns: the wave reaches half the
       // screen around 0.5, and a headline fading through that flip lost
       // its contrast (review 3).
-      const o = 1 - smooth(prog(P.open, 0.12, 0.46));
+      const o = 1 - smooth(prog(P.open, 0.05, 0.3));
       el.style.opacity = o.toFixed(3);
       el.style.visibility = o > 0.002 ? "visible" : "hidden";
       // The "you" moment (docs/STUDENT-POV.md, section 2): once the
       // headline has gone, one line flies past as the light leaves USC,
       // growing as it comes toward you.
+      // It arrives as the headline leaves, then holds still and fully
+      // visible for the rest of the pin and as the stage scrolls away,
+      // about half a screen (review 4: a 150px flyby was easy to miss).
       if (you) {
-        const t = prog(P.open, 0.42, 1);
-        const vo = smooth(prog(t, 0, 0.25)) * (1 - smooth(prog(t, 0.75, 1)));
+        const t = prog(P.open, 0.22, 0.45);
+        const vo = smooth(t);
         you.style.opacity = vo.toFixed(3);
         you.style.visibility = vo > 0.002 ? "visible" : "hidden";
         if (!reduced)
-          you.style.transform = `translate3d(0, ${lerp(120, -120, t).toFixed(1)}px, 0) scale(${lerp(0.82, 1.18, t).toFixed(3)})`;
+          you.style.transform = `translate3d(0, ${lerp(60, 0, easeOut3(t)).toFixed(1)}px, 0) scale(${lerp(0.9, 1, easeOut3(t)).toFixed(3)})`;
       }
       if (reduced) return;
       el.style.transform = `translate3d(0, ${(-P.open * 64).toFixed(1)}px, 0)`;
@@ -46,7 +49,7 @@ export default function Opening() {
       // first line a beat ahead of the second, like it's being drawn up
       // the freeway.
       lines.forEach((ln, i) => {
-        const k = easeIn3(prog(P.open, 0.02 + i * 0.04, 0.46 + i * 0.04));
+        const k = easeIn3(prog(P.open, 0.0 + i * 0.03, 0.3 + i * 0.03));
         ln.style.fontVariationSettings = `"wdth" ${lerp(100, 75, k).toFixed(1)}`;
         ln.style.transform = `scale(1, ${lerp(1, 1.7, k).toFixed(3)})`;
         ln.style.letterSpacing = `${lerp(-0.025, 0.02, k).toFixed(4)}em`;

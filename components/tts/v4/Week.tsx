@@ -30,7 +30,7 @@ import { attachXray } from "./xrayLine";
 /* The film (blender/, commit 1934ab8): 1280x720 and a 720x1280 portrait
  * cut for phones, every frame a keyframe so a seek lands on its exact
  * frame. poster.jpg is frame 1, the flat #F4EFE6 field the dive's glow
- * crossfades into; poster-machine.jpg is frame 330, the whole machine, for
+ * crossfades into; poster-machine.jpg is frame 360, the whole machine pulled back, for
  * reduced motion and for a video that can't play. */
 const FILM = {
   sources: [
@@ -76,7 +76,7 @@ const CAPTIONS: { stage: Stage; line: string; label?: string; at: string }[] = [
     stage: "typewriter",
     line: "It drafts the first email. You fix it until it sounds like a person.",
     label: "prompting",
-    at: "is-tc is-small",
+    at: "is-tc is-mid",
   },
   {
     stage: "blocks",
@@ -123,8 +123,13 @@ export default function Week() {
       }
       video = null;
     };
-    if (reduced || !box) showPoster();
-    else {
+    /* The video is made only when the dive is about 1.5 screens away, so
+     * nobody downloads the film at the top of the page (review 4: 5.3 MB
+     * at scrollY 0). Until then the frame-1 poster stands in. */
+    let pending = false;
+    const makeVideo = () => {
+      if (!box || video) return;
+      box.querySelector("img")?.remove();
       const v = document.createElement("video");
       v.className = "w4-media";
       v.muted = true;
@@ -132,10 +137,7 @@ export default function Week() {
       v.preload = "auto";
       v.poster = portrait ? FILM.posterPortrait : FILM.poster;
       v.setAttribute("aria-hidden", "true");
-      const list =
-        window.innerWidth < 768 && FILM.portrait.length
-          ? FILM.portrait
-          : FILM.sources;
+      const list = portrait ? FILM.portrait : FILM.sources;
       list.forEach((s, i) => {
         const src = document.createElement("source");
         src.src = s.src;
@@ -145,9 +147,9 @@ export default function Week() {
         v.append(src);
       });
       v.addEventListener("error", showPoster);
-      // Warm the decoder while the reader is still at the top: the first
-      // seek decoded mid-scroll as a 233 ms frame at the dive on a cold
-      // load (production build, headed, 2026-10-05).
+      // Warm the decoder before the dive: the first seek decoded mid-scroll
+      // as a 233 ms frame on a cold load (production build, headed,
+      // 2026-10-05).
       v.addEventListener(
         "canplay",
         () => {
@@ -163,6 +165,15 @@ export default function Week() {
       v.addEventListener("seeked", kick);
       box.append(v);
       video = v;
+    };
+    if (reduced || !box) showPoster();
+    else {
+      const img = document.createElement("img");
+      img.src = portrait ? FILM.posterPortrait : FILM.poster;
+      img.alt = "";
+      img.className = "w4-media";
+      box.append(img);
+      pending = true;
     }
 
     /* The film's own stage frames, from stages.json. */
@@ -184,11 +195,19 @@ export default function Week() {
 
     const off = onFrame((f) => {
       const p = P.week;
+      if (pending) {
+        const top = el.getBoundingClientRect().top;
+        const diveTop = top + WEEK.dive[0] * (el.offsetHeight - f.vh);
+        if (diveTop < 1.5 * f.vh) {
+          pending = false;
+          makeVideo();
+        }
+      }
       const q = p - (1 - P.weekIn) * 0.1;
 
       // "Say your first project is..." rides the travel and the heat map.
       if (intro) {
-        const t = prog(q, -0.06, WEEK.dive[0] + 0.02);
+        const t = prog(q, -0.06, WEEK.dive[1] + 0.012);
         const o = smooth(prog(t, 0, 0.15)) * (1 - smooth(prog(t, 0.8, 1)));
         intro.style.opacity = o.toFixed(3);
         intro.style.visibility = o > 0.002 ? "visible" : "hidden";
@@ -200,7 +219,7 @@ export default function Week() {
       // it's the whole frame, in the film's ground colour.
       if (glow) {
         const g = easeInOut3(
-          prog(p, WEEK.dive[0] + 0.02, WEEK.filmIn[1] - 0.01),
+          prog(p, WEEK.dive[0], WEEK.filmIn[0] + 0.002),
         );
         const gone = smooth(prog(p, WEEK.filmIn[1], WEEK.filmIn[1] + 0.01));
         const o = smooth(prog(g, 0, 0.3)) * (1 - gone);
@@ -240,7 +259,10 @@ export default function Week() {
         // The pull-back's line waits for the camera to clear the mailbox,
         // which still fills its top left for the stage's first frames.
         const t0 = st.name === "pullback" ? 0.3 : 0;
-        const o = smooth(prog(t, t0, t0 + 0.16)) * (1 - smooth(prog(t, 0.84, 1)));
+        // The pull-back's line stays until the film itself closes, so the
+        // zoomed-out machine always has its words (freshman review 2).
+        const fade = st.name === "pullback" ? 0 : smooth(prog(t, 0.84, 1));
+        const o = smooth(prog(t, t0, t0 + 0.16)) * (1 - fade);
         c.style.opacity = o.toFixed(3);
         c.style.visibility = o > 0.002 ? "visible" : "hidden";
         if (!reduced)

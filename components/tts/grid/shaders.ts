@@ -367,7 +367,7 @@ void main() {
   if (uMode < 0.5) o = over(o, aStreet, tcv * 0.16);
   else if (uMode < 1.5) o = over(o, bWash, tcv * 0.35);
   else if (uMode < 2.5) o = over(o, bBg2, tcv * (1.0 - smoothstep(0.66, 0.85, uT)) * 0.97);
-  else o = over(o, aHot, tcv * 0.55);
+  // The rain's wash has no rim of its own.
   gl_FragColor = o;
 }
 `;

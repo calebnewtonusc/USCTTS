@@ -37,6 +37,8 @@ uniform vec2 uFocus;
 uniform vec4 uProtect;
 uniform float uProtectOn, uProtectM;
 
+// Broad, smooth patches, the same function as washNoise() in TypeScript.
+float washNoise(vec2 p) { return 0.5 + 0.25 * (sin(p.x / 1900.0 + 1.3) * cos(p.y / 2300.0 - 0.7) + sin((p.x + p.y) / 3100.0 + 2.1)); }
 float sunX(vec2 p) { return p.x * 0.94 + p.y * 0.34; }
 float sunS(float t) { return mix(7600.0, -7600.0, t); }
 
@@ -68,15 +70,11 @@ float transM(vec2 p, out float crest) {
     crest = 1.0 - smoothstep(r * 0.7, r, d);
     return smoothstep(0.5, 0.62, uT);
   }
-  float m = 0.0;
-  for (int i = 0; i < ${SITE_N}; i++) {
-    float age = uT - uSiteT[i];
-    float r = 40.0 + max(age, 0.0) * 2600.0;
-    float d = length(p - uSite[i]);
-    m = max(m, step(0.0, age) * (1.0 - smoothstep(r * 0.82, r, d)));
-    crest = max(crest, step(0.0, age) * exp(-pow((d - r) / 55.0, 2.0)) * (1.0 - smoothstep(0.0, 0.3, age)));
-  }
-  return max(m, smoothstep(0.86, 0.98, uT));
+  // Rain into Join: a soft wash, never a circle (review 4: a growing disc
+  // with ring ghosts). Cardinal seeps in unevenly over broad patches of
+  // the city and finishes full-bleed; the drops fall into it.
+  float n = washNoise(p);
+  return smoothstep(0.0, 0.3, uT * 1.4 - n * 0.4);
 }
 
 float protectMask(vec2 frag) {
@@ -123,16 +121,9 @@ export function transM(
     return Math.max(smooth(0.35, 0.75, h), smooth(0.82, 1, t));
   }
   if (mode === 2) return smooth(0.5, 0.62, t);
-  let m = 0;
-  for (let i = 0; i < SITE_N; i++) {
-    const age = t - siteT[i];
-    if (age < 0) continue;
-    const r = 40 + age * 2600;
-    const d = Math.hypot(x - sites[i * 2], y - sites[i * 2 + 1]);
-    m = Math.max(m, 1 - smooth(r * 0.82, r, d));
-  }
+  const n = 0.5 + 0.25 * (Math.sin(x / 1900 + 1.3) * Math.cos(y / 2300 - 0.7) + Math.sin((x + y) / 3100 + 2.1));
   void focus;
-  return Math.max(m, smooth(0.86, 0.98, t));
+  return smooth(0, 0.3, t * 1.4 - n * 0.4);
 }
 
 /** The 16 businesses nearest a point, nearest first, and when each one
