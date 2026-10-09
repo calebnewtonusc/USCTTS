@@ -65,28 +65,32 @@ function status(): string {
   if (P.weekIn > 0.6) {
     // The mono labels name the skill or the tool (SCRIPT-v5).
     const ph = phaseAt(P.week);
-    if (ph === "intro") return "example: a dental office in Koreatown";
+    if (ph === "intro") return "a real office near Wilshire and Western";
     if (ph === "travel") {
       const left = KTOWN_KM * (1 - travelT());
       return left > 0.05 ? `en route to Koreatown, ${left.toFixed(1)} km` : "arrived in Koreatown";
     }
     if (ph === "dive") return "into one point of light";
-    if (ph === "tray") return "finding leads, in Clay";
-    if (ph === "sorter") return "qualifying, with Perplexity research";
-    if (ph === "typewriter") return "prompting";
-    if (ph === "mailbox") return "sent";
-    if (ph === "blocks") return "the CRM";
-    if (ph === "pullback") return "teaching the office";
+    // The captions name each stage's skill; the readout only counts, so
+    // the two never say the same words at once.
+    if (ph === "tray") return "stage 1 of 5";
+    if (ph === "sorter") return "stage 2 of 5";
+    if (ph === "typewriter") return "stage 3 of 5";
+    if (ph === "mailbox") return "stage 4 of 5";
+    if (ph === "blocks") return "stage 5 of 5";
+    if (ph === "pullback") return "handing it over";
     return "back on the map";
   }
-  if (P.partners > 0.25) return "building on Clay and Perplexity, through BMA";
+  if (P.partners > 0.25) return "the whole basin, centred on USC";
   if (store.load < 1) return `assembling LA, ${Math.round(store.load * 100)}%`;
   // The first scroll is the whole club in one move: students at USC, work
   // going out to businesses across LA. The status line says it as it runs.
-  if (store.stream > 0.55) return "sending work out to LA: automations, CRMs, training";
+  if (store.stream > 0.55) return "work streaming out from USC across LA";
   if (store.stream > 0.04) return "students at USC, streaming in on the 110 and the 10";
-  // What the club is, to a student, in the readout (STUDENT-POV, 1).
-  return "students who build real AI for real LA businesses";
+  // Where the reader stands. It used to say what the club is, which the
+  // line about who we are says two screens later, and nothing on home is
+  // said twice (Caleb, 2026-10-09).
+  return "you are here: USC";
 }
 
 const clock = (secs: boolean) =>

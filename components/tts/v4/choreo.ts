@@ -317,7 +317,12 @@ function regions(f: Frame) {
   // straight down (no tilted plane, no horizon), so the doors land on one
   // full-bleed cardinal with nothing left in a corner (review 3,
   // 2026-10-05, a blob, then a tilted quad, then a pink corner).
-  const lift = easeInOut3(prog(P.join, 0.4, 0.75));
+  // The camera slides to the spot the doors were tuned on (review 3,
+  // 2026-10-05): held over USC, the 110's ribbon ran straight through "Book
+  // 30 minutes" like a strikethrough (screenshot, 2026-10-09).
+  const lift = easeInOut3(prog(P.join, 0.25, 0.75));
+  x = lerp(x, KOREATOWN[0] * 0.55, lift);
+  y = lerp(y, KOREATOWN[1] * 0.55, lift);
   zoom = lerp(zoom, 0.95, lift);
   tilt = lerp(tilt, 0, lift);
   if (lift > 0.02) mode = "topdown";
@@ -325,7 +330,7 @@ function regions(f: Frame) {
   // The doors are big type straight on the field; a bright freeway ribbon
   // through "Teach me to build that" read as a strikethrough at 390
   // (2026-10-05), so the field's light comes down under them.
-  dim = lerp(dim, 0.45, easeOut3(prog(P.join, 0, 0.6)));
+  dim = lerp(dim, 0.6, easeOut3(prog(P.join, 0, 0.6)));
 
   // The colour world (grid/palette.ts): 0 night over the basin, 1 dawn sky
   // as the stream lifts, 2 a full cardinal field while the map finds

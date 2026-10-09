@@ -60,7 +60,8 @@ export default function Partners() {
       // The section pins for most of a screen (v4.css); the numbers count
       // up while it holds, a beat apart.
       ROWS.forEach((r, i) => {
-        const k = easeOut3(prog(p, 0.3 + i * 0.03, 0.5 + i * 0.03));
+        // The count starts with the row's fade, so "$0B" never shows.
+        const k = easeOut3(prog(p, 0.16 + i * 0.04, 0.44 + i * 0.04));
         const s = `$${(r.value * k).toFixed(r.decimals)}B`;
         if (nums[i] && nums[i].textContent !== s) nums[i].textContent = s;
         const depth = i === 0 ? 90 : 130;

@@ -7,16 +7,15 @@ import { mono } from "./v4/mono";
  * "ending" is home's: the same links, small and in mono, inside the
  * cardinal ending under the two doors, because Join followed by a white
  * footer was two endings (Caleb, 2026-10-05: "Why do you have back to back
- * footers?"). */
+ * footers?"). It leaves out Join and Instagram: the student door right
+ * above already carries both, and nothing on home appears twice (Caleb,
+ * 2026-10-09: "Repeating things is low aura"). */
 export default function Footer({ variant = "full" }: { variant?: "full" | "ending" }) {
   if (variant === "ending") {
     return (
       <footer className={`footer is-ending ${mono.variable}`}>
         <nav className="footer-strip" aria-label="Footer">
           <ul>
-            <li>
-              <Link href="/apply">Join TTS</Link>
-            </li>
             <li>
               <Link href="/members">People</Link>
             </li>
@@ -38,15 +37,6 @@ export default function Footer({ variant = "full" }: { variant?: "full" | "endin
                 target="_blank"
               >
                 LinkedIn
-              </a>
-            </li>
-            <li>
-              <a
-                href={INSTAGRAM_URL}
-                rel="noreferrer"
-                target="_blank"
-              >
-                Instagram
               </a>
             </li>
           </ul>
