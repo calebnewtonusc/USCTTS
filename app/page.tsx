@@ -1,5 +1,5 @@
-import TTSHome from "@/components/tts/TTSHome";
+import Landing from "@/components/tts/landing/Landing";
 
 export default function Home() {
-  return <TTSHome />;
+  return <Landing />;
 }

@@ -9,6 +9,7 @@ import "./pages.css";
 // About, Build and the meeting slides are gone (next.config.mjs sends them
 // to /), so the nav is the two pages a visitor actually looks for plus Join.
 const LINKS = [
+  { href: "/way", label: "The TTS way" },
   { href: "/members", label: "People" },
   { href: "/work-with-us", label: "For companies" },
 ];
