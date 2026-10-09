@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { loadGrid } from "./data";
 import { createGridEngine, type GridEngine } from "./engine";
+import { grid } from "./store";
 
 interface LAGridProps {
   /** positioning and stacking; defaults to a fixed full-viewport layer */
@@ -33,6 +34,7 @@ export default function LAGrid({
       // only exists in the browser.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setStill(true);
+      grid.ready = true;
       return;
     }
     const ctrl = new AbortController();
@@ -41,17 +43,24 @@ export default function LAGrid({
       .then((data) => {
         if (ctrl.signal.aborted) return;
         try {
-          engine = createGridEngine(canvas, data);
+          engine = createGridEngine(canvas, data, () => {
+            grid.ready = true;
+          });
         } catch {
           // The context can still fail after the probe (lost GPU).
           setStill(true);
+          grid.ready = true;
         }
       })
       .catch((err: unknown) => {
-        if (!ctrl.signal.aborted) console.error("LAGrid:", err);
+        if (!ctrl.signal.aborted) {
+          console.error("LAGrid:", err);
+          grid.ready = true;
+        }
       });
     return () => {
       ctrl.abort();
+      grid.ready = false;
       engine?.dispose();
     };
   }, [src]);

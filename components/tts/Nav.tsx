@@ -9,7 +9,8 @@ import "./pages.css";
 // About, Build and the meeting slides are gone (next.config.mjs sends them
 // to /), so the nav is the two pages a visitor actually looks for plus Join.
 const LINKS = [
-  { href: "/way", label: "The TTS way" },
+  // The semester's story on home; WayHash glides there instead of jumping.
+  { href: "/#way", label: "The TTS way" },
   { href: "/members", label: "People" },
   { href: "/work-with-us", label: "For companies" },
 ];
@@ -42,6 +43,12 @@ export default function Nav() {
   }, [open]);
 
   const close = () => setOpenOn(null);
+  // On home, the story link glides on this page rather than navigating.
+  const onWay = (e: React.MouseEvent, href: string) => {
+    if (href !== "/#way" || pathname !== "/") return;
+    e.preventDefault();
+    window.dispatchEvent(new Event("tts:way"));
+  };
   const cls = ["nav", scrolled ? "is-scrolled" : "", open ? "is-open" : ""]
     .filter(Boolean)
     .join(" ");
@@ -60,6 +67,7 @@ export default function Nav() {
               <Link
                 href={l.href}
                 aria-current={pathname === l.href ? "page" : undefined}
+                onClick={(e) => onWay(e, l.href)}
               >
                 {l.label}
               </Link>
@@ -93,7 +101,10 @@ export default function Nav() {
               <li key={l.href}>
                 <Link
                   href={l.href}
-                  onClick={close}
+                  onClick={(e) => {
+                    close();
+                    onWay(e, l.href);
+                  }}
                   aria-current={pathname === l.href ? "page" : undefined}
                 >
                   {l.label}

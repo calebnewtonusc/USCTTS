@@ -1,48 +1,44 @@
 # STORY-tts: the beat sheet
 
-The home page's scroll story, per `docs/DIRECTION-tts-v3.md`: one world (the
-GTM and AI machine at golden hour), one continuous camera move, each station a
-beat. The scene is one 1200vh block with a sticky pin and one progress value
-`N` (0 to 1), followed at 0.2 a frame, the chassis ported from our
-lemma-replica (`src/sections/hero-scene.js`). Windows below are on `N`; at
-1440x900 one unit of `N` is about 9,960px of scroll.
+Rewritten 2026-10-09 for the home page that folds the /way story back in
+(components/tts/landing/Landing.tsx). One semester at TTS, told by one set of
+objects: LA's real street grid as points of light around the USC dot. Every
+scroll-linked value reads one followed scroll (v4/choreo.ts, 12/s, Lemma's
+0.2 a frame), and the only timed motion is the 2200ms load clock.
 
-| Beat     | N              | Clock                         | What the objects do                                                                                                                                                                                                         | Caption                                          |
-| -------- | -------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Intro    | load           | timed, 2200ms                 | Stations drop into place one after another (each over 0.35 of the clock); the copy rises 12px in lines                                                                                                                      | Build the systems that do the work.              |
-| Exit     | 0 to 0.055     | scroll                        | Copy leaves upward 380px on one cubic curve, opacity on the band and again on the copy; the camera pulls back and up                                                                                                        | (none)                                           |
-| Accounts | 0.10 to 0.205  | scroll                        | Camera settles on the funnel; raw accounts, neutral blocks, pour into it on a loop                                                                                                                                          | It starts with raw accounts.                     |
-| Enrich   | 0.235 to 0.335 | scroll                        | Camera swings over the two enrichment pipes; gold beads (data being worked) run through them                                                                                                                                | Enrich first. Then decide.                       |
-| Qualify  | 0.37 to 0.53   | scroll                        | The magnifier over the belt: each record turns gold (kept) or grey and drops into the set-aside bin. The panel counts the real 2026-09-15 numbers up: 180, 388, 102 set aside, 286 kept, 30 shortlisted                     | Qualify on criteria, not vibes.                  |
-| Agents   | 0.56 to 0.66   | scroll                        | Five agents at their desks, visors breathing, documents lifting as they read                                                                                                                                                | Agents do the research.                          |
-| Send     | 0.69 to 0.785  | scroll                        | The mailbox flag rises on arrival; envelopes leave in arcs to the horizon                                                                                                                                                   | Then it reaches the right person.                |
-| Compound | 0.815 to 0.905 | scroll                        | The pipeline chart's bars climb as you arrive; a gold ball climbs the steps                                                                                                                                                 | And it compounds.                                |
-| Sink     | 0.90 to 0.925  | scroll                        | The camera flies up and side-on; the whole machine sinks into the ground, a hairline lattice appears, and lattice cells light ahead of where the front will pass                                                            | (none)                                           |
-| Build    | from 0.93      | timed, 1800ms, once per entry | A gold wavefront crosses the ground from funnel to chart. Each part rises out of the ground as the front passes it, over its own 560ms; the pipes connect behind the front; each station starts running once its parts land | This is the machine. We teach every piece of it. |
+| Beat                        | Range                | Clock                                                         | What the objects do                                                                                                                                                                                                                         | Words                                                                                                                                                                             |
+| --------------------------- | -------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Intro                       | load                 | timed 2200ms, starts when the field has drawn its first frame | Points fly onto their streets while the camera settles from high and steep down onto USC; each headline line slides up out of its mask (starts 0.30 and 0.38 of the clock); the readout strip comes in at 0.5; one pulse rings out from USC | USC's AI implementation lab.                                                                                                                                                      |
+| Exit                        | 0 to 560px           | scroll                                                        | Line one leaves 420px, line two 300px, on one cubic ease-out; opacity reaches 0 at 520px; the camera streams down the 110 into USC                                                                                                          | This is you, a few weeks from now.                                                                                                                                                |
+| Who we are                  | #v4-partners, pinned | scroll                                                        | The camera eases back over the basin into the sky world; the line and the two partner rows drift at three depths; the valuations count up while it holds                                                                                    | We do everything AI for LA businesses... / Clay $7.1B (Sept 2026), Perplexity $20B (Sept 2025), through Blue Modern Advisory                                                      |
+| A business brings a problem | #v4-week 0 to 0.03   | scroll                                                        | The agent light drives from USC to a real dental office node in Koreatown                                                                                                                                                                   | the TTS way. Say your first client is a dental office in Koreatown...                                                                                                             |
+| Build it                    | 0.03 to 0.95         | scroll                                                        | The camera dives through that point; the clay machine film scrubs stage by stage (tray, sorter, typewriter, mailbox, CRM stack); the x-ray line shows each stage's real artifact and manim clip                                             | one line per stage                                                                                                                                                                |
+| Hand it over                | 0.95 to 0.99         | scroll                                                        | The film draws back in to a point of light on the cream map                                                                                                                                                                                 | Then you teach the office to run it without you.                                                                                                                                  |
+| Where they go               | #v4-alumni           | scroll, one-shot reveals                                      | The camera rises off the block and drifts home to USC; the alumni wall, the mentors and the team come up over the city in layers                                                                                                            | Then you graduate. This is where the 15 people who started at TTS went. / These people actually want to help you. / When Matthew Kim graduated, he handed TTS to Caleb and Tyler. |
+| Two doors                   | #v4-join             | scroll                                                        | The cardinal rains in from Koreatown across the city                                                                                                                                                                                        | I'm at USC. Teach me to build that. / I run a business. Book 30 minutes with Caleb.                                                                                               |
 
-Reduced motion: no flight and no sweep. The block becomes the hero and seven
-station stills (`public/tts/world/station-*.jpg`, rendered from the same world
-at each caption's hold, the last one with the build finished), each with its
-caption and, for Qualify, the real counts.
+Nothing appears twice. The manim clips live only inside the x-ray, each face
+once (the alumni wall carries alumni only), and the doors are the only calls
+to action besides the nav. /way redirects to /#way, which glides to the
+story (WayHash.tsx).
 
-After the block, the page continues on the same chassis:
+Reduced motion: every beat lands on its finished state; the film is its
+pulled-back poster.
 
-| Section                                        | Mechanism                                                                                                        | What carries it                                                |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Run it yourself                                | pinned crossfade, the replica's W3 panels: layers switched by class, 500ms ease-out, IntersectionObserver at 0.5 | the in-browser run on the real dataset, with the verify switch |
-| What you learn                                 | pinned 330vh; each of five stations draws itself from one scroll progress                                        | a hand-drawn board in the page's hairline family               |
-| What we build, What we turn down, People, Join | static, with the join band on the replica's mesh shader in page ink                                              | type, the roster's photographs                                 |
+## Measured, Chromium on Metal, 1440x900
 
-## Seams: no hard cut
+Intro frame times over the first 3.2s, and long tasks inside them:
 
-Every section hands off to the next through one shared object
-(`components/tts/home/Seams.tsx`). Each seam overlaps the last screen of one
-section and the first screen of the next, so it adds no scroll. One progress
-value drives it, so it reverses, and reduced motion hides it.
+| Page          | Load avg | p95          | max        | long tasks                 |
+| ------------- | -------- | ------------ | ---------- | -------------------------- |
+| live bba598b  | 120      | 16.8         | 1550       | 3, 1632ms total            |
+| live bba598b  | 18       | 16.7 to 16.8 | 50 to 67   | none                       |
+| this home     | 18       | 16.7 to 16.8 | 17 to 67   | one 81+54ms run, else none |
+| lemma-replica | 18       | 16.8         | 133 to 166 | 1 to 2, 130 to 307ms       |
 
-| Seam | Shared object | What happens |
-|---|---|---|
-| World to run | the qualification readout | It grows out of the station in the world's last frame, holds as a card while the world gives way to the page ground, then lands on the run panel as it rises |
-| Run to whiteboard | the world's ground grid | A lattice seen from a low camera tilts up until it faces the reader, fills in, and lands on the board's surface |
-| Whiteboard to the sections below | the compounding stroke | The board's last curve keeps drawing, arcs over, and runs down the left gutter, where it becomes the cardinal spine that What we build, What we turn down and the roster hang on |
-| Roster to join | the dawn sun | The world's low sun rises from below the page, turning from dawn gold to cardinal, until it is the join band |
+A trace of the live intro showed the cause the numbers hide: the load clock
+started at mount, the grid data parsed about a second later and its first
+frame stalled 113ms linking shaders (GetProgramiv), so the city arrived
+half built. Now the shaders link through compileAsync, one frame is drawn,
+and only then does the clock start; the new trace has no long task after
+hydration.

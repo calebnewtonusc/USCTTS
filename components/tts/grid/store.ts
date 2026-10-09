@@ -33,6 +33,11 @@ export interface GridBurst {
 }
 
 export const grid = {
+  // WRITTEN BY THE ENGINE: true once the shaders are linked and the first
+  // frame is drawn. The load clock waits for it (v4/choreo.ts).
+  ready: false,
+  // The film covers the whole field: the engine skips drawing.
+  covered: false,
   load: 0, // 0..1 load clock: scattered points fly onto their streets
   pulse: 0, // 0..1 one ring pulse outward from USC
   stream: 0, // 0..1 light streams down the freeways into USC, then out to business points

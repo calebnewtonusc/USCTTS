@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { clamp, prog, smooth } from "../engine/math";
-import { glideTo, onFrame, P, phaseAt, store, travelT, WEEK } from "./choreo";
+import { glideTo, INTRO, onFrame, P, phaseAt, store, travelT, WEEK } from "./choreo";
 import { KOREATOWN } from "../grid/store";
 import { attachFlap } from "./flap";
 
@@ -44,6 +44,13 @@ const STOPS: Stop[] = [
   { label: "Koreatown", at: () => weekAt(WEEK.heat[1]) },
   { label: "The machine", at: () => weekAt(WEEK.film[0] + 0.05) },
   {
+    label: "Alumni",
+    at: () => {
+      const e = el("alumni");
+      return e ? topOf(e) : 0;
+    },
+  },
+  {
     label: "Your turn",
     at: () => {
       const e = el("join");
@@ -54,6 +61,7 @@ const STOPS: Stop[] = [
 
 function status(): string {
   if (P.join > 0.35) return "your turn";
+  if (P.alumni > 0.08 && P.week >= 1) return "back at USC, where the people who started here went";
   if (P.weekIn > 0.6) {
     // The mono labels name the skill or the tool (SCRIPT-v5).
     const ph = phaseAt(P.week);
@@ -129,7 +137,8 @@ export default function Readouts() {
     });
 
     const off = onFrame((f) => {
-      const o = 1 - smooth(prog(P.join, 0.25, 0.6));
+      // Comes in on the load clock once the streets are mostly drawn.
+      const o = (1 - smooth(prog(P.join, 0.25, 0.6))) * smooth(prog(INTRO.t, 0.5, 0.8));
       root.style.opacity = o.toFixed(3);
       root.style.visibility = o > 0.002 ? "visible" : "hidden";
 

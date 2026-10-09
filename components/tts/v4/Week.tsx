@@ -281,8 +281,12 @@ export default function Week() {
   return (
     <section ref={root} id="v4-week" className="w5" aria-labelledby="w5-intro">
       <div className="w5-stage">
+        {/* Tyler: "understand the TTS way", leading into the story. The
+         * business brings the problem; the student is the main character. */}
         <h2 id="w5-intro" className="w5-intro">
-          Say your first project is a dental office in Koreatown, for example.
+          <span className="w5-label w5-way">the TTS way</span>
+          Say your first client is a dental office in Koreatown that answers
+          the same emails all week.
         </h2>
 
         <div

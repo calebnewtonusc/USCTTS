@@ -144,6 +144,15 @@
     var(--ro-a) 40%,
     transparent
   );
+  /* Hidden until the load clock brings it in (Readouts.tsx); without this
+   * the server's HTML showed it, light, for the first frames over the
+   * dark field. */
+  opacity: 0;
+}
+@media (scripting: none) {
+  .tts .v4-ro {
+    opacity: 1;
+  }
 }
 .tts .v4-ro-read {
   display: flex;
@@ -290,6 +299,12 @@
   height: 140vh;
   height: 140svh;
 }
+/* The headline's depth exit runs over 560px of scroll (Opening.tsx), and
+ * the "you" line holds after it, so the pin is longer than the old 140. */
+.tts .v4-open {
+  height: 175vh;
+  height: 175svh;
+}
 .tts .v4-open-stage {
   position: sticky;
   top: var(--nav-h);
@@ -319,21 +334,43 @@
 }
 .tts .v4-h1-l {
   display: block;
-  transform-origin: 0 100%;
+  /* Each line is its own mask: the words slide up out of it on the load
+   * clock. The padding keeps descenders inside the mask. */
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
   will-change: transform;
 }
 .tts .v4-rise {
   display: inline-block;
-  animation: v4-rise 640ms cubic-bezier(0.2, 0.6, 0.2, 1) 700ms both;
+  will-change: transform;
 }
-@keyframes v4-rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
+/* Before the clock starts the lines sit below their masks; the script sets
+ * data-intro="run" on mount and drives them from there. Without script
+ * they stand where they belong. */
+.tts .v4-open-copy[data-intro="wait"] .v4-rise {
+  transform: translate3d(0, 105%, 0);
+}
+@media (scripting: none) {
+  .tts .v4-open-copy[data-intro="wait"] .v4-rise {
+    transform: none;
   }
 }
 
-/* ---------- 2. partners ---------- */
+/* ---------- 2. who we are, and partners ---------- */
+.tts .pt-say {
+  max-width: 24ch;
+  margin: 0 auto clamp(56px, 9vh, 104px);
+  font-size: clamp(30px, 3.5vw, 54px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+  text-wrap: balance;
+}
+.tts .w5-way {
+  display: block;
+  margin-bottom: 14px;
+}
 .tts .pt {
   /* Top-aligned, so the numbers rise into view right as the headline hands
    * off instead of after half a screen of empty map (review 3). */
@@ -341,6 +378,24 @@
   display: grid;
   align-content: start;
   padding-top: 8vh;
+}
+/* Who we are and the partners hold together on one pinned screen, so the
+ * line is never half under the nav while the numbers count. */
+.tts .pt {
+  display: block;
+  min-height: 0;
+  height: 170vh;
+  height: 170svh;
+  padding-top: 0;
+}
+.tts .pt > .pt-inner {
+  position: sticky;
+  top: var(--nav-h);
+  height: calc(100vh - var(--nav-h) - var(--strip-h));
+  height: calc(100svh - var(--nav-h) - var(--strip-h));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .tts .pt-inner {
   width: 100%;
@@ -785,8 +840,8 @@
   outline-offset: -4px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .tts .v4-rise {
-    animation: none;
+  .tts .v4-open-copy[data-intro] .v4-rise {
+    transform: none;
   }
 }
 
@@ -1368,4 +1423,77 @@
 .tts .w5-film .w5-xword[aria-pressed="true"] {
   color: var(--sky-soft);
   text-shadow: none;
+}
+
+/* The opener's scroll cue (Opening.tsx): a hairline whose light runs down
+ * it on a 2.4s loop, Lemma's cue period (lemma-replica ambient.js). */
+.tts .v4-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 28px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+  opacity: 0;
+}
+.tts .v4-cue-line {
+  position: relative;
+  width: 1px;
+  height: 36px;
+  background: var(--rule);
+  overflow: hidden;
+}
+.tts .v4-cue-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 40%;
+  background: var(--ink);
+  transform: translateY(-100%);
+  animation: v4-cue 2.4s cubic-bezier(0.6, 0, 0.4, 1) infinite;
+}
+.tts .v4-cue.is-paused .v4-cue-line::after {
+  animation-play-state: paused;
+}
+/* Transform only, so the loop never touches layout. */
+@keyframes v4-cue {
+  to {
+    transform: translateY(250%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tts .v4-cue-line::after {
+    animation: none;
+    transform: translateY(75%);
+  }
+}
+
+/* On a phone the line and both numbers are taller than one screen, so the
+ * section scrolls in flow instead of pinning. */
+@media (max-width: 599px) {
+  .tts .pt {
+    height: auto;
+    padding-block: 10vh 14vh;
+  }
+  .tts .pt > .pt-inner {
+    position: static;
+    height: auto;
+  }
+  .tts .pt-say {
+    font-size: 27px;
+  }
+}
+
+/* The page behind the fixed field takes the field's colour while it is
+ * dark. Nothing shows through the opaque canvas, but anything that reads
+ * colours from the DOM (site-gate's contrast check, a reader mode) saw
+ * light nav text over the paper behind it. */
+.tts:has(.v4[data-world="navy"]) {
+  background-color: #0d1020;
+}
+.tts:has(.v4[data-world="cardinal"]) {
+  background-color: #8f1426;
 }

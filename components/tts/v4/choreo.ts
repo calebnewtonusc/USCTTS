@@ -31,9 +31,13 @@ export const P = {
   partners: 0, // partners, from its top at the screen's bottom to its bottom at the top
   weekIn: 0, // the week arriving: its top from the screen's bottom to the top
   week: 0, // the week's pinned runway: the whole story
+  alumni: 0, // where the students go, mentors and team: top at the screen's bottom to bottom at the top
   join: 0, // join arriving
   page: 0, // the whole document, for the route rail
 };
+
+/** The intro's own clock, 0..1 and linear, for the copy's entrance. */
+export const INTRO = { t: 0 };
 
 /*
  * The week's runway, P.week (docs/SCRIPT-v5.md, beats 4 to 6). The grid
@@ -108,7 +112,7 @@ const entries: Entry[] = [];
 let raf = 0;
 let bound = false;
 const box: Record<string, { top: number; h: number }> = {};
-const IDS = ["open", "partners", "week", "join"];
+const IDS = ["open", "partners", "week", "alumni", "join"];
 
 function measure() {
   for (const id of IDS) {
@@ -121,15 +125,46 @@ function measure() {
   }
 }
 
+/*
+ * The followed scroll. Every updater reads this, not window.scrollY, so a
+ * wheel notch arrives over a few frames instead of as one step. Lemma's
+ * progress hook does `o.current += delta * 0.2` a frame (lemma-replica,
+ * hero-scene.js), 13.4 per second at 60 fps; 12 is a hair softer, written
+ * per second so a dropped frame doesn't change the feel. Snaps under half
+ * a pixel so the loop goes idle.
+ */
+const FOLLOW = 12;
+let fy = -1;
+let lastRun = 0;
+let reducedMotion = false;
+
 function run(now: number) {
   raf = 0;
+  const y = window.scrollY;
+  // A jump of more than three screens (the scrollbar dragged, a key like
+  // End) lands: following it would replay a whole chapter in a blur.
+  if (fy < 0 || reducedMotion || Math.abs(y - fy) > 3 * window.innerHeight) fy = y;
+  else {
+    const gap = now - lastRun;
+    const dt = gap > 50 ? 1 / 60 : gap / 1000;
+    fy += (y - fy) * (1 - Math.exp(-dt * FOLLOW));
+    if (Math.abs(y - fy) < 0.5) fy = y;
+  }
+  lastRun = now;
   const f: Frame = {
-    y: window.scrollY,
+    y: fy,
     vh: window.innerHeight,
     vw: window.innerWidth,
     now,
   };
   for (const e of entries) e.fn(f);
+  if (fy !== y) kick();
+}
+
+/** Skip the follower once, for a jump that should land, not glide. */
+export function snapScroll() {
+  fy = -1;
+  kick();
 }
 
 export function kick() {
@@ -139,12 +174,16 @@ export function kick() {
 function bind() {
   if (bound) return;
   bound = true;
+  reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const remeasure = () => {
     measure();
     kick();
   };
   window.addEventListener("scroll", kick, { passive: true });
-  window.addEventListener("resize", remeasure);
+  window.addEventListener("resize", () => {
+    fy = -1;
+    remeasure();
+  });
   new ResizeObserver(remeasure).observe(document.body);
   document.fonts?.ready.then(remeasure);
   measure();
@@ -193,7 +232,12 @@ function regions(f: Frame) {
   P.partners = through("partners", f);
   P.weekIn = arrive("week", f);
   P.week = pin("week", f);
+  P.alumni = through("alumni", f);
   P.join = arrive("join", f);
+  // The film covers the whole field between its crossfade and its
+  // pull-back, so the engine can skip drawing under it.
+  store.covered =
+    P.weekIn >= 1 && P.week > WEEK.filmIn[1] + 0.002 && P.week < WEEK.out[0] - 0.001;
   const doc = document.documentElement.scrollHeight - f.vh;
   P.page = doc > 0 ? clamp(f.y / doc) : 0;
 
@@ -206,6 +250,15 @@ function regions(f: Frame) {
   let zoom = lerp(1, 1.18, stream);
   let tilt = lerp(0, 0.45, stream);
   let mode: Mode = stream > 0.06 ? "freeway" : "basin";
+  // The intro's camera: it starts high and steep over the basin and
+  // settles down onto USC on the load clock while the streets land, so the
+  // city arrives with a move under it, not on a still frame. The engine's
+  // camera follower (2.6/s) trails the clock, which is what makes it glide.
+  if (INTRO.t < 1) {
+    const li = easeInOut3(INTRO.t);
+    zoom *= lerp(0.62, 1, li);
+    tilt = Math.max(tilt, lerp(0.85, 0, li));
+  }
 
   // 2. Partners: the camera eases back out over the whole basin.
   const back = easeInOut3(prog(P.partners, 0.18, 0.6));
@@ -249,15 +302,22 @@ function regions(f: Frame) {
   store.agent.to = KOREATOWN;
   store.agent.t = t;
 
-  // 4. Join. The last change spreads out from the agent while the camera
-  // is still down on its block, so you watch the cardinal run along the
-  // streets there; it finishes across the whole city before the camera
-  // lifts, straight down (no tilted plane, no horizon), so the doors land
-  // on one full-bleed cardinal with nothing left in a corner (review 3,
+  // 4. Where they go. Out of the point of light the camera rises off the
+  // block and drifts home to USC, straight down, while the alumni, the
+  // mentors and the team come up over the cream city. The field sits
+  // back so the cards read.
+  const home = easeInOut3(prog(P.alumni, 0.02, 0.34));
+  x = lerp(x, 0, home);
+  y = lerp(y, 0, home);
+  zoom = lerp(zoom, 1.25, home);
+  if (home > 0.02) mode = "topdown";
+  dim = lerp(dim, 0.5, smooth(prog(P.alumni, 0.04, 0.2)));
+
+  // 5. Join. The last change spreads out from USC while the camera holds
+  // straight down (no tilted plane, no horizon), so the doors land on one
+  // full-bleed cardinal with nothing left in a corner (review 3,
   // 2026-10-05, a blob, then a tilted quad, then a pink corner).
   const lift = easeInOut3(prog(P.join, 0.4, 0.75));
-  x = lerp(x, KOREATOWN[0] * 0.55, lift);
-  y = lerp(y, KOREATOWN[1] * 0.55, lift);
   zoom = lerp(zoom, 0.95, lift);
   tilt = lerp(tilt, 0, lift);
   if (lift > 0.02) mode = "topdown";
@@ -287,7 +347,9 @@ function regions(f: Frame) {
     // join without a seam.
     // Mostly inside Join, so the doors rise with the wash and there's no
     // empty red screen before them (review 4).
-    0.15 * prog(P.week, WEEK.out[1] - 0.02, 1) + 0.85 * prog(P.join, 0, 0.3),
+    // With the alumni between the film and the doors, the rain runs inside
+    // Join only.
+    prog(P.join, 0, 0.3),
   ];
   const world = seg[0] + seg[1] + seg[2] + seg[3];
   store.world = world;
@@ -296,12 +358,7 @@ function regions(f: Frame) {
   store.wave.to = from + 1;
   store.wave.t = world - from;
   store.wave.origin = from === 0 ? [0, 0] : KOREATOWN;
-  // The story lane, held to one world while a change passes behind it.
-  const laneEl = P.weekIn > 0.5 && P.week < 1 ? document.querySelector(".w4-lane") : null;
-  if (laneEl) {
-    const r = laneEl.getBoundingClientRect();
-    store.protect = [r.left, r.top, r.width, r.height];
-  } else store.protect = null;
+  store.protect = null;
   store.dim = dim;
   store.camera.x = x;
   store.camera.y = y;
@@ -325,25 +382,44 @@ export function startRegions() {
 /*
  * The load clock, the one timed motion on the field (crafts/website.md: two
  * clocks, never confused). 2.2s of points flying onto their streets, the
- * length Lemma's intro runs, then one pulse out from USC over 1.6s. Reduced
- * motion lands on the finished state.
+ * length Lemma's intro runs, then one pulse out from USC over 1.6s. It
+ * starts when the field has drawn its first frame (grid.ready), not at
+ * mount: from mount it lost about a second to the data and the shader link
+ * and the city arrived half built (live trace, 2026-10-09). The copy rises
+ * on this same clock (INTRO.t), so nothing on the screen keeps its own
+ * time. Reduced motion lands on the finished state.
  */
 export const LOAD_MS = 2200;
 export const PULSE_MS = 1600;
+// Guessed, about three times the one second measured between mount and the
+// first drawn frame on the live site: past it the copy comes in anyway, so
+// a slow GPU never holds the headline back.
+const READY_WAIT_MS = 3000;
 export function startLoadClock(reduced: boolean) {
   if (reduced) {
     store.load = 1;
     store.pulse = 1;
+    INTRO.t = 1;
     kick();
     return () => {};
   }
   store.load = 0;
   store.pulse = 0;
-  const t0 = performance.now();
+  INTRO.t = 0;
+  const mount = performance.now();
+  let t0 = -1;
   let id = 0;
   const step = (now: number) => {
+    if (t0 < 0) {
+      if (!store.ready && now - mount < READY_WAIT_MS) {
+        id = requestAnimationFrame(step);
+        return;
+      }
+      t0 = now;
+    }
     const t = now - t0;
-    store.load = easeOut3(clamp(t / LOAD_MS));
+    INTRO.t = clamp(t / LOAD_MS);
+    store.load = easeOut3(INTRO.t);
     store.pulse = clamp((t - LOAD_MS) / PULSE_MS);
     kick();
     if (store.pulse < 1) id = requestAnimationFrame(step);
@@ -378,6 +454,8 @@ export function glideTo(target: number) {
       top: target - Math.sign(d) * 0.6 * vh,
       behavior: "instant",
     });
+    // Under the veil the jump lands; the follower would replay it.
+    snapScroll();
     requestAnimationFrame(() => {
       veil.classList.remove("is-on");
       window.scrollTo({ top: target, behavior: "smooth" });
@@ -386,7 +464,7 @@ export function glideTo(target: number) {
 }
 
 /** The document y where a region's progress reaches p. */
-export function yAt(id: "open" | "partners" | "week" | "join", p: number) {
+export function yAt(id: "open" | "partners" | "week" | "alumni" | "join", p: number) {
   const vh = window.innerHeight;
   const el = document.getElementById(`v4-${id}`);
   if (!el) return 0;

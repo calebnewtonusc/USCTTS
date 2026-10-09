@@ -39,7 +39,10 @@ const CAMERA_RATE = 2.6;
 // Store values the page writes are followed at this rate per second, so a
 // discrete write never teleports a single point.
 const FOLLOW_RATE = 10;
-// When nothing is changing, ambient flow renders at 30 fps.
+// When nothing is changing, ambient flow renders at 30 fps, but only once
+// the field is dimmed behind panels (dim 0.3 and up). On the opener the
+// flow is the picture, and at 30 its lights stepped against the 60 fps copy
+// over them (Caleb, 2026-10-09: "so chopped"); it runs every frame there.
 const IDLE_FRAME_MS = 1000 / 30;
 // A colour world follows at 3/s, a little behind geometry: a chapter's light
 // arrives over about a second of scroll settle. At 1.8/s a parked frame 1.1 s
@@ -67,9 +70,18 @@ function hexToRgb(hex: string | undefined): [number, number, number] {
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }
 
+/**
+ * onReady fires once, on the first animation frame after the shaders are
+ * linked and one frame has been drawn. The page's load clock waits for it:
+ * started at mount, the clock ran for about a second while the data loaded
+ * and the programs compiled (a 113 ms first frame, GetProgramiv, in a trace
+ * of the live site on 2026-10-09), so the intro arrived half done and
+ * stalled. Warming first means the clock's first frame is a cheap one.
+ */
 export function createGridEngine(
   canvas: HTMLCanvasElement,
   data: GridData,
+  onReady?: () => void,
 ): GridEngine {
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const renderer = new THREE.WebGLRenderer({
@@ -681,6 +693,7 @@ export function createGridEngine(
   let last = performance.now();
   let lastRender = 0;
   let disposed = false;
+  let wasCovered = false;
 
   const approach = (cur: number, target: number, k: number) => {
     const next = cur + (target - cur) * k;
@@ -709,7 +722,10 @@ export function createGridEngine(
     step("exit", grid.exit);
     step("agentT", grid.agent.t);
     {
-      const kw = reduced ? 1 : 1 - Math.exp(-dt * WORLD_RATE);
+      // More than one world away means the page jumped (End key, the
+      // scrollbar, a glide under the veil): land on it rather than sweep
+      // through every chapter's colour on the way.
+      const kw = reduced || Math.abs(grid.world - follow.world) > 1.2 ? 1 : 1 - Math.exp(-dt * WORLD_RATE);
       const v = approach(follow.world, grid.world, kw);
       if (v !== follow.world) moving = true;
       follow.world = v;
@@ -774,9 +790,20 @@ export function createGridEngine(
       moving = true;
     }
 
+    // Covered by the film: nothing under it is visible, so draw nothing
+    // and keep the GPU for the video's seeks. Uncovering redraws at once.
+    if (grid.covered) {
+      wasCovered = true;
+      return;
+    }
+    if (wasCovered) {
+      wasCovered = false;
+      dirty = true;
+    }
     const ambient = !reduced && follow.exit < 1;
+    const idleMs = follow.dim < 0.3 ? 0 : IDLE_FRAME_MS;
     const due =
-      moving || dirty || (ambient && now - lastRender >= IDLE_FRAME_MS);
+      moving || dirty || (ambient && now - lastRender >= idleMs - 1);
     if (!due) return;
     if (follow.exit >= 1 && !moving && !dirty) return;
 
@@ -816,7 +843,23 @@ export function createGridEngine(
   window.addEventListener("resize", resize);
   document.addEventListener("visibilitychange", onVisible);
   t0Wall = performance.now();
-  raf = requestAnimationFrame(frame);
+  /* Link every program off the main thread where the driver allows it
+   * (KHR_parallel_shader_compile, which compileAsync polls), draw one frame
+   * so the buffers upload, then report ready on the next frame. */
+  const start = () => {
+    if (disposed) return;
+    placeCamera();
+    renderer.render(scene, camera);
+    lastRender = performance.now();
+    raf = requestAnimationFrame((now) => {
+      if (disposed) return;
+      last = now;
+      onReady?.();
+      frame(now);
+    });
+  };
+  placeCamera();
+  renderer.compileAsync(scene, camera).then(start, start);
 
   return {
     dispose() {

@@ -41,7 +41,7 @@ list. Each line is something he said or flagged in a screenshot that night.
 ## Facts
 - Use only claims in docs/POSITIONING.md, data/people.ts or the run
   dataset. Never name Palantir
-- Apple stays off the page until Susan Nyirenda is verified
+- Apple is in: Caleb verified Susan Nyirenda on 2026-10-05
 - No em dashes, no emojis
 
 ## Gates
