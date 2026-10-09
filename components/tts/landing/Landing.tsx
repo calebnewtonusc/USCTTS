@@ -73,9 +73,9 @@ export default function Landing() {
                 </h2>
                 <p className="ld-body" data-reveal="1">
                   When Matthew Kim graduated, he handed TTS to Caleb Newton and
-                  Tyler Larsen, and there was nobody left in it. They rebuilt it
-                  around one idea: you learn AI by building it for a real
-                  business, with the tools that business already pays for.
+                  Tyler Larsen with nobody left in it. They rebuilt it on one
+                  rule: you learn AI by shipping it for a real client, anywhere
+                  in the world, on the tools that client already pays for.
                 </p>
                 <Link href="/members" className="ld-btn" data-reveal="2">
                   Learn more about TTS <span aria-hidden="true">&rarr;</span>
@@ -94,7 +94,7 @@ export default function Landing() {
                   decoding="async"
                 />
                 <figcaption>
-                  one client project, every stage, from the TTS way
+                  every stage of one client project, from the TTS way
                 </figcaption>
               </figure>
             </div>
@@ -106,7 +106,7 @@ export default function Landing() {
                 our network
               </p>
               <h2 id="ld-net-h" className="ld-h" data-reveal="0">
-                See where {ALUMNI.length} people who started at TTS went.
+                {ALUMNI.length} people started at TTS. See where they went.
               </h2>
               <p className="ld-lede" data-reveal="1">
                 Tap a company to meet them.
@@ -148,8 +148,8 @@ export default function Landing() {
                     Understand the TTS way.
                   </span>
                   <span className="ld-way-sub">
-                    Follow one client project through a semester, stage by
-                    stage, in 3D.
+                    Follow one client project from the first lead to the
+                    handover, in 3D.
                   </span>
                   <span className="ld-btn is-light">
                     Start the walkthrough <span aria-hidden="true">&rarr;</span>

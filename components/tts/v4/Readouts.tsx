@@ -72,7 +72,7 @@ function status(): string {
   if (store.load < 1) return `assembling LA, ${Math.round(store.load * 100)}%`;
   // The first scroll is the whole club in one move: students at USC, work
   // going out to businesses across LA. The status line says it as it runs.
-  if (store.stream > 0.55) return "work streaming out from USC across LA";
+  if (store.stream > 0.55) return "work streaming out from USC";
   if (store.stream > 0.04) return "students at USC, streaming in on the 110 and the 10";
   // Where the reader stands. It used to say what the club is, which the
   // line about who we are says two screens later, and nothing on home is

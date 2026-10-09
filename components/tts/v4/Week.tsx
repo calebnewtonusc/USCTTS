@@ -52,7 +52,7 @@ const STAGE_NAME: Record<string, Stage> = {
 const CAPTIONS: { stage: Stage; line: string; label?: string; at: string }[] = [
   {
     stage: "tray",
-    line: "First you find every business nearby that could use them.",
+    line: "First you find every business that could send them patients.",
     label: "finding leads, in Clay",
     at: "is-tr is-big",
   },
@@ -264,7 +264,7 @@ export default function Week() {
         <h2 id="w5-intro" className="w5-intro">
           <span className="w5-label w5-way">the TTS way</span>
           Say your first client is a dental office in Koreatown that answers
-          the same emails all week.
+          the same emails all week. The next one could be anywhere.
         </h2>
 
         <div

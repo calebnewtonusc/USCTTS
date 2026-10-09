@@ -12,13 +12,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   // www, not the apex: the apex 301s and drops the path, so og:image 404d there.
   metadataBase: new URL("https://www.usctts.com"),
-  title: "Trojan Tech Solutions | USC's AI implementation lab",
+  title: "Trojan Tech Solutions | USC's AI implementation and go-to-market lab",
   description:
-    "USC's AI implementation lab. Members do whatever AI work a company needs, automations, CRM, GTM engineering, agents, even teaching their people, and learn it by building it.",
+    "USC's AI implementation and go-to-market lab. Students build whatever AI a company or nonprofit needs, anywhere in the world: automations, CRMs, outbound, agents and training. They learn it by shipping it.",
   openGraph: {
     title: "Trojan Tech Solutions",
     description:
-      "USC's AI implementation lab. Members do whatever AI work a company needs, automations, CRM, GTM engineering, agents, even teaching their people, and learn it by building it.",
+      "USC's AI implementation and go-to-market lab. Students build whatever AI a company or nonprofit needs, anywhere in the world: automations, CRMs, outbound, agents and training. They learn it by shipping it.",
     url: "https://www.usctts.com",
     siteName: "Trojan Tech Solutions",
     type: "website",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Trojan Tech Solutions",
     description:
-      "USC's AI implementation lab. Members do whatever AI work a company needs, automations, CRM, GTM engineering, agents, even teaching their people, and learn it by building it.",
+      "USC's AI implementation and go-to-market lab. Students build whatever AI a company or nonprofit needs, anywhere in the world: automations, CRMs, outbound, agents and training. They learn it by shipping it.",
     images: ["/img/tts-logo.png"],
   },
   icons: {

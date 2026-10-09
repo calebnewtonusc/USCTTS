@@ -40,20 +40,20 @@ tyler said."
 
 ### 1. Who we are
 
-- "We do everything AI for LA businesses: automations, CRMs, outbound, teaching their people, whatever a company needs. Students build all of it.": Caleb's own description, the big statement under the headline. Both.
+- "We build whatever AI a company or nonprofit needs, anywhere in the world: automations, CRMs, outbound, training their teams. Students build all of it.": Caleb's own description, global (2026-10-10: "TTS is global businesses, not just la"); LA is where the club lives, not who it serves. Both.
 - Clay wordmark and Perplexity mark, $7.1B and $20B counting up once when the row shows, each with "valued as of" and its date, never summed: the partners, sized and sourced. Both.
 - "You build on Clay and Perplexity, the tools real companies pay for to find their customers, through our partner Blue Modern Advisory.": what a member gets, and who holds the partnership. S.
 
 ### 2. About us
 
 - "A dormant club, rebuilt in three months.": the club's real history in one line (docs/COPY-tts.md, sourced facts). Both.
-- "When Matthew Kim graduated, he handed TTS to Caleb Newton and Tyler Larsen, and there was nobody left in it. ...": where the team came from and what the club is for. Both.
+- "When Matthew Kim graduated, he handed TTS to Caleb Newton and Tyler Larsen with nobody left in it. They rebuilt it on one rule: you learn AI by shipping it for a real client, anywhere in the world, on the tools that client already pays for.": where the team came from and what the club is for. Both.
 - "Learn more about TTS" button, to /members: Tyler's button; /members tells the comeback story with the advisors. Both.
 - The figure, frame 352 of the machine film at 2560px (whole machine pulled back), with its caption: a picture of what a client project is. It is a render, not a photo; no real photo of members at work is on disk yet. Both.
 
 ### 3. Our network
 
-- "See where 15 people who started at TTS went.": Tyler's "see our network"; 15 is ALUMNI.length. S.
+- "15 people started at TTS. See where they went.": Tyler's "see our network"; 15 is ALUMNI.length. S.
 - "Tap a company to meet them.": says the wall is interactive. S.
 - The logo wall, one tile per company, marks large in one ink at rest and full colour on hover, the faces and first names under each: "the logos would add a lot of credibility", with real faces. S.
 - The dialog a tile opens (the company's people, bigger, with roles; Escape, the close button or the backdrop closes it): Tyler's click into an interactive alumni view. S.
@@ -65,7 +65,7 @@ tyler said."
 
 ### 5. The TTS way
 
-- The card to /way, frame 200 of the film at 2560px (the typewriter drafting), "Understand the TTS way.", one line on what it is, "Start the walkthrough": Tyler's card into the 3D scroll story. The image eases in 3% on hover. Both.
+- The card to /way, frame 200 of the film at 2560px (the typewriter drafting), "Understand the TTS way.", "Follow one client project from the first lead to the handover, in 3D.", "Start the walkthrough": Tyler's card into the 3D scroll story. The image eases in 3% on hover. Both.
 
 ### 6. Meet the team
 

@@ -9,7 +9,7 @@ import "@/components/tts/pages.css";
 export const metadata: Metadata = {
   title: "Apply | Trojan Tech Solutions",
   description:
-    "Join Trojan Tech Solutions, USC's AI implementation lab. Learn to build AI in build sessions, then build it for real companies.",
+    "Join Trojan Tech Solutions, USC's AI implementation and go-to-market lab. Learn to build AI in build sessions, then ship it for real companies and nonprofits anywhere in the world.",
 };
 
 /* What happens after you apply, as one rail: the three things a member

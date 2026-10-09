@@ -7,7 +7,8 @@ import { easeOut3 } from "../engine/math";
  * Who TTS is, the first thing on home's sheet (Tyler, 2026-10-09: a big
  * statement of who we are). The line is Caleb's own description of the club
  * (RUBRIC: "We do everything AI. Automations, teaching, crm, blah blah
- * blah, wtv a company needs!"). Under it the two partners, each valuation
+ * blah, wtv a company needs!"), global since 2026-10-10: "TTS is global
+ * businesses, not just la". Under it the two partners, each valuation
  * with its date and never summed, and always through Blue Modern Advisory
  * (Caleb, 2026-10-04: "We are OFFICIAL Partners of clay and perplexity
  * through bma").
@@ -79,9 +80,9 @@ export default function Statement() {
   return (
     <>
       <h2 id="ld-who-h" className="ld-say" data-reveal="0">
-        We do everything AI for LA businesses: automations, CRMs, outbound,
-        teaching their people, whatever a company needs. Students build all of
-        it.
+        We build whatever AI a company or nonprofit needs, anywhere in the
+        world: automations, CRMs, outbound, training their teams. Students
+        build all of it.
       </h2>
       <div className="st">
         <ul ref={row} className="st-row" aria-label="Official partners">

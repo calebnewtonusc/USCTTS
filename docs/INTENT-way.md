@@ -23,7 +23,7 @@ order and timings are in STORY-tts.md and components/tts/v4/choreo.ts.
 
 ## 2. The project (one pinned scene, 1000vh)
 
-- "the TTS way" label and "Say your first client is a dental office in Koreatown that answers the same emails all week.": a business brings a problem, the student solves it; labelled as an example. Both.
+- "the TTS way" label and "Say your first client is a dental office in Koreatown that answers the same emails all week. The next one could be anywhere.": a business brings a problem, the student solves it; framed as one example, since TTS serves clients anywhere (Caleb, 2026-10-10). Both.
 - The agent light driving from USC to a real dental office node near Wilshire and Western: the USC dot becoming the student's project. Both.
 - The glow growing from that point to fill the screen in the film's ground colour (#F4EFE6), about 20% of a screen: the dive, so the film arrives through the city with no cut. Both.
 - The rack focus out of the flat field, the film's first 22 frames in about 13% of a screen: the camera finding the machine inside the point. Under half a screen together with the dive, per the 2026-10-09 brief. Both.

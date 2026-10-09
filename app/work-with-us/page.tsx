@@ -70,7 +70,7 @@ export default function WorkWithUsPage() {
           </ul>
           <p className="pg-mono-note">examples of the work, not past clients</p>
           <p className="wu-how">
-            Book a call, and if it&apos;s a yes, we build it in your own tools and hand it to your team.
+            Book a call. If it&apos;s a yes, we build it in your own tools, wherever you are, and hand it to your team.
           </p>
           <div className="ix-actions">
             <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
