@@ -36,6 +36,7 @@
 }
 /* The nav is transparent at the top of the page, so on the night opening
  * its type flips with the world too. */
+.tts:has(.v4.is-dark) header.nav:not(.is-scrolled):not(.is-open) .nav-mark,
 .tts:has(.v4.is-dark) header.nav:not(.is-scrolled):not(.is-open) .nav-mark-name,
 .tts:has(.v4.is-dark) header.nav:not(.is-scrolled):not(.is-open) .nav-links a {
   color: #fbf7f0;
