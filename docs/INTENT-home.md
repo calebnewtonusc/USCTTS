@@ -1,82 +1,87 @@
 # INTENT-home: every visible thing on /, and why it is there
 
 Caleb, 2026-10-09: "Nothing on either the sites should be unintentional."
-Each line names the element, why it exists, what it proves, and the reader
-it serves: S is a USC student deciding whether to join, B is a business
-owner who wants AI help, and both means both. Anything on screen that is
-not on this list is a bug. Story order and timings are in STORY-tts.md.
+Each line names the element, why it exists, and the reader it serves: S is a
+USC student deciding whether to join, B is a business owner who wants AI
+help, and both means both. Anything on screen that is not on this list is a
+bug. The semester's scroll story is /way, listed in INTENT-way.md.
+
+The order is Tyler's, from his voice memos on 2026-10-09: "a more
+professional kind of first page that people see rather than an animation
+you have to scroll through", "the dot in LA is good", then a separating tab
+and "it goes into being a real website", and "it's just gotta start off with
+like a basic page". Caleb, 2026-10-10: "Make sure you're listening to what
+tyler said."
 
 ## Chrome, on every screen
 
-- Nav mark (red square, "Trojan Tech Solutions", "USC"): says whose site this is and that it belongs to USC. Both.
-- Nav links, "The TTS way", "People", "For companies": the three places a visitor looks for; "The TTS way" glides to the story on this page instead of leaving it. Both.
-- Nav "Join" button, cardinal: the one persistent way in for a student who has already decided, on every route. It is site chrome, not a page section, so it is the one deliberate exception to nothing twice. S.
-- Nav background: transparent with light type over the dark opener, paper with a hairline once scrolled, so the links stay readable over every world. Both.
-- Readout strip, bottom left (coordinates where the camera looks, LA time, points lit, one status line): proves the map is real data (OpenStreetMap streets, a live LA clock, 74,741 points counted from the file) and narrates what the field is doing in words the page never prints elsewhere. Both.
-- Readout backing gradient: a soft band behind the strip so the mono text reads over any world; it is the only gradient on the chrome. Both.
-- Route rail, bottom right (USC, Clay + Perplexity, Koreatown, The machine, Alumni, Your turn): where you are in the semester and a way to jump; each stop glides, nothing teleports. Both.
-- The LA field (WebGL): the one set of objects that tells the story. Real streets around the USC dot, its colour worlds (night, sky, cream, cardinal) mark the chapters. Both.
+- Nav mark (red square, "Trojan Tech Solutions", "USC"): whose site this is, and that it belongs to USC. Both.
+- Nav links, "The TTS way" (to /way), "People" (to /members), "For companies": the three places a visitor looks for. Both.
+- Nav "Join" button, cardinal: the one persistent way in for a student who has already decided, on every route. Site chrome, the one deliberate exception to nothing twice. S.
+- Nav background: transparent with light type over the dark opener, paper with a hairline once scrolled. Both.
+- The LA field (WebGL, drawn at the screen's pixel ratio up to 2): the opener's city and, at the end, the cardinal ground under the doors. Both.
 
-## 1. The intro (load clock, 2200ms)
+## The opener (load clock, 2200ms; 130svh)
 
 - Dark navy screen before the first frame: the canvas colour while the shaders link; the clock waits for it, so the city never arrives half built. Both.
-- Points flying onto their streets, with the camera settling from high and steep onto USC: the event that opens the page and shows the club lives in LA. Both.
-- The red USC dot and its breathing glow: the protagonist of the story; every later beat starts or ends here. S.
-- The single cardinal ring pulsing out from USC once: the intro's last beat, the club reaching out into the city. Both.
-- Headline "USC's AI implementation lab.", two lines sliding out of their masks: who TTS is in one line, the same words as the site's title. Both.
-- "scroll" with a hairline whose light runs down it (2.4s loop, Lemma's cue period, pauses once the headline is gone, still under reduced motion): the only ambient loop outside the field, telling a first-time visitor there is more. Both.
-- Headline leaving in depth (420px and 300px on one curve): the hero coming apart as the story starts. Both.
-- Freeways streaming light into USC on the first scroll: students arriving, the first state change of the one set of objects. S.
-- "This is you, a few weeks from now.": makes the student the main character before the story starts (STUDENT-POV, section 2). S.
+- Points flying onto their streets, the camera settling from high and steep onto USC: the event that opens the page and puts the club in LA. Both.
+- The red USC dot and its breathing glow, and one cardinal ring pulsing out from it: where TTS is, and the club reaching into the city ("the dot in LA is good"). Both.
+- Headline "USC's AI implementation and go-to-market lab.", two lines sliding out of their masks: who TTS is in Tyler's words, the statement he asked to lead. No "first" or "premier", neither has a source. Both.
+- "scroll" with a hairline whose light runs down it (2.4s loop, pauses once the headline is gone, still under reduced motion): the one ambient loop on home, saying there is a page below. Both.
+- Readout strip, bottom left (coordinates where the camera looks, LA time, points lit, one status line): proves the map is real data (OpenStreetMap streets, a live LA clock, 74,741 points counted from the file). It leaves as the sheet comes up. Both.
+- Freeways streaming light into USC on the first scroll, the headline leaving in depth: the city moving under the reader while the sheet rises. Both.
 
-## 2. Who we are, and the partners (sky world, pinned)
+## The sheet
 
-- "We do everything AI for LA businesses: automations, CRMs, outbound, teaching their people, whatever a company needs. Students build all of it.": Caleb's own description of the club, the Clay-style statement of what TTS does. Both.
-- Clay wordmark and Perplexity mark: tools a student already recognises and a business already pays for. Both.
-- $7.1B and $20B counting up, each with "valued as of" and its date, never summed: how big the two partners are, sourced. Both.
-- "You build on Clay and Perplexity, the tools real companies pay for to find their customers, through our partner Blue Modern Advisory.": what a member gets from the partnership, and who holds it. S.
-- Three depths of drift on the line and the two rows: depth without a band or a fade. Both.
+- The paper sheet, its top edge peeking 12% of a screen up from the bottom at load, inset and rounded, growing to full width as it covers the city: Tyler's separating tab, and nothing arrives from nowhere (clay.com's sheet). Both.
+- "who we are" on the lip, under a short grip line: names the first section so the edge reads as the start of the page. Both.
+- Mono label over each section (about us, our network, join the network, the TTS way, the team): where you are on a long page. Both.
+- Rises on arrival (data-reveal, once, 70ms stagger; still under reduced motion): sections come up as you reach them. Both.
 
-## 3. The TTS way (one pinned scene)
+### 1. Who we are
 
-- "the TTS way" mono label: Tyler's name for the story, so the nav link and the beat share one name. Both.
-- "Say your first client is a dental office in Koreatown that answers the same emails all week.": a business brings a problem, with the student as the one solving it. Both.
-- The agent light driving from USC to a real dental office node near Wilshire and Western: the second state change, the USC dot becoming the student's project. Both.
-- The glow growing from that point to fill the screen in the film's ground colour: the dive, so the film arrives through the city with no cut. Both.
-- The rack focus out of the flat field (the film's first 22 frames): the camera finding the machine inside the point. Both.
-- The clay machine film (Blender, scrubbed by scroll): the semester's work as one machine a student builds. Both.
-- Five captions, each with a mono label naming the skill or tool: what you learn at each stage, in one line each, varying in place so no two read the same. S.
-- Cream halo behind each caption: keeps the line readable over the moving film without a box. Both.
-- "x-ray" button, top right: opens the drag line that shows each stage's real artifact; quiet until tapped. Both.
-- X-ray views (the tagged week, the Clay table, the qualifying prompt, the first email and its prompt, the CRM workflow, the lesson plan, and the manim clip for each): proof that the work is real and teachable. They are the only place the manim clips appear. Both.
-- The film drawing back into a point of light: handing it over, the machine returning to the city. B.
-- "Then you teach the office to run it without you.": the deliverable is something running, not a deck. B.
+- "We do everything AI for LA businesses: automations, CRMs, outbound, teaching their people, whatever a company needs. Students build all of it.": Caleb's own description, the big statement under the headline. Both.
+- Clay wordmark and Perplexity mark, $7.1B and $20B counting up once when the row shows, each with "valued as of" and its date, never summed: the partners, sized and sourced. Both.
+- "You build on Clay and Perplexity, the tools real companies pay for to find their customers, through our partner Blue Modern Advisory.": what a member gets, and who holds the partnership. S.
 
-## 4. Where they go (cream world)
+### 2. About us
 
-- The camera rising off the block and drifting home to USC: the story returns to where it started. S.
-- "Then you graduate. This is where the 15 people who started at TTS went.": the end of the semester and the proof; 15 is ALUMNI.length. S.
-- The alumni wall, one card per company with its mark and the people there: credibility, faces and real employers, every one from data/people.ts. S.
-- Company marks in one grey ink at rest, full colour on hover; faces 15% grey at rest: a dozen brands read as one wall, and hovering a card brings it to life. S.
-- Cards rising in once and drifting at four depths above 900px: the wall coming up out of the city in layers. Both.
+- "A dormant club, rebuilt in three months.": the club's real history in one line (docs/COPY-tts.md, sourced facts). Both.
+- "When Matthew Kim graduated, he handed TTS to Caleb Newton and Tyler Larsen, and there was nobody left in it. ...": where the team came from and what the club is for. Both.
+- "Learn more about TTS" button, to /members: Tyler's button; /members tells the comeback story with the advisors. Both.
+- The figure, frame 352 of the machine film at 2560px (whole machine pulled back), with its caption: a picture of what a client project is. It is a render, not a photo; no real photo of members at work is on disk yet. Both.
+
+### 3. Our network
+
+- "See where 15 people who started at TTS went.": Tyler's "see our network"; 15 is ALUMNI.length. S.
+- "Tap a company to meet them.": says the wall is interactive. S.
+- The logo wall, one tile per company, marks large in one ink at rest and full colour on hover, the faces and first names under each: "the logos would add a lot of credibility", with real faces. S.
+- The dialog a tile opens (the company's people, bigger, with roles; Escape, the close button or the backdrop closes it): Tyler's click into an interactive alumni view. S.
+
+### 4. Join the network
+
 - "These people actually want to help you.": Tyler's line for the mentors. S.
-- Six mentor cards (photo, name, role, company and its mark): who backs the club, each face once on the page. Both.
-- "When Matthew Kim graduated, he handed TTS to Caleb and Tyler.": where the current team came from, approved by Caleb on 2026-10-05. Both.
-- Three team cards, two linked with an arrow that slides on hover: who runs it and how to reach them; Emily's has no link because none is on record. Both.
-- Square corners and one hairline on every card, no shadow: DESIGN-tts's figure family. Both.
+- Six mentor cards (real photo, name, role, company and its mark): Duncan and the others, with their background. Both.
 
-## 5. The two doors (cardinal world)
+### 5. The TTS way
 
-- The cardinal raining in across the city: the last state change, the whole map becoming the ending. Both.
-- Hairline above and between the doors: separates the two choices. Both.
-- "I'm at USC. Teach me to build that." with the email field and "Tell me when it opens": something a student can do today, since applications are closed. S.
-- "applications open soon. Follow us on Instagram": the honest status and a way to follow now. S.
-- "I run a business. Book 30 minutes with Caleb." linking to Calendly, "calendly, opens in a new tab": the business door. B.
-- Footer strip (People, Work with us, Sponsor, speak or recruit, T Combinator when its host is live, LinkedIn, and the student-org and OpenStreetMap line): the rest of the site and the map's licence. Join and Instagram are left out because the student door carries both. Both.
+- The card to /way, frame 200 of the film at 2560px (the typewriter drafting), "Understand the TTS way.", one line on what it is, "Start the walkthrough": Tyler's card into the 3D scroll story. The image eases in 3% on hover. Both.
 
-## Removed in this pass, because nothing justified them
+### 6. Meet the team
 
-- CSS for the old week panel (w4-head, w4-lane, w4-line, w4-panel, w4-stage, w4-title), the unused caption spots (is-bl, is-br, is-huge, is-small) and the "only university club" line: inherited from earlier homes, never rendered here.
-- The superseded 140vh opener height and the old partners grid rule.
-- Readout statuses that repeated words already on screen: the club description (said by the who-we-are line), the services list, the BMA line, and the stage labels the captions print.
-- Join TTS and Instagram in the ending footer.
+- "Meet the team." and three cards, Caleb, Tyler and Emily, professional photos only, each at most 279px wide so no headshot is upscaled at dpr 2; two link to LinkedIn with an arrow that slides on hover, Emily's has no link because none is on record. Both.
+
+## 7. The doors (cardinal world)
+
+- The cardinal raining in across the city as the sheet ends: the field returns for the ending. Both.
+- "I'm at USC. Teach me to build that." with the email field and "Tell me when it opens", "applications open soon. Follow us on Instagram": something a student can do today. S.
+- "I run a business. Book 30 minutes with Caleb.", Calendly in a new tab: the business door. B.
+- Footer strip (People, Work with us, Sponsor, speak or recruit, T Combinator when its host is live, LinkedIn, the student-org and OpenStreetMap line). Both.
+
+## Removed in this pass, because Tyler's brief replaced them
+
+- The semester story on home (partners pinned on the sky, the dental office, the film, the alumni rising over the city): moved whole to /way, behind the card.
+- The route rail: it pointed at stops of a story home no longer tells; it lives on /way.
+- "This is you, a few weeks from now.": the story's line, now on /way.
+- "When Matthew Kim graduated..." as the team heading: the about section carries it, so the team section is just "Meet the team."
+- WayHash and the /way to /#way redirect.

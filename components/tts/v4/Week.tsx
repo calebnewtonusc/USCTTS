@@ -12,6 +12,7 @@ import {
   WEEK,
   type Stage,
 } from "./choreo";
+import { createFilm, type Film } from "./filmSeq";
 import XrayViews from "./Xray";
 import { attachXray } from "./xrayLine";
 
@@ -27,24 +28,13 @@ import { attachXray } from "./xrayLine";
  * the client, and an example. One scroll value drives all of it, P.week.
  */
 
-/* The film (blender/, commit 1934ab8): 1280x720 and a 720x1280 portrait
- * cut for phones, every frame a keyframe so a seek lands on its exact
- * frame. poster.jpg is frame 1, the flat #F4EFE6 field the dive's glow
- * crossfades into; poster-machine.jpg is frame 360, the whole machine pulled back, for
- * reduced motion and for a video that can't play. */
+/* The film (blender/machine.py): 375 frames rendered at 2560x1440 and a
+ * 1440x2560 portrait cut for phones, drawn as an image sequence
+ * (filmSeq.ts). The stills are frame 360, the whole machine pulled back,
+ * for reduced motion. */
 const FILM = {
-  sources: [
-    { src: "/tts/machine/machine.mp4", type: "video/mp4" },
-    { src: "/tts/machine/machine.webm", type: "video/webm" },
-  ],
-  portrait: [
-    { src: "/tts/machine/machine-portrait.mp4", type: "video/mp4" },
-    { src: "/tts/machine/machine-portrait.webm", type: "video/webm" },
-  ],
-  poster: "/tts/machine/poster.jpg",
-  posterPortrait: "/tts/machine/poster-portrait.jpg",
-  still: "/tts/machine/poster-machine.jpg",
-  stillPortrait: "/tts/machine/poster-machine-portrait.jpg",
+  still: "/tts/machine/still-land.webp",
+  stillPortrait: "/tts/machine/still-port.webp",
   stages: "/tts/machine/stages.json",
 };
 // stages.json names its stages for the film; these are the page's names.
@@ -106,75 +96,59 @@ export default function Week() {
     const box = el.querySelector<HTMLElement>(".w4-film");
     const caps = [...el.querySelectorAll<HTMLElement>(".w5-cap")];
 
-    /* The film: a poster under reduced motion, or if the video can't play;
-     * otherwise a video whose time the scroll sets, at most one seek per
-     * frame and never while the last one is still landing. */
-    let video: HTMLVideoElement | null = null;
+    /* The film: a still under reduced motion, otherwise a canvas the
+     * scroll draws frames into (filmSeq.ts). Nothing downloads until the
+     * dive is about 1.5 screens away (review 4: 5.3 MB at scrollY 0). */
     const portrait = window.innerWidth < 768 && window.innerHeight > window.innerWidth;
-    const showPoster = () => {
-      if (!box) return;
-      box.querySelector("video")?.remove();
-      if (!box.querySelector("img")) {
-        const img = document.createElement("img");
-        img.src = portrait ? FILM.stillPortrait : FILM.still;
-        img.alt = "";
-        img.className = "w4-media";
-        box.append(img);
-      }
-      video = null;
-    };
-    /* The video is made only when the dive is about 1.5 screens away, so
-     * nobody downloads the film at the top of the page (review 4: 5.3 MB
-     * at scrollY 0). Until then the frame-1 poster stands in. */
+    let seq: Film | null = null;
     let pending = false;
-    const makeVideo = () => {
-      if (!box || video) return;
-      box.querySelector("img")?.remove();
-      const v = document.createElement("video");
-      v.className = "w4-media";
-      v.muted = true;
-      v.playsInline = true;
-      v.preload = "auto";
-      v.poster = portrait ? FILM.posterPortrait : FILM.poster;
-      v.setAttribute("aria-hidden", "true");
-      const list = portrait ? FILM.portrait : FILM.sources;
-      list.forEach((s, i) => {
-        const src = document.createElement("source");
-        src.src = s.src;
-        src.type = s.type;
-        // The last source failing means nothing can play: show the poster.
-        if (i === list.length - 1) src.addEventListener("error", showPoster);
-        v.append(src);
-      });
-      v.addEventListener("error", showPoster);
-      // Warm the decoder before the dive: the first seek decoded mid-scroll
-      // as a 233 ms frame on a cold load (production build, headed,
-      // 2026-10-05).
-      v.addEventListener(
-        "canplay",
-        () => {
-          if (v.currentTime === 0) v.currentTime = 0.04;
-        },
-        { once: true },
-      );
-      // The frame count is the film's own: duration at 30 fps.
-      v.addEventListener("loadedmetadata", () => {
-        if (v.duration) FILM_FRAMES.n = Math.round(v.duration * 30);
-        kick();
-      });
-      v.addEventListener("seeked", kick);
-      box.append(v);
-      video = v;
-    };
-    if (reduced || !box) showPoster();
-    else {
+    if (box && reduced) {
       const img = document.createElement("img");
-      img.src = portrait ? FILM.posterPortrait : FILM.poster;
+      img.src = portrait ? FILM.stillPortrait : FILM.still;
       img.alt = "";
       img.className = "w4-media";
       box.append(img);
+    } else if (box) {
+      const cv = document.createElement("canvas");
+      cv.className = "w4-media";
+      cv.setAttribute("aria-hidden", "true");
+      box.append(cv);
+      seq = createFilm(cv, portrait, kick);
+      FILM_FRAMES.n = seq.n;
       pending = true;
     }
+    /* The film's grain, which the render used to bake into every frame
+     * (machine.py: per-pixel grain tripled each 2560 WebP). One tile at the
+     * screen's own pixels, built once here; v4.css steps it at 12 fps while
+     * the film shows, so a reader parked in the film never sees a frozen
+     * frame. Same strength as the render's: a gaussian at 0.17 around the
+     * ground, 0.26 of it. */
+    const grain = el.querySelector<HTMLElement>(".w5-grain");
+    if (grain && !reduced) {
+      const T = 192;
+      const c = document.createElement("canvas");
+      c.width = c.height = T;
+      const g = c.getContext("2d");
+      if (g) {
+        const im = g.createImageData(T, T);
+        for (let i = 0; i < T * T; i++) {
+          // Box-Muller, one sample a pixel.
+          const u = Math.random() || 1e-6;
+          const v = Math.random();
+          const z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) * 0.17;
+          const a = Math.min(1, Math.abs(z) * 0.26 * 2.2);
+          const k = z > 0 ? 255 : 0;
+          im.data[i * 4] = im.data[i * 4 + 1] = im.data[i * 4 + 2] = k;
+          im.data[i * 4 + 3] = Math.round(a * 255);
+        }
+        g.putImageData(im, 0, 0);
+        const dprG = window.devicePixelRatio || 1;
+        grain.style.backgroundImage = `url(${c.toDataURL("image/png")})`;
+        grain.style.backgroundSize = `${(T / dprG).toFixed(2)}px`;
+      }
+    }
+    const onResize = () => seq?.resize();
+    window.addEventListener("resize", onResize);
 
     /* The film's own stage frames, from stages.json. */
     fetch(FILM.stages)
@@ -187,6 +161,7 @@ export default function Week() {
           .sort((x, y) => x.from - y.from);
         if (!list.length) return;
         STAGES.splice(0, STAGES.length, ...list);
+        seq?.setStages(list.map((x) => x.from));
         kick();
       })
       .catch(() => {});
@@ -200,14 +175,14 @@ export default function Week() {
         const diveTop = top + WEEK.dive[0] * (el.offsetHeight - f.vh);
         if (diveTop < 1.5 * f.vh) {
           pending = false;
-          makeVideo();
+          seq?.load();
         }
       }
       const q = p - (1 - P.weekIn) * 0.1;
 
       // "Say your first project is..." rides the travel and the heat map.
       if (intro) {
-        const t = prog(q, -0.06, WEEK.dive[1] + 0.012);
+        const t = prog(q, -0.06, WEEK.dive[1] + 0.006);
         const o = smooth(prog(t, 0, 0.15)) * (1 - smooth(prog(t, 0.8, 1)));
         intro.style.opacity = o.toFixed(3);
         intro.style.visibility = o > 0.002 ? "visible" : "hidden";
@@ -241,14 +216,15 @@ export default function Week() {
         const r = Math.hypot(f.vw, f.vh) * 1.8 * (1 - shrink) + 10;
         film.style.setProperty("--r", `${r.toFixed(0)}px`);
         film.classList.toggle("is-shrinking", shrink > 0);
+        // The x-ray hint loop runs only while the film fills the screen,
+        // the grain only while any of it shows.
+        film.classList.toggle("is-parked", o > 0.98);
+        film.classList.toggle("is-on", o > 0.002);
       }
 
-      // One seek per frame at most, and none while one is landing.
-      const v = video;
-      if (v && v.readyState >= 1 && v.duration && !v.seeking) {
-        const tgt = filmShare(p) * (v.duration - 0.04);
-        if (Math.abs(v.currentTime - tgt) > 1 / 60) v.currentTime = tgt;
-      }
+      // The film draws its frame while it's on screen at all.
+      if (seq && film && film.style.visibility !== "hidden")
+        seq.draw(filmShare(p) * FILM_FRAMES.n - 1);
 
       // Each caption rides its stage's frames.
       const fr = filmShare(p) * FILM_FRAMES.n;
@@ -275,6 +251,8 @@ export default function Week() {
     return () => {
       off();
       xray.dispose();
+      seq?.dispose();
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 
@@ -297,8 +275,9 @@ export default function Week() {
 
         <div className="w5-film">
           <div className="w4-body">
-            {/* The video or its poster goes in here (the effect above). */}
+            {/* The film's canvas, or its still, goes in here (the effect above). */}
             <div className="w4-film" />
+            <div className="w5-grain" aria-hidden="true" />
             <div id="w4-xray" className="xr-side" aria-label="How it's built">
               <XrayViews />
             </div>

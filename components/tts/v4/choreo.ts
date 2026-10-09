@@ -31,6 +31,7 @@ export const P = {
   partners: 0, // partners, from its top at the screen's bottom to its bottom at the top
   weekIn: 0, // the week arriving: its top from the screen's bottom to the top
   week: 0, // the week's pinned runway: the whole story
+  sheet: 0, // home's paper sheet arriving: its top from the screen's bottom to the top
   alumni: 0, // where the students go, mentors and team: top at the screen's bottom to bottom at the top
   join: 0, // join arriving
   page: 0, // the whole document, for the route rail
@@ -48,22 +49,24 @@ export const INTRO = { t: 0 };
  */
 export const WEEK = {
   // The agent leaves USC as the week arrives, under the script's line.
-  travel: [0.0, 0.03],
+  travel: [0.0, 0.02],
   // Through the point: the camera dives and the glow fills the frame in
   // the film's #F4EFE6 straight from the blue map (review 4: no red world
-  // here, no blank hold after).
-  dive: [0.0, 0.04],
+  // here, no blank hold after). Tightened 2026-10-09 ("Fix everything"):
+  // the glow, the crossfade and the rack focus were 0.7 of a screen of
+  // flat frames at 1440 (dull.py, grey spread under 20); they now run in
+  // about a third of that.
+  dive: [0.0, 0.022],
   // The film crossfades in over the full-frame glow, and its focus pull
-  // starts the same moment. With the line riding the section's arrival,
-  // the film starts about 2.4 screens down at 1440 (freshman review 2 asked
-  // for 2.5 to 3; it was 4.4).
-  filmIn: [0.032, 0.044],
-  film: [0.032, 0.95],
-  // The pull-back to a point of light, then the rain into Join. Short: the
-  // zoomed-out diorama read as a dead screen (freshman review 2).
+  // starts the same moment.
+  filmIn: [0.018, 0.026],
+  film: [0.018, 0.95],
+  // The pull-back to a point of light. On /way the doors rise over it
+  // (v4.css pulls them up under the pin's last half screen), so the point
+  // never sits alone on an empty map.
   out: [0.945, 0.99],
   // Kept for the camera's zoom while travelling; no heat map any more.
-  heat: [0.0, 0.03],
+  heat: [0.0, 0.02],
 } as const;
 
 /* The film's stages, in frames at 30 fps: public/tts/machine/stages.json,
@@ -83,7 +86,7 @@ export const FILM_FRAMES = { n: 375 };
 /* The film's first 22 frames are its rack focus out of the flat field.
  * They pass in the first 4% of the film's scroll, so the tray reads as a
  * city sooner (review 4: a screen of blur under the first caption). */
-const RACK = { frames: 22, share: 0.04 };
+const RACK = { frames: 22, share: 0.015 };
 export const filmShare = (p: number) => {
   const k = prog(p, WEEK.film[0], WEEK.film[1]);
   const r = RACK.frames / FILM_FRAMES.n;
@@ -112,12 +115,17 @@ const entries: Entry[] = [];
 let raf = 0;
 let bound = false;
 const box: Record<string, { top: number; h: number }> = {};
-const IDS = ["open", "partners", "week", "alumni", "join"];
+const IDS = ["open", "partners", "week", "sheet", "alumni", "join"];
 
 function measure() {
   for (const id of IDS) {
     const el = document.getElementById(`v4-${id}`);
-    if (!el) continue;
+    // box outlives a client navigation, so a section this page lacks must
+    // be forgotten: home's sheet measured on / turned /way's sky cream.
+    if (!el) {
+      delete box[id];
+      continue;
+    }
     box[id] = {
       top: el.getBoundingClientRect().top + window.scrollY,
       h: el.offsetHeight,
@@ -232,12 +240,17 @@ function regions(f: Frame) {
   P.partners = through("partners", f);
   P.weekIn = arrive("week", f);
   P.week = pin("week", f);
+  P.sheet = arrive("sheet", f);
   P.alumni = through("alumni", f);
   P.join = arrive("join", f);
   // The film covers the whole field between its crossfade and its
   // pull-back, so the engine can skip drawing under it.
+  // Home's paper sheet covers it the same way while it fills the screen.
+  const sh = box.sheet;
+  const underSheet = !!sh && f.y >= sh.top && f.y + f.vh <= sh.top + sh.h;
   store.covered =
-    P.weekIn >= 1 && P.week > WEEK.filmIn[1] + 0.002 && P.week < WEEK.out[0] - 0.001;
+    underSheet ||
+    (P.weekIn >= 1 && P.week > WEEK.filmIn[1] + 0.002 && P.week < WEEK.out[0] - 0.001);
   const doc = document.documentElement.scrollHeight - f.vh;
   P.page = doc > 0 ? clamp(f.y / doc) : 0;
 
@@ -356,6 +369,13 @@ function regions(f: Frame) {
     // Join only.
     prog(P.join, 0, 0.3),
   ];
+  // Home has no week: its sky turns cream while the paper sheet covers the
+  // whole field (never on screen), so the doors get the same rain from
+  // cream to cardinal that ends /way.
+  if (box.sheet && P.sheet >= 1) {
+    seg[1] = 1;
+    seg[2] = 1;
+  }
   const world = seg[0] + seg[1] + seg[2] + seg[3];
   store.world = world;
   const from = Math.min(3, Math.floor(world));

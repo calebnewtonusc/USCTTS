@@ -32,24 +32,13 @@ const weekAt = (p: number) => {
   return e ? topOf(e) + p * (e.offsetHeight - window.innerHeight) : 0;
 };
 
+/* The route rail exists on /way only: home is a structured page after its
+ * opener, and a rail of stops there would point at a story it no longer
+ * tells. */
 const STOPS: Stop[] = [
   { label: "USC", at: () => 0 },
-  {
-    label: "Clay + Perplexity",
-    at: () => {
-      const e = el("partners");
-      return e ? topOf(e) + e.offsetHeight / 2 - window.innerHeight / 2 : 0;
-    },
-  },
   { label: "Koreatown", at: () => weekAt(WEEK.heat[1]) },
   { label: "The machine", at: () => weekAt(WEEK.film[0] + 0.05) },
-  {
-    label: "Alumni",
-    at: () => {
-      const e = el("alumni");
-      return e ? topOf(e) : 0;
-    },
-  },
   {
     label: "Your turn",
     at: () => {
@@ -61,7 +50,6 @@ const STOPS: Stop[] = [
 
 function status(): string {
   if (P.join > 0.35) return "your turn";
-  if (P.alumni > 0.08 && P.week >= 1) return "back at USC, where the people who started here went";
   if (P.weekIn > 0.6) {
     // The mono labels name the skill or the tool (SCRIPT-v5).
     const ph = phaseAt(P.week);
@@ -81,7 +69,6 @@ function status(): string {
     if (ph === "pullback") return "handing it over";
     return "back on the map";
   }
-  if (P.partners > 0.25) return "the whole basin, centred on USC";
   if (store.load < 1) return `assembling LA, ${Math.round(store.load * 100)}%`;
   // The first scroll is the whole club in one move: students at USC, work
   // going out to businesses across LA. The status line says it as it runs.
@@ -102,7 +89,7 @@ const clock = (secs: boolean) =>
     hour12: false,
   }).format(new Date());
 
-export default function Readouts() {
+export default function Readouts({ rail = true }: { rail?: boolean }) {
   const strip = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -142,7 +129,11 @@ export default function Readouts() {
 
     const off = onFrame((f) => {
       // Comes in on the load clock once the streets are mostly drawn.
-      const o = (1 - smooth(prog(P.join, 0.25, 0.6))) * smooth(prog(INTRO.t, 0.5, 0.8));
+      // On home it leaves as the paper sheet comes up over the field.
+      const o =
+        (1 - smooth(prog(P.join, 0.25, 0.6))) *
+        (1 - smooth(prog(P.sheet, 0.2, 0.55))) *
+        smooth(prog(INTRO.t, 0.5, 0.8));
       root.style.opacity = o.toFixed(3);
       root.style.visibility = o > 0.002 ? "visible" : "hidden";
 
@@ -190,6 +181,7 @@ export default function Readouts() {
         <span className="v4-ro-pts">0 points lit</span>
         <span className="v4-ro-status">live</span>
       </p>
+      {rail && (
       <nav className="v4-rail" aria-label="Stops on the route">
         <div className="v4-rail-track" aria-hidden="true">
           <span className="v4-rail-fill" />
@@ -205,6 +197,7 @@ export default function Readouts() {
           ))}
         </ol>
       </nav>
+      )}
     </div>
   );
 }

@@ -36,6 +36,8 @@ export const LEADERSHIP: Person[] = [
     name: "Tyler Larsen",
     role: "Co-President",
     status: "active",
+    // His LinkedIn suit photo, which he asked for in his voice memo ("you
+    // can get that on my LinkedIn"), pulled 2026-10-09 at 560px like before.
     photo: "/img/tyler_shot.jpeg",
     link: "https://www.linkedin.com/in/tyler-larsen-4130a7294/",
   },

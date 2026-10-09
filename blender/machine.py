@@ -1655,8 +1655,14 @@ def grain_image(size=512, seed=5):
     return img
 
 
-def setup_render(res_x, res_y, samples, threshold=0.02):
+def setup_render(res_x, res_y, samples, threshold=0.02, grain=True):
     sc = bpy.context.scene
+    # Pixel sizes below were tuned at 1600 wide; scale them with the frame so
+    # the 2560 cut has the same soft edges, not edges 1.6 times harder.
+    k = max(res_x, res_y) / 1600
+    # The scene does not change topology between frames: keep the BVH and
+    # the textures across the sequence instead of rebuilding them per frame.
+    sc.render.use_persistent_data = True
     sc.render.engine = "CYCLES"
     prefs = bpy.context.preferences.addons["cycles"].preferences
     prefs.compute_device_type = "METAL"
@@ -1668,6 +1674,9 @@ def setup_render(res_x, res_y, samples, threshold=0.02):
     sc.cycles.use_adaptive_sampling = True
     sc.cycles.adaptive_threshold = threshold
     sc.cycles.use_denoising = True
+    # OIDN on the GPU: on the CPU it fought every other job on the machine.
+    if hasattr(sc.cycles, "denoising_use_gpu"):
+        sc.cycles.denoising_use_gpu = True
     sc.cycles.max_bounces = 8
     sc.cycles.diffuse_bounces = 4
     sc.cycles.glossy_bounces = 3
@@ -1716,7 +1725,10 @@ def setup_render(res_x, res_y, samples, threshold=0.02):
     mix.data_type = "RGBA"
     mix.blend_type = "MULTIPLY"
     # f = 0.26 with nearest sampling: ground std close to Clay's measured 0.026
-    mix.inputs["Factor"].default_value = 0.26
+    # --no-grain leaves it to the page: per-pixel grain in every frame of a
+    # 2560 sequence tripled its WebP size, and the page draws the same grain
+    # live at the screen's own pixels.
+    mix.inputs["Factor"].default_value = 0.26 if grain else 0.0
     ng.links.new(gi.outputs["Image"], tr.inputs["Image"])
     ng.links.new(tr.outputs["Image"], lift.inputs[6])
     # bookends: frame 1 is a flat field of the ground colour (#F4EFE6) that the
@@ -1731,7 +1743,7 @@ def setup_render(res_x, res_y, samples, threshold=0.02):
             ell2.inputs[key].default_value = val
     blur2 = ng.nodes.new("CompositorNodeBlur")
     if "Size" in blur2.inputs:
-        blur2.inputs["Size"].default_value = (260, 260)
+        blur2.inputs["Size"].default_value = (260 * k, 260 * k)
     ng.links.new(ell2.outputs[0], blur2.inputs[0])
     inv = ng.nodes.new("ShaderNodeMath")
     inv.operation = "SUBTRACT"
@@ -1763,7 +1775,7 @@ def setup_render(res_x, res_y, samples, threshold=0.02):
             if key in ell.inputs:
                 ell.inputs[key].default_value = val
         blur = ng.nodes.new("CompositorNodeBlur")
-        for key, val in (("Size", (300, 300)),):
+        for key, val in (("Size", (300 * k, 300 * k)),):
             if key in blur.inputs:
                 blur.inputs[key].default_value = val
         ng.links.new(ell.outputs[0], blur.inputs[0])
@@ -1811,6 +1823,7 @@ def main():
     ap.add_argument("--threshold", type=float, default=0.03)
     ap.add_argument("--stills", default="1,40,75,110,140,170,200,225,250,300")
     ap.add_argument("--skip-audit", action="store_true")
+    ap.add_argument("--no-grain", action="store_true")
     ap.add_argument("--stages", default="", help="write stage frame ranges as JSON here")
     a = ap.parse_args(argv)
     m, show = build_and_bake()
@@ -1828,7 +1841,7 @@ def main():
     if a.res:
         h = int(round(h * a.res / w / 2) * 2)
         w = a.res
-    setup_render(w, h, a.samples, a.threshold)
+    setup_render(w, h, a.samples, a.threshold, grain=not a.no_grain)
     os.makedirs(a.out, exist_ok=True)
     sc = bpy.context.scene
     if a.mode == "save":

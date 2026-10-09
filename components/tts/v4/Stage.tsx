@@ -10,7 +10,7 @@ import Readouts from "./Readouts";
  * strip, and the veil same-page moves dissolve under. It also starts the
  * page's two clocks, the scroll loop and the load clock, once.
  */
-export default function Stage() {
+export default function Stage({ rail = true }: { rail?: boolean }) {
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const offRegions = startRegions();
@@ -47,7 +47,7 @@ export default function Stage() {
       <div className="v4-field" aria-hidden="true">
         <LAGrid className="v4-grid-canvas" />
       </div>
-      <Readouts />
+      <Readouts rail={rail} />
       <div className="v4-veil" aria-hidden="true" />
     </>
   );

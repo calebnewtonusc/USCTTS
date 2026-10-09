@@ -33,7 +33,17 @@ const LINE_TRAVEL = [420, 300];
 const EXIT_PX = 560;
 const FADE_PX = 520;
 
-export default function Opening() {
+/* Home and /way share the opener. Home's is short and has no "you" line
+ * (Tyler: a basic page first); /way's is the story's start. */
+export default function Opening({
+  lines,
+  you,
+  short = false,
+}: {
+  lines: [string, string];
+  you?: string;
+  short?: boolean;
+}) {
   const copy = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -90,15 +100,19 @@ export default function Opening() {
   }, []);
 
   return (
-    <section id="v4-open" className="v4-open" aria-labelledby="v4-h1">
+    <section
+      id="v4-open"
+      className={`v4-open${short ? " is-short" : ""}`}
+      aria-labelledby="v4-h1"
+    >
       <div className="v4-open-stage">
         <div ref={copy} className="v4-open-copy" data-intro="wait">
           <h1 id="v4-h1" className="v4-h1">
             <span className="v4-h1-l">
-              <span className="v4-rise">USC&apos;s AI</span>
+              <span className="v4-rise">{lines[0]}</span>
             </span>{" "}
             <span className="v4-h1-l">
-              <span className="v4-rise">implementation lab.</span>
+              <span className="v4-rise">{lines[1]}</span>
             </span>
           </h1>
           {/* What moves at rest on the opener besides the city: a hairline
@@ -109,9 +123,11 @@ export default function Opening() {
             scroll
           </span>
         </div>
-        <p className="v4-you" aria-hidden="true">
-          This is you, a few weeks from now.
-        </p>
+        {you && (
+          <p className="v4-you" aria-hidden="true">
+            {you}
+          </p>
+        )}
       </div>
     </section>
   );

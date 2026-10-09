@@ -22,9 +22,6 @@ const nextConfig = {
       { source: "/build/:path*", destination: "/", permanent: true },
       { source: "/meetings", destination: "/", permanent: true },
       { source: "/meetings/:path*", destination: "/", permanent: true },
-      // The scroll story lived at /way for one deploy (bba598b) and is the
-      // home page again; home glides to it from the hash (WayHash.tsx).
-      { source: "/way", destination: "/#way", permanent: false },
     ];
     if (!TC_ORIGIN) return about;
     return [

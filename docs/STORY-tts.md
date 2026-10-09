@@ -1,7 +1,12 @@
 # STORY-tts: the beat sheet
 
-Rewritten 2026-10-09 for the home page that folds the /way story back in
-(components/tts/landing/Landing.tsx). One semester at TTS, told by one set of
+The scroll story lives at /way (components/tts/landing/Way.tsx) as of
+2026-10-10, behind home's "Understand the TTS way" card: Tyler asked for home
+to be a basic, structured page after the LA opener (docs/INTENT-home.md).
+On /way the opener's line is "This is how a TTS project runs.", the
+partners beat and the alumni beat stay on home, and the doors follow the
+film directly. The rows below for those two beats describe the home of
+2026-10-09 and are kept for history. One project at TTS, told by one set of
 objects: LA's real street grid as points of light around the USC dot. Every
 scroll-linked value reads one followed scroll (v4/choreo.ts, 12/s, Lemma's
 0.2 a frame), and the only timed motion is the 2200ms load clock.
@@ -19,11 +24,10 @@ scroll-linked value reads one followed scroll (v4/choreo.ts, 12/s, Lemma's
 
 Nothing appears twice. The manim clips live only inside the x-ray, each face
 once (the alumni wall carries alumni only), and the doors are the only calls
-to action besides the nav. /way redirects to /#way, which glides to the
-story (WayHash.tsx).
+to action besides the nav.
 
 Reduced motion: every beat lands on its finished state; the film is its
-pulled-back poster.
+pulled-back still (still-land.webp, still-port.webp).
 
 ## Measured, Chromium on Metal, 1440x900
 
