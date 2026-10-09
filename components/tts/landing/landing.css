@@ -12,6 +12,15 @@
   height: 130vh;
   height: 130svh;
 }
+/* Its headline and cue sit above the sheet's lip, not under it. */
+.tts .v4-open.is-short .v4-open-copy {
+  bottom: calc(var(--strip-h) + 104px + 40px);
+}
+@media (max-width: 599px) {
+  .tts .v4-open.is-short .v4-open-copy {
+    bottom: 212px;
+  }
+}
 
 .tts .ld {
   --k: 0;
@@ -25,9 +34,10 @@
   background: var(--paper);
   /* Its top edge peeks up from the bottom of the first screen at load, just
    * above the readout strip, so the reader sees there is a site under the
-   * city. At -42svh the lip sat on the strip at 1440 and 390. */
-  margin-top: calc(-30vh - var(--strip-h) - 64px);
-  margin-top: calc(-30svh - var(--strip-h) - 64px);
+   * city. At -42svh the lip sat on the strip at 1440 and 390, and at 64px
+   * above it the T Combinator banner pushed the lip under the fold. */
+  margin-top: calc(-30vh - var(--strip-h) - 104px);
+  margin-top: calc(-30svh - var(--strip-h) - 104px);
   margin-inline: calc((1 - var(--k)) * var(--gutter));
   /* The bottom corners stay round so the sheet hands over to the doors'
    * cardinal city with an edge that reads as a sheet ending, not a cut. */
@@ -522,6 +532,9 @@
 @media (max-width: 599px) {
   .tts .ld {
     padding-top: 80px;
+    /* The phone's readout strip wraps to three lines, about 70px. */
+    margin-top: calc(-30vh - 176px);
+    margin-top: calc(-30svh - 176px);
   }
   .tts .nw-wall {
     gap: 8px;

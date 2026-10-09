@@ -121,8 +121,7 @@ export default function Week() {
      * (machine.py: per-pixel grain tripled each 2560 WebP). One tile at the
      * screen's own pixels, built once here; v4.css steps it at 12 fps while
      * the film shows, so a reader parked in the film never sees a frozen
-     * frame. Same strength as the render's: a gaussian at 0.17 around the
-     * ground, 0.26 of it. */
+     * frame. The render's strength: a gaussian at 0.17, 0.26 of it. */
     const grain = el.querySelector<HTMLElement>(".w5-grain");
     if (grain && !reduced) {
       const T = 192;
@@ -136,7 +135,9 @@ export default function Week() {
           const u = Math.random() || 1e-6;
           const v = Math.random();
           const z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) * 0.17;
-          const a = Math.min(1, Math.abs(z) * 0.26 * 2.2);
+          // 2.2 here read at about 2.5 times the render's grain in a dpr 2
+          // crop of the live film; 1 lands near its 0.026.
+          const a = Math.min(1, Math.abs(z) * 0.26);
           const k = z > 0 ? 255 : 0;
           im.data[i * 4] = im.data[i * 4 + 1] = im.data[i * 4 + 2] = k;
           im.data[i * 4 + 3] = Math.round(a * 255);
@@ -223,8 +224,15 @@ export default function Week() {
       }
 
       // The film draws its frame while it's on screen at all.
-      if (seq && film && film.style.visibility !== "hidden")
-        seq.draw(filmShare(p) * FILM_FRAMES.n - 1);
+      // While the scroll is moving it blends the two nearest frames; once
+      // it settles it lands on one, since a parked blend of two frames
+      // across a fast camera move read as a double exposure (live dpr 2
+      // crops, 2026-10-10).
+      if (seq && film && film.style.visibility !== "hidden") {
+        const at = filmShare(p) * FILM_FRAMES.n - 1;
+        const moving = Math.abs(f.y - window.scrollY) > 0.5;
+        seq.draw(moving ? at : Math.round(at));
+      }
 
       // Each caption rides its stage's frames.
       const fr = filmShare(p) * FILM_FRAMES.n;
