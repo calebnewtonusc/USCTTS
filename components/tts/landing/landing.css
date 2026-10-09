@@ -34,10 +34,12 @@
   background: var(--paper);
   /* Its top edge peeks up from the bottom of the first screen at load, just
    * above the readout strip, so the reader sees there is a site under the
-   * city. At -42svh the lip sat on the strip at 1440 and 390, and at 64px
-   * above it the T Combinator banner pushed the lip under the fold. */
-  margin-top: calc(-30vh - var(--strip-h) - 104px);
-  margin-top: calc(-30svh - var(--strip-h) - 104px);
+   * city. At -42svh the lip sat on the strip at 1440 and 390 (live probe:
+   * sheet top 853, strip top 848). */
+  /* The opener starts under the nav and the T Combinator banner, 109px
+   * down at 1440 (measured live), hence the nav height on top. */
+  margin-top: calc(-30vh - var(--strip-h) - 104px - var(--nav-h));
+  margin-top: calc(-30svh - var(--strip-h) - 104px - var(--nav-h));
   margin-inline: calc((1 - var(--k)) * var(--gutter));
   /* The bottom corners stay round so the sheet hands over to the doors'
    * cardinal city with an edge that reads as a sheet ending, not a cut. */
@@ -533,8 +535,8 @@
   .tts .ld {
     padding-top: 80px;
     /* The phone's readout strip wraps to three lines, about 70px. */
-    margin-top: calc(-30vh - 176px);
-    margin-top: calc(-30svh - 176px);
+    margin-top: calc(-30vh - 236px);
+    margin-top: calc(-30svh - 236px);
   }
   .tts .nw-wall {
     gap: 8px;
