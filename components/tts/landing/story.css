@@ -833,17 +833,27 @@
 }
 .tts .ts-final {
   position: absolute;
-  inset: calc(var(--nav-h) + 32px)
-    max(var(--gutter), calc((100% - var(--wide)) / 2 + var(--gutter))) 40px;
+  inset: calc(var(--nav-h) + 20px) clamp(8px, 1.6vw, 24px) clamp(8px, 1.6vw, 24px);
   display: grid;
-  align-content: center;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 20px;
   pointer-events: none;
+}
+/* From 1200px the thread runs down the left margin; the panels start just
+ * past it so its point never sits on a face. */
+@media (min-width: 1200px) {
+  .tts .ts-final {
+    left: calc(max(20px, (100% - var(--wide)) / 2 + var(--gutter) - 52px) + 28px);
+  }
 }
 .tts .ts[data-done="1"] .ts-final {
   pointer-events: auto;
 }
+/* The climax (Caleb, 2026-10-10: "TS NOT EPIC ENOUGH"): the three own the
+ * screen, edge to edge, each a tall portrait with the name huge on it. */
 .tts .ts-head {
-  margin: 0 0 32px;
+  margin: 0;
+  padding-inline: max(var(--gutter), calc((100% - var(--wide)) / 2 + var(--gutter)));
   font-size: clamp(34px, 4vw, 60px);
   font-weight: 400;
   line-height: 1.04;
@@ -855,45 +865,56 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 280px));
-  gap: 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  min-height: 0;
+}
+.tts .ts-card {
+  min-height: 0;
 }
 .tts .ts-card-in {
-  opacity: 0;
-  display: grid;
-  align-content: start;
-  gap: 16px;
+  position: relative;
+  display: block;
   height: 100%;
-  padding: 12px 12px 22px;
+  overflow: hidden;
   border-radius: 24px;
-  color: inherit;
+  color: #fff;
   text-decoration: none;
-  background: #fff3cc;
-  transition:
-    background-color 200ms cubic-bezier(0, 0, 0.2, 1),
-    box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .ts-card:nth-child(2) .ts-card-in {
-  background: #e6f0f9;
-}
-.tts .ts-card:nth-child(3) .ts-card-in {
-  background: #fbe9e3;
+  background: #2a1b1e;
+  opacity: 0;
+  transition: transform 300ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .tts .ts-card-slot {
+  position: absolute;
+  inset: 0;
   display: block;
-  aspect-ratio: 4 / 5;
-  border-radius: 20px;
+}
+.tts .ts-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+  opacity: 0;
+  transition: transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .tts .ts-card-body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: grid;
-  gap: 6px;
-  padding: 0 6px;
+  gap: 8px;
+  padding: clamp(18px, 2vw, 28px);
+  padding-top: 96px;
+  background: linear-gradient(rgba(20, 12, 14, 0), rgba(20, 12, 14, 0.82) 55%);
   opacity: 0;
 }
 .tts .ts-card-body b {
-  font-size: 21px;
+  font-size: clamp(34px, 3.6vw, 60px);
   font-weight: 500;
-  letter-spacing: -0.01em;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
 }
 .tts .ts-role,
 .tts .ts-go {
@@ -901,17 +922,17 @@
   font-size: 11.5px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--cardinal);
+  color: #ffcc00;
 }
 .tts .ts-go {
-  margin-top: 6px;
-  color: var(--ink-2);
+  color: rgba(255, 255, 255, 0.8);
   transition: color 200ms;
 }
 .tts .ts-bio {
-  font-size: 15px;
-  line-height: 1.45;
-  color: var(--ink-2);
+  max-width: 30ch;
+  font-size: 15.5px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.88);
 }
 .tts .ts-face {
   position: absolute;
@@ -927,18 +948,21 @@
 }
 @media (hover: hover) and (pointer: fine) {
   .tts a.ts-card-in:hover {
-    box-shadow: inset 0 0 0 2px var(--hot);
+    transform: translateY(-4px);
+  }
+  .tts a.ts-card-in:hover .ts-photo {
+    transform: scale(1.04);
   }
   .tts a.ts-card-in:hover .ts-go {
-    color: var(--cardinal);
+    color: #fff;
   }
 }
 .tts a.ts-card-in:focus-visible {
-  outline: 3px solid var(--ink);
+  outline: 3px solid #ffcc00;
   outline-offset: 3px;
 }
 .tts a.ts-card-in:active {
-  background: #fff;
+  transform: scale(0.985);
 }
 
 /* ---- 07, the doors: the cursor is USC's point, white on the cardinal
@@ -1054,40 +1078,30 @@
     font-size: 40px;
   }
   .tts .ts-final {
-    inset: calc(var(--nav-h) + 16px) var(--gutter) 24px;
+    inset: calc(var(--nav-h) + 12px) 0 16px;
+    gap: 14px;
   }
   .tts .ts-head {
-    margin-bottom: 20px;
     font-size: 34px;
   }
   .tts .ts-cards {
-    grid-template-columns: minmax(0, 1fr);
+    display: flex;
     gap: 10px;
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
   }
-  .tts .ts-card-in {
-    grid-template-columns: 92px minmax(0, 1fr);
-    align-items: center;
-    gap: 14px;
-    padding: 8px;
-    border-radius: 20px;
+  .tts .ts-cards::-webkit-scrollbar {
+    display: none;
   }
-  .tts .ts-card-slot {
-    aspect-ratio: 1;
-    border-radius: 14px;
-  }
-  .tts .ts-card-body {
-    gap: 3px;
-    padding: 0;
+  .tts .ts-card {
+    flex: 0 0 84%;
+    scroll-snap-align: start;
   }
   .tts .ts-card-body b {
-    font-size: 17px;
-  }
-  .tts .ts-bio {
-    font-size: 13px;
-    line-height: 1.35;
-  }
-  .tts .ts-go {
-    display: none;
+    font-size: 38px;
   }
 }
 

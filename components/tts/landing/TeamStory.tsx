@@ -67,6 +67,14 @@ const FILL = (() => {
     }));
 })();
 
+// One standout line each, cut from their sourced bios in data/people.ts
+// (Caleb, 2026-10-10: the team section was "NOT EPIC ENOUGH").
+const LINE: Record<string, string> = {
+  "Caleb Newton": "With Tyler, took TTS from an empty club to 30+ members in three months.",
+  "Tyler Larsen": "Recruited the club's ten-person cabinet.",
+  "Emily Zhao": "Designed the TTS logo and the club's previous site.",
+};
+
 const MATT = ADVISORS.find((p) => p.name === "Matthew Kim");
 
 // Beats: [in from, in to, out from, out to] on the stage's scroll value.
@@ -118,6 +126,7 @@ export default function TeamStory() {
     const slots = [...el.querySelectorAll<HTMLElement>(".ts-card-slot")];
     const cards = [...el.querySelectorAll<HTMLElement>(".ts-card-body")];
     const shells = [...el.querySelectorAll<HTMLElement>(".ts-card-in")];
+    const photos = [...el.querySelectorAll<HTMLElement>(".ts-photo")];
     const head = el.querySelector<HTMLElement>(".ts-head");
     const svg = el.querySelector<SVGSVGElement>(".ts-lines");
     const stage = el.querySelector<HTMLElement>(".ts-stage");
@@ -219,7 +228,13 @@ export default function TeamStory() {
         fc.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
         fc.style.width = `${w.toFixed(1)}px`;
         fc.style.height = `${hh.toFixed(1)}px`;
-        fc.style.borderRadius = `${lerp(999, 20, travel).toFixed(1)}px`;
+        fc.style.borderRadius = `${lerp(999, 24, travel).toFixed(1)}px`;
+        // Landed, the face hands over to the same photograph inside its
+        // panel, so the panel can scroll (the phone's swipe) with it.
+        const land = smooth(prog(travel, 0.97, 1));
+        fc.style.opacity = (o * (1 - land)).toFixed(3);
+        const photo = photos[i];
+        if (photo) photo.style.opacity = land.toFixed(3);
       });
       // The cards' grounds arrive under the travelling faces, their words
       // once the faces have landed.
@@ -236,7 +251,7 @@ export default function TeamStory() {
       if (head) {
         head.style.opacity = smooth(prog(p, 0.7, 0.8)).toFixed(3);
       }
-      el.dataset.done = p > 0.8 ? "1" : "";
+      el.dataset.done = p > 0.82 ? "1" : "";
     };
 
     measure();
@@ -317,11 +332,14 @@ export default function TeamStory() {
             {LEADERSHIP.map((p) => {
               const inner = (
                 <>
-                  <span className="ts-card-slot" />
+                  <span className="ts-card-slot">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className="ts-photo" src={p.photo} alt="" decoding="async" />
+                  </span>
                   <span className="ts-card-body">
-                    <b>{p.name}</b>
                     <span className="ts-role">{p.role}</span>
-                    {p.bio && <span className="ts-bio">{p.bio}</span>}
+                    <b>{p.name}</b>
+                    <span className="ts-bio">{LINE[p.name] ?? p.bio}</span>
                     {p.link && (
                       <span className="ts-go">
                         {p.link.includes("linkedin") ? "LinkedIn" : "Website"}{" "}
