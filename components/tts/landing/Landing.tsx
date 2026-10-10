@@ -146,9 +146,9 @@ export default function Landing() {
                       <b>Cancer therapeutics</b>
                     </li>
                   </ul>
-                  <Link href="/members" className="ld-btn" data-reveal="3">
+                  <a href="#team" className="ld-btn" data-reveal="3">
                     Learn more about TTS <span aria-hidden="true">&rarr;</span>
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>
@@ -221,7 +221,7 @@ export default function Landing() {
           </section>
 
           {/* 06. The team, told as the comeback. */}
-          <section className="ld-sec ld-team" aria-labelledby="ld-team-h">
+          <section id="team" className="ld-sec ld-team" aria-labelledby="ld-team-h">
             <div className="ld-wrap">
               <Mark n="06" label="the team" />
             </div>

@@ -561,7 +561,7 @@ export default function Network() {
                 <span className="nw-who" aria-hidden="true">
                   {n.company
                     ? n.people.map((p) => first(p.name)).join(" and ")
-                    : `${first(n.people[0].name)}, ${n.people[0].role}`}
+                    : first(n.people[0].name)}
                 </span>
               )}
             </li>

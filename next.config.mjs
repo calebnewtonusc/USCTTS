@@ -22,6 +22,9 @@ const nextConfig = {
       { source: "/build/:path*", destination: "/", permanent: true },
       { source: "/meetings", destination: "/", permanent: true },
       { source: "/meetings/:path*", destination: "/", permanent: true },
+      // Caleb, 2026-10-10: "Why do we have a people tab? All that info is on
+      // the main page". The roster and the comeback story are home's #team.
+      { source: "/members", destination: "/#team", permanent: true },
     ];
     if (!TC_ORIGIN) return about;
     return [

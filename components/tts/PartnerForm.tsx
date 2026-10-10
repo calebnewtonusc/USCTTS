@@ -72,7 +72,7 @@ export default function PartnerForm() {
         <h2 className="t-h3">Thanks, {values.contactName.split(" ")[0]}.</h2>
         <p>{`We have it, and we'll reply to ${values.email.trim()}.`}</p>
         <p>
-          <Link className="link" href="/members">
+          <Link className="link" href="/#team">
             Meet the people who will read it
           </Link>
         </p>

@@ -8,11 +8,12 @@ import "./pages.css";
 
 // About, Build and the meeting slides are gone (next.config.mjs sends them
 // to /), so the nav is the two pages a visitor actually looks for plus Join.
+// People went too (Caleb, 2026-10-10: "Why do we have a people tab? All
+// that info is on the main page"); /members redirects to home's #team.
 const LINKS = [
   // The scroll story has its own page again (Tyler, 2026-10-09: home is a
   // basic page first, and the 3D walkthrough sits behind its own door).
   { href: "/way", label: "The TTS way" },
-  { href: "/members", label: "People" },
   { href: "/work-with-us", label: "For companies" },
 ];
 

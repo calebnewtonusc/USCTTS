@@ -153,7 +153,8 @@ export const ADVISORS: Person[] = [
     ],
   },
   // Duncan: "Active mentor to USC students through ACTS2 Fellowship"
-  // (meeting slides, 02498dc).
+  // (meeting slides, 02498dc). ACTS2 is now GenCollege Christian Fellowship
+  // (Caleb, 2026-10-10).
   {
     name: "Duncan Inganji",
     role: "Software Engineer",
@@ -164,14 +165,14 @@ export const ADVISORS: Person[] = [
     logo: "/tts/marks/google.png",
     background: [
       { label: "Software Engineer, Google", logo: "/tts/marks/google.png" },
-      { label: "Mentors USC students through the ACTS2 Fellowship" },
+      { label: "Mentors USC students through GenCollege Christian Fellowship" },
     ],
   },
   // Sagar: Stanford GSB (second-brain/core/people.md, confirmed by Caleb
   // 2026-10-05), former McKinsey (site at 9a698f2, and Tyler's voice memo),
   // past president of 180 Degrees Consulting at USC (people.md, confirmed by
-  // Caleb 2026-09-04). NEED: the company Tyler called "Hydroc" in his
-  // 2026-10-09 memo; LinkedIn was logged out (401) when checked 2026-10-10.
+  // Caleb 2026-09-04). Formerly at Tiderock and at Clay (Caleb,
+  // 2026-10-10); the "Hydroc" in Tyler's 2026-10-09 memo was Tiderock.
   {
     name: "Sagar Tiwari",
     role: "MBA, ex-McKinsey",
@@ -183,6 +184,8 @@ export const ADVISORS: Person[] = [
     background: [
       { label: "MBA, Stanford GSB", logo: "/tts/marks/stanford.png" },
       { label: "Formerly at McKinsey & Company", logo: "/tts/marks/mckinsey.png" },
+      { label: "Formerly at Tiderock" },
+      { label: "Formerly at Clay", logo: "/tts/partners/clay.png" },
       { label: "Past president, 180 Degrees Consulting at USC" },
     ],
   },

@@ -329,7 +329,7 @@ export default function ApplyPage() {
                 And {ADVISORS.length} club advisors, open to a coffee chat
                 anytime.
               </p>
-              <Link href="/members" className="jo-link is-light">
+              <Link href="/#team" className="jo-link is-light">
                 Meet everyone <span aria-hidden="true">&rarr;</span>
               </Link>
             </div>

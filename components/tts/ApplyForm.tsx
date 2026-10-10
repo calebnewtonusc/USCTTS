@@ -100,7 +100,7 @@ export default function ApplyForm() {
           {`Your application is in. One of the people running the club reads every one, and you'll hear back at ${values.email.trim()} whether it's a yes or a no.`}
         </p>
         <p>
-          <Link className="link" href="/members">
+          <Link className="link" href="/#team">
             Meet the people who&apos;ll read it
           </Link>
         </p>
