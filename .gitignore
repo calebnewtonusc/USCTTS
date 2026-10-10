@@ -50,3 +50,5 @@ supabase/.temp/
 
 # the v2 film re-render works here and deletes it after encoding
 blender/renders-v2/
+public/tts/machine/seq-v2/
+public/tts/machine/still-*-v2.webp
