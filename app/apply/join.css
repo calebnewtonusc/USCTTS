@@ -1,0 +1,553 @@
+/* Join (page.tsx): short, colourful, one action. Same world as home: the
+ * field's points, USC's cardinal point, mono for small data
+ * (docs/INTENT-home.md, "One world"). */
+
+html:has(.jo) {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:has(.jo) {
+    scroll-behavior: auto;
+  }
+}
+
+.tts .jo {
+  --hot: #d0102e;
+  --cardinal: #990000;
+  --navy: #0d1020;
+  --navy-2: #1b2140;
+  --gold: #ffcc00;
+  --cream: #fff7e6;
+  --mono-f: var(--tts-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+.tts .jo-wrap {
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.tts .jo em {
+  font-style: normal;
+  color: var(--cardinal);
+}
+.tts .jo-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px;
+  font-family: var(--mono-f);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.tts .jo-mark.is-light {
+  color: rgba(255, 241, 204, 0.72);
+}
+.tts .jo-n {
+  font-family: var(--mono-f);
+  color: var(--cardinal);
+}
+.tts .jo-mark.is-light .jo-n {
+  color: var(--gold);
+}
+.tts .jo-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--hot);
+  box-shadow: 0 0 0 5px rgba(208, 16, 46, 0.22);
+}
+
+/* 1. Hero. */
+.tts .jo-hero {
+  margin: 0 clamp(8px, 1.6vw, 24px);
+  padding-block: clamp(48px, 8vh, 96px);
+  border-radius: 32px;
+  color: var(--cream);
+  background:
+    radial-gradient(60% 80% at 78% 50%, var(--navy-2), transparent 75%),
+    var(--navy);
+  overflow: hidden;
+}
+.tts .jo-hero-in {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+.tts .jo-h1 {
+  max-width: 16ch;
+  margin: 0;
+  font-size: clamp(40px, 4.6vw, 70px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+.tts .jo-hero .jo-h1 em {
+  color: var(--gold);
+}
+.tts .jo-lede {
+  max-width: 38ch;
+  margin: 24px 0 0;
+  font-size: clamp(17px, 1.4vw, 20px);
+  line-height: 1.5;
+  color: rgba(255, 241, 204, 0.78);
+}
+.tts .jo-action {
+  margin-top: 32px;
+  max-width: 480px;
+  scroll-margin-top: calc(var(--nav-h, 64px) + 40px);
+}
+.tts .jo-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-family: var(--mono-f);
+  font-size: 12.5px;
+  color: rgba(255, 241, 204, 0.85);
+}
+/* The signup form keeps its own markup and wiring (NotifyForm); on the
+ * night ground its text takes the cream. */
+.tts .jo-hero .nf-done,
+.tts .jo-hero [role="alert"],
+.tts .jo-hero label {
+  color: var(--cream);
+}
+.tts .jo-ig {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 15px;
+  color: rgba(255, 241, 204, 0.82);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 241, 204, 0.35);
+  text-underline-offset: 4px;
+  transition:
+    color 150ms,
+    text-decoration-color 150ms;
+}
+.tts .jo-apply {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 28px;
+  border-radius: 999px;
+  font-size: 17px;
+  font-weight: 500;
+  text-decoration: none;
+  color: #fff;
+  background: var(--cardinal);
+  transition:
+    background-color 150ms cubic-bezier(0, 0, 0.2, 1),
+    transform 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .jo-apply.is-light {
+  min-height: 64px;
+  padding: 0 34px;
+  font-size: 19px;
+  color: var(--cardinal);
+  background: #fff;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .jo-apply:hover {
+    background: #b3001a;
+    transform: translateY(-1px);
+  }
+  .tts .jo-apply.is-light:hover {
+    background: var(--cream);
+  }
+  .tts .jo-ig:hover {
+    color: #fff;
+    text-decoration-color: #fff;
+  }
+}
+.tts .jo-apply:focus-visible,
+.tts .jo-ig:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+.tts .jo-apply:active {
+  transform: scale(0.97);
+}
+.tts .jo-scene {
+  position: relative;
+  padding: clamp(20px, 3vw, 40px);
+}
+.tts .jo-scene-floor {
+  position: absolute;
+  inset: -40px;
+  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent);
+  mask-image: radial-gradient(closest-side, #000 55%, transparent);
+}
+.tts .jo-frame {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border-radius: 22px;
+  background: #f6d6b4;
+  box-shadow: 0 0 0 6px rgba(255, 204, 0, 0.18);
+}
+.tts .jo-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Paper sections. */
+.tts .jo-sec {
+  padding-block: clamp(80px, 11vw, 136px);
+}
+.tts .jo-sec.is-tight {
+  padding-block: 0 clamp(72px, 9vw, 120px);
+}
+.tts .jo-h2 {
+  max-width: 20ch;
+  margin: 0 0 clamp(24px, 3vw, 36px);
+  font-size: clamp(30px, 3.6vw, 54px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.026em;
+}
+.tts .jo-split {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+.tts .jo-link {
+  display: inline-flex;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: rgba(153, 0, 0, 0.4);
+  text-underline-offset: 4px;
+  transition:
+    color 150ms,
+    text-decoration-color 150ms;
+}
+.tts .jo-link.is-light {
+  color: var(--cream);
+  text-decoration-color: rgba(255, 241, 204, 0.4);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .jo-link:hover {
+    color: var(--cardinal);
+    text-decoration-color: var(--cardinal);
+  }
+  .tts .jo-link.is-light:hover {
+    color: #fff;
+    text-decoration-color: #fff;
+  }
+}
+.tts .jo-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.tts .jo-panel {
+  margin: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 0;
+  box-shadow:
+    0 0 0 8px #e6f0f9,
+    0 30px 60px -36px rgba(44, 106, 166, 0.45);
+}
+.tts .jo-cap {
+  padding: 10px 16px 12px;
+  font-family: var(--mono-f);
+  font-size: 11.5px;
+  color: var(--ink-2);
+  border-top: 1px solid var(--rule, rgba(42, 27, 30, 0.14));
+}
+
+/* 3. The work card. */
+.tts .jo-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 64px);
+  align-items: center;
+  padding: clamp(24px, 4.5vw, 64px);
+  border-radius: 28px;
+  background: #fbe9e3;
+}
+.tts .jo-tools {
+  max-width: 40ch;
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.5;
+  color: #5e4f52;
+}
+.tts .jo-manifest {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid rgba(122, 31, 31, 0.16);
+}
+.tts .jo-manifest li {
+  display: grid;
+  grid-template-columns: 44px auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid rgba(122, 31, 31, 0.16);
+}
+.tts .jo-manifest b {
+  font-size: 19px;
+  font-weight: 500;
+}
+.tts .jo-manifest li > span:last-child:not(.jo-code) {
+  justify-self: end;
+  text-align: right;
+  font-family: var(--mono-f);
+  font-size: 12px;
+  color: #6f5457;
+}
+.tts .jo-code {
+  justify-self: start;
+  align-self: center;
+  padding: 2px 6px;
+  font-family: var(--mono-f);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--cardinal);
+  border: 1px solid rgba(153, 0, 0, 0.3);
+  border-radius: 6px;
+}
+.tts .jo-code.is-field {
+  width: 10px;
+  height: 10px;
+  margin-left: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--hot);
+  box-shadow: 0 0 0 4px rgba(208, 16, 46, 0.14);
+}
+
+/* 4. The path, on a dotted line. */
+.tts .jo-steps {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+.tts .jo-steps::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  right: 0;
+  top: 5px;
+  height: 2px;
+  background-image: radial-gradient(
+    circle,
+    rgba(153, 0, 0, 0.45) 0.9px,
+    transparent 1.3px
+  );
+  background-size: 7px 2px;
+  background-repeat: repeat-x;
+}
+.tts .jo-steps li {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding-top: 32px;
+}
+.tts .jo-step-dot {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 24px;
+  height: 24px;
+  fill: var(--hot);
+}
+.tts .jo-step-dot .halo {
+  fill: rgba(208, 16, 46, 0.14);
+}
+.tts .jo-steps .jo-n {
+  font-size: 12px;
+}
+.tts .jo-steps b {
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.tts .jo-steps li > span:last-child {
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+/* 5. The network band. */
+.tts .jo-net {
+  margin: 0 clamp(8px, 1.6vw, 24px);
+  padding-block: clamp(64px, 9vw, 112px);
+  border-radius: 32px;
+  color: var(--cream);
+  background:
+    radial-gradient(70% 70% at 20% 30%, var(--navy-2), transparent 75%),
+    var(--navy);
+}
+.tts .jo-net .jo-h2 em {
+  color: var(--gold);
+}
+.tts .jo-marks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.tts .jo-marks li {
+  display: grid;
+  place-items: center;
+  height: 64px;
+  padding: 0 22px;
+  border-radius: 16px;
+  background: #fff;
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .jo-marks img {
+  display: block;
+  width: auto;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .jo-marks li:hover {
+    transform: translateY(-3px);
+  }
+}
+.tts .jo-advisors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 24px;
+  margin-top: clamp(40px, 5vw, 56px);
+  padding-top: 28px;
+  border-top: 1px solid rgba(255, 241, 204, 0.14);
+}
+.tts .jo-advisors p {
+  margin: 0;
+  font-size: 17px;
+  color: rgba(255, 241, 204, 0.85);
+}
+.tts .jo-faces {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+.tts .jo-faces li + li {
+  margin-left: -10px;
+}
+.tts .jo-faces a {
+  display: block;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--navy);
+  transition:
+    transform 180ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 180ms;
+}
+.tts .jo-faces img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 22%;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .jo-faces a:hover {
+    position: relative;
+    z-index: 1;
+    transform: translateY(-4px) scale(1.08);
+    box-shadow:
+      0 0 0 3px var(--navy),
+      0 0 0 5px var(--hot);
+  }
+}
+.tts .jo-faces a:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* 6. The end. */
+.tts .jo-end {
+  margin: clamp(16px, 2vw, 24px) clamp(8px, 1.6vw, 24px) clamp(8px, 1.6vw, 24px);
+  padding-block: clamp(72px, 10vw, 128px);
+  border-radius: 32px;
+  color: #fff;
+  background:
+    radial-gradient(60% 80% at 80% 20%, #b3122a, transparent 70%),
+    var(--cardinal);
+}
+.tts .jo-end-in {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+.tts .jo-end-h {
+  max-width: 14ch;
+  margin: 0;
+  font-size: clamp(38px, 5.2vw, 80px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.032em;
+}
+.tts .jo-end .jo-apply:focus-visible {
+  outline-color: #fff;
+}
+
+@media (max-width: 999px) {
+  .tts .jo-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 32px;
+  }
+  .tts .jo-steps::before {
+    display: none;
+  }
+}
+@media (max-width: 899px) {
+  .tts .jo-hero-in,
+  .tts .jo-split,
+  .tts .jo-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 599px) {
+  .tts .jo-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tts .jo-manifest li {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+  .tts .jo-manifest li > span:last-child:not(.jo-code) {
+    grid-column: 2;
+    justify-self: start;
+    text-align: left;
+  }
+  .tts .jo-marks li {
+    height: 54px;
+    padding: 0 16px;
+  }
+  .tts .jo-apply {
+    width: 100%;
+  }
+  .tts .jo-hero,
+  .tts .jo-net,
+  .tts .jo-end {
+    border-radius: 24px;
+  }
+}
