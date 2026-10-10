@@ -15,8 +15,10 @@ import sys
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = os.path.join(HERE, "renders")
-OUT = os.path.join(HERE, "..", "public", "tts", "machine", "seq")
+# FILM_SRC and FILM_OUT redirect it, so a re-render can encode beside the
+# live sequence and be swapped in whole (blender/film_v2.sh).
+SRC = os.environ.get("FILM_SRC", os.path.join(HERE, "renders"))
+OUT = os.environ.get("FILM_OUT", os.path.join(HERE, "..", "public", "tts", "machine", "seq"))
 SETS = [
     ("land-2560", "land", (2560, 1440), 80),
     ("land-1280", "land", (1280, 720), 78),

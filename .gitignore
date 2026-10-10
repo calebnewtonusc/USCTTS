@@ -47,3 +47,6 @@ supabase/.temp/
 /manim/.venv/
 /manim/media/
 /manim/install.log
+
+# the v2 film re-render works here and deletes it after encoding
+blender/renders-v2/

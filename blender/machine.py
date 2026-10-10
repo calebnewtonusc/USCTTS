@@ -348,8 +348,12 @@ LIGHT = dict(key_energy=4.2, key_angle=16.0, key_elev=38.0, key_az=-35.0,
 # with a penumbra 103px wide per 1000, which reads as overcast. A 6 degree
 # disc and a world at 0.09 give the short dark contact shadow under every
 # object; camera_bg doubles so the backdrop the camera sees stays as bright.
-LIGHT_V2 = dict(LIGHT, key_energy=5.2, key_angle=6.0, key_elev=42.0, world_strength=0.09,
-                camera_bg=11.0, horizon="FFF6EA", zenith="F2E2CC")
+# The first v2 key (5.2, camera_bg 11) clipped the pulled-back frame 360 to
+# floor 255,250,235 against the page ground #F4EFE6 (244,239,230) that the
+# film fades into; v1 lands at 241,234,223. Key 4.4 and camera_bg 9.5 gave
+# 241,233,219 floor and a backdrop of 235 against v1's 240, hence 10.
+LIGHT_V2 = dict(LIGHT, key_energy=4.4, key_angle=6.0, key_elev=42.0, world_strength=0.09,
+                camera_bg=10.0, horizon="FFF6EA", zenith="F2E2CC")
 
 
 def light_rig(**over):
