@@ -57,14 +57,17 @@ export const WEEK = {
   // flat frames at 1440 (dull.py, grey spread under 20); they now run in
   // about a third of that.
   dive: [0.0, 0.022],
-  // The film crossfades in over the full-frame glow, and its focus pull
-  // starts the same moment.
-  filmIn: [0.018, 0.026],
-  film: [0.018, 0.95],
-  // The pull-back to a point of light. On /way the doors rise over it
-  // (v4.css pulls them up under the pin's last half screen), so the point
-  // never sits alone on an empty map.
-  out: [0.945, 0.99],
+  // The iris (Caleb, 2026-10-10: "Transitions between the city dot grid
+  // part and the clay part is so shit"). While the grid's camera is still
+  // diving, the film opens out of the client node at the screen's centre,
+  // its first frame looking straight down on the red lead as a dot the size
+  // of the node, and both cameras keep zooming in at about the same rate.
+  filmIn: [0.014, 0.022],
+  film: [0.014, 0.99],
+  // The ending: the film settles on its wide golden shot and the doors'
+  // cardinal sheet rises over it (v4.css, ".is-way .jn"); the readouts
+  // leave first so nothing collides with the doors.
+  out: [0.937, 0.99],
   // Kept for the camera's zoom while travelling; no heat map any more.
   heat: [0.0, 0.02],
 } as const;
@@ -83,10 +86,13 @@ export const STAGES: { name: Stage; from: number; to: number }[] = [
 export const FILM_FRAMES = { n: 375 };
 
 /** Share of the film at a point of the week's scroll. */
-/* The film's first 22 frames are its rack focus out of the flat field.
- * They pass in the first 4% of the film's scroll, so the tray reads as a
- * city sooner (review 4: a screen of blur under the first caption). */
-const RACK = { frames: 22, share: 0.015 };
+/* The film's first 44 frames are its descent, straight down on the lead to
+ * the follow camera (blender/machine.py OPEN_FRAMES). Their share is set so
+ * the film's zoom starts at the grid's: the grid ends its dive at about
+ * 228 log-units of zoom per unit of scroll (1.6 x ln(60/2.6) / 0.022), and
+ * the film's distance falls 1.6 x ln(30/3.4) over its descent, so
+ * 3.49 / (228 x 0.976) = 0.0157 of the film's scroll. */
+const RACK = { frames: 44, share: 0.0157 };
 export const filmShare = (p: number) => {
   const k = prog(p, WEEK.film[0], WEEK.film[1]);
   const r = RACK.frames / FILM_FRAMES.n;
@@ -250,7 +256,10 @@ function regions(f: Frame) {
   const underSheet = !!sh && f.y >= sh.top && f.y + f.vh <= sh.top + sh.h;
   store.covered =
     underSheet ||
-    (P.weekIn >= 1 && P.week > WEEK.filmIn[1] + 0.002 && P.week < WEEK.out[0] - 0.001);
+    // On /way the film never closes, so the field stays covered from the
+    // iris until the doors' sheet has the screen (P.join 0.6), and the two
+    // canvases never draw at once (Caleb: "The scroll is soooo choppy").
+    (P.weekIn >= 1 && P.week > WEEK.filmIn[1] + 0.001 && P.join < 0.6);
   const doc = document.documentElement.scrollHeight - f.vh;
   P.page = doc > 0 ? clamp(f.y / doc) : 0;
 
@@ -291,14 +300,20 @@ function regions(f: Frame) {
   // with its glow and crossfades into the film. At the end it pulls back
   // out to the point, which is the agent's light at the screen's centre.
   const [D0, D1] = WEEK.dive;
-  const dive = easeInOut3(prog(P.week, D0, D1));
-  const pull = easeInOut3(prog(P.week, WEEK.out[0], WEEK.out[1]));
+  // The dive accelerates and never brakes (k^1.6), and the zoom moves in
+  // log space, so at the iris it is still zooming at a steady rate for the
+  // film to carry on. The pull-back is the mirror: full speed out of the
+  // point, easing as the city settles.
+  const diveK = prog(P.week, D0, D1) ** 1.6;
+  const pullK = 1 - (1 - prog(P.week, WEEK.out[0], WEEK.out[1])) ** 1.6;
   // Topdown zoom: 1 is 9 km across the screen. Following the agent the
   // camera holds about 5.5 km, then closes to about 3.5 km as the map
   // lights who's worth reaching.
   const wz = lerp(1.6, 2.6, smooth(prog(P.week, WEEK.heat[0], WEEK.heat[1])));
   // Through the point: zoom 60 is 150 m across, the inside of one block.
-  const z = lerp(lerp(wz, 60, dive), 4, pull);
+  const zIn = wz * Math.pow(60 / wz, diveK);
+  const z = zIn * Math.pow(4 / 60, pullK);
+  const dive = smooth(prog(P.week, D0, D1));
   x = lerp(x, lerp(ax, CLIENT_NODE[0], dive), wi);
   y = lerp(y, lerp(ay, CLIENT_NODE[1], dive), wi);
   zoom = lerp(zoom, z, wi);
@@ -353,11 +368,11 @@ function regions(f: Frame) {
   const seg = [
     // Sunrise, over most of the opening's runway.
     smooth(prog(P.open, 0.1, 0.95)),
-    // Sky to cardinal to cream both pass while the glow covers the whole
-    // frame, so the reader goes from the blue map straight to the film's
-    // cream and never sees the red world at the dive (review 4).
-    smooth(prog(P.week, WEEK.filmIn[0] + 0.002, WEEK.filmIn[0] + 0.006)),
-    smooth(prog(P.week, WEEK.filmIn[0] + 0.006, WEEK.filmIn[0] + 0.01)),
+    // Sky to cardinal to cream both pass once the iris covers the whole
+    // frame, so the grid around the opening iris stays the blue map and the
+    // reader never sees the red world at the dive (review 4).
+    smooth(prog(P.week, WEEK.filmIn[1] + 0.002, WEEK.filmIn[1] + 0.006)),
+    smooth(prog(P.week, WEEK.filmIn[1] + 0.006, WEEK.filmIn[1] + 0.01)),
     // Rain, finished across the whole city by Join's 0.4, before the camera
     // lifts and the doors come up (review 3: the ending must be clean).
     // It starts as Friday clears (the week's last screen) and runs on into

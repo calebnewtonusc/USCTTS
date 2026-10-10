@@ -626,6 +626,25 @@
   margin-top: -50vh;
   margin-top: -50svh;
 }
+/* On /way the doors arrive on their own sheet, rising over the film's held
+ * last frame the way home's paper sheet rises over the city: a deep
+ * cardinal ground, rounded at the top, with the map's cardinal points
+ * gathering in it as it comes (--g, from Week.tsx). No vignette, no map,
+ * no white field under it. */
+.tts .v4.is-way .w5 + .jn {
+  position: relative;
+  z-index: 3;
+  min-height: 100vh;
+  min-height: 100svh;
+  border-radius: 28px 28px 0 0;
+  color: #fbf3e0;
+  --ink: #fbf3e0;
+  --ink-2: rgba(251, 243, 224, 0.78);
+  --rule: rgba(251, 243, 224, 0.26);
+  background:
+    radial-gradient(circle, rgba(251, 243, 224, calc(0.22 * var(--g, 0))) 1.2px, transparent 1.8px) 0 0 / 22px 22px,
+    radial-gradient(120% 90% at 50% 0%, #a3162b 0%, #7a0a1c 55%, #5c0612 100%);
+}
 .tts .jn {
   /* No full-screen minimum: the doors come up with the cardinal wash
    * instead of after a screen of empty red (review 4), and the footer
@@ -889,16 +908,19 @@
   outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
-.tts .v4.is-dark .jn .nf-row .btn-primary {
+.tts .v4.is-dark .jn .nf-row .btn-primary,
+.tts .v4.is-way .jn .nf-row .btn-primary {
   background: #fbf7f0;
   color: #85101f;
 }
 @media (hover: hover) and (pointer: fine) {
-  .tts .v4.is-dark .jn .nf-row .btn-primary:hover {
+  .tts .v4.is-dark .jn .nf-row .btn-primary:hover,
+  .tts .v4.is-way .jn .nf-row .btn-primary:hover {
     background: #ffffff;
   }
 }
-.tts .v4.is-dark .jn .nf-row .btn-primary:focus-visible {
+.tts .v4.is-dark .jn .nf-row .btn-primary:focus-visible,
+.tts .v4.is-way .jn .nf-row .btn-primary:focus-visible {
   box-shadow:
     0 0 0 2px #85101f,
     0 0 0 4px #fbf7f0;
@@ -962,8 +984,8 @@
   visibility: hidden;
   will-change: transform, opacity;
 }
-/* The point of light's glow, in the film's ground colour #F4EFE6
- * (blender/machine.py), so the film's first frame is the same field. */
+/* The warm halo on the point while the iris opens (Week.tsx): the clay
+ * world's sunlit peach, so light carries across the seam before the film. */
 .tts .w5-glow {
   position: absolute;
   left: 50%;
@@ -973,8 +995,8 @@
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    #f4efe6 0 45%,
-    rgba(244, 239, 230, 0) 70%
+    rgba(255, 221, 186, 0.9) 0 18%,
+    rgba(255, 221, 186, 0) 60%
   );
   transform: translate(-50%, -50%) scale(0.02);
   opacity: 0;
@@ -997,16 +1019,18 @@
   --ink-3: #a1969a;
   --rule: rgba(42, 27, 30, 0.14);
 }
-/* Pulling back out: the film closes to the point it came from. */
+/* The iris: the film opens out of the point and closes back into it, a
+ * circle on the screen's centre with a soft edge (Week.tsx sets --r). The
+ * class name predates the opening half. */
 .tts .w5-film.is-shrinking {
   -webkit-mask-image: radial-gradient(
     circle at 50% calc(50% - var(--nav-h) / 2),
-    #000 calc(var(--r) * 0.3),
+    #000 calc(var(--r) * 0.72),
     transparent var(--r)
   );
   mask-image: radial-gradient(
     circle at 50% calc(50% - var(--nav-h) / 2),
-    #000 calc(var(--r) * 0.3),
+    #000 calc(var(--r) * 0.72),
     transparent var(--r)
   );
 }

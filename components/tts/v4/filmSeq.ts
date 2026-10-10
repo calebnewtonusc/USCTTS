@@ -7,14 +7,14 @@
  * Caleb called "Both of them blurry asf" (2026-10-09), and seeking a
  * long-GOP file stalls on every seek. Now:
  *
- *   - frames are WebP stills rendered at 2560x1440 (1440x2560 for phones),
+ *   - frames are WebP stills rendered at 2880x1620 (1440x2560 for phones),
  *     encoded by blender/encode_seq.py, drawn into a canvas sized to the
  *     screen's own pixels
  *   - a low set (1280 or 720 wide) loads first so the film is never blank,
  *     then the sharp set loads stage by stage, nearest stage first
- *   - frames stay compressed in memory (about 56MB of blobs at 2560) and
+ *   - frames stay compressed in memory (blobs of the 2880 set) and
  *     only a window around the playhead is decoded, off the main thread,
- *     with createImageBitmap: all 375 decoded at 2560 would be 5.5GB
+ *     with createImageBitmap: all 375 decoded at 2880 would be 7GB
  *   - every frame paints the two nearest frames blended by the fractional
  *     position, so a slow scroll still changes something on every rAF
  */
@@ -23,7 +23,9 @@ export type SeqSet = { dir: string; w: number; h: number };
 const N_DEFAULT = 375;
 
 const SETS = {
-  landHi: { dir: "/tts/machine/seq/land-2560", w: 2560, h: 1440 },
+  // 2880 is the canvas's own width at 1440 css and dpr 2, so the common
+  // desktop draws it 1:1 (2026-10-10, "blurry af" on the 2560 set).
+  landHi: { dir: "/tts/machine/seq/land-2880", w: 2880, h: 1620 },
   landLo: { dir: "/tts/machine/seq/land-1280", w: 1280, h: 720 },
   portHi: { dir: "/tts/machine/seq/port-1440", w: 1440, h: 2560 },
   portLo: { dir: "/tts/machine/seq/port-720", w: 720, h: 1280 },
