@@ -7,6 +7,10 @@
 const TC_ORIGIN = process.env.NEXT_PUBLIC_TC_ORIGIN ?? "";
 
 const nextConfig = {
+  // A second build directory for checks that run beside a live dev build
+  // (scripts/flash-check.sh builds into .next-flash so it never fights
+  // another tab's build over .next).
+  ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   images: {
     unoptimized: false,
   },

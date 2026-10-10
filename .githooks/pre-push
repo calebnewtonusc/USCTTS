@@ -1,0 +1,15 @@
+#!/bin/zsh
+# Before a push that touches /way's film or map, scrub /way for flashes.
+# Caleb, 2026-10-10: "The way tab has so many flashbangs of sudden color
+# changes that are unintentional on the map". FLASH_CHECK=0 skips it.
+[[ "${FLASH_CHECK:-1}" == "0" ]] && exit 0
+range=""
+while read local_ref local_sha remote_ref remote_sha; do
+  [[ "$remote_sha" == 0000000000000000000000000000000000000000 ]] && range="$local_sha" || range="$remote_sha..$local_sha"
+done
+[[ -z "$range" ]] && exit 0
+if git diff --name-only $range 2>/dev/null | grep -qE '^(components/tts/(v4|grid)/|public/tts/(machine|grid)/|blender/machine\.py)'; then
+  echo "pre-push: /way's film or map changed, running the flash check (a few minutes)"
+  zsh scripts/flash-check.sh || { echo "pre-push: flash check failed; see /tmp/flash-check/report.json"; exit 1; }
+fi
+exit 0

@@ -50,3 +50,6 @@ supabase/.temp/
 
 # the v2 film re-render works here and deletes it after encoding
 blender/renders-v2/
+
+# the flash check builds here, beside .next
+.next-flash/
