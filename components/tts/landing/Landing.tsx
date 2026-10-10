@@ -5,7 +5,7 @@ import Stage from "../v4/Stage";
 import Opening from "../v4/Opening";
 import { Join } from "../home/Sections";
 import { mono } from "../v4/mono";
-import { ALUMNI } from "@/data/people";
+import { NETWORK_PEOPLE } from "@/data/people";
 import Depth from "./Depth";
 import Network from "./Network";
 import { Mentors, Team } from "./People";
@@ -30,7 +30,10 @@ import "./landing.css";
  *   6. meet the team
  *   7. the two doors
  *
- * Nothing on this page appears twice. Every number is the length of a list
+ * Nothing on this page appears twice, images included: the full clay
+ * machine is only in the /way film, and each section here has its own scene
+ * from blender/heroes.py (Caleb, 2026-10-10: "Why are we repeating the same
+ * thing 3x???"). Every number is the length of a list
  * in data/people.ts or a dated valuation; nothing claims "first" or
  * "premier", since neither has a source. docs/INTENT-home.md lists every
  * visible element and why it is here.
@@ -52,9 +55,9 @@ export default function Landing() {
 
         <Sheet>
           <Depth />
-          <span className="ld-tab" aria-hidden="true">
-            who we are
-          </span>
+          {/* The lip carries only its grip: the first section names itself
+           * in its pill, and a label here said the same words twice. */}
+          <span className="ld-tab" aria-hidden="true" />
 
           <section className="ld-sec ld-who" aria-labelledby="ld-who-h">
             <div className="ld-wrap">
@@ -63,67 +66,80 @@ export default function Landing() {
           </section>
 
           <section className="ld-sec ld-about" aria-labelledby="ld-about-h">
-            <div className="ld-wrap ld-split">
-              <div className="ld-about-copy">
-                <p className="ld-label" data-reveal="0">
-                  about us
-                </p>
-                <h2 id="ld-about-h" className="ld-h" data-reveal="0">
-                  A dormant club, rebuilt in three months.
-                </h2>
-                <p className="ld-body" data-reveal="1">
-                  When Matthew Kim graduated, he handed TTS to Caleb Newton and
-                  Tyler Larsen with nobody left in it. They rebuilt it on one
-                  rule: you learn AI by shipping it for a real client, anywhere
-                  in the world, on the tools that client already pays for.
-                </p>
-                <Link href="/members" className="ld-btn" data-reveal="2">
-                  Learn more about TTS <span aria-hidden="true">&rarr;</span>
-                </Link>
+            <div className="ld-wrap">
+              <div className="ld-card is-blush ld-split">
+                <div className="ld-about-copy">
+                  <p className="ld-pill is-cardinal" data-reveal="0">
+                    our work
+                  </p>
+                  <h2 id="ld-about-h" className="ld-h" data-reveal="0">
+                    Real clients,{" "}
+                    <em className="ld-accent">from Nigeria to Yemen.</em>
+                  </h2>
+                  {/* Tyler's voice memo, 2026-10-09: cut the about story
+                   * and show what is special, the international work. Only
+                   * the place and the field he named; nothing else is known
+                   * yet. Nigeria's line matches second-brain/core/now.md
+                   * (stemmets.com). NEED: Yemen's field, and where the
+                   * cancer therapeutics client is. A sentence, not a card
+                   * grid: site-gate refuses a heading-plus-line grid. */}
+                  <p className="ld-body" data-reveal="1">
+                    TTS has client projects in <b>Nigeria</b>, an AI
+                    curriculum for an education nonprofit; in <b>Ghana</b>,
+                    in healthcare; in <b>Yemen</b>; and in{" "}
+                    <b>cancer therapeutics</b>.
+                  </p>
+                  <Link href="/members" className="ld-btn" data-reveal="2">
+                    Learn more about TTS <span aria-hidden="true">&rarr;</span>
+                  </Link>
+                </div>
+                <div className="ld-frame is-blush" data-reveal="1">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/tts/home/mailbox-720.webp"
+                    srcSet="/tts/home/mailbox-720.webp 720w, /tts/home/mailbox-1440.webp 1440w"
+                    sizes="(min-width: 900px) 640px, 100vw"
+                    alt="A gold clay mailbox with its red flag up and a sealed letter going out on its open door"
+                    width={1440}
+                    height={1080}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
               </div>
-              <figure className="ld-figure" data-reveal="1">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/tts/landing/machine-1280.webp"
-                  srcSet="/tts/landing/machine-1280.webp 1280w, /tts/landing/machine-2560.webp 2560w"
-                  sizes="(min-width: 900px) 50vw, 100vw"
-                  alt="A rendered machine where a lead rolls from a tray through a sorter, a typewriter and a mailbox into a stack of CRM blocks"
-                  width={2560}
-                  height={1440}
-                  loading="lazy"
-                  decoding="async"
-                />
-                <figcaption>
-                  every stage of one client project, from the TTS way
-                </figcaption>
-              </figure>
             </div>
           </section>
 
           <section className="ld-sec ld-net" aria-labelledby="ld-net-h">
             <div className="ld-wrap">
-              <p className="ld-label" data-reveal="0">
-                our network
-              </p>
-              <h2 id="ld-net-h" className="ld-h" data-reveal="0">
-                {ALUMNI.length} people started at TTS. See where they went.
-              </h2>
-              <p className="ld-lede" data-reveal="1">
-                Tap a company to meet them.
-              </p>
-              <Network />
+              <div className="ld-card is-sky">
+                <p className="ld-pill is-sky" data-reveal="0">
+                  our network
+                </p>
+                <h2 id="ld-net-h" className="ld-h" data-reveal="0">
+                  See where TTS <em className="ld-accent">can get you.</em>
+                </h2>
+                <p className="ld-lede" data-reveal="1">
+                  {NETWORK_PEOPLE.length} people started at TTS. Tap a company
+                  to meet them.
+                </p>
+                <Network />
+              </div>
             </div>
           </section>
 
           <section className="ld-sec ld-mentors" aria-labelledby="ld-men-h">
             <div className="ld-wrap">
-              <p className="ld-label" data-reveal="0">
-                join the network
-              </p>
-              <h2 id="ld-men-h" className="ld-h" data-reveal="0">
-                These people actually want to help you.
-              </h2>
-              <Mentors />
+              <div className="ld-card is-leaf">
+                <p className="ld-pill is-leaf" data-reveal="0">
+                  club advisors
+                </p>
+                <h2 id="ld-men-h" className="ld-h" data-reveal="0">
+                  Club advisors,{" "}
+                  <em className="ld-accent">open to a coffee chat anytime.</em>
+                </h2>
+                <Mentors />
+              </div>
             </div>
           </section>
 
@@ -133,19 +149,19 @@ export default function Landing() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   className="ld-way-img"
-                  src="/tts/landing/typewriter-1280.webp"
-                  srcSet="/tts/landing/typewriter-1280.webp 1280w, /tts/landing/typewriter-2560.webp 2560w"
-                  sizes="(min-width: 1200px) 1200px, 100vw"
+                  src="/tts/home/writer-1200.webp"
+                  srcSet="/tts/home/writer-1200.webp 1200w, /tts/home/writer-2400.webp 2400w"
+                  sizes="(min-width: 1280px) 1184px, 100vw"
                   alt=""
-                  width={2560}
-                  height={1440}
+                  width={2400}
+                  height={1350}
                   loading="lazy"
                   decoding="async"
                 />
                 <span className="ld-way-copy">
-                  <span className="ld-label is-light">the TTS way</span>
+                  <span className="ld-pill is-gold">the TTS way</span>
                   <span id="ld-way-h" className="ld-way-h">
-                    Understand the TTS way.
+                    Understand <em className="ld-accent">the TTS way.</em>
                   </span>
                   <span className="ld-way-sub">
                     Follow one client project from the first lead to the
@@ -161,13 +177,15 @@ export default function Landing() {
 
           <section className="ld-sec ld-team" aria-labelledby="ld-team-h">
             <div className="ld-wrap">
-              <p className="ld-label" data-reveal="0">
-                the team
-              </p>
-              <h2 id="ld-team-h" className="ld-h" data-reveal="0">
-                Meet the team.
-              </h2>
-              <Team />
+              <div className="ld-card is-gold">
+                <p className="ld-pill is-coral" data-reveal="0">
+                  the team
+                </p>
+                <h2 id="ld-team-h" className="ld-h" data-reveal="0">
+                  Meet <em className="ld-accent">the team.</em>
+                </h2>
+                <Team />
+              </div>
             </div>
           </section>
         </Sheet>

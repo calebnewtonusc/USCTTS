@@ -165,10 +165,21 @@ def add_wobble(ob, strength):
 
 _mats = {}
 
+# Which look the materials and light are built in. "v1" is the look the /way
+# film shipped in (2026-10-05, matched to Clay's Orch loop). Caleb, 2026-10-10,
+# set the about render beside clay.com: "Ours is so lame the clay one is
+# YAYYYYYY". Measured on that render (machine-1280.webp): mean saturation
+# 0.089 over the frame, 1.7% of pixels above 0.3, so it read as pale plastic
+# under a flat sky. "v2" is real
+# clay: saturated colour, a visible grain, light that scatters under the skin,
+# warm occlusion where things meet, and contact shadows from one soft key.
+# Set with --look; heroes.py always builds in v2.
+LOOK = {"name": "v1"}
+
 
 def clay(key, color=None, rough=0.58, bump=1.0):
     """Matte clay: soft sheen, fine grain bump, a slow lumpy bump, tiny value drift."""
-    name = f"clay_{key}"
+    name = f"clay_{key}_{LOOK['name']}"
     if name in _mats:
         return _mats[name]
     col = hexcol(key) if color is None else color
@@ -237,8 +248,59 @@ def clay(key, color=None, rough=0.58, bump=1.0):
     nt.links.new(acomb.outputs["Color"], aom.inputs[7])
     nt.links.new(aom.outputs[2], bsdf.inputs["Base Color"])
     nt.links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
+    if LOOK["name"] == "v2":
+        clay_v2(nt, bsdf, tc, fine, b1, b2, mix, aor, aom, acomb, bump)
     _mats[name] = m
     return m
+
+
+def clay_v2(nt, bsdf, tc, fine, b1, b2, mix, aor, aom, acomb, bump):
+    """The v2 skin on top of the v1 graph, so v1 renders stay byte-identical.
+
+    Set by eye on the before/after crop of frame 200 (docs/INTENT-home.md,
+    "the clay look"), never fitted to Clay's pixels: synthesising their look,
+    not cloning it, is the brief. Treat each as guessed, then judged."""
+    # Subsurface: 0.04 read as painted plastic. 0.22 at a 2cm radius lets the
+    # key glow through thin edges, which is most of what makes clay read as
+    # clay at this scale (the parts are 0.1 to 0.5 units, one unit a metre).
+    bsdf.inputs["Subsurface Weight"].default_value = 0.22
+    bsdf.inputs["Subsurface Radius"].default_value = (1.0, 0.45, 0.28)
+    bsdf.inputs["Subsurface Scale"].default_value = 0.02
+    bsdf.inputs["Roughness"].default_value = min(bsdf.inputs["Roughness"].default_value, 0.52)
+    bsdf.inputs["Specular IOR Level"].default_value = 0.4
+    # a velvet rim, the soft bright edge a matte clay surface shows at grazing angles
+    bsdf.inputs["Sheen Weight"].default_value = 0.3
+    bsdf.inputs["Sheen Roughness"].default_value = 0.45
+    # Grain you can see: the fine noise twice as fine and nearly twice as
+    # strong, plus thumb-pressed dimples from a Voronoi layer.
+    fine.inputs["Scale"].default_value = 260.0
+    fine.inputs["Detail"].default_value = 6.0
+    b1.inputs["Strength"].default_value = 0.18 * bump
+    vor = nt.nodes.new("ShaderNodeTexVoronoi")
+    vor.feature = "SMOOTH_F1"
+    vor.inputs["Scale"].default_value = 38.0
+    nt.links.new(tc.outputs["Object"], vor.inputs["Vector"])
+    b3 = nt.nodes.new("ShaderNodeBump")
+    b3.inputs["Strength"].default_value = 0.07 * bump
+    b3.inputs["Distance"].default_value = 0.004
+    nt.links.new(vor.outputs["Distance"], b3.inputs["Height"])
+    nt.links.new(b2.outputs["Normal"], b3.inputs["Normal"])
+    nt.links.new(b3.outputs["Normal"], bsdf.inputs["Normal"])
+    # Saturation up 25% before occlusion (v1 frame mean 0.089).
+    hsv = nt.nodes.new("ShaderNodeHueSaturation")
+    hsv.inputs["Saturation"].default_value = 1.25
+    nt.links.new(mix.outputs[2], hsv.inputs["Color"])
+    nt.links.new(hsv.outputs["Color"], aom.inputs[6])
+    # Warm occlusion: creases go to a terracotta brown, never grey. The v1
+    # grey multiply is what made every contact read as dust.
+    warm = nt.nodes.new("ShaderNodeValToRGB")
+    warm.color_ramp.elements[0].position = 0.0
+    warm.color_ramp.elements[0].color = (0.30, 0.13, 0.08, 1.0)
+    warm.color_ramp.elements[1].position = 1.0
+    warm.color_ramp.elements[1].color = (1.0, 1.0, 1.0, 1.0)
+    aor.inputs["To Min"].default_value = 0.35
+    nt.links.new(aor.outputs["Result"], warm.inputs["Fac"])
+    nt.links.new(warm.outputs["Color"], aom.inputs[7])
 
 
 def reskin(ob):
@@ -281,11 +343,20 @@ LIGHT = dict(key_energy=4.2, key_angle=16.0, key_elev=38.0, key_az=-35.0,
              horizon="FBF8F2", zenith="EFE7DA")
 
 
+# v2: the key carries the picture and the sky only fills. The world at 0.18
+# against a 4.2 sun with a 16 degree disc gave cast-shadow cores 0.44 of lit
+# with a penumbra 103px wide per 1000, which reads as overcast. A 6 degree
+# disc and a world at 0.09 give the short dark contact shadow under every
+# object; camera_bg doubles so the backdrop the camera sees stays as bright.
+LIGHT_V2 = dict(LIGHT, key_energy=5.2, key_angle=6.0, key_elev=42.0, world_strength=0.09,
+                camera_bg=11.0, horizon="FFF6EA", zenith="F2E2CC")
+
+
 def light_rig(**over):
     """One big soft key, high and in front and to one side, plus a warm
     gradient environment that lifts every shadow to a warm grey-brown.
     Matched against Clay's Orch loop in blender/lookdev.py."""
-    cfg = dict(LIGHT, **over)
+    cfg = dict(LIGHT_V2 if LOOK["name"] == "v2" else LIGHT, **over)
     sc = bpy.context.scene
     sun = bpy.data.objects.new("Key", bpy.data.lights.new("Key", "SUN"))
     sun.data.energy = cfg["key_energy"]
@@ -1825,7 +1896,11 @@ def main():
     ap.add_argument("--skip-audit", action="store_true")
     ap.add_argument("--no-grain", action="store_true")
     ap.add_argument("--stages", default="", help="write stage frame ranges as JSON here")
+    ap.add_argument("--look", default="v1", choices=["v1", "v2"],
+                    help="v1 reproduces the shipped /way film; v2 is the clay look")
+    ap.add_argument("--region", default="", help="render border x0,y0,x1,y1 in 0..1, for crops")
     a = ap.parse_args(argv)
+    LOOK["name"] = a.look
     m, show = build_and_bake()
     if not a.skip_audit:
         audit(m, show)
@@ -1852,6 +1927,12 @@ def main():
     else:
         lo, hi = (int(x) for x in a.frames.split("-"))
         frames = list(range(lo, hi + 1))
+    if a.region:
+        x0, y0, x1, y1 = (float(v) for v in a.region.split(","))
+        sc.render.use_border = True
+        sc.render.use_crop_to_border = True
+        sc.render.border_min_x, sc.render.border_min_y = x0, y0
+        sc.render.border_max_x, sc.render.border_max_y = x1, y1
     for f in frames:
         sc.frame_set(f)
         sc.render.filepath = os.path.join(a.out, f"f{f:04d}.png")

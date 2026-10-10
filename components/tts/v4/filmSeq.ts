@@ -89,18 +89,33 @@ export function createFilm(
   });
   const lo = mk(portrait ? SETS.portLo : SETS.landLo, KEEP.lo);
   const hi = mk(portrait ? SETS.portHi : SETS.landHi, KEEP.hi);
-  let stages: number[] = [0];
   let started = false;
   let disposed = false;
   let head = 0;
   const ctrl = new AbortController();
 
-  async function fetchAll(L: Layer, order: number[], parallel: number) {
-    let k = 0;
+  /* The next frame to fetch is always the one nearest the playhead that
+   * isn't in yet, read fresh on every pick. The sharp set used to follow a
+   * fixed order decided at load and waited for all 375 low frames first, so
+   * anyone who scrolled into the middle of the film watched the 1280 set
+   * there for most of a minute (Tyler, relayed 2026-10-10: "still a bit
+   * blurry"). */
+  function nextNearest(L: Layer): number {
+    const c = Math.round(head);
+    for (let d = 0; d < n; d++) {
+      for (const i of d ? [c + d, c - d] : [c]) {
+        if (i < 0 || i >= n) continue;
+        if (!L.blobs[i] && !L.fetching.has(i)) return i;
+      }
+    }
+    return -1;
+  }
+
+  async function fetchAll(L: Layer, parallel: number) {
     const worker = async () => {
-      while (!disposed && k < order.length) {
-        const i = order[k++];
-        if (L.blobs[i] || L.fetching.has(i)) continue;
+      while (!disposed) {
+        const i = nextNearest(L);
+        if (i < 0) return;
         L.fetching.add(i);
         try {
           const r = await fetch(url(L.set, i), { signal: ctrl.signal });
@@ -156,25 +171,6 @@ export function createFilm(
           .catch(() => L.decoding.delete(i));
       }
     }
-  }
-
-  /* Frames ordered from the playhead's stage outward, stage by stage. */
-  function stageOrder(): number[] {
-    const starts = [...stages, n];
-    const blocks: number[][] = [];
-    for (let s = 0; s < starts.length - 1; s++) {
-      const b: number[] = [];
-      for (let i = starts[s]; i < starts[s + 1]; i++) b.push(i);
-      blocks.push(b);
-    }
-    let cur = 0;
-    for (let s = 0; s < starts.length - 1; s++) if (head >= starts[s]) cur = s;
-    const out: number[] = [];
-    for (let d = 0; d < blocks.length; d++) {
-      if (blocks[cur + d]) out.push(...blocks[cur + d]);
-      if (d && blocks[cur - d]) out.push(...blocks[cur - d]);
-    }
-    return out;
   }
 
   function resize() {
@@ -252,24 +248,20 @@ export function createFilm(
     if (started) return;
     started = true;
     resize();
-    // Low set first, in order from the top, so the rack focus is in hand
-    // the moment the film fades up; then the sharp set by stage.
-    const all = Array.from({ length: n }, (_, i) => i);
-    fetchAll(lo, all, PARALLEL.lo).then(() => {
-      if (!disposed && needHi()) fetchAll(hi, stageOrder(), PARALLEL.hi);
-    });
-    // Begin the sharp set's first stage alongside, so the opening shot is
-    // sharp by the time anyone reaches it.
-    if (needHi()) fetchAll(hi, all.slice(0, Math.min(n, stages[1] ?? 48)), 2);
+    // Both sets at once, each nearest the playhead first: the low set so
+    // the film is never blank, the sharp set so the frame you stop on is
+    // the 2560 one as early as the network allows.
+    fetchAll(lo, PARALLEL.lo);
+    if (needHi()) fetchAll(hi, PARALLEL.hi);
   }
 
   return {
     load,
     draw,
     resize,
-    setStages: (starts) => {
-      stages = starts.length ? starts : [0];
-    },
+    // Fetching follows the playhead now, so stage order no longer matters;
+    // kept so Week.tsx's call stays valid.
+    setStages: () => {},
     dispose: () => {
       disposed = true;
       ctrl.abort();

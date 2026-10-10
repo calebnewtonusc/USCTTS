@@ -1,6 +1,6 @@
 "use client";
 
-import { grid, KOREATOWN, type GridMode } from "../grid/store";
+import { grid, CLIENT_NODE, type GridMode } from "../grid/store";
 import {
   clamp,
   easeInOut3,
@@ -42,8 +42,8 @@ export const INTRO = { t: 0 };
 
 /*
  * The week's runway, P.week (docs/SCRIPT-v5.md, beats 4 to 6). The grid
- * carries the agent from USC to Koreatown and lights up who's worth
- * reaching, the camera dives through the Koreatown point into the clay
+ * carries the agent from USC to the client node and lights up who's worth
+ * reaching, the camera dives through the client node into the clay
  * machine film, the film plays under the scroll stage by stage, then pulls
  * back to a point of light on the grid and the rain begins.
  */
@@ -280,14 +280,14 @@ function regions(f: Frame) {
   if (back > 0.2) mode = "basin";
   let dim = 0.18 * smooth(prog(P.partners, 0.2, 0.45));
 
-  // 3. The week. The camera follows the agent from USC to Koreatown,
+  // 3. The week. The camera follows the agent from USC to the client node,
   // straight down while it finds customers, then settles over one block.
   const wi = easeInOut3(P.weekIn);
   const t = travelT();
-  const ax = lerp(0, KOREATOWN[0], t);
-  const ay = lerp(0, KOREATOWN[1], t);
+  const ax = lerp(0, CLIENT_NODE[0], t);
+  const ay = lerp(0, CLIENT_NODE[1], t);
   // The dive (the cardinal to cream change, grid/transitions.ts): the
-  // camera drops through the Koreatown point; Week.tsx fills the screen
+  // camera drops through the client node; Week.tsx fills the screen
   // with its glow and crossfades into the film. At the end it pulls back
   // out to the point, which is the agent's light at the screen's centre.
   const [D0, D1] = WEEK.dive;
@@ -299,8 +299,8 @@ function regions(f: Frame) {
   const wz = lerp(1.6, 2.6, smooth(prog(P.week, WEEK.heat[0], WEEK.heat[1])));
   // Through the point: zoom 60 is 150 m across, the inside of one block.
   const z = lerp(lerp(wz, 60, dive), 4, pull);
-  x = lerp(x, lerp(ax, KOREATOWN[0], dive), wi);
-  y = lerp(y, lerp(ay, KOREATOWN[1], dive), wi);
+  x = lerp(x, lerp(ax, CLIENT_NODE[0], dive), wi);
+  y = lerp(y, lerp(ay, CLIENT_NODE[1], dive), wi);
   zoom = lerp(zoom, z, wi);
   tilt = lerp(tilt, 0, wi);
   if (wi > 0.35) mode = "topdown";
@@ -312,7 +312,7 @@ function regions(f: Frame) {
   // the script's line (freshman review 2).
   store.highlight = 0;
   store.agent.from = [0, 0];
-  store.agent.to = KOREATOWN;
+  store.agent.to = CLIENT_NODE;
   store.agent.t = t;
 
   // 4. Where they go. Out of the point of light the camera rises off the
@@ -334,8 +334,8 @@ function regions(f: Frame) {
   // 2026-10-05): held over USC, the 110's ribbon ran straight through "Book
   // 30 minutes" like a strikethrough (screenshot, 2026-10-09).
   const lift = easeInOut3(prog(P.join, 0.25, 0.75));
-  x = lerp(x, KOREATOWN[0] * 0.55, lift);
-  y = lerp(y, KOREATOWN[1] * 0.55, lift);
+  x = lerp(x, CLIENT_NODE[0] * 0.55, lift);
+  y = lerp(y, CLIENT_NODE[1] * 0.55, lift);
   zoom = lerp(zoom, 0.95, lift);
   tilt = lerp(tilt, 0, lift);
   if (lift > 0.02) mode = "topdown";
@@ -382,7 +382,7 @@ function regions(f: Frame) {
   store.wave.from = from;
   store.wave.to = from + 1;
   store.wave.t = world - from;
-  store.wave.origin = from === 0 ? [0, 0] : KOREATOWN;
+  store.wave.origin = from === 0 ? [0, 0] : CLIENT_NODE;
   store.protect = null;
   store.dim = dim;
   store.camera.x = x;

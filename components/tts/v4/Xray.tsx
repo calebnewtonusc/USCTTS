@@ -21,7 +21,7 @@ import {
  */
 
 const KIND_NAMES: [Kind, string][] = [
-  ["gtm", "finding customers"],
+  ["gtm", "finding funders"],
   ["email", "the same emails"],
   ["sheet", "the spreadsheet"],
   ["teach", "learning new tools"],
@@ -60,11 +60,11 @@ export default function XrayViews() {
           {/* Filled with the manim clip on the first x-ray open (Week.tsx). */}
           <div className="xr-clip" />
           <div className="xr-detail">
-            <p className="xr-cap">a Clay table, researched with Perplexity</p>
+            <p className="xr-cap">the lead table, every funder researched</p>
             <table className="xr-table">
               <thead>
                 <tr>
-                  <th>company</th>
+                  <th>funder</th>
                   <th>decision maker</th>
                   <th>signal</th>
                   <th>why it&apos;s worth reaching</th>

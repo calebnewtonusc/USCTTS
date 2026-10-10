@@ -1,9 +1,12 @@
 /*
  * Home's sheet (Landing.tsx, Sheet.tsx): after the LA opener the page is a
- * structured site on paper, in the order Tyler asked for. The sheet is the
- * paper itself; every card on it is a well: square corners, one hairline,
- * no shadow (docs/DESIGN-tts.md). Only the sheet's top edge is rounded, and
- * only until it has grown to the full width.
+ * structured site on paper, in the order Tyler asked for. Since 2026-10-10
+ * each section is a tinted rounded card with a coloured pill, a two-tone
+ * headline and its own clay scene (Caleb, beside clay.com: "Ours is so lame
+ * the clay one is YAYYYYYY"). The tints are the clay world's own colours, so
+ * the page and the renders read as one palette. Still no shadows: depth comes
+ * from the renders, the cards are flat colour (docs/DESIGN-tts.md, "Home's
+ * sheet").
  */
 
 /* Home's opener is short: the headline holds for a third of a screen while
@@ -53,17 +56,12 @@
   top: 22px;
   left: 50%;
   transform: translateX(-50%);
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  color: var(--ink-2);
 }
 .tts .ld-tab::before {
   content: "";
   display: block;
   width: 36px;
   height: 3px;
-  margin: 0 auto 10px;
   border-radius: 2px;
   background: var(--ink-3);
 }
@@ -74,17 +72,92 @@
   padding-inline: var(--gutter);
 }
 .tts .ld-sec + .ld-sec {
-  margin-top: clamp(112px, 16vh, 184px);
+  margin-top: clamp(32px, 5vh, 56px);
 }
-.tts .ld-label {
-  margin: 0 0 16px;
+/* The section after the big statement gets the long breath. */
+.tts .ld-who + .ld-sec {
+  margin-top: clamp(96px, 14vh, 160px);
+}
+
+/* A coloured pill names each section, one colour per section, drawn from
+ * the clay world (gold, cardinal, sky, leaf, coral). */
+.tts .ld-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  margin: 0 0 20px;
+  padding: 0 12px;
   font-family: var(--mono);
   font-size: 12px;
-  letter-spacing: 0.02em;
-  color: var(--red);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  color: #fff;
 }
-.tts .ld-label.is-light {
-  color: rgba(251, 250, 247, 0.8);
+.tts .ld-pill.is-gold {
+  color: var(--ink);
+  background: #ffcc00;
+}
+.tts .ld-pill.is-cardinal {
+  background: #990000;
+}
+.tts .ld-pill.is-sky {
+  background: #2b6fae;
+}
+.tts .ld-pill.is-leaf {
+  background: #2f7a3a;
+}
+.tts .ld-pill.is-coral {
+  background: #c2412b;
+}
+/* The two-tone headline: the phrase that carries the claim, in cardinal on
+ * light cards and gold on the navy one. */
+.tts .ld-accent {
+  font-style: normal;
+  color: #990000;
+}
+
+/* A tinted rounded card holds each section after the statement. */
+.tts .ld-card {
+  padding: clamp(24px, 4.5vw, 64px);
+  border-radius: 28px;
+  background: var(--card-tint, #fff);
+}
+.tts .ld-card.is-blush {
+  --card-tint: #fbe9e3;
+}
+.tts .ld-card.is-sky {
+  --card-tint: #e6f0f9;
+}
+.tts .ld-card.is-leaf {
+  --card-tint: #e9f2e0;
+}
+.tts .ld-card.is-gold {
+  --card-tint: #fff3cc;
+}
+/* A rounded frame the hero scene fills edge to edge; its tint is the
+ * render's own backdrop, so the frame reads as intentional while the image
+ * loads. */
+.tts .ld-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--frame-tint, #eee);
+  isolation: isolate;
+}
+.tts .ld-frame.is-blush {
+  --frame-tint: #f1c8bd;
+}
+.tts .ld-frame.is-world {
+  --frame-tint: #f6d6b4;
+  margin-top: clamp(40px, 6vh, 72px);
+}
+.tts .ld-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .tts .ld-say {
   max-width: 26ch;
@@ -120,13 +193,14 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  min-height: 46px;
-  padding: 0 20px;
+  min-height: 48px;
+  padding: 0 24px;
   font-size: 15px;
   font-weight: 500;
   text-decoration: none;
   color: var(--paper);
   background: var(--ink);
+  border-radius: 999px;
   transition:
     background-color 150ms cubic-bezier(0, 0, 0.2, 1),
     transform 150ms cubic-bezier(0, 0, 0.2, 1);
@@ -140,7 +214,8 @@
 }
 @media (hover: hover) and (pointer: fine) {
   .tts a.ld-btn:hover {
-    background: #45303a;
+    background: #990000;
+    transform: translateY(-1px);
   }
   .tts a.ld-btn:hover span,
   .tts .ld-way-card:hover .ld-btn span {
@@ -154,8 +229,9 @@
   outline: 2px solid var(--ink);
   outline-offset: 3px;
 }
-.tts a.ld-btn:active {
-  transform: scale(0.98);
+.tts a.ld-btn:active,
+.tts .ld-way-card:active .ld-btn {
+  transform: translateY(0) scale(0.97);
 }
 
 /* ---- 1. who we are ---- */
@@ -219,28 +295,19 @@
 /* ---- 2. about us ---- */
 .tts .ld-split {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  gap: clamp(32px, 5vw, 80px);
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: clamp(28px, 4vw, 64px);
   align-items: center;
 }
-.tts .ld-figure {
-  margin: 0;
-  background: var(--well);
-  border: 1px solid var(--rule);
+.tts .ld-split .ld-frame {
+  aspect-ratio: 4 / 3;
 }
-.tts .ld-figure img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
+.tts .ld-card .ld-body {
+  color: #5e4f52;
 }
-.tts .ld-figure figcaption {
-  padding: 12px 14px;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  color: var(--ink-2);
-  border-top: 1px solid var(--rule);
+.tts .ld-card .ld-body b {
+  font-weight: 500;
+  color: var(--ink);
 }
 
 /* ---- 3. the network ---- */
@@ -266,8 +333,9 @@
   text-align: left;
   font: inherit;
   color: var(--ink);
-  background: var(--well);
-  border: 1px solid var(--rule);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(43, 111, 174, 0.12);
+  border-radius: 18px;
   cursor: pointer;
   transition:
     background-color 150ms cubic-bezier(0, 0, 0.2, 1),
@@ -312,7 +380,7 @@
   height: 32px;
   object-fit: cover;
   flex: none;
-  border: 2px solid var(--well);
+  border: 2px solid #fff;
   border-radius: 50%;
   filter: grayscale(0.15);
   transition: filter 150ms cubic-bezier(0, 0, 0.2, 1);
@@ -340,7 +408,8 @@
 @media (hover: hover) and (pointer: fine) {
   .tts .nw-btn:hover {
     background: #fff;
-    border-color: rgba(42, 27, 30, 0.32);
+    border-color: rgba(43, 111, 174, 0.4);
+    transform: translateY(-2px);
   }
   .tts .nw-btn:hover .nw-mark img,
   .tts .nw-btn:hover .nw-faces img {
@@ -372,6 +441,7 @@
   color: var(--ink);
   background: var(--paper);
   border: 1px solid var(--rule);
+  border-radius: 24px;
 }
 .tts .nw-dialog::backdrop {
   background: rgba(26, 20, 22, 0.42);
@@ -416,6 +486,7 @@
   color: var(--ink);
   background: var(--paper-2);
   border: 0;
+  border-radius: 999px;
   cursor: pointer;
   transition: background-color 150ms cubic-bezier(0, 0, 0.2, 1);
 }
@@ -447,6 +518,7 @@
   aspect-ratio: 1;
   object-fit: cover;
   margin-bottom: 8px;
+  border-radius: 14px;
 }
 .tts .nw-people b {
   font-size: 16px;
@@ -463,8 +535,16 @@
   overflow: hidden;
   color: #fbfaf7;
   text-decoration: none;
-  background: #1a1416;
+  /* the render's own navy at its darkest edge */
+  background: #151c2d;
+  border-radius: 28px;
   isolation: isolate;
+}
+.tts .ld-way-card .ld-accent {
+  color: #ffcc00;
+}
+.tts .ld-way-card .ld-pill {
+  margin: 0;
 }
 .tts .ld-way-img {
   display: block;
@@ -474,8 +554,8 @@
   object-fit: cover;
   transition: transform 900ms cubic-bezier(0.2, 0.6, 0.2, 1);
 }
-/* A dark ground under the copy on the left, so the light type reads on the
- * cream render. */
+/* The render already falls off to navy on the left where the copy sits; a
+ * light wash of the same navy keeps the type at full contrast on any crop. */
 .tts .ld-way-card::after {
   content: "";
   position: absolute;
@@ -483,9 +563,9 @@
   z-index: 0;
   background: linear-gradient(
     90deg,
-    rgba(26, 20, 22, 0.86) 0%,
-    rgba(26, 20, 22, 0.62) 38%,
-    rgba(26, 20, 22, 0) 70%
+    rgba(21, 28, 45, 0.7) 0%,
+    rgba(21, 28, 45, 0.35) 34%,
+    rgba(21, 28, 45, 0) 56%
   );
   pointer-events: none;
 }
@@ -517,7 +597,7 @@
 }
 .tts .ld-way-card:focus-visible {
   outline: 2px solid var(--ink);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
 @media (max-width: 1099px) {
@@ -529,6 +609,11 @@
   .tts .st,
   .tts .ld-split {
     grid-template-columns: minmax(0, 1fr);
+  }
+  /* The world crops to its middle on a narrow screen: USC, the freeway and
+   * downtown all sit in the centre 60% of the render. */
+  .tts .ld-frame.is-world {
+    aspect-ratio: 4 / 3;
   }
 }
 @media (max-width: 599px) {
@@ -561,9 +646,19 @@
   .tts .ld-way-card::after {
     display: none;
   }
+  .tts .ld-way-img {
+    aspect-ratio: 4 / 3;
+    object-position: 72% 50%;
+  }
   .tts .ld-way-copy {
     position: static;
     padding: 24px 20px 28px;
+  }
+  .tts .ld-card {
+    border-radius: 22px;
+  }
+  .tts .ld-frame {
+    border-radius: 16px;
   }
 }
 
@@ -584,22 +679,38 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
 }
 .tts .pp-card {
   display: grid;
   align-content: start;
-  background: var(--well);
-  border: 1px solid var(--rule);
-  transition: border-color 150ms cubic-bezier(0, 0, 0.2, 1);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(47, 122, 58, 0.12);
+  border-radius: 18px;
+  transition:
+    border-color 150ms cubic-bezier(0, 0, 0.2, 1),
+    transform 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+/* An advisor card is a row: a 96px face, then the name and background.
+ * Square faces at a third of 1184px were drawn at 380px, past every
+ * headshot's resolution at dpr 2. */
+.tts .pp-cards .pp-card {
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
 }
 .tts .pp-card-face {
   display: block;
-  width: 100%;
-  aspect-ratio: 1;
+  width: 96px;
+  height: 96px;
+  border-radius: 14px;
   object-fit: cover;
   object-position: 50% 22%;
+}
+.tts .pp-cards .pp-card-body {
+  padding: 2px 0 0;
 }
 .tts .pp-card-body {
   display: grid;
@@ -613,6 +724,45 @@
   font-weight: 500;
 }
 .tts .pp-card-body > span {
+  color: var(--ink-2);
+}
+/* An advisor's background: a mark (or a leaf dot) and one line per row. */
+.tts .pp-bg {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.tts .pp-bg li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.tts .pp-bg img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+.tts .pp-bg-dot {
+  width: 8px;
+  height: 8px;
+  margin: 6px;
+  border-radius: 50%;
+  background: #2f7a3a;
+}
+/* Room for the LinkedIn arrow, which sits on the card's bottom right. */
+.tts a.pp-team-link .pp-card-body {
+  padding-right: 40px;
+}
+.tts .pp-bio {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.45;
   color: var(--ink-2);
 }
 .tts .pp-card-co {
@@ -629,7 +779,8 @@
 }
 @media (hover: hover) and (pointer: fine) {
   .tts .pp-card:hover {
-    border-color: rgba(42, 27, 30, 0.32);
+    border-color: rgba(47, 122, 58, 0.4);
+    transform: translateY(-2px);
   }
 }
 
@@ -648,8 +799,10 @@
 .tts .pp-team-link {
   position: relative;
   display: grid;
-  background: var(--well);
-  border: 1px solid var(--rule);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(194, 65, 43, 0.12);
+  border-radius: 18px;
   color: inherit;
   text-decoration: none;
   transition:
@@ -675,7 +828,8 @@
 }
 @media (hover: hover) and (pointer: fine) {
   .tts a.pp-team-link:hover {
-    border-color: var(--ink);
+    border-color: #c2412b;
+    transform: translateY(-2px);
   }
   .tts a.pp-team-link:hover .pp-go {
     transform: translateX(4px);
@@ -724,12 +878,12 @@
 
 @media (max-width: 1099px) {
   .tts .pp-cards {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 599px) {
   .tts .pp-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
   }
   .tts .pp-team-row {
     grid-template-columns: repeat(3, minmax(0, 1fr));

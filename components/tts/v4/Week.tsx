@@ -19,13 +19,13 @@ import { attachXray } from "./xrayLine";
 /*
  * The dive and the machine (docs/SCRIPT-v5.md, beats 4 to 6). The grid is
  * the city and the clay machine is what happens inside one point of it. The
- * camera dives through the Koreatown point, its glow fills the screen in the
+ * camera dives through the client's point, its glow fills the screen in the
  * film's ground colour, and the film's first frame, the same colour, racks
  * into focus. The film plays under the scroll, one stage per caption. At the
  * end it pulls back to a point of light on the grid, and the rain begins.
  *
- * Reader: a USC student. They're the main character; the dental office is
- * the client, and an example. One scroll value drives all of it, P.week.
+ * Reader: a USC student. They're the main character; the Ghana nonprofit
+ * is the client, and an example. One scroll value drives all of it, P.week.
  */
 
 /* The film (blender/machine.py): 375 frames rendered at 2560x1440 and a
@@ -47,36 +47,45 @@ const STAGE_NAME: Record<string, Stage> = {
   out: "pullback",
 };
 
-/* One line per stage, verbatim from the script, each with its mono label
- * naming the skill or the tool. The mailbox has no words: the flag pops. */
+/* One line per stage, verbatim from Tyler's voice memo (relayed
+ * 2026-10-10), each with a mono label naming the skill. The example is one
+ * TTS project, a Ghana nonprofit's donor outreach; no tool brand appears
+ * in the walkthrough. */
 const CAPTIONS: { stage: Stage; line: string; label?: string; at: string }[] = [
   {
     stage: "tray",
-    line: "First you find every business that could send them patients.",
-    label: "finding leads, in Clay",
+    line: "First you find every foundation that could fund them.",
+    label: "finding leads",
     at: "is-tr is-big",
   },
   {
     stage: "sorter",
-    line: "Then you decide who's actually worth reaching, and teach the AI why.",
-    label: "qualifying, with Perplexity research",
+    line: "Then decide who's actually worth reaching, and teach the AI why.",
+    label: "qualifying",
     at: "is-tr is-mid",
   },
   {
     stage: "typewriter",
-    line: "It drafts the first email. You fix it until it sounds like a person.",
+    line: "The team drafts the first email, and it writes well-tailored copy from there.",
     label: "prompting",
     at: "is-tc is-mid",
   },
   {
-    stage: "blocks",
-    line: "Every reply lands in a CRM you wired up, so nothing gets lost.",
+    stage: "mailbox",
+    line: "Every reply lands in the client's CRM and gets answered with AI.",
     label: "the CRM",
+    at: "is-tl is-mid",
+  },
+  {
+    stage: "blocks",
+    line: "Meetings start appearing on the client's calendar within a week.",
+    label: "meetings booked",
     at: "is-mr is-big",
   },
   {
     stage: "pullback",
-    line: "Then you teach the office to run it without you.",
+    line: "Then we teach the client to run it and hand it off as a full software project.",
+    label: "the handoff",
     at: "is-tl is-big",
   },
 ];
@@ -267,12 +276,11 @@ export default function Week() {
   return (
     <section ref={root} id="v4-week" className="w5" aria-labelledby="w5-intro">
       <div className="w5-stage">
-        {/* Tyler: "understand the TTS way", leading into the story. The
-         * business brings the problem; the student is the main character. */}
+        {/* Tyler (relayed 2026-10-10): make it clearly one example of a
+         * TTS project, with his example client. */}
         <h2 id="w5-intro" className="w5-intro">
-          <span className="w5-label w5-way">the TTS way</span>
-          Say your first client is a dental office in Koreatown that answers
-          the same emails all week. The next one could be anywhere.
+          <span className="w5-label w5-way">one example of a TTS project</span>
+          Say your client is a nonprofit in Ghana that needs donor outreach.
         </h2>
 
         <div

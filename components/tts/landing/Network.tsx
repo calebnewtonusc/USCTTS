@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ALUMNI, type Person } from "@/data/people";
+import { NETWORK_PEOPLE, type Person } from "@/data/people";
 
 /*
  * "See our network" (Tyler, 2026-10-09): where alumni went, the company
@@ -17,6 +17,8 @@ import { ALUMNI, type Person } from "@/data/people";
 
 // Marks on disk. A company without one is set as type.
 const LOGOS: Record<string, string> = {
+  "McKinsey & Company": "/img/logos/mckinsey.png",
+  Microsoft: "/tts/alumni/microsoft.svg",
   Apple: "/tts/alumni/apple.svg",
   Bloomberg: "/tts/alumni/bloomberg.svg",
   "Capital One": "/tts/alumni/capitalone.svg",
@@ -28,20 +30,28 @@ const LOGOS: Record<string, string> = {
   Reddit: "/tts/alumni/reddit.svg",
 };
 
-type Group = { key: string; title: string; people: Person[] };
+type Group = { key: string; title: string; people: Person[]; past: boolean };
 
-/* One tile per company, bigger groups first, then the ones with a mark. */
+/* One tile per company, bigger groups first, then the ones with a mark. A
+ * person's earlier employer gets a tile too (Tyler, 2026-10-09: more logos,
+ * "the more the better"), with their role saying "ex-". */
 function groups(people: Person[]): Group[] {
   const m = new Map<string, Person[]>();
+  const pastKeys = new Set<string>();
   for (const p of people) {
     const key = p.company ?? `role:${p.name}`;
     m.set(key, [...(m.get(key) ?? []), p]);
+    for (const past of p.past ?? []) {
+      pastKeys.add(past);
+      m.set(past, [...(m.get(past) ?? []), { ...p, company: past }]);
+    }
   }
   return [...m.entries()]
     .map(([key, ps]) => ({
       key,
       title: ps[0].company ?? ps[0].role,
       people: ps,
+      past: pastKeys.has(key),
     }))
     .sort(
       (a, b) =>
@@ -50,7 +60,7 @@ function groups(people: Person[]): Group[] {
     );
 }
 
-const GROUPS = groups(ALUMNI);
+const GROUPS = groups(NETWORK_PEOPLE);
 
 export default function Network() {
   const dlg = useRef<HTMLDialogElement>(null);
@@ -66,7 +76,7 @@ export default function Network() {
 
   return (
     <>
-      <ul className="nw-wall" aria-label="Companies our alumni work at">
+      <ul className="nw-wall" aria-label="Companies people who started at TTS work at">
         {GROUPS.map((g, i) => (
           <li
             key={g.key}
@@ -136,7 +146,9 @@ export default function Network() {
               <h3 id="nw-dialog-h">
                 {open.key.startsWith("role:")
                   ? "Started at TTS"
-                  : `Started at TTS, now at ${open.title}`}
+                  : open.past
+                    ? `Started at TTS, then at ${open.title}`
+                    : `Started at TTS, now at ${open.title}`}
               </h3>
               <button
                 type="button"

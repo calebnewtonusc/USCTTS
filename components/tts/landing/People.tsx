@@ -30,16 +30,21 @@ export function Mentors() {
           <Face p={p} className="pp-card-face" />
           <span className="pp-card-body">
             <b>{p.name}</b>
-            <span>{p.role}</span>
-            {p.company && (
-              <span className="pp-card-co">
-                {p.logo && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.logo} alt="" loading="lazy" />
-                )}
-                {p.company}
-              </span>
-            )}
+            {/* Tyler, 2026-10-09: show more of each advisor's background,
+             * with the marks. Every row is sourced in data/people.ts. */}
+            <ul className="pp-bg">
+              {(p.background ?? [{ label: p.role, logo: p.logo }]).map((r) => (
+                <li key={r.label}>
+                  {r.logo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={r.logo} alt="" loading="lazy" />
+                  ) : (
+                    <span className="pp-bg-dot" aria-hidden="true" />
+                  )}
+                  <span>{r.label}</span>
+                </li>
+              ))}
+            </ul>
           </span>
         </li>
       ))}
@@ -57,6 +62,7 @@ export function Team() {
             <span className="pp-card-body">
               <b>{p.name}</b>
               <span>{p.role}</span>
+              {p.bio && <span className="pp-bio">{p.bio}</span>}
             </span>
           </>
         );

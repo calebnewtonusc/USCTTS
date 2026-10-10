@@ -79,11 +79,30 @@ export default function Statement() {
 
   return (
     <>
+      <p className="ld-pill is-gold" data-reveal="0">
+        who we are
+      </p>
       <h2 id="ld-who-h" className="ld-say" data-reveal="0">
         We build whatever AI a company or nonprofit needs, anywhere in the
-        world: automations, CRMs, outbound, training their teams. Students
-        build all of it.
+        world: automations, CRMs, outbound, training their teams.{" "}
+        <em className="ld-accent">Students build all of it.</em>
       </h2>
+      {/* The one big scene on home: a clay LA at golden hour, USC's tower
+       * and red dot on the left, downtown on the right, a freeway between
+       * (blender/heroes.py, world). It sits under the line it illustrates:
+       * students, from USC, building for the city and past it. */}
+      <div className="ld-frame is-world" data-reveal="1">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/tts/home/world-1200.webp"
+          srcSet="/tts/home/world-1200.webp 1200w, /tts/home/world-2400.webp 2400w"
+          sizes="(min-width: 1280px) 1184px, 100vw"
+          alt="A clay Los Angeles at golden hour: green hills, a downtown of rounded towers, palm trees, and USC's cardinal tower with a red map dot above it, joined by a freeway"
+          width={2400}
+          height={1200}
+          decoding="async"
+        />
+      </div>
       <div className="st">
         <ul ref={row} className="st-row" aria-label="Official partners">
           {ROWS.map((r, i) => (

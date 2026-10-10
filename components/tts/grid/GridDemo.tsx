@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import LAGrid from "./LAGrid";
-import { grid, KOREATOWN, type GridMode } from "./store";
+import { grid, CLIENT_NODE, type GridMode } from "./store";
 
 // Verification harness: one scroll value drives every engine state in order.
 // Not part of the home page.
@@ -27,7 +27,7 @@ function apply(p: number) {
   grid.pulse = prog(p, 0.1, 0.18);
   grid.stream = prog(p, 0.18, 0.38);
   grid.agent.from = [0, 0];
-  grid.agent.to = KOREATOWN;
+  grid.agent.to = CLIENT_NODE;
   grid.agent.t = prog(p, 0.4, 0.5);
   grid.highlight = prog(p, 0.5, 0.6);
   grid.dim = 0.45 * prog(p, 0.62, 0.66) * (1 - prog(p, 0.78, 0.8));
@@ -41,8 +41,8 @@ function apply(p: number) {
   else if (p >= 0.38 && p < 0.62) mode = "topdown";
   else if (p >= 0.62 && p < 0.8) mode = "block";
   grid.mode = mode;
-  grid.camera.x = mode === "topdown" ? KOREATOWN[0] * (0.55 + 0.45 * prog(p, 0.44, 0.52)) : 0;
-  grid.camera.y = mode === "topdown" ? KOREATOWN[1] * (0.55 + 0.45 * prog(p, 0.44, 0.52)) : 0;
+  grid.camera.x = mode === "topdown" ? CLIENT_NODE[0] * (0.55 + 0.45 * prog(p, 0.44, 0.52)) : 0;
+  grid.camera.y = mode === "topdown" ? CLIENT_NODE[1] * (0.55 + 0.45 * prog(p, 0.44, 0.52)) : 0;
   grid.camera.zoom = mode === "topdown" ? 1.5 : 1;
   grid.camera.tilt = 0.5;
 }
@@ -128,7 +128,7 @@ export default function GridDemo() {
         className={`pointer-events-none fixed bottom-6 left-1/2 z-10 w-[min(92vw,560px)] -translate-x-1/2 border border-[#1a1416]/15 bg-[#FBFAF7]/80 p-4 backdrop-blur-sm transition-opacity duration-500 ${weekVisible ? "opacity-100" : "opacity-0"}`}
       >
         <p className="mb-3 font-mono text-[11px] text-[#1a1416]/70">
-          example week / dental office, Koreatown
+          example project / one client
         </p>
         <div className="grid grid-cols-5 gap-2">
           {Array.from({ length: BLOCKS }, (_, i) => (

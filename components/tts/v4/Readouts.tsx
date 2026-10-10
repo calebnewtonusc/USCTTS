@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { clamp, prog, smooth } from "../engine/math";
 import { glideTo, INTRO, onFrame, P, phaseAt, store, travelT, WEEK } from "./choreo";
-import { KOREATOWN } from "../grid/store";
 import { attachFlap } from "./flap";
 
 /*
@@ -21,7 +20,6 @@ const M_PER_DEG = 111320;
 // street points, 5,066 freeway vertices and 348 businesses. The counter
 // lights up with the load clock.
 const POINTS = 69327 + 5066 + 348;
-const KTOWN_KM = Math.hypot(KOREATOWN[0], KOREATOWN[1]) / 1000;
 
 type Stop = { label: string; at: () => number };
 
@@ -37,7 +35,7 @@ const weekAt = (p: number) => {
  * tells. */
 const STOPS: Stop[] = [
   { label: "USC", at: () => 0 },
-  { label: "Koreatown", at: () => weekAt(WEEK.heat[1]) },
+  { label: "The client", at: () => weekAt(WEEK.heat[1]) },
   { label: "The machine", at: () => weekAt(WEEK.film[0] + 0.05) },
   {
     label: "Your turn",
@@ -53,20 +51,19 @@ function status(): string {
   if (P.weekIn > 0.6) {
     // The mono labels name the skill or the tool (SCRIPT-v5).
     const ph = phaseAt(P.week);
-    if (ph === "intro") return "a real office near Wilshire and Western";
-    if (ph === "travel") {
-      const left = KTOWN_KM * (1 - travelT());
-      return left > 0.05 ? `en route to Koreatown, ${left.toFixed(1)} km` : "arrived in Koreatown";
-    }
+    // The example client is in Ghana, so the light on the LA map is the
+    // work leaving USC, never a street address or a distance.
+    if (ph === "intro") return "one example project";
+    if (ph === "travel") return travelT() < 0.98 ? "the work leaves USC" : "with the client";
     if (ph === "dive") return "into one point of light";
     // The captions name each stage's skill; the readout only counts, so
     // the two never say the same words at once.
-    if (ph === "tray") return "stage 1 of 5";
-    if (ph === "sorter") return "stage 2 of 5";
-    if (ph === "typewriter") return "stage 3 of 5";
-    if (ph === "mailbox") return "stage 4 of 5";
-    if (ph === "blocks") return "stage 5 of 5";
-    if (ph === "pullback") return "handing it over";
+    if (ph === "tray") return "stage 1 of 6";
+    if (ph === "sorter") return "stage 2 of 6";
+    if (ph === "typewriter") return "stage 3 of 6";
+    if (ph === "mailbox") return "stage 4 of 6";
+    if (ph === "blocks") return "stage 5 of 6";
+    if (ph === "pullback") return "stage 6 of 6";
     return "back on the map";
   }
   if (store.load < 1) return `assembling LA, ${Math.round(store.load * 100)}%`;

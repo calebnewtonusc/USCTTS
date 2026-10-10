@@ -25,6 +25,17 @@ scoped under `.tts`.
 | Naming another USC organization           | the format is attacked, never a club                                                                                           |
 | `href="#"`, a link to an unowned host     | `site-gate check`; T Combinator is reached through `/tc` only                                                                  |
 
+## Home's sheet, since 2026-10-10
+
+Caleb set home beside clay.com that night ("Ours is so lame the clay one is
+YAYYYYYY"), so home's sheet (components/tts/landing/landing.css) overrides
+two denials above, on that sheet only: cards and buttons are rounded (28px
+cards, 22px frames, 18px tiles, pill buttons), and each section has a
+coloured pill and a tint from the clay world (blush, sky, leaf, gold, navy).
+Still no shadows, no glass, no second family; depth comes from the clay
+renders, and the accent in every two-tone headline is cardinal (gold on
+navy). Every other route keeps the rules above.
+
 ## Type
 
 Instrument Sans, chosen by measurement (100px canvas metrics, 2026-10-04):

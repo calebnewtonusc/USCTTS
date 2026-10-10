@@ -132,27 +132,27 @@ function Path() {
   );
 }
 
-/* What a member builds, shown working: the lead list from the home page's
- * example week, a dental office in Koreatown, filling itself row by row with
- * a reason and a drafted first email. Timed once on load; reduced motion
+/* What a member builds, shown working: the funder list from /way's example
+ * project, a nonprofit in Ghana that needs donor outreach, filling itself row
+ * by row with a reason and a drafted first email. Timed once on load; reduced motion
  * shows it finished. */
 const LEADS = [
-  { biz: "Orthodontist", where: "Wilshire Blvd", why: "Refers patients for cleanings, two blocks away" },
-  { biz: "Pediatric clinic", where: "Western Ave", why: "Families who need a dentist nearby" },
-  { biz: "Coworking space", where: "Wilshire Blvd", why: "Hundreds of people working next door" },
-  { biz: "Taekwondo studio", where: "Vermont Ave", why: "Kids' classes, parents asking about mouthguards" },
+  { biz: "Family foundation", where: "London", why: "Just opened a West Africa education fund" },
+  { biz: "Corporate giving arm", where: "Accra", why: "New Accra office, looking for local programs" },
+  { biz: "Diaspora giving circle", where: "Houston", why: "Members from the same region" },
+  { biz: "Health foundation", where: "Geneva", why: "Clinic outreach is in scope this year" },
 ];
 
 function LeadRun() {
   return (
     <figure className="ix-panel" aria-label="An example lead list a member builds, filling itself">
       <div className="ix-bar">
-        <span>Who&apos;s worth reaching, near a Koreatown dental office</span>
+        <span>Who&apos;s worth reaching, for a nonprofit in Ghana</span>
         <span>{LEADS.length} found, drafts ready</span>
       </div>
       <ul className="ix-rows">
         <li className="is-head" aria-hidden="true">
-          <span>business</span>
+          <span>funder</span>
           <span>why it&apos;s worth reaching</span>
           <span>email</span>
         </li>

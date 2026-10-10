@@ -144,9 +144,9 @@ class GtmScore(TTSScene):
 
         x_axis = Line(at(0, 0), at(1.0, 0), color=fg, stroke_width=4).set_stroke(opacity=0.5)
         y_axis = Line(at(0, 0), at(0, 1.0), color=fg, stroke_width=4).set_stroke(opacity=0.5)
-        x_label = sans("nearby →", 52, fg, opacity=0.7).next_to(at(1.0, 0), DOWN, buff=0.25)
+        x_label = sans("mission fit →", 52, fg, opacity=0.7).next_to(at(1.0, 0), DOWN, buff=0.25)
         x_label.align_to(at(1.0, 0), RIGHT)
-        y_label = sans("growing →", 52, fg, opacity=0.7).rotate(PI / 2)
+        y_label = sans("giving →", 52, fg, opacity=0.7).rotate(PI / 2)
         y_label.next_to(at(0, 1.0), LEFT, buff=0.25).align_to(at(0, 1.0), UP)
 
         # Seeded so every render is the same picture. 24 dots of radius 0.16
@@ -281,19 +281,21 @@ class GtmScoreOnCardinal(GtmScore):
 # ---------------------------------------------------------------------------
 
 # The reply wraps onto two lines so it can be set at 66pt.
-REPLY_LINES = [["Of course,", "Thursday"], ["at", "9:30", "works."]]
+# The /way example since 2026-10-10: a Ghana nonprofit's donor outreach, so
+# a funder asks for the impact report and the reply offers it.
+REPLY_LINES = [["Of course,", "I'll"], ["send", "it", "today."]]
 CANDIDATES = [
     [("Of course,", 0.58), ("Sure,", 0.22), ("Yes,", 0.14)],
-    [("Thursday", 0.47), ("we", 0.26), ("that", 0.17)],
-    [("at", 0.74), ("morning", 0.16), ("works", 0.10)],
-    [("9:30", 0.41), ("9:00", 0.33), ("10:15", 0.18)],
-    [("works.", 0.69), ("is", 0.19), ("would", 0.12)],
+    [("I'll", 0.47), ("we", 0.26), ("happy", 0.17)],
+    [("send", 0.74), ("share", 0.16), ("attach", 0.10)],
+    [("it", 0.62), ("ours", 0.21), ("one", 0.12)],
+    [("today.", 0.55), ("Friday.", 0.27), ("soon.", 0.12)],
 ]
 
 
 class EmailDraft(TTSScene):
     def construct(self):
-        question = sans("Move my cleaning to Thursday?", 60)
+        question = sans("Can we see your impact report?", 60)
         q_box = RoundedRectangle(
             width=question.width + 0.9, height=question.height + 0.8, corner_radius=0.35,
             stroke_width=0, fill_color=SKY, fill_opacity=0.2,
@@ -378,9 +380,9 @@ class EmailDraft(TTSScene):
 # piece the others lack, so the merged card is fuller than any one row.
 COLUMN_WIDTHS = [3.9, 5.6, 2.6]
 ROWS = [
-    ["Dan Ortiz", "213-555-0148", ""],
-    ["dan ortiz", "", "Aug 19"],
-    ["D. Ortiz", "(213) 555-0148", ""],
+    ["Ana Ruiz", "415-555-0148", ""],
+    ["ana ruiz", "", "Aug 19"],
+    ["A. Ruiz", "(415) 555-0148", ""],
 ]
 
 
@@ -406,7 +408,7 @@ class CrmMerge(TTSScene):
             row = []
             for c, value in enumerate(values):
                 # Empty cells stay empty: a placeholder mark read as part
-                # of the neighbouring value at 400px ("213-555-0148·").
+                # of the neighbouring value at 400px ("415-555-0148·").
                 t = sans(value or " ", 52)
                 t.move_to([col_x[c] + 0.3, row_y[r], 0], aligned_edge=LEFT)
                 row.append(t)
@@ -471,9 +473,9 @@ class CrmMerge(TTSScene):
         accent.move_to(card.get_left() + RIGHT * 0.5)
 
         inner = card.get_left()[0] + 1.1
-        name = sans("Dan Ortiz", 104, INK, BOLD).move_to([inner, card.get_top()[1] - 1.05, 0], aligned_edge=LEFT)
-        phone = sans("(213) 555-0148", 66).move_to([inner, name.get_y() - 1.45, 0], aligned_edge=LEFT)
-        visit = sans("last visit Aug 19", 56, opacity=0.75).move_to([inner, phone.get_y() - 1.0, 0], aligned_edge=LEFT)
+        name = sans("Ana Ruiz", 104, INK, BOLD).move_to([inner, card.get_top()[1] - 1.05, 0], aligned_edge=LEFT)
+        phone = sans("(415) 555-0148", 66).move_to([inner, name.get_y() - 1.45, 0], aligned_edge=LEFT)
+        visit = sans("last reply Aug 19", 56, opacity=0.75).move_to([inner, phone.get_y() - 1.0, 0], aligned_edge=LEFT)
 
         rest = VGroup(rules, all_cells, name_glow, phone_glow, name_links, phone_links, bracket, same)
         self.play(

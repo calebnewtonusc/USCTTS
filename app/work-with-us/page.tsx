@@ -51,7 +51,7 @@ export default function WorkWithUsPage() {
             <Inbox />
           </div>
           <p className="ix-readout">
-            <span>Koreatown, an example</span>
+            <span>an example inbox</span>
             <span>
               <b>&bull;</b> 9:14 am
             </span>

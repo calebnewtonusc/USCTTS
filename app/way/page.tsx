@@ -7,7 +7,7 @@ import Way from "@/components/tts/landing/Way";
 export const metadata: Metadata = {
   title: "The TTS way | Trojan Tech Solutions",
   description:
-    "Follow one client project at Trojan Tech Solutions, stage by stage: finding leads in Clay, qualifying them with Perplexity, drafting the first email, wiring the CRM and handing it over.",
+    "Follow one client project at Trojan Tech Solutions, stage by stage: finding leads, qualifying them, drafting the first email, answering replies in the CRM, booking meetings and handing it over.",
 };
 
 export default function WayPage() {

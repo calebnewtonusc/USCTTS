@@ -15,8 +15,9 @@ import "./landing.css";
  *
  *   1. The city assembles on the load clock and the line slides up out of
  *      it; the first scroll streams light down the freeways into USC.
- *   2. A business brings a problem (a dental office in Koreatown), the
- *      light drives there from USC, the camera dives into that point and
+ *   2. One example client brings a problem (a nonprofit in Ghana that
+ *      needs donor outreach), the light leaves USC, the camera dives into
+ *      a point and
  *      the clay machine is the project: finding leads, deciding who's worth
  *      reaching, drafting, the CRM, handing it over. The x-ray shows each
  *      stage's real artifact.
@@ -31,10 +32,9 @@ export default function Way() {
       <div className={`v4 is-way ${mono.variable}`}>
         <Stage />
         <div className="v4-content">
-          <Opening
-            lines={["This is how a", "TTS project runs."]}
-            you="This is you, a few weeks from now."
-          />
+          {/* Tyler (relayed 2026-10-10) cut "This is you, a few weeks
+           * from now." The opener holds only its headline now. */}
+          <Opening lines={["This is how a", "TTS project runs."]} />
           <Week />
           <Join />
         </div>

@@ -18,7 +18,7 @@ import {
 } from "./shaders";
 import { isDarkWorld, ROLES, viaColour, worldColour, worldGain, WORLDS, type ColourRole } from "./palette";
 import { pickSites, SITE_N, transM } from "./transitions";
-import { grid, KOREATOWN, type GridMode } from "./store";
+import { grid, CLIENT_NODE, type GridMode } from "./store";
 
 const PAPER = 0xfbfaf7;
 const FOV = 30;
@@ -500,11 +500,11 @@ export function createGridEngine(
 
   /* ------------------------------------------- the four changes of world */
   // transitions.ts says what each one is. The heat map and the rain both
-  // work from the 16 real businesses nearest the dental office.
-  const picked = pickSites(data.biz, KOREATOWN);
+  // work from the 16 real businesses nearest the client node.
+  const picked = pickSites(data.biz, CLIENT_NODE);
   for (let i = 0; i < SITE_N; i++)
     uniforms.uSite.value[i].set(picked.sites[i * 2], picked.sites[i * 2 + 1]);
-  uniforms.uFocus.value.set(KOREATOWN[0], KOREATOWN[1]);
+  uniforms.uFocus.value.set(CLIENT_NODE[0], CLIENT_NODE[1]);
 
   function setRoles(prefix: "a" | "b", world: number) {
     for (const role of ROLES) {
@@ -551,7 +551,7 @@ export function createGridEngine(
           ray.setFromCamera(ndc, camera);
           const p = ray.ray.intersectPlane(groundPlane, hit);
           all++;
-          if (p && transM(seg, t, p.x, p.y, siteXY, siteT, KOREATOWN) > 0.5) got++;
+          if (p && transM(seg, t, p.x, p.y, siteXY, siteT, CLIENT_NODE) > 0.5) got++;
         }
       const reached = got * 2 > all;
       uniforms.uProtectM.value = reached ? 1 : 0;

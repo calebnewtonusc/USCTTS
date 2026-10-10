@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 
-/* An example front-desk inbox, the same dental office in Koreatown the home
- * page follows, so an owner sees their week before reading a word. The
- * messages are the kind that office really gets, labelled as an example.
+/* An example inbox for a small business, so an owner sees their week before
+ * reading a word. Labelled as an example; no business is named. The kinds
+ * of message are the ones any front desk gets.
  * The unread count climbs once on load; reduced motion shows the end. */
 const MAILS = [
-  { who: "Grace L.", subj: "Can I move my cleaning to Thursday?", t: "9:14" },
-  { who: "Daniel P.", subj: "Do you take Delta Dental?", t: "9:09" },
+  { who: "Grace L.", subj: "Can I move my appointment to Thursday?", t: "9:14" },
+  { who: "Daniel P.", subj: "Do you have a price list?", t: "9:09" },
   { who: "Min-ji K.", subj: "Are you open Saturdays?", t: "8:57" },
   { who: "Ana V.", subj: "Could you resend my last invoice?", t: "8:30" },
 ];
@@ -38,7 +38,7 @@ export default function Inbox() {
   return (
     <figure className="ix-panel" aria-label={`An example front desk inbox with ${END} unread emails`}>
       <div className="ix-bar">
-        <span>A dental office&apos;s inbox, for example</span>
+        <span>A small business inbox, for example</span>
         <span className="ix-count">{n} unread</span>
       </div>
       <ul className="ix-mail">

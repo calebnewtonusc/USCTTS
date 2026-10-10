@@ -67,5 +67,5 @@ export const grid = {
 
 export type GridState = typeof grid;
 
-// A real dental office node near Wilshire and Western, from public/tts/grid (see README there).
-export const KOREATOWN: [number, number] = [-2004, 4594];
+// The node the work light drives to on /way, near Wilshire and Western (public/tts/grid/README.md). The page never names it: the example client is a Ghana nonprofit, so this is only where the light goes.
+export const CLIENT_NODE: [number, number] = [-2004, 4594];
