@@ -223,7 +223,12 @@ export const ALUMNI: Person[] = [
  * "See where TTS can get you" wall (Network.tsx). */
 export const NETWORK_PEOPLE: Person[] = [
   ...ALUMNI,
-  ...ADVISORS.filter((p) => p.name === "Matthew Kim" || p.name === "Kevin Sangmuah"),
+  // Without their photos: their faces are in the advisors section, and a
+  // face appears once on home (coordinator, 2026-10-10). Their tiles keep
+  // the company mark and their first names.
+  ...ADVISORS.filter((p) => p.name === "Matthew Kim" || p.name === "Kevin Sangmuah").map(
+    (p) => ({ ...p, photo: undefined }),
+  ),
 ];
 
 /** Companies the network actually reaches, for a logo wall. Sourced, not claimed. */

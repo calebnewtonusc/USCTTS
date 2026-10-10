@@ -108,7 +108,7 @@ exactly one place, the /way film.
 | home, who we are       | public/tts/home/world-1200.webp, world-2400.webp                                                                                    | blender/heroes.py --hero world                              |
 | home, partners         | public/tts/partners/clay.png, perplexity.svg                                                                                        | the partners' official marks                                |
 | home, our work         | public/tts/home/mailbox-720.webp, mailbox-1440.webp                                                                                 | blender/heroes.py --hero mailbox                            |
-| home, network          | public/tts/alumni/_.svg, public/img/logos/mckinsey.png, public/img/alumni/_.jpeg, matthew_shot.jpeg, kevin_shot.jpeg                | company marks; alumni photos from data/people.ts            |
+| home, network          | public/tts/alumni/(name).svg, public/img/logos/mckinsey.png, public/img/alumni/(name).jpeg                | company marks; alumni photos from data/people.ts            |
 | home, advisors         | public/img/{chris_swain,matthew,kevin,duncan,sagar,andrew}\_shot.\*, public/img/logos/{mckinsey,reddit,google,stanford,mixbook}.png | data/people.ts                                              |
 | home, TTS way card     | public/tts/home/writer-1200.webp, writer-2400.webp                                                                                  | blender/heroes.py --hero writer                             |
 | home, team             | public/img/{caleb,tyler,emily}\_shot.\*                                                                                             | data/people.ts                                              |
@@ -116,9 +116,11 @@ exactly one place, the /way film.
 | /way, the film         | public/tts/machine/seq/{land-2560,land-1280,port-1440,port-720}/\*.webp, still-land.webp and still-port.webp under reduced motion   | blender/machine.py, the only place the full machine appears |
 | /way, x-ray            | public/tts/manim/{gtm_score,gtm_score_on_cardinal,email_draft,crm_merge,teach_curve}.{mov,webm,png}                                 | manim/scenes.py                                             |
 
-The matthew and kevin headshots appear twice on home, in the network tile
-and the advisor row, because they are both alumni and advisors; that is the
-same person in two roles, not a repeated picture used as decoration.
+Every face appears once on home. Matthew Kim and Kevin Sangmuah are both
+on the network wall (they co-founded TTS) and in the advisors section, so
+their tiles on the wall show only the company mark and their first names,
+with no photo in the tile or its dialog; their faces are in the advisors
+section only (coordinator, 2026-10-10).
 
 ## The clay look (blender/machine.py LOOK, heroes.py)
 
