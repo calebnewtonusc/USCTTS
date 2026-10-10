@@ -129,10 +129,11 @@ export const ADVISORS: Person[] = [
     role: "Analyst",
     company: "McKinsey & Company",
     status: "advisor",
+    link: "https://www.linkedin.com/in/matthewkiiim",
     photo: "/img/matthew_shot.jpeg",
-    logo: "/img/logos/mckinsey.png",
+    logo: "/tts/marks/mckinsey.png",
     background: [
-      { label: "Analyst, McKinsey & Company", logo: "/img/logos/mckinsey.png" },
+      { label: "Analyst, McKinsey & Company", logo: "/tts/marks/mckinsey.png" },
       { label: "Co-founded TTS" },
     ],
   },
@@ -142,10 +143,11 @@ export const ADVISORS: Person[] = [
     role: "Software Engineer, and founder",
     company: "Reddit",
     status: "advisor",
+    link: "https://www.linkedin.com/in/kevin-sangmuah-4a780a221",
     photo: "/img/kevin_shot.jpeg",
-    logo: "/img/logos/reddit.png",
+    logo: "/tts/marks/reddit.png",
     background: [
-      { label: "Software Engineer, Reddit", logo: "/img/logos/reddit.png" },
+      { label: "Software Engineer, Reddit", logo: "/tts/marks/reddit.png" },
       { label: "Founder and CFO, Retax 360" },
       { label: "Co-founded TTS" },
     ],
@@ -157,10 +159,11 @@ export const ADVISORS: Person[] = [
     role: "Software Engineer",
     company: "Google",
     status: "advisor",
+    link: "https://www.linkedin.com/in/duncaninganji/",
     photo: "/img/duncan_shot.jpeg",
-    logo: "/img/logos/google.png",
+    logo: "/tts/marks/google.png",
     background: [
-      { label: "Software Engineer, Google", logo: "/img/logos/google.png" },
+      { label: "Software Engineer, Google", logo: "/tts/marks/google.png" },
       { label: "Mentors USC students through the ACTS2 Fellowship" },
     ],
   },
@@ -174,11 +177,12 @@ export const ADVISORS: Person[] = [
     role: "MBA, ex-McKinsey",
     company: "Stanford GSB",
     status: "advisor",
+    link: "https://www.linkedin.com/in/sagart851/",
     photo: "/img/sagar_shot.jpeg",
-    logo: "/img/logos/stanford.png",
+    logo: "/tts/marks/stanford.png",
     background: [
-      { label: "MBA, Stanford GSB", logo: "/img/logos/stanford.png" },
-      { label: "Formerly at McKinsey & Company", logo: "/img/logos/mckinsey.png" },
+      { label: "MBA, Stanford GSB", logo: "/tts/marks/stanford.png" },
+      { label: "Formerly at McKinsey & Company", logo: "/tts/marks/mckinsey.png" },
       { label: "Past president, 180 Degrees Consulting at USC" },
     ],
   },
@@ -187,12 +191,19 @@ export const ADVISORS: Person[] = [
     role: "Founder and CEO",
     company: "Mixbook",
     status: "advisor",
+    link: "https://www.linkedin.com/in/andrewlaffoon/",
     photo: "/img/andrew_shot.jpeg",
-    logo: "/img/logos/mixbook.png",
-    background: [{ label: "Founder and CEO, Mixbook", logo: "/img/logos/mixbook.png" }],
+    logo: "/tts/marks/mixbook.png",
+    background: [{ label: "Founder and CEO, Mixbook", logo: "/tts/marks/mixbook.png" }],
   },
 ];
 
+// LinkedIn URLs, alumni and advisors: every one is the URL the site carried
+// before (git history of components/TTSSite.tsx and data/people.ts, April to
+// May 2026); Susan's from ecf1a0f ("use susan nyirenda's actual linkedin
+// profile") and Sagar's from d5b9437 ("Sagar's LinkedIn URL to the one Caleb
+// sent"). None is constructed. Chris Swain has no LinkedIn on disk, so his
+// link stays his IYA faculty page.
 // Fifteen people who started in this club. This is the proof section: the
 // outreach line "our people are at Google, Apple, McKinsey and Reddit" is
 // sourced entirely from ADVISORS and this list, with Apple being Susan
@@ -200,21 +211,21 @@ export const ADVISORS: Person[] = [
 // Albert's employer is left off on purpose: Caleb, 2026-10-04, "We shouldn't
 // flex palantir". Company is optional, so every renderer must handle it absent.
 export const ALUMNI: Person[] = [
-  { name: "Susan Nyirenda", role: "Software Engineer", company: "Apple", status: "alumni", photo: "/img/alumni/susannyirenda.jpeg" },
-  { name: "Albert Chung", role: "Forward Deployed Engineer", status: "alumni", photo: "/img/alumni/albertchung.jpeg" },
-  { name: "Elizabeth Abbey", role: "Software Engineer, ex-Microsoft", company: "Reddit", past: ["Microsoft"], status: "alumni", photo: "/img/alumni/elizabethabbey.jpeg" },
-  { name: "Senai Assefa", role: "Software Engineer, ex-Microsoft", company: "Bloomberg", past: ["Microsoft"], status: "alumni", photo: "/img/alumni/senaiassefa.jpeg" },
-  { name: "Rohan Singh", role: "Sales and Analytics", company: "Bloomberg", status: "alumni", photo: "/img/alumni/rohansingh.jpeg" },
-  { name: "David Esquivel", role: "Cybersecurity Engineer", company: "Capital One", status: "alumni", photo: "/img/alumni/davidesquivel.jpeg" },
-  { name: "Anthony Nasser", role: "Software Engineer", company: "NBC Universal", status: "alumni", photo: "/img/alumni/anthonynasser.jpeg" },
-  { name: "Emerson Kahle", role: "Software Development Engineer", company: "Fastly", status: "alumni", photo: "/img/alumni/emersonkahle.jpeg" },
-  { name: "Brandon McGowan", role: "Product Manager", company: "Epic", status: "alumni", photo: "/img/alumni/brandonmcgowan.jpeg" },
-  { name: "James La", role: "Tech Consulting", company: "PwC", status: "alumni", photo: "/img/alumni/jamesla.jpeg" },
-  { name: "Akshar Aiyer", role: "Investment Banking", company: "Citi", status: "alumni", photo: "/img/alumni/aksharaiyer.jpeg" },
-  { name: "Abhi Shah", role: "Investment Banking", company: "Jefferies", status: "alumni", photo: "/img/alumni/abhishah.jpeg" },
-  { name: "Parth Juthani", role: "Investment Banking", company: "Nomura", status: "alumni", photo: "/img/alumni/parthjuthani.jpeg" },
-  { name: "Joshua Kim", role: "Analyst", company: "Roxborough Group", status: "alumni", photo: "/img/alumni/joshuakim.jpeg" },
-  { name: "Kelly Kim", role: "JD Candidate", company: "USC Gould", status: "alumni", photo: "/img/alumni/kellykim.jpeg" },
+  { name: "Susan Nyirenda", role: "Software Engineer", company: "Apple", status: "alumni", link: "https://www.linkedin.com/in/susannyirenda/", photo: "/img/alumni/susannyirenda.jpeg" },
+  { name: "Albert Chung", role: "Forward Deployed Engineer", status: "alumni", link: "https://www.linkedin.com/in/albert-chung-70577821b", photo: "/img/alumni/albertchung.jpeg" },
+  { name: "Elizabeth Abbey", role: "Software Engineer, ex-Microsoft", company: "Reddit", past: ["Microsoft"], status: "alumni", link: "https://www.linkedin.com/in/elizabeth-abbey-27418123b", photo: "/img/alumni/elizabethabbey.jpeg" },
+  { name: "Senai Assefa", role: "Software Engineer, ex-Microsoft", company: "Bloomberg", past: ["Microsoft"], status: "alumni", link: "https://www.linkedin.com/in/senai-assefa", photo: "/img/alumni/senaiassefa.jpeg" },
+  { name: "Rohan Singh", role: "Sales and Analytics", company: "Bloomberg", status: "alumni", link: "https://www.linkedin.com/in/rohansingh23/", photo: "/img/alumni/rohansingh.jpeg" },
+  { name: "David Esquivel", role: "Cybersecurity Engineer", company: "Capital One", status: "alumni", link: "https://www.linkedin.com/in/davesq", photo: "/img/alumni/davidesquivel.jpeg" },
+  { name: "Anthony Nasser", role: "Software Engineer", company: "NBC Universal", status: "alumni", link: "https://www.linkedin.com/in/anthony-nasser", photo: "/img/alumni/anthonynasser.jpeg" },
+  { name: "Emerson Kahle", role: "Software Development Engineer", company: "Fastly", status: "alumni", link: "https://www.linkedin.com/in/emerson-kahle-560315198", photo: "/img/alumni/emersonkahle.jpeg" },
+  { name: "Brandon McGowan", role: "Product Manager", company: "Epic", status: "alumni", link: "https://www.linkedin.com/in/brandon-mcgowan-413724223", photo: "/img/alumni/brandonmcgowan.jpeg" },
+  { name: "James La", role: "Tech Consulting", company: "PwC", status: "alumni", link: "https://www.linkedin.com/in/jbla-usc", photo: "/img/alumni/jamesla.jpeg" },
+  { name: "Akshar Aiyer", role: "Investment Banking", company: "Citi", status: "alumni", link: "https://www.linkedin.com/in/akshar-aiyer/", photo: "/img/alumni/aksharaiyer.jpeg" },
+  { name: "Abhi Shah", role: "Investment Banking", company: "Jefferies", status: "alumni", link: "https://www.linkedin.com/in/abhiiishah", photo: "/img/alumni/abhishah.jpeg" },
+  { name: "Parth Juthani", role: "Investment Banking", company: "Nomura", status: "alumni", link: "https://www.linkedin.com/in/parthjuthani", photo: "/img/alumni/parthjuthani.jpeg" },
+  { name: "Joshua Kim", role: "Analyst", company: "Roxborough Group", status: "alumni", link: "https://www.linkedin.com/in/joshuadkim", photo: "/img/alumni/joshuakim.jpeg" },
+  { name: "Kelly Kim", role: "JD Candidate", company: "USC Gould", status: "alumni", link: "https://www.linkedin.com/in/kelly-kim-usc", photo: "/img/alumni/kellykim.jpeg" },
 ];
 
 /* Everyone who started at TTS: the fifteen alumni plus Matthew Kim and
