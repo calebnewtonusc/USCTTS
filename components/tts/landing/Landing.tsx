@@ -12,6 +12,7 @@ import Gather from "./Gather";
 import Network from "./Network";
 import Partners from "./Partners";
 import { Mentors } from "./People";
+import ScrollHold from "./ScrollHold";
 import Sheet from "./Sheet";
 import Statement from "./Statement";
 import TeamStory from "./TeamStory";
@@ -52,6 +53,7 @@ export default function Landing() {
     <Shell footer="ending">
       <div className={`v4 ${mono.variable}`}>
         <Stage rail={false} />
+        <ScrollHold />
         <div className="v4-content">
           <Opening
             short

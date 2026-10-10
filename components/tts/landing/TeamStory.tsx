@@ -266,7 +266,11 @@ export default function TeamStory() {
       return () => ro.disconnect();
     }
     const off = onFrame((f) => {
-      const p = Math.round(clamp((f.y - docTop) / run) * 2000) / 2000;
+      // The story's last move lands at 0.84; the pin ends there, so the
+      // scrollbar never travels while the screen holds still (Caleb,
+      // 2026-10-10: "The scroll bar should freeze when the scroll is
+      // freezed"). The climax then scrolls away with the page.
+      const p = Math.round(clamp(((f.y - docTop) / run) * 0.84) * 2000) / 2000;
       if (p === lastP) return;
       lastP = p;
       paint(p);

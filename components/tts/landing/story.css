@@ -522,7 +522,7 @@
 /* ---- 06, the team story ---- */
 .tts .ts {
   position: relative;
-  height: 560vh;
+  height: 480vh;
 }
 .tts .ts-stage {
   position: sticky;
@@ -908,7 +908,7 @@
     padding: 0 12px;
   }
   .tts .ts {
-    height: 520vh;
+    height: 450vh;
   }
   .tts .ts-stage {
     grid-template-columns: minmax(0, 1fr);
@@ -1036,4 +1036,13 @@
   background: radial-gradient(circle, #a3162b 0%, #a3162b 45%, #9b1226 100%);
   transform: translate(-50%, -50%) scale(0.004);
   will-change: transform;
+}
+
+/* The load clock's hold (ScrollHold.tsx): the page and its thumb stay put
+ * together, and the gutter keeps the width from shifting on release. */
+html:has(.tts .v4) {
+  scrollbar-gutter: stable;
+}
+html[data-hold="1"] {
+  overflow: hidden;
 }
