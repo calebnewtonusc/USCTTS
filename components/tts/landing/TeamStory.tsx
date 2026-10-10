@@ -265,11 +265,19 @@ export default function TeamStory() {
     <div ref={root} className="ts">
       <div className="ts-stage">
         <div className="ts-copy">
-          {BEATS.map((b, i) => (
-            <p key={i} className={`ts-beat${i === 0 ? " is-first" : ""}`}>
-              {b.text}
-            </p>
-          ))}
+          {/* The story's first line is the section's heading: it is what
+           * a reader sees on arrival. "Meet the team." closes it. */}
+          {BEATS.map((b, i) =>
+            i === 0 ? (
+              <h2 key={i} id="ld-team-h" className="ts-beat is-first">
+                {b.text}
+              </h2>
+            ) : (
+              <p key={i} className="ts-beat">
+                {b.text}
+              </p>
+            ),
+          )}
         </div>
 
         <div className="ts-roster" aria-hidden="true">
@@ -301,9 +309,9 @@ export default function TeamStory() {
         </p>
 
         <div className="ts-final">
-          <h2 id="ld-team-h" className="ts-head">
+          <p className="ts-head">
             Meet <em className="ld-accent">the team.</em>
-          </h2>
+          </p>
           <ul className="ts-cards">
             {LEADERSHIP.map((p) => {
               const inner = (

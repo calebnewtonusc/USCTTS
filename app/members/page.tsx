@@ -129,7 +129,7 @@ export default function MembersPage() {
             people
           </p>
           <h1>
-            Everyone at TTS, <em>in one place.</em>
+            Everyone at TTS <em>is on this page.</em>
           </h1>
           <ul className="mr-counts" aria-label="Counts">
             {GROUPS.map((g) => (
@@ -168,7 +168,7 @@ export default function MembersPage() {
         ))}
 
         <section className="mr-close" aria-labelledby="mr-close-h">
-          <h2 id="mr-close-h">So the next seat on this page could be yours.</h2>
+          <h2 id="mr-close-h">Want to be on this page next?</h2>
           <Link href="/apply" className="btn btn-primary">
             Join TTS{" "}
             <span className="arrow" aria-hidden="true">
