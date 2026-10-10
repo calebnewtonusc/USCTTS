@@ -7,12 +7,16 @@ import { Join } from "../home/Sections";
 import { mono } from "../v4/mono";
 import { NETWORK_PEOPLE } from "@/data/people";
 import Depth from "./Depth";
+import DotFloor from "./DotFloor";
 import Network from "./Network";
-import { Mentors, Team } from "./People";
+import { Mentors } from "./People";
 import Sheet from "./Sheet";
 import Statement from "./Statement";
+import TeamStory from "./TeamStory";
+import Thread, { Mark } from "./Thread";
 import "../v4/v4.css";
 import "./landing.css";
+import "./story.css";
 
 /*
  * Home, in the order Tyler asked for in his voice memos on 2026-10-09
@@ -22,21 +26,21 @@ import "./landing.css";
  *
  *   the LA map and the USC dot, short ("the dot in LA is good")
  *   a separating tab, then "it goes into being a real website":
- *   1. who TTS is, big
- *   2. about us, with a picture and Learn more about TTS
- *   3. see our network: logos, faces, a tap into each company
- *   4. join the network: the mentors, "these people actually want to help you"
+ *   1. who TTS is, big, on its clay city
+ *   2. the work, which leaves LA
+ *   3. the network, where the night field comes back as lines of light
+ *   4. the club advisors
  *   5. understand the TTS way: the door into the 3D walkthrough at /way
- *   6. meet the team
+ *   6. meet the team, told as the club's comeback
  *   7. the two doors
  *
- * Nothing on this page appears twice, images included: the full clay
- * machine is only in the /way film, and each section here has its own scene
- * from blender/heroes.py (Caleb, 2026-10-10: "Why are we repeating the same
- * thing 3x???"). Every number is the length of a list
- * in data/people.ts or a dated valuation; nothing claims "first" or
- * "premier", since neither has a source. docs/INTENT-home.md lists every
- * visible element and why it is here.
+ * Since 2026-10-10 it is one world, not two sites in one (Caleb: "I wanna
+ * tastefully marry the 2, it seems like 2 sites in 1 rn"): the opener's
+ * points are the floor under the clay scenes and the seams between
+ * sections, USC's cardinal point travels down a thread that marks each
+ * section, and the network is drawn in the field's own light. Every dot is
+ * a street or a person. docs/INTENT-home.md lists every visible element
+ * and the shared rules.
  */
 export default function Landing() {
   // The grid's data starts with the HTML instead of after hydration. The
@@ -55,96 +59,138 @@ export default function Landing() {
 
         <Sheet>
           <Depth />
+          <Thread />
           {/* The lip carries only its grip: the first section names itself
-           * in its pill, and a label here said the same words twice. */}
+           * in its marker, and a label here said the same words twice. */}
           <span className="ld-tab" aria-hidden="true" />
 
+          {/* 01. Who TTS is, standing on its own city. */}
           <section className="ld-sec ld-who" aria-labelledby="ld-who-h">
             <div className="ld-wrap">
+              <Mark n="01" label="who we are" />
               <Statement />
             </div>
           </section>
 
+          {/* The seam: the city's points assemble out of the page and leave
+           * the same way, so the next section arrives through the map. */}
+          <div className="ld-seam" aria-hidden="true">
+            <DotFloor
+              win={[-5200, -900, 5200, 900]}
+              usc
+              max={2600}
+              alpha={0.26}
+            />
+          </div>
+
+          {/* 02. The work leaves LA. */}
           <section className="ld-sec ld-about" aria-labelledby="ld-about-h">
             <div className="ld-wrap">
-              <div className="ld-card is-blush ld-split">
-                <div className="ld-about-copy">
-                  <p className="ld-pill is-cardinal" data-reveal="0">
-                    our work
+              <div className="ld-card is-blush ld-work">
+                <div className="ld-work-pic" data-reveal="1">
+                  <DotFloor
+                    win={[-2400, -1800, 2400, 1800]}
+                    color="#7a1f1f"
+                    alpha={0.34}
+                    max={2400}
+                    hold
+                    className="ld-work-floor"
+                  />
+                  <div className="ld-frame is-blush">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/tts/home/mailbox-720.webp"
+                      srcSet="/tts/home/mailbox-720.webp 720w, /tts/home/mailbox-1440.webp 1440w"
+                      sizes="(min-width: 900px) 560px, 100vw"
+                      alt="A gold clay mailbox with its red flag up and a sealed letter going out on its open door"
+                      width={1440}
+                      height={1080}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                </div>
+                <div className="ld-work-copy">
+                  <Mark n="02" label="our work" />
+                  <p className="ld-lead" data-reveal="0">
+                    And the work doesn&apos;t stay in LA.
                   </p>
                   <h2 id="ld-about-h" className="ld-h" data-reveal="0">
                     Real clients,{" "}
                     <em className="ld-accent">from Nigeria to Yemen.</em>
                   </h2>
-                  {/* Tyler's voice memo, 2026-10-09: cut the about story
-                   * and show what is special, the international work. Only
-                   * the place and the field he named; nothing else is known
-                   * yet. Nigeria's line matches second-brain/core/now.md
-                   * (stemmets.com). NEED: Yemen's field, and where the
-                   * cancer therapeutics client is. A sentence, not a card
-                   * grid: site-gate refuses a heading-plus-line grid. */}
-                  <p className="ld-body" data-reveal="1">
-                    TTS has client projects in <b>Nigeria</b>, an AI
-                    curriculum for an education nonprofit; in <b>Ghana</b>,
-                    in healthcare; in <b>Yemen</b>; and in{" "}
-                    <b>cancer therapeutics</b>.
-                  </p>
-                  <Link href="/members" className="ld-btn" data-reveal="2">
+                  {/* Tyler's voice memo, 2026-10-09: show what is special,
+                   * the international work. Only the place and the field he
+                   * named; nothing else is known yet. Nigeria's line matches
+                   * second-brain/core/now.md (stemmets.com). NEED: Yemen's
+                   * field, and where the cancer therapeutics client is. */}
+                  <ul className="ld-manifest" aria-label="Client projects">
+                    <li data-reveal="1">
+                      <span className="ld-m-code">NG</span>
+                      <b>Nigeria</b>
+                      <span className="ld-m-what">
+                        an AI curriculum for an education nonprofit
+                      </span>
+                    </li>
+                    <li data-reveal="1">
+                      <span className="ld-m-code">GH</span>
+                      <b>Ghana</b>
+                      <span className="ld-m-what">healthcare</span>
+                    </li>
+                    <li data-reveal="2">
+                      <span className="ld-m-code">YE</span>
+                      <b>Yemen</b>
+                    </li>
+                    <li data-reveal="2">
+                      <span className="ld-m-code is-field" aria-hidden="true" />
+                      <b>Cancer therapeutics</b>
+                    </li>
+                  </ul>
+                  <Link href="/members" className="ld-btn" data-reveal="3">
                     Learn more about TTS <span aria-hidden="true">&rarr;</span>
                   </Link>
-                </div>
-                <div className="ld-frame is-blush" data-reveal="1">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/tts/home/mailbox-720.webp"
-                    srcSet="/tts/home/mailbox-720.webp 720w, /tts/home/mailbox-1440.webp 1440w"
-                    sizes="(min-width: 900px) 640px, 100vw"
-                    alt="A gold clay mailbox with its red flag up and a sealed letter going out on its open door"
-                    width={1440}
-                    height={1080}
-                    loading="lazy"
-                    decoding="async"
-                  />
                 </div>
               </div>
             </div>
           </section>
 
+          {/* 03. Where the two worlds meet: the night field comes back and
+           * each person who started here is a line of light out of USC. */}
           <section className="ld-sec ld-net" aria-labelledby="ld-net-h">
-            <div className="ld-wrap">
-              <div className="ld-card is-sky">
-                <p className="ld-pill is-sky" data-reveal="0">
-                  our network
-                </p>
-                <h2 id="ld-net-h" className="ld-h" data-reveal="0">
-                  See where TTS <em className="ld-accent">can get you.</em>
-                </h2>
-                <p className="ld-lede" data-reveal="1">
-                  {NETWORK_PEOPLE.length} people started at TTS. Tap a company
-                  to meet them.
-                </p>
+            <div className="ld-net-band">
+              <div className="ld-wrap">
+                <div className="ld-net-head">
+                  <Mark n="03" label="our network" tone="light" />
+                  <h2 id="ld-net-h" className="ld-h" data-reveal="0">
+                    See where TTS <em className="ld-accent">can get you.</em>
+                  </h2>
+                  <p className="ld-lede" data-reveal="1">
+                    {NETWORK_PEOPLE.length} people started at TTS, and each line
+                    of light is one of them. Tap a face to find them on
+                    LinkedIn.
+                  </p>
+                </div>
                 <Network />
               </div>
             </div>
           </section>
 
+          {/* 04. The people you can call. */}
           <section className="ld-sec ld-mentors" aria-labelledby="ld-men-h">
             <div className="ld-wrap">
-              <div className="ld-card is-leaf">
-                <p className="ld-pill is-leaf" data-reveal="0">
-                  club advisors
-                </p>
-                <h2 id="ld-men-h" className="ld-h" data-reveal="0">
-                  Club advisors,{" "}
-                  <em className="ld-accent">open to a coffee chat anytime.</em>
-                </h2>
-                <Mentors />
-              </div>
+              <Mark n="04" label="club advisors" />
+              <h2 id="ld-men-h" className="ld-h is-wide" data-reveal="0">
+                Club advisors,{" "}
+                <em className="ld-accent">open to a coffee chat anytime.</em>
+              </h2>
+              <Mentors />
             </div>
           </section>
 
+          {/* 05. The door into the walkthrough. */}
           <section className="ld-sec ld-way" aria-labelledby="ld-way-h">
             <div className="ld-wrap">
+              <Mark n="05" label="the TTS way" />
               <Link href="/way" className="ld-way-card" data-reveal="0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -159,7 +205,6 @@ export default function Landing() {
                   decoding="async"
                 />
                 <span className="ld-way-copy">
-                  <span className="ld-pill is-gold">the TTS way</span>
                   <span id="ld-way-h" className="ld-way-h">
                     Understand <em className="ld-accent">the TTS way.</em>
                   </span>
@@ -175,18 +220,12 @@ export default function Landing() {
             </div>
           </section>
 
+          {/* 06. The team, told as the comeback. */}
           <section className="ld-sec ld-team" aria-labelledby="ld-team-h">
             <div className="ld-wrap">
-              <div className="ld-card is-gold">
-                <p className="ld-pill is-coral" data-reveal="0">
-                  the team
-                </p>
-                <h2 id="ld-team-h" className="ld-h" data-reveal="0">
-                  Meet <em className="ld-accent">the team.</em>
-                </h2>
-                <Team />
-              </div>
+              <Mark n="06" label="the team" />
             </div>
+            <TeamStory />
           </section>
         </Sheet>
 

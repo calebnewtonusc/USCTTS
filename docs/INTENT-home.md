@@ -19,7 +19,7 @@ names it.
 The look is from the same night. Caleb set the about section beside
 clay.com: "Ours is so lame the clay one is YAYYYYYY", and then, of one
 render used three times, "Why are we repeating the same thing 3x???" So each
-section is a tinted rounded card with a coloured pill, a two-tone headline
+section has a two-tone headline, a tinted ground
 and, where it shows a picture, its own clay scene built for it
 (blender/heroes.py). The full machine is only in the /way film.
 
@@ -43,58 +43,106 @@ Kept as is: Tyler's second memo, "keep the LA opener with the glowing dot".
 - Readout strip, bottom left (coordinates where the camera looks, LA time, points lit, one status line): proves the map is real data (OpenStreetMap streets, a live LA clock, 74,741 points counted from the file). It leaves as the sheet comes up. Both.
 - Freeways streaming light into USC on the first scroll, the headline leaving in depth: the city moving under the reader while the sheet rises. Both.
 
+## One world: the rules every section follows
+
+Caleb, 2026-10-10: "Is there a way to weave aspects of the dope dot stuff
+into the rest of the site with it seeming fire lemma future type shi
+without it seeming gimmicky? I wanna tastefully marry the 2, it seems like
+2 sites in 1 rn." Before this the LA opener and the paper sections read as
+two websites. These rules make them one, and any new section on home, /way
+or /members follows them.
+
+1. **Every dot is a place or a person.** Dots are the opener's points: real
+   OpenStreetMap street samples from la-grid.bin (landing/dots.ts), a
+   coordinate on the world graticule (/way), or one person. It is never a
+   decorative pattern and never a random field.
+2. **Same spacing and colour as the field.** Street dots at the opener's
+   size (1.4px, arterials 1.25x and stronger), lines as dots every 7px.
+   Ink at low alpha on paper; street gold and cream on navy; flow blue for
+   light that travels.
+3. **USC's cardinal point is the one recurring mark** (#d0102e with a soft
+   halo): the travelling head of the thread down home's sheet, each lit
+   section node, the network's origin, the mark on a card under the
+   pointer, and the cursor over the doors (white there, the way the field
+   draws it on cardinal).
+4. **Dots assemble and dissolve, never cut.** A dot floor assembles the way
+   the opener's city does, each point flying in from a small scatter in
+   order of its distance from USC, as its band comes up the screen, and
+   dissolves the same way as it leaves (DotFloor.tsx). One pure function of
+   the followed scroll, so scrolling back plays it back.
+5. **Mono is for small data only**: section numbers, places, country codes,
+   roles, coordinates, counts. Headlines and sentences stay in the grotesk.
+6. **Restraint.** No glow except the USC point's halo and travelling light.
+   No effect that does not carry a place, a person or a handoff. 60fps:
+   canvases redraw only while visible and only when their value changes;
+   ambient loops pause offscreen and in a hidden tab. Reduced motion draws
+   every floor finished, every line drawn, no travelling light.
+
 ## The sheet
 
 - The paper sheet, its top edge peeking 12% of a screen up from the bottom at load, inset and rounded, growing to full width as it covers the city: Tyler's separating tab, and nothing arrives from nowhere. Both.
-- A grip line on the lip, no words: says the edge is a sheet you pull up. The label that used to sit there repeated the first pill. Both.
-- One coloured pill per section, mono, uppercase, rounded (gold, cardinal, sky, leaf, gold on navy, coral): where you are on a long page, and the clay world's colours carried into the page. Both.
-- Two-tone headlines, the phrase that carries the claim in cardinal (gold on the navy card): the one line to read if you read nothing else. Both.
-- Tinted rounded cards (blush, sky, leaf, gold; 28px corners, flat colour, no shadow): each section reads as one object, the way clay.com's feature cards do, in TTS's palette. Both.
+- A grip line on the lip, no words: says the edge is a sheet you pull up. Both.
+- The thread (Thread.tsx), from 1200px up: a dotted line in the left margin at the field's spacing, with USC's cardinal point travelling down it at 45% of the screen as you read. Each section's marker is a node on it that lights cardinal when the point reaches it. It is the section indicator, the handoff between sections and the recurring USC mark in one object. Narrower, each marker shows its own point inline. Both.
+- Section markers, mono: "01 who we are" through "06 the team", the number in cardinal (gold on navy). They replaced the coloured pills, which repeated one template on every section. Both.
+- Two-tone headlines, the phrase that carries the claim in cardinal (gold on navy). Both.
 - Rounded buttons: ink at rest, cardinal and lifted 1px on hover, scaled to 0.97 when pressed, a 2px ring on keyboard focus. Both.
-- Rises on arrival (data-reveal, once, 70ms stagger; still under reduced motion): sections come up as you reach them. Both.
+- Rises on arrival (data-reveal, once, 70ms stagger; still under reduced motion). Both.
 
-### 1. Who we are (pill "who we are", gold)
+### 1. Who we are (marker 01)
 
-- "We build whatever AI a company or nonprofit needs, anywhere in the world: automations, CRMs, outbound, training their teams. Students build all of it.", the last sentence in cardinal: Caleb's description, global (2026-10-10), and the line Tyler's second memo keeps ("pretty direct"). Both.
-- The clay LA world (world-1200/2400.webp), a 2:1 rounded frame, 4:3 crop on phones: the one big joyful scene on home. USC's cardinal tower with the red dot above it, a downtown of rounded towers, palms, a freeway between them, hills and sky at golden hour. It sits under the line it illustrates: students, from USC, building for the city and past it. Both.
-- Clay wordmark and Perplexity mark, $7.1B and $20B counting up once when the row shows, each with "valued as of" and its date, never summed: the partners, sized and sourced. Both.
-- "You build on Clay and Perplexity, the tools real companies pay for to find their customers, through our partner Blue Modern Advisory.": what a member gets, and who holds the partnership. S.
+- "We build whatever AI a company or nonprofit needs, anywhere in the world: automations, CRMs, outbound, training their teams. Students build all of it.", the last sentence in cardinal: Caleb's description, global (2026-10-10). Both.
+- The clay LA world (world-1200/2400.webp), a 2:1 rounded frame, 4:3 crop on phones, standing on a dot floor: the real streets around USC as points, running out past the frame's edges and fading at a soft oval. The clay city on the real one. Both.
+- Clay wordmark and Perplexity mark, $7.1B and $20B counting up once, each with "valued as of" and its date, never summed. Both.
+- "You build on Clay and Perplexity, the tools real companies pay for to find their customers, through our partner Blue Modern Advisory.". S.
 
-### 2. Our work (pill "our work", cardinal, blush card)
+### The seam
 
-Replaced the about story on Tyler's second memo: the statement already says who TTS is, so show what is special, the international work.
+- A band of the city's points (10 km of streets across, USC's point at its centre) that assembles out of the paper as it comes up and dissolves as it leaves the top: the handoff from the city to the work leaving it. Both.
 
-- "Real clients, from Nigeria to Yemen.", the place names in cardinal: the reach, in two places Tyler named. Both.
-- One sentence, "TTS has client projects in Nigeria, an AI curriculum for an education nonprofit; in Ghana, in healthcare; in Yemen; and in cancer therapeutics.", the four names in ink: only the place or field Tyler named (source: Tyler voice memo 2026-10-09, relayed 2026-10-10; Nigeria also in second-brain/core/now.md, stemmets.com). A sentence, since site-gate refuses a heading-plus-line card grid. [NEED: Yemen's field, and where the cancer therapeutics client is.] Both.
-- "Learn more about TTS" button, to /members: Tyler's first-memo button; /members tells the comeback story with the advisors. Both.
-- The gold clay mailbox (mailbox-720/1440.webp), its flag up and a sealed letter going out on its open door, on blush, filling a 4:3 rounded frame: work shipped to a client, wherever they are. Both.
+### 2. Our work (marker 02, blush card)
 
-### 3. Our network (pill "our network", sky card)
+- The gold clay mailbox (mailbox-720/1440.webp), 4:3, on its own dot floor in the card's red: work shipped out of the city. Left on desktop, first on phones. Both.
+- "And the work doesn't stay in LA.", a lead line in muted ink, then the headline "Real clients, from Nigeria to Yemen.": the handoff from the LA scene above. Both.
+- The manifest, four hairline rows: NG Nigeria, "an AI curriculum for an education nonprofit"; GH Ghana, "healthcare"; YE Yemen; and Cancer therapeutics with the cardinal point in place of a country code, since its place is not known. Country codes and fields in mono. Only what Tyler named (voice memo 2026-10-09; Nigeria also in second-brain/core/now.md, stemmets.com). [NEED: Yemen's field, and where the cancer therapeutics client is.] Both.
+- "Learn more about TTS", to /members. Both.
 
-- "See where TTS can get you.", the last three words in cardinal: Tyler's retitle. S.
-- "17 people started at TTS. Tap a company to meet them.": the fifteen alumni plus Matthew Kim and Kevin Sangmuah, who co-founded TTS ("OG Co-Founder" on the site at 37795eb); the count is NETWORK_PEOPLE.length in data/people.ts. The other advisors were never members, so they stay off this wall. S.
-- The logo wall, rounded white tiles, one per company, marks in one ink at rest and full colour on hover, faces and first names under each. Since Tyler's "the more the better", it also has McKinsey (Matthew) and Microsoft (Elizabeth and Senai, both ex-Microsoft per data/people.ts), with "then at Microsoft" in the dialog, never "now". Git history (every logo file and alumni list since April) held no other sourced company. Palantir stays off (Caleb, 2026-10-04, "We shouldn't flex palantir"), even though Tyler mentioned it. S.
-- The dialog a tile opens (the company's people, bigger, with roles; Escape, the close button or the backdrop closes it): Tyler's click into an interactive alumni view. S.
+### 3. Our network (marker 03, the night field returns)
 
-### 4. Club advisors (pill "club advisors", leaf card)
+Caleb, 2026-10-10: "Add color brotha", "Ts pointless, make it all link to their linkedins" and "The boring alumni layout lame af get creative". The logo wall and its dialog are gone; the network is drawn in the field's own light.
+
+- A navy band, inset and rounded, in the opener's night colours. Its floor is the real LA streets around USC as points, in street gold and cream (Network.tsx). S.
+- "See where TTS can get you." (Tyler's retitle), gold accent; "17 people started at TTS, and each line of light is one of them. Tap a face to find them on LinkedIn." The count is NETWORK_PEOPLE.length in data/people.ts: the fifteen alumni plus Matthew Kim and Kevin Sangmuah, who co-founded TTS. S.
+- USC's cardinal point on the left with a mono tag (USC, 34.0224 N, 118.2851 W, 17 started here). One line of gold dots per person runs out of it to their face, drawn out from USC as the section arrives, with a short run of flow-blue light travelling each line on its own loop. Elizabeth's and Senai's lines pass through Microsoft first, where both worked before (people.ts), and Microsoft's node says "Elizabeth and Senai, before". S.
+- Each company is a white chip with its real mark in its own colours, ringed in a clay tint, with the faces of its people under it and their first names in mono. Marks from the companies' files on disk and Wikimedia Commons (public/tts/marks/: McKinsey trimmed from the old PNG, NBCUniversal and USC Gould from Commons). Epic and Roxborough Group are set in type: "Epic" alone does not say which Epic, and roxboroughgroup.com served no logo (checked 2026-10-10). S.
+- Albert Chung has no company node, by design (Caleb, 2026-10-04: "We shouldn't flex palantir"): his line ends at his face with his role under it, in the person's slot, never in a company's. S.
+- Matthew and Kevin appear as their initials on a cardinal disc: their faces are in the advisors section, and a face appears once on home. S.
+- Every face links to that person's LinkedIn in a new tab. All 17 URLs are the ones the site carried before (git history, April to May 2026); none is constructed. Hover or focus on a company lights its lines in cream with cardinal light and dims the rest; a face shows the person's role in a cream tag. S.
+- Under 900px the map stacks: USC on top, companies in two columns, one trunk of dots down the gap between them, each person's line turning off it at their face, drawn as the reader reaches it. S.
+
+### 4. Club advisors (marker 04)
+
+Caleb, 2026-10-10: "TS so ugly and doesn't make em go WOAHHHHH".
 
 - "Club advisors, open to a coffee chat anytime.", the second half in cardinal: Tyler's retitle. S.
-- Six advisor rows, a 96px face beside the name and a list of background lines, each with the company's mark where one is on disk and a leaf dot where not. Sources in data/people.ts: Chris Swain from his IYA faculty page (three venture-backed companies, 50+ products for Disney, Intel, Sony, IBM and others, co-founded the EA Game Innovation Lab at USC, founding member of R/GA); Matthew Kim (Analyst at McKinsey, co-founded TTS); Kevin Sangmuah (Reddit, founder and CFO of Retax 360, co-founded TTS); Duncan Inganji (Google, mentors through the ACTS2 Fellowship); Sagar Tiwari (Stanford GSB, formerly McKinsey, past president of 180 Degrees Consulting at USC; [NEED: the company Tyler called "Hydroc"]); Andrew Laffoon (founder and CEO of Mixbook). Both.
+- Six portrait cards, each on its own saturated colour (leaf, sky, coral, gold, violet, cardinal), the photo filling a rounded square, the mark of where they are at its real size on a white chip over the photo, the name, every background line from data/people.ts, and a mono "LinkedIn" (Chris Swain's is his IYA faculty page, the only link on disk for him). The middle column sits 48px lower on desktop. Hover lifts the card, eases the photo in 5% and shows USC's cardinal point in its corner. On phones the cards are a swipe rail. Sources as before: Chris Swain from his IYA faculty page; Matthew Kim (Analyst at McKinsey, co-founded TTS); Kevin Sangmuah (Reddit, founder and CFO of Retax 360, co-founded TTS); Duncan Inganji (Google, mentors through the ACTS2 Fellowship); Sagar Tiwari (Stanford GSB, formerly McKinsey, past president of 180 Degrees Consulting at USC; [NEED: the company Tyler called "Hydroc"]); Andrew Laffoon (founder and CEO of Mixbook). Both.
 
-### 5. The TTS way (navy card)
+### 5. The TTS way (marker 05, navy card)
 
-- The card to /way: the cardinal clay typewriter drafting one letter, the lead waiting at its foot, on the opener's navy, lit by one warm key and a cool rim (writer-1200/2400.webp, its own scene, not a film frame). The typewriter sits at 67% across so the copy owns the left. Pill "the TTS way" in gold, "Understand the TTS way." with "the TTS way." in gold, "Follow one client project from the first lead to the handover, in 3D.", "Start the walkthrough". The image eases in 3% on hover. Both.
+- The card to /way: the cardinal clay typewriter on the opener's navy (writer-1200/2400.webp). "Understand the TTS way." with "the TTS way." in gold, "Follow one client project from the first lead to the handover, in 3D.", "Start the walkthrough". The image eases in 3% on hover. Both.
 
-### 6. Meet the team (pill "the team", coral, gold card)
+### 6. Meet the team (marker 06, the comeback story)
 
-- "Meet the team." and three cards, Caleb, Tyler and Emily, professional photos only, each at most 279px wide so no headshot is upscaled at dpr 2; two link to LinkedIn with an arrow that slides on hover, Emily's has no link because none is on record. Both.
-- One or two lines of background each (Tyler's second memo), sourced in data/people.ts: Caleb from second-brain/core/identity.md and now.md (IYA sophomore; with Tyler took TTS from an empty club to 30+ members in three months); Tyler from now.md and people.md (Global Business sophomore, recruited the ten-person cabinet, runs the student-org registration); Emily from her people.ts note (designed the logo and the previous site, also in 180 Degrees Consulting). Amber stays off: it is in stealth. Both.
+Caleb, 2026-10-10: "Should we move the people page into the main page? The ppl page animation/story is tufff". It replaced the flat three-card team section; /members is now the full roster, so the two never share the animation (TeamStory.tsx).
 
+- One pinned stage, 560vh. The roster is 30 points, one a seat, empty rings while "For over a year, Trojan Tech Solutions sat dormant, with nobody in it."; Matthew Kim's cardinal point (his initials, "Matthew Kim handed it on") with red threads to Caleb's and Tyler's seats, their faces landing there, under the handoff line; Emily joining and the rest of the seats filling outward from the three in clay colours along thin lines, each pulled in by a neighbour, under "So they started over, with Emily Zhao on design...". Lines never share the screen (the /members version overlapped at 0.3). The seats are a picture of dormant and full, not a member count. Both.
+- "About three months later, it had a real roster." alone, big, as the roster sits back. Both.
+- The three faces travel out of their seats into the team cards, the same three photographs, so a face is on the page once and the story's last move is the content: "Meet the team.", three tinted cards (gold, sky, blush) with name, role in mono, the background line from data/people.ts, and a link (Caleb's site, Tyler's LinkedIn; Emily has none on record). Professional photos only, never an AI-generated team image. Amber stays off: it is in stealth. Both.
 ## 7. The doors (cardinal world)
 
 - The cardinal raining in across the city as the sheet ends: the field returns for the ending. Both.
 - "I'm at USC. Teach me to build that." with the email field and "Tell me when it opens", "applications open soon. Follow us on Instagram": something a student can do today. S.
 - "I run a business. Book 30 minutes with Caleb.", Calendly in a new tab: the business door. B.
+- The cursor over the doors is USC's point, white with a soft halo, the way the field draws it on cardinal (story.css; pointer devices only, text cursor in the field). Both.
 - Footer strip (People, Work with us, Sponsor, speak or recruit, T Combinator when its host is live, LinkedIn, the student-org and OpenStreetMap line). Both.
 
 ## Every image and video on home and /way, and where it comes from
@@ -108,11 +156,12 @@ exactly one place, the /way film.
 | home, who we are       | public/tts/home/world-1200.webp, world-2400.webp                                                                                    | blender/heroes.py --hero world                              |
 | home, partners         | public/tts/partners/clay.png, perplexity.svg                                                                                        | the partners' official marks                                |
 | home, our work         | public/tts/home/mailbox-720.webp, mailbox-1440.webp                                                                                 | blender/heroes.py --hero mailbox                            |
-| home, network          | public/tts/alumni/(name).svg, public/img/logos/mckinsey.png, public/img/alumni/(name).jpeg                | company marks; alumni photos from data/people.ts            |
-| home, advisors         | public/img/{chris_swain,matthew,kevin,duncan,sagar,andrew}\_shot.\*, public/img/logos/{mckinsey,reddit,google,stanford,mixbook}.png | data/people.ts                                              |
+| home, network          | public/tts/grid/la-grid.bin (the floor), public/tts/alumni/(name).svg, public/tts/marks/{mckinsey.png,nbcuniversal.svg,uscgould.png}, public/img/alumni/(name).jpeg | OpenStreetMap; company marks (Commons: NBCUniversal 2026 Logo (flat).svg and USC Gould logo.png, both public domain); alumni photos from data/people.ts |
+| home, advisors         | public/img/{chris_swain,matthew,kevin,duncan,sagar,andrew}\_shot.\*, public/tts/marks/{mckinsey,reddit,google,stanford,mixbook}.png (trimmed from public/img/logos) | data/people.ts                                              |
 | home, TTS way card     | public/tts/home/writer-1200.webp, writer-2400.webp                                                                                  | blender/heroes.py --hero writer                             |
-| home, team             | public/img/{caleb,tyler,emily}\_shot.\*                                                                                             | data/people.ts                                              |
-| /way, opener and doors | public/tts/grid/la-grid.bin                                                                                                         | OpenStreetMap                                               |
+| home, team story       | public/img/{caleb,tyler,emily}\_shot.\*                                                                                             | data/people.ts                                              |
+| /way, opener           | none: a canvas graticule and great circle (WayOpen.tsx); the field under it is la-grid.bin |
+| /way, doors            | public/tts/grid/la-grid.bin                                                                                                         | OpenStreetMap                                               |
 | /way, the film         | public/tts/machine/seq/{land-2560,land-1280,port-1440,port-720}/\*.webp, still-land.webp and still-port.webp under reduced motion   | blender/machine.py, the only place the full machine appears |
 | /way, x-ray            | public/tts/manim/{gtm_score,gtm_score_on_cardinal,email_draft,crm_merge,teach_curve}.{mov,webm,png}                                 | manim/scenes.py                                             |
 
@@ -136,7 +185,9 @@ and a soft vignette added in blender/encode_heroes.py.
 
 ## Removed, because Tyler's brief replaced them
 
-- 2026-10-10: the about story ("A dormant club, rebuilt in three months." and the Matthew Kim handoff line). The statement says who TTS is; the work tiles show what is special. The story still lives on /members.
+- 2026-10-10: the coloured section pills, the network's logo wall and its dialog, the six small advisor cards, and the flat three-card team section, on Caleb's verdicts the same day. /members' scroll story moved to home; /members is the full roster.
+
+- 2026-10-10: the about story ("A dormant club, rebuilt in three months." and the Matthew Kim handoff line). The statement says who TTS is; the work tiles show what is special. The comeback story is home's team section now (TeamStory.tsx).
 - 2026-10-10: the film frames on home (machine-1280/2560.webp, frame 352, as the about image; typewriter-1280/2560.webp, frame 200, on the TTS way card) and the grey caption strip under the about image. Deleted from public/tts/landing/.
 - 2026-10-10: "these people actually want to help you" and "15 people started at TTS. See where they went.", retitled by Tyler.
 - 2026-10-09: the semester story on home, the route rail, "This is you, a few weeks from now.", WayHash and the /way to /#way redirect.

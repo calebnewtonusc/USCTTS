@@ -1,8 +1,9 @@
 /*
  * Home's sheet (Landing.tsx, Sheet.tsx): after the LA opener the page is a
  * structured site on paper, in the order Tyler asked for. Since 2026-10-10
- * each section is a tinted rounded card with a coloured pill, a two-tone
- * headline and its own clay scene (Caleb, beside clay.com: "Ours is so lame
+ * sections use tinted rounded grounds, a two-tone headline and their own
+ * clay scenes; the shared one-world rules (thread, markers, dot floors,
+ * network) are in story.css (Caleb, beside clay.com: "Ours is so lame
  * the clay one is YAYYYYYY"). The tints are the clay world's own colours, so
  * the page and the renders read as one palette. Still no shadows: depth comes
  * from the renders, the cards are flat colour (docs/DESIGN-tts.md, "Home's
@@ -46,7 +47,8 @@
   margin-inline: calc((1 - var(--k)) * var(--gutter));
   /* The bottom corners stay round so the sheet hands over to the doors'
    * cardinal city with an edge that reads as a sheet ending, not a cut. */
-  border-radius: calc((1 - var(--k)) * 20px) calc((1 - var(--k)) * 20px) 20px 20px;
+  border-radius: calc((1 - var(--k)) * 20px) calc((1 - var(--k)) * 20px) 20px
+    20px;
   padding-block: clamp(72px, 12vh, 128px) clamp(96px, 14vh, 160px);
 }
 /* The separating tab: a mono label on the sheet's lip, the first section's
@@ -79,38 +81,6 @@
   margin-top: clamp(96px, 14vh, 160px);
 }
 
-/* A coloured pill names each section, one colour per section, drawn from
- * the clay world (gold, cardinal, sky, leaf, coral). */
-.tts .ld-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  margin: 0 0 20px;
-  padding: 0 12px;
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  border-radius: 999px;
-  color: #fff;
-}
-.tts .ld-pill.is-gold {
-  color: var(--ink);
-  background: #ffcc00;
-}
-.tts .ld-pill.is-cardinal {
-  background: #990000;
-}
-.tts .ld-pill.is-sky {
-  background: #2b6fae;
-}
-.tts .ld-pill.is-leaf {
-  background: #2f7a3a;
-}
-.tts .ld-pill.is-coral {
-  background: #c2412b;
-}
 /* The two-tone headline: the phrase that carries the claim, in cardinal on
  * light cards and gold on the navy one. */
 .tts .ld-accent {
@@ -292,16 +262,6 @@
   color: var(--ink-2);
 }
 
-/* ---- 2. about us ---- */
-.tts .ld-split {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-  gap: clamp(28px, 4vw, 64px);
-  align-items: center;
-}
-.tts .ld-split .ld-frame {
-  aspect-ratio: 4 / 3;
-}
 .tts .ld-card .ld-body {
   color: #5e4f52;
 }
@@ -310,222 +270,11 @@
   color: var(--ink);
 }
 
-/* ---- 3. the network ---- */
-.tts .nw-wall {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-.tts .nw-tile.is-wide {
-  grid-column: span 2;
-}
-.tts .nw-btn {
-  display: grid;
-  grid-template-rows: 1fr auto;
-  gap: 24px;
-  width: 100%;
-  height: 100%;
-  min-height: 176px;
-  padding: 24px 20px 18px;
-  text-align: left;
-  font: inherit;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(43, 111, 174, 0.12);
-  border-radius: 18px;
-  cursor: pointer;
-  transition:
-    background-color 150ms cubic-bezier(0, 0, 0.2, 1),
-    border-color 150ms cubic-bezier(0, 0, 0.2, 1),
-    transform 150ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .nw-mark {
-  display: flex;
-  align-items: center;
-  min-height: 48px;
-}
-.tts .nw-mark img {
-  max-height: 40px;
-  max-width: 168px;
-  width: auto;
-  object-fit: contain;
-  /* Marks sit in one ink at rest so a dozen brands read as one wall, like
-   * clay.com's customer row; a hand on the tile gives the brand its colour. */
-  filter: grayscale(1) contrast(1.1);
-  opacity: 0.85;
-  transition:
-    filter 150ms cubic-bezier(0, 0, 0.2, 1),
-    opacity 150ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .nw-name {
-  font-size: clamp(22px, 2vw, 28px);
-  letter-spacing: -0.02em;
-}
-/* A tile with no company (Albert's, whose employer stays off) is his role,
- * set smaller and quieter so it doesn't read as a company name. */
-.tts .nw-name.is-role {
-  font-size: 17px;
-  color: var(--ink-2);
-}
-.tts .nw-faces {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-}
-.tts .nw-faces img {
-  width: 32px;
-  height: 32px;
-  object-fit: cover;
-  flex: none;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  filter: grayscale(0.15);
-  transition: filter 150ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .nw-faces img + img {
-  margin-left: -8px;
-}
-.tts .nw-who {
-  flex: 1;
-  min-width: 0;
-  margin-left: 10px;
-  font-size: 14px;
-  color: var(--ink-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.tts .nw-go {
-  margin-left: 8px;
-  color: var(--ink-3);
-  transition:
-    transform 150ms cubic-bezier(0, 0, 0.2, 1),
-    color 150ms cubic-bezier(0, 0, 0.2, 1);
-}
-@media (hover: hover) and (pointer: fine) {
-  .tts .nw-btn:hover {
-    background: #fff;
-    border-color: rgba(43, 111, 174, 0.4);
-    transform: translateY(-2px);
-  }
-  .tts .nw-btn:hover .nw-mark img,
-  .tts .nw-btn:hover .nw-faces img {
-    filter: none;
-    opacity: 1;
-  }
-  .tts .nw-btn:hover .nw-go {
-    transform: translateX(4px);
-    color: var(--ink);
-  }
-}
-.tts .nw-btn:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-}
-.tts .nw-btn:focus-visible .nw-go {
-  transform: translateX(4px);
-  color: var(--ink);
-}
-.tts .nw-btn:active {
-  transform: scale(0.985);
-}
-
-/* The company's people, opened from a tile. */
-.tts .nw-dialog {
-  width: min(640px, calc(100vw - 2 * var(--gutter)));
-  max-height: calc(100vh - 96px);
-  padding: 0;
-  color: var(--ink);
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 24px;
-}
-.tts .nw-dialog::backdrop {
-  background: rgba(26, 20, 22, 0.42);
-}
-.tts .nw-dialog[open] {
-  animation: nw-in 220ms cubic-bezier(0.2, 0.6, 0.2, 1);
-}
 @keyframes nw-in {
   from {
     opacity: 0;
     transform: translate3d(0, 16px, 0);
   }
-}
-@media (prefers-reduced-motion: reduce) {
-  .tts .nw-dialog[open] {
-    animation: none;
-  }
-}
-.tts .nw-panel-head {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px 20px 18px;
-  border-bottom: 1px solid var(--rule);
-}
-.tts .nw-panel-mark {
-  max-height: 28px;
-  max-width: 120px;
-  width: auto;
-}
-.tts .nw-panel-head h3 {
-  flex: 1;
-  margin: 0;
-  font-size: 17px;
-  font-weight: 500;
-}
-.tts .nw-close {
-  min-height: 40px;
-  padding: 0 14px;
-  font: inherit;
-  font-size: 14px;
-  color: var(--ink);
-  background: var(--paper-2);
-  border: 0;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: background-color 150ms cubic-bezier(0, 0, 0.2, 1);
-}
-@media (hover: hover) and (pointer: fine) {
-  .tts .nw-close:hover {
-    background: var(--paper-3);
-  }
-}
-.tts .nw-close:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-}
-.tts .nw-people {
-  list-style: none;
-  margin: 0;
-  padding: 20px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 20px;
-}
-.tts .nw-people li {
-  display: grid;
-  gap: 4px;
-  font-size: 14px;
-  line-height: 1.35;
-}
-.tts .nw-people img {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  margin-bottom: 8px;
-  border-radius: 14px;
-}
-.tts .nw-people b {
-  font-size: 16px;
-  font-weight: 500;
-}
-.tts .nw-people span {
-  color: var(--ink-2);
 }
 
 /* ---- 5. the TTS way ---- */
@@ -543,9 +292,7 @@
 .tts .ld-way-card .ld-accent {
   color: #ffcc00;
 }
-.tts .ld-way-card .ld-pill {
-  margin: 0;
-}
+
 .tts .ld-way-img {
   display: block;
   width: 100%;
@@ -600,14 +347,8 @@
   outline-offset: 4px;
 }
 
-@media (max-width: 1099px) {
-  .tts .nw-wall {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
 @media (max-width: 899px) {
-  .tts .st,
-  .tts .ld-split {
+  .tts .st {
     grid-template-columns: minmax(0, 1fr);
   }
   /* The world crops to its middle on a narrow screen: USC, the freeway and
@@ -622,21 +363,6 @@
     /* The phone's readout strip wraps to three lines, about 70px. */
     margin-top: calc(-30vh - 236px);
     margin-top: calc(-30svh - 236px);
-  }
-  .tts .nw-wall {
-    gap: 8px;
-  }
-  .tts .nw-btn {
-    min-height: 0;
-    gap: 16px;
-    padding: 18px 14px 14px;
-  }
-  .tts .nw-mark img {
-    max-width: 120px;
-    max-height: 30px;
-  }
-  .tts .nw-name {
-    font-size: 19px;
   }
   .tts .st-row {
     gap: 20px;
@@ -660,192 +386,6 @@
   .tts .ld-frame {
     border-radius: 16px;
   }
-}
-
-
-/* Light-world ink inside every card. */
-.tts .pp-card,
-.tts .pp-team-card {
-  --ink: #2a1b1e;
-  --ink-2: #6f6264;
-  --ink-3: #a1969a;
-  --rule: rgba(42, 27, 30, 0.14);
-  color: var(--ink);
-}
-
-/* ---- mentors ---- */
-.tts .pp-cards {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-.tts .pp-card {
-  display: grid;
-  align-content: start;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(47, 122, 58, 0.12);
-  border-radius: 18px;
-  transition:
-    border-color 150ms cubic-bezier(0, 0, 0.2, 1),
-    transform 150ms cubic-bezier(0, 0, 0.2, 1);
-}
-/* An advisor card is a row: a 96px face, then the name and background.
- * Square faces at a third of 1184px were drawn at 380px, past every
- * headshot's resolution at dpr 2. */
-.tts .pp-cards .pp-card {
-  grid-template-columns: 96px minmax(0, 1fr);
-  gap: 16px;
-  padding: 16px;
-}
-.tts .pp-card-face {
-  display: block;
-  width: 96px;
-  height: 96px;
-  border-radius: 14px;
-  object-fit: cover;
-  object-position: 50% 22%;
-}
-.tts .pp-cards .pp-card-body {
-  padding: 2px 0 0;
-}
-.tts .pp-card-body {
-  display: grid;
-  gap: 4px;
-  padding: 14px 14px 16px;
-  font-size: 14px;
-  line-height: 1.35;
-}
-.tts .pp-card-body b {
-  font-size: 16px;
-  font-weight: 500;
-}
-.tts .pp-card-body > span {
-  color: var(--ink-2);
-}
-/* An advisor's background: a mark (or a leaf dot) and one line per row. */
-.tts .pp-bg {
-  list-style: none;
-  margin: 8px 0 0;
-  padding: 0;
-  display: grid;
-  gap: 8px;
-}
-.tts .pp-bg li {
-  display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
-  gap: 10px;
-  align-items: start;
-  font-size: 14px;
-  line-height: 1.4;
-  color: var(--ink-2);
-}
-.tts .pp-bg img {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
-}
-.tts .pp-bg-dot {
-  width: 8px;
-  height: 8px;
-  margin: 6px;
-  border-radius: 50%;
-  background: #2f7a3a;
-}
-/* Room for the LinkedIn arrow, which sits on the card's bottom right. */
-.tts a.pp-team-link .pp-card-body {
-  padding-right: 40px;
-}
-.tts .pp-bio {
-  margin-top: 6px;
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--ink-2);
-}
-.tts .pp-card-co {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 6px;
-  color: var(--ink) !important;
-}
-.tts .pp-card-co img {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-}
-@media (hover: hover) and (pointer: fine) {
-  .tts .pp-card:hover {
-    border-color: rgba(47, 122, 58, 0.4);
-    transform: translateY(-2px);
-  }
-}
-
-/* ---- the team ---- */
-.tts .pp-team-row {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  /* Cards at most 279px wide, so the 560px headshots (Tyler's is 560 from
-   * LinkedIn) are never upscaled at dpr 2. At 980 they were drawn at 1.14x. */
-  max-width: 860px;
-}
-.tts .pp-team-link {
-  position: relative;
-  display: grid;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(194, 65, 43, 0.12);
-  border-radius: 18px;
-  color: inherit;
-  text-decoration: none;
-  transition:
-    border-color 150ms cubic-bezier(0, 0, 0.2, 1),
-    transform 150ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .pp-team-face {
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-  object-position: 50% 18%;
-}
-.tts .pp-go {
-  position: absolute;
-  right: 14px;
-  bottom: 16px;
-  font-size: 18px;
-  color: var(--ink-2);
-  transition:
-    transform 150ms cubic-bezier(0, 0, 0.2, 1),
-    color 150ms cubic-bezier(0, 0, 0.2, 1);
-}
-@media (hover: hover) and (pointer: fine) {
-  .tts a.pp-team-link:hover {
-    border-color: #c2412b;
-    transform: translateY(-2px);
-  }
-  .tts a.pp-team-link:hover .pp-go {
-    transform: translateX(4px);
-    color: var(--ink);
-  }
-}
-.tts a.pp-team-link:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-}
-.tts a.pp-team-link:focus-visible .pp-go {
-  transform: translateX(4px);
-  color: var(--ink);
-}
-.tts a.pp-team-link:active {
-  transform: scale(0.98);
 }
 
 /* ---- arrival: rises once and holds (Depth.tsx) ---- */
@@ -873,33 +413,5 @@
     opacity: 1;
     transform: none;
     transition: none;
-  }
-}
-
-@media (max-width: 1099px) {
-  .tts .pp-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@media (max-width: 599px) {
-  .tts .pp-cards {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .tts .pp-team-row {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-  }
-  .tts .pp-team-face {
-    aspect-ratio: 1;
-  }
-  .tts .pp-team-row .pp-card-body {
-    padding: 10px 8px 12px;
-    font-size: 12.5px;
-  }
-  .tts .pp-team-row .pp-card-body b {
-    font-size: 14px;
-  }
-  .tts .pp-go {
-    display: none;
   }
 }

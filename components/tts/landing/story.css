@@ -1,0 +1,1132 @@
+/*
+ * Home as one world (Caleb, 2026-10-10: "it seems like 2 sites in 1 rn").
+ * The rules every section follows are in docs/INTENT-home.md, "One world":
+ *   - dots are the opener's points: real streets or real people, at the
+ *     opener's 7px spacing, in its colours (ink on paper, gold and cream
+ *     on navy), never decoration
+ *   - USC's cardinal point (#d0102e, a soft halo) is the one recurring
+ *     mark: the thread's travelling head, the lit section nodes, the
+ *     network's origin, a card under the pointer, the cursor on the doors
+ *   - mono (--mono) carries small data only: section numbers, places,
+ *     roles, coordinates, counts
+ */
+
+.tts .ld {
+  --hot: #d0102e;
+  --cardinal: #990000;
+  --navy: #0d1020;
+  --navy-2: #1b2140;
+  --gold: #ffcc00;
+  --cream: #fff1cc;
+  --flow: #5fa8e0;
+}
+
+/* A dot floor fills whatever box holds it. */
+.tts .dfl {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+/* ---- the thread ---- */
+.tts .th {
+  display: none;
+}
+@media (min-width: 1200px) {
+  .tts .th {
+    display: block;
+    position: absolute;
+    z-index: 4;
+    top: 0;
+    bottom: 0;
+    left: max(20px, calc((100% - var(--wide)) / 2 + var(--gutter) - 52px));
+    width: 2px;
+    pointer-events: none;
+  }
+}
+.tts .th-base,
+.tts .th-lit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  background-repeat: repeat-y;
+  background-size: 2px 7px;
+}
+.tts .th-base {
+  bottom: 0;
+  background-image: radial-gradient(
+    circle,
+    rgba(42, 27, 30, 0.26) 0.9px,
+    transparent 1.3px
+  );
+}
+.tts .th-lit {
+  height: 0;
+  background-image: radial-gradient(
+    circle,
+    var(--hot) 0.9px,
+    transparent 1.3px
+  );
+}
+.tts .th-node {
+  position: absolute;
+  left: -4px;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1.5px rgba(42, 27, 30, 0.35);
+  transition:
+    background-color 300ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 300ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .th-node.is-on {
+  background: var(--hot);
+  box-shadow:
+    inset 0 0 0 1.5px var(--hot),
+    0 0 0 5px rgba(208, 16, 46, 0.14);
+}
+.tts .th-head {
+  position: absolute;
+  top: -6px;
+  left: -5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--hot);
+  box-shadow:
+    0 0 0 6px rgba(208, 16, 46, 0.16),
+    0 0 18px 4px rgba(208, 16, 46, 0.35);
+  opacity: 0;
+  transition: opacity 200ms linear;
+}
+
+/* ---- section markers ---- */
+.tts .ld-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 22px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.tts .ld-mark-n {
+  color: var(--cardinal);
+}
+.tts .ld-mark-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px rgba(42, 27, 30, 0.35);
+  transition:
+    background-color 300ms,
+    box-shadow 300ms;
+}
+.tts .ld-mark.is-on .ld-mark-dot {
+  background: var(--hot);
+  box-shadow: 0 0 0 4px rgba(208, 16, 46, 0.14);
+}
+.tts .ld-mark.is-light {
+  color: rgba(255, 241, 204, 0.72);
+}
+.tts .ld-mark.is-light .ld-mark-n {
+  color: var(--gold);
+}
+/* With the thread in the margin, its node is the marker's point. */
+@media (min-width: 1200px) {
+  .tts .ld-mark-dot {
+    display: none;
+  }
+}
+
+/* ---- 01, the city on its floor ---- */
+.tts .ld-ground {
+  position: relative;
+  margin-top: clamp(40px, 6vh, 72px);
+  padding: clamp(28px, 4vw, 56px) clamp(0px, 3vw, 48px) clamp(48px, 6vw, 96px);
+}
+.tts .ld-ground-floor {
+  -webkit-mask-image: radial-gradient(
+    ellipse 58% 62% at 50% 56%,
+    #000 60%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 58% 62% at 50% 56%,
+    #000 60%,
+    transparent 100%
+  );
+}
+.tts .ld-ground .ld-frame.is-world {
+  margin-top: 0;
+}
+
+/* ---- the seam ---- */
+.tts .ld-seam {
+  position: relative;
+  height: clamp(120px, 20vh, 200px);
+  margin-block: clamp(8px, 2vh, 24px);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 18%,
+    #000 82%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 18%,
+    #000 82%,
+    transparent
+  );
+}
+.tts .ld-who + .ld-seam + .ld-sec {
+  margin-top: 0;
+}
+
+/* ---- 02, the work ---- */
+.tts .ld-work {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  gap: clamp(28px, 4vw, 64px);
+  align-items: center;
+}
+.tts .ld-work-pic {
+  position: relative;
+  padding: clamp(16px, 2.4vw, 36px);
+}
+.tts .ld-work-floor {
+  border-radius: 24px;
+  -webkit-mask-image: radial-gradient(closest-side, #000 70%, transparent);
+  mask-image: radial-gradient(closest-side, #000 70%, transparent);
+}
+.tts .ld-work .ld-frame {
+  position: relative;
+  aspect-ratio: 4 / 3;
+}
+.tts .ld-lead {
+  margin: 0 0 6px;
+  font-size: clamp(19px, 1.6vw, 24px);
+  line-height: 1.3;
+  color: #7a5a5e;
+}
+.tts .ld-manifest {
+  list-style: none;
+  margin: 0 0 32px;
+  padding: 0;
+  border-bottom: 1px solid rgba(122, 31, 31, 0.16);
+}
+.tts .ld-manifest li {
+  display: grid;
+  grid-template-columns: 44px auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid rgba(122, 31, 31, 0.16);
+}
+.tts .ld-manifest b {
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.tts .ld-m-code {
+  justify-self: start;
+  align-self: center;
+  padding: 2px 6px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--cardinal);
+  border: 1px solid rgba(153, 0, 0, 0.3);
+  border-radius: 6px;
+}
+.tts .ld-m-code.is-field {
+  width: 10px;
+  height: 10px;
+  margin-left: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--hot);
+  box-shadow: 0 0 0 4px rgba(208, 16, 46, 0.14);
+}
+.tts .ld-m-what {
+  justify-self: end;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.4;
+  color: #6f5457;
+}
+
+/* ---- 03, the network: the night field returns ---- */
+.tts .ld-net-band {
+  position: relative;
+  margin-inline: clamp(8px, 1.6vw, 24px);
+  padding-block: clamp(64px, 8vw, 112px) clamp(48px, 6vw, 88px);
+  border-radius: 32px;
+  color: #fff7e6;
+  background:
+    radial-gradient(70% 80% at 14% 55%, var(--navy-2), transparent 75%),
+    var(--navy);
+  overflow: hidden;
+}
+.tts .ld-net-band .ld-h {
+  color: #fff7e6;
+}
+.tts .ld-net-band .ld-accent {
+  color: var(--gold);
+}
+.tts .ld-net-band .ld-lede {
+  margin: -8px 0 0;
+  max-width: 52ch;
+  color: rgba(255, 241, 204, 0.72);
+}
+.tts .nw-map {
+  --draw: 0;
+  position: relative;
+  height: clamp(640px, 60vw, 800px);
+  margin-top: clamp(24px, 4vw, 48px);
+}
+.tts .nw-floor,
+.tts .nw-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.tts .nw-usc {
+  position: absolute;
+  z-index: 2;
+  left: 3%;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transform: translateY(-50%);
+}
+.tts .nw-usc-dot {
+  position: relative;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--hot);
+  box-shadow:
+    0 0 0 8px rgba(208, 16, 46, 0.2),
+    0 0 28px 8px rgba(208, 16, 46, 0.45);
+}
+.tts .nw-usc-tag {
+  display: grid;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(13, 16, 32, 0.82);
+  box-shadow: inset 0 0 0 1px rgba(255, 241, 204, 0.12);
+  gap: 2px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(255, 241, 204, 0.62);
+}
+.tts .nw-usc-tag b {
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff7e6;
+  letter-spacing: 0.06em;
+}
+.tts .nw-nodes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  inset: 0;
+}
+.tts .nw-node {
+  position: absolute;
+  z-index: 2;
+  left: var(--x);
+  top: var(--y);
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  transform: translate(-50%, -50%);
+  opacity: clamp(0, calc((var(--draw) - 0.3) * 2.2), 1);
+}
+.tts .nw-node > * {
+  transition: opacity 220ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .nw-node.is-dim > * {
+  opacity: 0.26;
+}
+.tts .nw-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  min-width: 76px;
+  padding: 0 18px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 0 0 4px var(--ring);
+  transition:
+    transform 200ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .nw-node.is-sky {
+  --ring: rgba(95, 168, 224, 0.55);
+}
+.tts .nw-node.is-gold {
+  --ring: rgba(255, 204, 0, 0.6);
+}
+.tts .nw-node.is-blush {
+  --ring: rgba(241, 160, 150, 0.6);
+}
+.tts .nw-node.is-leaf {
+  --ring: rgba(120, 190, 110, 0.55);
+}
+.tts .nw-chip img {
+  display: block;
+  width: var(--w);
+  height: var(--h);
+  object-fit: contain;
+}
+.tts .nw-type {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.tts .nw-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(255, 241, 204, 0.6);
+  white-space: nowrap;
+}
+.tts .nw-people {
+  display: flex;
+  gap: 6px;
+}
+.tts .nw-who {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(255, 241, 204, 0.7);
+  white-space: nowrap;
+}
+.tts .nw-face {
+  position: relative;
+  display: block;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px var(--navy),
+    0 0 0 3.5px rgba(255, 204, 0, 0.7);
+  transition:
+    transform 180ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 180ms;
+}
+.tts .nw-face img,
+.tts .nw-ini {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.tts .nw-ini {
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: var(--cardinal);
+}
+.tts .nw-tip {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 10px);
+  left: 50%;
+  display: flex;
+  gap: 6px;
+  padding: 5px 9px;
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--ink);
+  background: #fff7e6;
+  border-radius: 7px;
+  opacity: 0;
+  transform: translate(-50%, -4px);
+  pointer-events: none;
+  transition:
+    opacity 160ms cubic-bezier(0, 0, 0.2, 1),
+    transform 160ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .nw-tip b {
+  font-weight: 600;
+}
+.tts .nw-tip span::after {
+  content: " \2197";
+}
+.tts span.nw-face .nw-tip span::after {
+  content: "";
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .nw-node:hover .nw-chip {
+    transform: translateY(-2px);
+    box-shadow:
+      0 0 0 4px var(--ring),
+      0 10px 28px rgba(0, 0, 0, 0.35);
+  }
+  .tts .nw-face:hover {
+    transform: scale(1.14);
+    box-shadow:
+      0 0 0 2px var(--navy),
+      0 0 0 3.5px var(--hot),
+      0 0 18px 4px rgba(208, 16, 46, 0.5);
+  }
+  .tts .nw-face:hover .nw-tip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+.tts .nw-face:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+.tts .nw-face:focus-visible .nw-tip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.tts .nw-face:active {
+  transform: scale(0.94);
+}
+
+/* ---- 04, the advisors ---- */
+.tts .ld-h.is-wide {
+  max-width: 24ch;
+}
+.tts .ad-grid {
+  list-style: none;
+  margin: clamp(32px, 4vw, 48px) 0 0;
+  padding: 0 0 48px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 1.6vw, 22px);
+}
+@media (min-width: 900px) {
+  .tts .ad-card:nth-child(3n + 2) {
+    translate: 0 48px;
+  }
+}
+.tts .ad-link {
+  display: grid;
+  align-content: start;
+  height: 100%;
+  padding: 12px 12px 24px;
+  border-radius: 28px;
+  color: var(--fg);
+  text-decoration: none;
+  background: var(--tone);
+  transition:
+    transform 220ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 220ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .ad-photo {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.16);
+}
+.tts .ad-photo > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 22%;
+  transition: transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.tts .ad-chip {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: #fff;
+}
+.tts .ad-chip img {
+  display: block;
+  height: 26px;
+  width: auto;
+  max-width: 132px;
+  object-fit: contain;
+}
+.tts .ad-dot {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--hot);
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.9),
+    0 0 18px 6px rgba(208, 16, 46, 0.55);
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 200ms cubic-bezier(0, 0, 0.2, 1),
+    transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .ad-body {
+  display: grid;
+  gap: 10px;
+  padding: 20px 8px 0;
+}
+.tts .ad-name {
+  font-size: clamp(22px, 1.9vw, 28px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+.tts .ad-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 5px;
+  font-size: 15.5px;
+  line-height: 1.4;
+  opacity: 0.88;
+}
+.tts .ad-go {
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.72;
+  transition: opacity 200ms;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts a.ad-link:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px -18px rgba(42, 27, 30, 0.5);
+  }
+  .tts a.ad-link:hover .ad-photo > img {
+    transform: scale(1.05);
+  }
+  .tts a.ad-link:hover .ad-dot {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .tts a.ad-link:hover .ad-go {
+    opacity: 1;
+  }
+}
+.tts a.ad-link:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+.tts a.ad-link:focus-visible .ad-dot {
+  opacity: 1;
+  transform: scale(1);
+}
+.tts a.ad-link:active {
+  transform: scale(0.985);
+}
+
+/* ---- 06, the team story ---- */
+.tts .ts {
+  position: relative;
+  height: 560vh;
+}
+.tts .ts-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: center;
+  padding: calc(var(--nav-h) + 32px)
+    max(var(--gutter), calc((100% - var(--wide)) / 2 + var(--gutter))) 40px;
+}
+.tts .ts-copy {
+  position: relative;
+  height: 62%;
+  min-height: 260px;
+}
+.tts .ts-beat {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  max-width: 22ch;
+  font-size: clamp(22px, 2.2vw, 32px);
+  line-height: 1.32;
+  letter-spacing: -0.012em;
+  opacity: 0;
+}
+.tts .ts-beat.is-first {
+  max-width: 14ch;
+  font-size: clamp(34px, 3.8vw, 58px);
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+}
+.tts .ts-roster {
+  position: relative;
+  justify-self: center;
+  width: min(100%, 520px);
+}
+.tts .ts-roster-tag,
+.tts .ts-matt-tag {
+  display: block;
+  margin-bottom: 16px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.tts .ts-matt-tag {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  opacity: 0;
+  transition: opacity 300ms;
+}
+.tts .ts-matt-tag b {
+  font-weight: 500;
+  color: var(--cardinal);
+}
+.tts .ts-roster:has(.is-matt[data-on="1"]) .ts-matt-tag {
+  opacity: 1;
+}
+.tts .ts-seats {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(10px, 1.6vw, 22px);
+}
+.tts .ts-seat {
+  --t: 0;
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+.tts .ts-seat::before {
+  content: "";
+  position: absolute;
+  inset: 34%;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px rgba(42, 27, 30, 0.28);
+}
+.tts .ts-seat::after {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background: var(--fillc, #5fa8e0);
+  opacity: var(--t);
+  transform: scale(calc(0.3 + 0.7 * var(--t)));
+}
+.tts .ts-seat:nth-child(4n + 1) {
+  --fillc: #ffcc00;
+}
+.tts .ts-seat:nth-child(4n + 2) {
+  --fillc: #5fa8e0;
+}
+.tts .ts-seat:nth-child(4n + 3) {
+  --fillc: #f1a096;
+}
+.tts .ts-seat:nth-child(4n) {
+  --fillc: #8cc47e;
+}
+.tts .ts-seat.is-root::before {
+  box-shadow: inset 0 0 0 1.5px rgba(153, 0, 0, 0.5);
+}
+.tts .ts-seat.is-matt::after {
+  background: var(--cardinal);
+  opacity: 0;
+  transform: scale(0.3);
+  transition:
+    opacity 400ms cubic-bezier(0, 0, 0.2, 1),
+    transform 400ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .ts-seat.is-matt[data-on="1"]::after {
+  opacity: 1;
+  transform: scale(1);
+  box-shadow: 0 0 0 6px rgba(208, 16, 46, 0.14);
+}
+.tts .ts-ini {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 400ms;
+}
+.tts .ts-seat.is-matt[data-on="1"] .ts-ini {
+  opacity: 1;
+}
+.tts .ts-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+.tts .ts-pull {
+  fill: none;
+  stroke: rgba(42, 27, 30, 0.3);
+  stroke-width: 1;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+}
+.tts .ts-thread {
+  fill: none;
+  stroke: var(--hot);
+  stroke-width: 1.5;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+}
+.tts .ts-big {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding-inline: var(--gutter);
+  text-align: center;
+  font-size: clamp(44px, 6.4vw, 108px);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  opacity: 0;
+  pointer-events: none;
+}
+.tts .ts-final {
+  position: absolute;
+  inset: calc(var(--nav-h) + 32px)
+    max(var(--gutter), calc((100% - var(--wide)) / 2 + var(--gutter))) 40px;
+  display: grid;
+  align-content: center;
+  pointer-events: none;
+}
+.tts .ts[data-done="1"] .ts-final {
+  pointer-events: auto;
+}
+.tts .ts-head {
+  margin: 0 0 32px;
+  font-size: clamp(34px, 4vw, 60px);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  opacity: 0;
+}
+.tts .ts-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 280px));
+  gap: 24px;
+}
+.tts .ts-card-in {
+  opacity: 0;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  height: 100%;
+  padding: 12px 12px 22px;
+  border-radius: 24px;
+  color: inherit;
+  text-decoration: none;
+  background: #fff3cc;
+  transition:
+    background-color 200ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .ts-card:nth-child(2) .ts-card-in {
+  background: #e6f0f9;
+}
+.tts .ts-card:nth-child(3) .ts-card-in {
+  background: #fbe9e3;
+}
+.tts .ts-card-slot {
+  display: block;
+  aspect-ratio: 4 / 5;
+  border-radius: 20px;
+}
+.tts .ts-card-body {
+  display: grid;
+  gap: 6px;
+  padding: 0 6px;
+  opacity: 0;
+}
+.tts .ts-card-body b {
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.tts .ts-role,
+.tts .ts-go {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cardinal);
+}
+.tts .ts-go {
+  margin-top: 6px;
+  color: var(--ink-2);
+  transition: color 200ms;
+}
+.tts .ts-bio {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.tts .ts-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: 0;
+  height: 0;
+  object-fit: cover;
+  object-position: 50% 20%;
+  pointer-events: none;
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts a.ts-card-in:hover {
+    box-shadow: inset 0 0 0 2px var(--hot);
+  }
+  .tts a.ts-card-in:hover .ts-go {
+    color: var(--cardinal);
+  }
+}
+.tts a.ts-card-in:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+.tts a.ts-card-in:active {
+  background: #fff;
+}
+
+/* ---- 07, the doors: the cursor is USC's point, white on the cardinal
+ * world the way the field draws it there ---- */
+@media (hover: hover) and (pointer: fine) {
+  .tts .jn,
+  .tts .jn a,
+  .tts .jn button {
+    cursor:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Ccircle cx='14' cy='14' r='11' fill='white' fill-opacity='.18'/%3E%3Ccircle cx='14' cy='14' r='5' fill='white'/%3E%3C/svg%3E")
+        14 14,
+      auto;
+  }
+  .tts .jn input {
+    cursor: text;
+  }
+}
+
+@media (max-width: 1099px) {
+  .tts .ad-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tts .ad-card:nth-child(3n + 2) {
+    translate: none;
+  }
+}
+
+/* Under 900px the network stacks: USC on top, the companies in two
+ * columns under it, the lines falling out of the point to each face. */
+@media (max-width: 899px) {
+  .tts .ld-work {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tts .nw-map {
+    height: auto;
+    padding-bottom: 8px;
+  }
+  .tts .nw-usc {
+    position: relative;
+    left: auto;
+    top: auto;
+    flex-direction: column-reverse;
+    gap: 14px;
+    margin: 8px 0 56px;
+    transform: none;
+  }
+  .tts .nw-usc-tag {
+    justify-items: center;
+    text-align: center;
+  }
+  .tts .nw-nodes {
+    position: relative;
+    inset: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px 44px;
+  }
+  .tts .nw-node {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    opacity: 1;
+  }
+  .tts .nw-who,
+  .tts .nw-meta {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+  .tts .nw-chip {
+    max-width: 100%;
+  }
+  .tts .nw-chip img {
+    width: auto;
+    height: calc(var(--h) * 0.82);
+    max-width: 100%;
+  }
+  .tts .nw-type {
+    font-size: 15px;
+    white-space: normal;
+    text-align: center;
+  }
+  .tts .nw-chip {
+    height: 48px;
+    padding: 0 12px;
+  }
+  .tts .ts {
+    height: 520vh;
+  }
+  .tts .ts-stage {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 0.9fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    padding-top: calc(var(--nav-h) + 20px);
+  }
+  .tts .ts-copy {
+    height: 100%;
+    min-height: 0;
+  }
+  .tts .ts-beat {
+    font-size: 20px;
+    max-width: none;
+  }
+  .tts .ts-beat.is-first {
+    font-size: 34px;
+  }
+  .tts .ts-roster {
+    width: min(100%, 340px);
+  }
+  .tts .ts-big {
+    font-size: 40px;
+  }
+  .tts .ts-final {
+    inset: calc(var(--nav-h) + 16px) var(--gutter) 24px;
+  }
+  .tts .ts-head {
+    margin-bottom: 20px;
+    font-size: 34px;
+  }
+  .tts .ts-cards {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .tts .ts-card-in {
+    grid-template-columns: 92px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+    padding: 8px;
+    border-radius: 20px;
+  }
+  .tts .ts-card-slot {
+    aspect-ratio: 1;
+    border-radius: 14px;
+  }
+  .tts .ts-card-body {
+    gap: 3px;
+    padding: 0;
+  }
+  .tts .ts-card-body b {
+    font-size: 17px;
+  }
+  .tts .ts-bio {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .tts .ts-go {
+    display: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .tts .ad-grid {
+    display: flex;
+    gap: 12px;
+    margin-inline: calc(-1 * var(--gutter));
+    padding: 0 var(--gutter) 8px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .tts .ad-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .tts .ad-card {
+    flex: 0 0 80%;
+    scroll-snap-align: start;
+  }
+  .tts .ld-manifest li {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+  .tts .ld-m-what {
+    grid-column: 2;
+    justify-self: start;
+    text-align: left;
+  }
+  .tts .nw-meta,
+  .tts .nw-who {
+    font-size: 10.5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tts .nw-node {
+    opacity: 1;
+  }
+}
