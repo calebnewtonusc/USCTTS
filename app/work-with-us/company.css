@@ -1,0 +1,531 @@
+/* For companies (page.tsx): one trip through the week a business owner
+ * already has, what we'd build, the real work, the tools and the one call.
+ * The one-world rules are in docs/INTENT-home.md. */
+
+.tts .co {
+  --hot: #d0102e;
+  --cardinal: #990000;
+  --navy: #0d1020;
+  --navy-2: #1b2140;
+  --gold: #ffcc00;
+  --cream: #fff7e6;
+  --mono-f: var(--tts-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+.tts .co-wrap {
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.tts .co em {
+  font-style: normal;
+  color: var(--cardinal);
+}
+
+/* Markers and small data, as on home. */
+.tts .co-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px;
+  font-family: var(--mono-f);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.tts .co-mark.is-light {
+  color: rgba(255, 241, 204, 0.72);
+}
+.tts .co-n {
+  font-family: var(--mono-f);
+  color: var(--cardinal);
+}
+.tts .co-mark.is-light .co-n {
+  color: var(--gold);
+}
+.tts .co-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--hot);
+  box-shadow: 0 0 0 5px rgba(208, 16, 46, 0.22);
+}
+
+/* The one button. */
+.tts .co-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 32px;
+}
+.tts .co-book {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 26px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  color: #fff;
+  background: var(--cardinal);
+  transition:
+    background-color 150ms cubic-bezier(0, 0, 0.2, 1),
+    transform 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .co-book span {
+  transition: transform 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .co-book.is-big {
+  min-height: 64px;
+  padding: 0 34px;
+  font-size: 19px;
+  color: var(--cardinal);
+  background: #fff;
+}
+.tts .co-write {
+  font-size: 15px;
+  color: rgba(255, 241, 204, 0.8);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 241, 204, 0.35);
+  text-underline-offset: 4px;
+  transition:
+    color 150ms,
+    text-decoration-color 150ms;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .co-book:hover {
+    background: #b3001a;
+    transform: translateY(-1px);
+  }
+  .tts .co-book.is-big:hover {
+    background: var(--cream);
+  }
+  .tts .co-book:hover span {
+    transform: translateX(4px);
+  }
+  .tts .co-write:hover {
+    color: #fff;
+    text-decoration-color: #fff;
+  }
+}
+.tts .co-book:focus-visible,
+.tts .co-write:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+.tts .co-book:active {
+  transform: scale(0.97);
+}
+
+/* 1. The hero: the night field, the inbox. */
+.tts .co-hero {
+  position: relative;
+  overflow: hidden;
+  margin: 0 clamp(8px, 1.6vw, 24px);
+  padding: clamp(72px, 11vh, 128px) 0 clamp(72px, 10vh, 120px);
+  border-radius: 32px;
+  color: var(--cream);
+  background:
+    radial-gradient(60% 80% at 75% 45%, var(--navy-2), transparent 75%),
+    var(--navy);
+}
+.tts .co-hero-floor {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: radial-gradient(
+    ellipse 75% 95% at 66% 50%,
+    #000 45%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 75% 95% at 66% 50%,
+    #000 45%,
+    transparent 100%
+  );
+}
+.tts .co-hero-in {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+.tts .co-h1 {
+  margin: 0;
+  font-size: clamp(44px, 6vw, 92px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+.tts .co-hero .co-h1 em {
+  color: var(--gold);
+}
+.tts .co-lede {
+  max-width: 40ch;
+  margin: 24px 0 0;
+  font-size: clamp(17px, 1.4vw, 20px);
+  line-height: 1.5;
+  color: rgba(255, 241, 204, 0.78);
+}
+.tts .co-hero .ix-panel {
+  color: var(--ink);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 0;
+  box-shadow:
+    0 0 0 6px rgba(255, 204, 0, 0.2),
+    0 30px 80px -30px rgba(0, 0, 0, 0.7);
+}
+
+/* Sections on paper. */
+.tts .co-sec {
+  padding-block: clamp(80px, 11vw, 144px);
+}
+.tts .co-h2 {
+  max-width: 20ch;
+  margin: 0 0 clamp(32px, 4vw, 48px);
+  font-size: clamp(32px, 4vw, 60px);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+}
+.tts .co-h2.is-small {
+  font-size: clamp(28px, 3vw, 44px);
+}
+
+/* 2. What we build: four coloured steps on one dotted line. */
+.tts .co-builds {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.tts .co-builds::before {
+  content: "";
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: 50%;
+  height: 2px;
+  background-image: radial-gradient(
+    circle,
+    rgba(153, 0, 0, 0.45) 0.9px,
+    transparent 1.3px
+  );
+  background-size: 7px 2px;
+  background-repeat: repeat-x;
+}
+.tts .co-build {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-height: 300px;
+  padding: 24px 22px 26px;
+  border-radius: 24px;
+  background: var(--t);
+  transition: transform 220ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .co-build.is-blush {
+  --t: #f7d9d0;
+}
+.tts .co-build.is-sky {
+  --t: #d5e6f6;
+}
+.tts .co-build.is-gold {
+  --t: #ffe68a;
+}
+.tts .co-build.is-leaf {
+  --t: #d7eacb;
+}
+.tts .co-build:nth-child(even) {
+  margin-top: 40px;
+}
+.tts .co-build-k {
+  font-family: var(--mono-f);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.tts .co-build-p {
+  margin-top: 24px;
+  font-size: 16px;
+  line-height: 1.4;
+  color: rgba(42, 27, 30, 0.62);
+  text-decoration: line-through;
+  text-decoration-color: rgba(153, 0, 0, 0.5);
+}
+.tts .co-build-arrow {
+  width: 44px;
+  height: 10px;
+  fill: var(--cardinal);
+}
+.tts .co-build-arrow path {
+  fill: none;
+  stroke: var(--cardinal);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tts .co-build-b {
+  font-size: clamp(21px, 1.8vw, 26px);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .co-build:hover {
+    transform: translateY(-4px) rotate(-0.4deg);
+  }
+}
+.tts .co-note {
+  margin: 28px 0 0;
+  font-family: var(--mono-f);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+/* 3. The world band. */
+.tts .co-world {
+  overflow: hidden;
+  margin-inline: clamp(8px, 1.6vw, 24px);
+  padding-block: clamp(72px, 9vw, 120px);
+  border-radius: 32px;
+  color: var(--cream);
+  background:
+    radial-gradient(70% 70% at 30% 40%, var(--navy-2), transparent 75%),
+    var(--navy);
+}
+.tts .co-world .co-h2 em {
+  color: var(--gold);
+}
+.tts .co-legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin: 24px 0 0;
+  padding: 20px 0 0;
+  border-top: 1px solid rgba(255, 241, 204, 0.14);
+  font-size: 15px;
+  color: rgba(255, 241, 204, 0.85);
+}
+.tts .co-legend li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tts .co-code {
+  padding: 2px 6px;
+  font-family: var(--mono-f);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  border: 1px solid rgba(255, 204, 0, 0.4);
+  border-radius: 6px;
+}
+.tts .co-code.is-field {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--hot);
+  box-shadow: 0 0 0 4px rgba(208, 16, 46, 0.22);
+}
+
+/* 4 and 5. Tools and steps. */
+.tts .co-how {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(40px, 6vw, 96px);
+  align-items: start;
+}
+.tts .co-tools {
+  padding: clamp(24px, 3vw, 36px);
+  border-radius: 24px;
+  background: #e6f0f9;
+}
+.tts .co-tools-line {
+  margin: 0;
+  font-size: clamp(19px, 1.6vw, 23px);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+.tts .co-marks {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-top: 28px;
+}
+.tts .co-marks img {
+  display: block;
+  height: auto;
+}
+.tts .co-pplx {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 19px;
+}
+.tts .co-steps {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 28px;
+}
+.tts .co-steps::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background-image: radial-gradient(
+    circle,
+    rgba(153, 0, 0, 0.45) 0.9px,
+    transparent 1.3px
+  );
+  background-size: 2px 7px;
+  background-repeat: repeat-y;
+}
+.tts .co-steps li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 4px 12px;
+  padding-left: 22px;
+}
+.tts .co-step-dot {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--hot);
+  box-shadow: 0 0 0 5px rgba(208, 16, 46, 0.14);
+}
+.tts .co-steps .co-n {
+  grid-row: span 2;
+  padding-top: 3px;
+  font-size: 12px;
+}
+.tts .co-steps b {
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.tts .co-steps li > span:last-child {
+  color: var(--ink-2);
+  font-size: 16px;
+  line-height: 1.45;
+}
+.tts .co-way {
+  display: inline-flex;
+  gap: 8px;
+  margin-top: 36px;
+  font-size: 15px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: rgba(153, 0, 0, 0.4);
+  text-underline-offset: 4px;
+  transition:
+    color 150ms,
+    text-decoration-color 150ms;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts .co-way:hover {
+    color: var(--cardinal);
+    text-decoration-color: var(--cardinal);
+  }
+}
+.tts .co-way:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* 6. The one call, on the cardinal world the doors use. */
+.tts .co-end {
+  margin: 0 clamp(8px, 1.6vw, 24px) clamp(8px, 1.6vw, 24px);
+  padding-block: clamp(80px, 11vw, 144px);
+  border-radius: 32px;
+  color: #fff;
+  background:
+    radial-gradient(60% 80% at 80% 20%, #b3122a, transparent 70%), #990000;
+}
+.tts .co-end-h {
+  max-width: 16ch;
+  margin: 0;
+  font-size: clamp(38px, 5.4vw, 84px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.032em;
+}
+.tts .co-write.is-light {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration-color: rgba(255, 255, 255, 0.4);
+}
+.tts .co-end .co-book:focus-visible,
+.tts .co-end .co-write:focus-visible {
+  outline-color: #fff;
+}
+.tts .co-end-meta {
+  margin: 16px 0 0;
+  font-family: var(--mono-f);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+@media (max-width: 999px) {
+  .tts .co-builds {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tts .co-builds::before {
+    display: none;
+  }
+  .tts .co-build:nth-child(even) {
+    margin-top: 0;
+  }
+}
+@media (max-width: 899px) {
+  .tts .co-hero-in,
+  .tts .co-how {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 599px) {
+  .tts .co-builds {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .tts .co-build {
+    min-height: 0;
+  }
+  .tts .co-build-p {
+    margin-top: 4px;
+  }
+  .tts .co-book {
+    width: 100%;
+    justify-content: center;
+    white-space: nowrap;
+  }
+  .tts .co-book.is-big {
+    padding: 0 20px;
+    font-size: 17px;
+  }
+  .tts .co-world,
+  .tts .co-end {
+    border-radius: 24px;
+  }
+}
