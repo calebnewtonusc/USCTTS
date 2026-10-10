@@ -9,6 +9,7 @@ import { NETWORK_PEOPLE } from "@/data/people";
 import Depth from "./Depth";
 import DotFloor from "./DotFloor";
 import Network from "./Network";
+import Partners from "./Partners";
 import { Mentors } from "./People";
 import Sheet from "./Sheet";
 import Statement from "./Statement";
@@ -83,6 +84,15 @@ export default function Landing() {
             />
           </div>
 
+          {/* The partners: home's loudest moment, its own full screen. */}
+          <section className="ld-sec ld-partners" aria-labelledby="ld-pt-h">
+            <Partners />
+          </section>
+
+          <div className="ld-seam is-after-dark" aria-hidden="true">
+            <DotFloor win={[-5200, -900, 5200, 900]} max={2200} alpha={0.22} />
+          </div>
+
           {/* 02. The work leaves LA. */}
           <section className="ld-sec ld-about" aria-labelledby="ld-about-h">
             <div className="ld-wrap">
@@ -154,6 +164,10 @@ export default function Landing() {
             </div>
           </section>
 
+          <div className="ld-seam" aria-hidden="true">
+            <DotFloor win={[-5200, -900, 5200, 900]} max={2200} alpha={0.24} />
+          </div>
+
           {/* 03. Where the two worlds meet: the night field comes back and
            * each person who started here is a line of light out of USC. */}
           <section className="ld-sec ld-net" aria-labelledby="ld-net-h">
@@ -174,6 +188,10 @@ export default function Landing() {
               </div>
             </div>
           </section>
+
+          <div className="ld-seam is-after-dark" aria-hidden="true">
+            <DotFloor win={[-5200, -900, 5200, 900]} max={2200} alpha={0.22} />
+          </div>
 
           {/* 04. The people you can call. */}
           <section className="ld-sec ld-mentors" aria-labelledby="ld-men-h">

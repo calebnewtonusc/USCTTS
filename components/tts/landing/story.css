@@ -1128,3 +1128,32 @@
     opacity: 1;
   }
 }
+
+/* Every section owns its own moment (Caleb, 2026-10-10: "No sections
+ * should read as combined"): the dark bands close on their own fade, a
+ * seam of the city's points sits between bands, and each section is at
+ * least most of a screen tall. */
+.tts .ld-net-band {
+  padding-bottom: clamp(96px, 12vw, 160px);
+}
+.tts .ld-net-band::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: clamp(120px, 16vw, 220px);
+  background: linear-gradient(rgba(13, 16, 32, 0), #0d1020 85%);
+  pointer-events: none;
+}
+.tts .ld-mentors,
+.tts .ld-about,
+.tts .ld-way {
+  min-height: 86vh;
+  min-height: 86svh;
+  display: grid;
+  align-content: center;
+}
+.tts .ld-seam + .ld-sec {
+  margin-top: 0;
+}
