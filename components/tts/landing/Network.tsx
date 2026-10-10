@@ -87,7 +87,10 @@ const LAYOUT: Record<string, [number, number, Node["tone"]]> = {
 function buildNodes(people: Person[]): Node[] {
   const m = new Map<string, Node>();
   const add = (key: string, p: Person, past = false) => {
-    const [x, y, tone] = LAYOUT[key] ?? [50, 50, "sky"];
+    const [x, y0, tone] = LAYOUT[key] ?? [50, 50, "sky"];
+    // The 72px chips (Caleb, 2026-10-10: "make the logos bigger") need the
+    // rows pulled in from the map's edges so the top row clears the nav.
+    const y = 15 + (y0 - 10) * 0.86;
     const n = m.get(key) ?? {
       key,
       company: key.startsWith("role:") ? undefined : key,
@@ -138,6 +141,9 @@ type Line = {
   len: number;
   delay: number;
   speed: number;
+  /** eased alpha and cream share, so a hover fades in instead of snapping */
+  a: number;
+  c: number;
 };
 
 const GOLD = "255, 204, 0";
@@ -309,6 +315,8 @@ export default function Network() {
           // Stacked, each line draws as the reader reaches its face.
           delay: stacked ? (end.y / h) * 0.85 : hash(i) * 0.35,
           speed: 0.11 + hash(i + 11) * 0.08,
+          a: 0.55,
+          c: 0,
         });
       });
       L = next;
@@ -316,34 +324,49 @@ export default function Network() {
       paint(performance.now());
     };
 
+    let lastPaint = 0;
     const paint = (now: number) => {
       lx.setTransform(dpr, 0, 0, dpr, 0, 0);
       lx.clearRect(0, 0, w, h);
       const focus = hotRef.current;
+      // A hover eases over about 150ms (rate 14/s) rather than snapping;
+      // reduced motion lands at once.
+      const dt = lastPaint ? Math.min(0.1, (now - lastPaint) / 1000) : 1;
+      lastPaint = now;
+      const ease = reduced ? 1 : 1 - Math.exp(-dt * 14);
       for (const ln of L) {
-        const on =
-          !focus ||
-          focus === ln.node ||
-          focus === ln.name ||
-          VIA[ln.name] === focus;
+        const on = !focus || focus === ln.node || VIA[ln.name] === focus;
+        ln.a += ((on ? (focus ? 0.95 : 0.55) : 0.45) - ln.a) * ease;
+        ln.c += ((focus && on ? 1 : 0) - ln.c) * ease;
         // How much of this line is drawn: out from USC as the map arrives.
         const k = easeOut3(clamp((drawK - ln.delay) / 0.55));
         const n = Math.floor(ln.len * k);
-        const a = on ? (focus ? 0.95 : 0.55) : 0.12;
-        lx.fillStyle = `rgba(${focus && on ? CREAM : GOLD}, ${a})`;
+        lx.fillStyle = `rgba(${GOLD}, ${(ln.a * (1 - ln.c)).toFixed(3)})`;
         for (let i = 0; i < n; i++) {
           lx.fillRect(ln.pts[i * 2] - 1, ln.pts[i * 2 + 1] - 1, 2, 2);
         }
-        // The packet: a short bright run of dots travelling outward.
-        if (!reduced && k >= 1 && on) {
+        if (ln.c > 0.01) {
+          lx.fillStyle = `rgba(${CREAM}, ${(ln.a * ln.c).toFixed(3)})`;
+          for (let i = 0; i < n; i++) {
+            lx.fillRect(ln.pts[i * 2] - 1, ln.pts[i * 2 + 1] - 1, 2, 2);
+          }
+        }
+        // The packet: a short bright run of dots travelling outward, on
+        // every line, faster and cardinal on the focused company's.
+        if (!reduced && k >= 1) {
           const head =
-            ((now / 1000) * ln.speed * (focus ? 2.2 : 1) + hash(ln.len)) % 1;
+            ((now / 1000) * ln.speed * (1 + ln.c * 1.2) + hash(ln.len)) % 1;
           const hi = Math.floor(head * ln.len);
           for (let j = 0; j < 6; j++) {
             const i = hi - j;
             if (i < 0) break;
-            lx.fillStyle = `rgba(${focus ? HOT : "95, 168, 224"}, ${(1 - j / 6) * 0.95})`;
+            const fade = (1 - j / 6) * 0.95;
+            lx.fillStyle = `rgba(95, 168, 224, ${(fade * (1 - ln.c)).toFixed(3)})`;
             lx.fillRect(ln.pts[i * 2] - 1.5, ln.pts[i * 2 + 1] - 1.5, 3, 3);
+            if (ln.c > 0.01) {
+              lx.fillStyle = `rgba(${HOT}, ${(fade * ln.c).toFixed(3)})`;
+              lx.fillRect(ln.pts[i * 2] - 1.5, ln.pts[i * 2 + 1] - 1.5, 3, 3);
+            }
           }
         }
       }

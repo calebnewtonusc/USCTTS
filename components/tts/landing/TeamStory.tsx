@@ -172,15 +172,15 @@ export default function TeamStory() {
         if (!reduced) be.style.translate = `0 ${((1 - o) * 18).toFixed(1)}px`;
       });
       if (big) {
-        const o = win(p, 0.52, 0.55, 0.62, 0.65);
+        const o = win(p, 0.52, 0.55, 0.6, 0.63);
         big.style.opacity = o.toFixed(3);
         big.style.visibility = o > 0.002 ? "visible" : "hidden";
       }
-      // The roster sits back for the big line and leaves as the faces travel.
+      // The roster stays at full strength beside the big line (it is the
+      // proof of it), then leaves as the faces travel out of it.
       if (roster) {
-        const dim = smooth(prog(p, 0.51, 0.55));
         const gone = smooth(prog(p, 0.63, 0.7));
-        const ro = ((1 - 0.85 * dim) * (1 - gone)).toFixed(3);
+        const ro = (1 - gone).toFixed(3);
         roster.style.opacity = ro;
         if (svg) svg.style.opacity = ro;
       }
@@ -204,8 +204,9 @@ export default function TeamStory() {
         th.style.opacity = (1 - smooth(prog(p, 0.46, 0.5))).toFixed(3);
       });
       // The three faces: in their seats, then out to the cards.
-      const travel = easeInOut3(prog(p, 0.64, 0.8));
       faces.forEach((fc, i) => {
+        // Staggered, so the three never cross each other at the same time.
+        const travel = easeInOut3(prog(p, 0.64 + i * 0.025, 0.76 + i * 0.025));
         const sr = seatR[leaderSeat[i]];
         const cr = slotR[i];
         if (!sr || !cr || !stageR) return;
@@ -278,6 +279,9 @@ export default function TeamStory() {
               </p>
             ),
           )}
+          {/* The payoff line takes the copy column, beside the full roster,
+           * never over it (Caleb, 2026-10-10: the faces sat on "roster"). */}
+          <p className="ts-big">About three months later, it had a real roster.</p>
         </div>
 
         <div className="ts-roster" aria-hidden="true">
@@ -304,9 +308,6 @@ export default function TeamStory() {
           <path className="ts-thread" pathLength={1} />
         </svg>
 
-        <p className="ts-big" aria-hidden="true">
-          About three months later, it had a real roster.
-        </p>
 
         <div className="ts-final">
           <p className="ts-head">
