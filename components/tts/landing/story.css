@@ -518,140 +518,6 @@
 .tts .ld-h.is-wide {
   max-width: 24ch;
 }
-.tts .ad-grid {
-  list-style: none;
-  margin: clamp(32px, 4vw, 48px) 0 0;
-  padding: 0 0 48px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(14px, 1.6vw, 22px);
-}
-@media (min-width: 900px) {
-  .tts .ad-card:nth-child(3n + 2) {
-    translate: 0 48px;
-  }
-}
-.tts .ad-link {
-  display: grid;
-  align-content: start;
-  height: 100%;
-  padding: 12px 12px 24px;
-  border-radius: 28px;
-  color: var(--fg);
-  text-decoration: none;
-  background: var(--tone);
-  transition:
-    transform 220ms cubic-bezier(0, 0, 0.2, 1),
-    box-shadow 220ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .ad-photo {
-  position: relative;
-  display: block;
-  aspect-ratio: 1;
-  overflow: hidden;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.16);
-}
-.tts .ad-photo > img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 22%;
-  transition: transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-.tts .ad-chip {
-  position: absolute;
-  left: 12px;
-  bottom: 12px;
-  display: flex;
-  align-items: center;
-  height: 46px;
-  padding: 0 14px;
-  border-radius: 12px;
-  background: #fff;
-}
-.tts .ad-chip img {
-  display: block;
-  height: 26px;
-  width: auto;
-  max-width: 132px;
-  object-fit: contain;
-}
-.tts .ad-dot {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--hot);
-  box-shadow:
-    0 0 0 4px rgba(255, 255, 255, 0.9),
-    0 0 18px 6px rgba(208, 16, 46, 0.55);
-  opacity: 0;
-  transform: scale(0.4);
-  transition:
-    opacity 200ms cubic-bezier(0, 0, 0.2, 1),
-    transform 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-.tts .ad-body {
-  display: grid;
-  gap: 10px;
-  padding: 20px 8px 0;
-}
-.tts .ad-name {
-  font-size: clamp(22px, 1.9vw, 28px);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.015em;
-}
-.tts .ad-rows {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 5px;
-  font-size: 15.5px;
-  line-height: 1.4;
-  opacity: 0.88;
-}
-.tts .ad-go {
-  margin-top: 6px;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.72;
-  transition: opacity 200ms;
-}
-@media (hover: hover) and (pointer: fine) {
-  .tts a.ad-link:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 18px 40px -18px rgba(42, 27, 30, 0.5);
-  }
-  .tts a.ad-link:hover .ad-photo > img {
-    transform: scale(1.05);
-  }
-  .tts a.ad-link:hover .ad-dot {
-    opacity: 1;
-    transform: scale(1);
-  }
-  .tts a.ad-link:hover .ad-go {
-    opacity: 1;
-  }
-}
-.tts a.ad-link:focus-visible {
-  outline: 3px solid var(--ink);
-  outline-offset: 3px;
-}
-.tts a.ad-link:focus-visible .ad-dot {
-  opacity: 1;
-  transform: scale(1);
-}
-.tts a.ad-link:active {
-  transform: scale(0.985);
-}
 
 /* ---- 06, the team story ---- */
 .tts .ts {
@@ -981,15 +847,6 @@
   }
 }
 
-@media (max-width: 1099px) {
-  .tts .ad-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .tts .ad-card:nth-child(3n + 2) {
-    translate: none;
-  }
-}
-
 /* Under 900px the network stacks: USC on top, the companies in two
  * columns under it, the lines falling out of the point to each face. */
 @media (max-width: 899px) {
@@ -1106,23 +963,9 @@
 }
 
 @media (max-width: 599px) {
-  .tts .ad-grid {
-    display: flex;
-    gap: 12px;
-    margin-inline: calc(-1 * var(--gutter));
-    padding: 0 var(--gutter) 8px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--gutter);
-    scrollbar-width: none;
-  }
-  .tts .ad-grid::-webkit-scrollbar {
-    display: none;
-  }
-  .tts .ad-card {
-    flex: 0 0 80%;
-    scroll-snap-align: start;
-  }
+  
+  
+  
   .tts .ld-manifest li {
     grid-template-columns: 44px minmax(0, 1fr);
   }

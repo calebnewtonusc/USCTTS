@@ -25,8 +25,10 @@ export interface Person {
   past?: string[];
   /** One or two sourced lines of background, for the team cards. */
   bio?: string;
-  /** Background rows for an advisor card, each with a mark when one is on disk. */
-  background?: { label: string; logo?: string }[];
+  /** Background rows for an advisor, each with its marks (several when one
+   *  line names several companies) or, where no official mark exists, a
+   *  short name set in type. Sourced only (public/tts/marks/SOURCES.md). */
+  background?: { label: string; logo?: string; logos?: string[]; type?: string }[];
 }
 
 // The people actually running both orgs as of 2026-09-22, confirmed by Caleb.
@@ -116,10 +118,14 @@ export const ADVISORS: Person[] = [
     photo: "/img/chris_swain_shot.jpg",
     link: "https://iovine-young.usc.edu/people/chris-swain",
     background: [
-      { label: "Co-founded three venture-backed companies" },
-      { label: "Led 50+ products for Disney, Intel, Sony, IBM and others" },
-      { label: "Co-founded the EA Game Innovation Lab at USC" },
-      { label: "Founding member of R/GA" },
+      { label: "Associate Professor of Teaching, USC Iovine and Young Academy", logo: "/tts/marks/usc.svg" },
+      { label: "Co-founded three venture-backed companies", type: "3" },
+      {
+        label: "Led 50+ products for Disney, Intel, Sony, IBM and others",
+        logos: ["/tts/marks/disney.svg", "/tts/marks/intel.svg", "/tts/marks/sony.svg", "/tts/marks/ibm.svg"],
+      },
+      { label: "Co-founded the EA Game Innovation Lab at USC", logos: ["/tts/marks/ea.svg", "/tts/marks/usc.svg"] },
+      { label: "Founding member of R/GA", logo: "/tts/marks/rga.png" },
     ],
   },
   // Matthew and Kevin co-founded TTS ("OG Co-Founder", site at 37795eb).
@@ -134,7 +140,7 @@ export const ADVISORS: Person[] = [
     logo: "/tts/marks/mckinsey.png",
     background: [
       { label: "Analyst, McKinsey & Company", logo: "/tts/marks/mckinsey.png" },
-      { label: "Co-founded TTS" },
+      { label: "Co-founded TTS", type: "TTS" },
     ],
   },
   // Kevin: "Founder and current CFO of Retax 360" (meeting slides, 9a698f2).
@@ -148,8 +154,8 @@ export const ADVISORS: Person[] = [
     logo: "/tts/marks/reddit.png",
     background: [
       { label: "Software Engineer, Reddit", logo: "/tts/marks/reddit.png" },
-      { label: "Founder and CFO, Retax 360" },
-      { label: "Co-founded TTS" },
+      { label: "Founder and CFO, ReTax360", logo: "/tts/marks/retax360.svg" },
+      { label: "Co-founded TTS", type: "TTS" },
     ],
   },
   // Duncan: "Active mentor to USC students through ACTS2 Fellowship"
@@ -165,7 +171,7 @@ export const ADVISORS: Person[] = [
     logo: "/tts/marks/google.png",
     background: [
       { label: "Software Engineer, Google", logo: "/tts/marks/google.png" },
-      { label: "Mentors USC students through GenCollege Christian Fellowship" },
+      { label: "Mentors USC students through GenCollege Christian Fellowship", type: "GenCollege" },
     ],
   },
   // Sagar: Stanford GSB (second-brain/core/people.md, confirmed by Caleb
@@ -184,9 +190,9 @@ export const ADVISORS: Person[] = [
     background: [
       { label: "MBA, Stanford GSB", logo: "/tts/marks/stanford.png" },
       { label: "Formerly at McKinsey & Company", logo: "/tts/marks/mckinsey.png" },
-      { label: "Formerly at Tiderock" },
+      { label: "Formerly at Tide Rock", logo: "/tts/marks/tiderock.svg" },
       { label: "Formerly at Clay", logo: "/tts/partners/clay.png" },
-      { label: "Past president, 180 Degrees Consulting at USC" },
+      { label: "Past president, 180 Degrees Consulting at USC", logo: "/tts/marks/180dc.png" },
     ],
   },
   {
