@@ -13,16 +13,24 @@ order and timings are in STORY-tts.md and components/tts/v4/choreo.ts.
 - Route rail, bottom right (USC, The client, The machine, Your turn): where you are in the story and a way to jump; each stop glides, nothing teleports. Both.
 - The LA field: the one set of objects that tells the story. Both.
 
-## 1. The opener (load clock, 2200ms)
+## 1. The opener: the client (WayOpen.tsx, 150svh)
 
-- The city assembling around the USC dot, the camera settling, one ring pulsing out: the same event as home's, because this is a page of its own. Both.
-- "This is how a TTS project runs.": what the page is, in one line. Both.
-- "scroll" cue with its 2.4s hairline loop (pauses with the headline, still under reduced motion). Both.
-- Freeways streaming light into USC on the first scroll: students arriving. S.
+Caleb, 2026-10-10: "why tf the top of the tts way page and the main exactly
+the same???". Home opens on the LA city; /way opens on the client, in the
+same language at the scale of the world (rules: INTENT-home.md, "One
+world").
+
+- A night-navy panel, under the nav too, so the city never shows above it. Both.
+- A graticule of points, one every 5 degrees and brighter on the 10s, so each dot is a real coordinate. Both.
+- USC's cardinal point on Los Angeles and a gold point on Ghana (the country's centre, about 7.9 N, 1.0 W; the example names the country only), each with a mono label ("USC Los Angeles", "Ghana the client"). Both.
+- The great circle between them as gold dots every 7px, with a short run of flow-blue light travelling from Ghana to USC on a 3.2s loop: the request arriving. Under reduced motion the light holds still. From 900px up the map owns the right half, so the arc never runs behind the headline. Both.
+- "one example of a TTS project" in mono with USC's point, then the headline "Say your client is a nonprofit in Ghana that needs donor outreach." (Tyler's example, relayed 2026-10-10), "that needs donor outreach." in gold, and "Here's how a TTS team takes it from the first lead to the handover." Both.
+- "scroll" with its 2.4s hairline loop (still under reduced motion). Both.
+- The panel's lower edge fades over a third of a screen into the LA field beneath, which is the same navy, so it lifts off the city with no seam; over the half screen of runway the field turns to dawn (choreo.ts, P.open). Both.
 
 ## 2. The project (one pinned scene, 1000vh)
 
-- "one example of a TTS project" label and "Say your client is a nonprofit in Ghana that needs donor outreach.": Tyler's example and framing, relayed 2026-10-10, so nobody reads the walkthrough as one past client. Both.
+- "the brief" label and "First, the work leaves USC.": the next beat after the opener, which names the client, so the Ghana line appears once. Both.
 - The agent light leaving USC across the map: the work going out from the club. It drives to a fixed node on the LA grid only because the map is LA; the page never names that node. Both.
 - The glow growing from that point to fill the screen in the film's ground colour (#F4EFE6), about 20% of a screen: the dive, so the film arrives through the city with no cut. Both.
 - The rack focus out of the flat field, the film's first 22 frames in about 13% of a screen: the camera finding the machine inside the point. Under half a screen together with the dive, per the 2026-10-09 brief. Both.

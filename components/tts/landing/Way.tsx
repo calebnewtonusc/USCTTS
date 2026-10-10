@@ -1,20 +1,23 @@
 import { preload } from "react-dom";
 import Shell from "../Shell";
 import Stage from "../v4/Stage";
-import Opening from "../v4/Opening";
 import Week from "../v4/Week";
 import { Join } from "../home/Sections";
 import { mono } from "../v4/mono";
+import WayOpen from "./WayOpen";
 import "../v4/v4.css";
 import "./landing.css";
+import "./way.css";
 
 /*
  * /way: one client project at TTS, told by one set of objects, LA's street
  * grid as points of light around the USC dot (docs/STORY-tts.md,
  * docs/INTENT-way.md).
  *
- *   1. The city assembles on the load clock and the line slides up out of
- *      it; the first scroll streams light down the freeways into USC.
+ *   1. The client: a world of points, USC's point on LA, Ghana's in gold,
+ *      the great circle between them with the request travelling it. The
+ *      navy panel lifts off the LA field as the first scroll turns it to
+ *      dawn (WayOpen.tsx).
  *   2. One example client brings a problem (a nonprofit in Ghana that
  *      needs donor outreach), the light leaves USC, the camera dives into
  *      a point and
@@ -32,9 +35,9 @@ export default function Way() {
       <div className={`v4 is-way ${mono.variable}`}>
         <Stage />
         <div className="v4-content">
-          {/* Tyler (relayed 2026-10-10) cut "This is you, a few weeks
-           * from now." The opener holds only its headline now. */}
-          <Opening lines={["This is how a", "TTS project runs."]} />
+          {/* /way's own opening, straight into the client (Caleb,
+           * 2026-10-10: the top of /way must not repeat home's). */}
+          <WayOpen />
           <Week />
           <Join />
         </div>

@@ -1,0 +1,166 @@
+/* /way's own opener (WayOpen.tsx): the client, at the scale of the world,
+ * in the field's language. The panel is the opener's night navy, so when
+ * it lifts off the LA field underneath, its fading lower edge and the field
+ * are the same colour and there is no seam. One-world rules:
+ * docs/INTENT-home.md. */
+
+.tts .wo {
+  position: relative;
+  /* Under the transparent nav too, so the city never shows above it. */
+  margin-top: calc(-1 * var(--nav-h));
+  /* Half a screen of runway past the panel: the field turns to dawn over
+   * it (choreo.ts, P.open) while the panel lifts away. */
+  height: 150vh;
+  height: 150svh;
+}
+.tts .wo-panel {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  color: #fff7e6;
+  background:
+    radial-gradient(60% 70% at 70% 40%, #1b2140, transparent 75%), #0d1020;
+}
+/* The panel's lower edge dissolves into the field below it. */
+.tts .wo-panel::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 32vh;
+  background: linear-gradient(#0d1020, rgba(13, 16, 32, 0));
+  pointer-events: none;
+}
+.tts .wo-map {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.tts .wo-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.tts .wo-place {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  gap: 8px;
+  margin: 14px 0 0 14px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: rgba(255, 241, 204, 0.7);
+  white-space: nowrap;
+  will-change: transform;
+}
+.tts .wo-place b {
+  font-weight: 500;
+  color: #fff7e6;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.tts .wo-place.is-usc b {
+  color: #ff5a72;
+}
+.tts .wo-place.is-gh {
+  margin-left: -14px;
+}
+.tts .wo-place.is-gh b {
+  color: #ffcc00;
+}
+.tts .wo-copy {
+  position: absolute;
+  left: max(var(--gutter), calc((100% - var(--wide)) / 2 + var(--gutter)));
+  right: var(--gutter);
+  bottom: calc(var(--strip-h, 40px) + 9vh);
+  max-width: 760px;
+}
+.tts .wo-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 22px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 241, 204, 0.72);
+}
+.tts .wo-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d0102e;
+  box-shadow: 0 0 0 5px rgba(208, 16, 46, 0.22);
+}
+.tts .wo-h {
+  margin: 0;
+  max-width: 17ch;
+  font-size: clamp(40px, 5.4vw, 84px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.tts .wo-h em {
+  font-style: normal;
+  color: #ffcc00;
+}
+.tts .wo-sub {
+  max-width: 40ch;
+  margin: 22px 0 0;
+  font-size: clamp(17px, 1.4vw, 20px);
+  line-height: 1.5;
+  color: rgba(255, 241, 204, 0.75);
+}
+.tts .wo-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 36px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: rgba(255, 241, 204, 0.6);
+}
+.tts .wo-cue-line {
+  position: relative;
+  width: 1px;
+  height: 36px;
+  overflow: hidden;
+  background: rgba(255, 241, 204, 0.22);
+}
+.tts .wo-cue-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -40%;
+  width: 1px;
+  height: 40%;
+  background: #fff7e6;
+  animation: wo-cue 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes wo-cue {
+  to {
+    top: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tts .wo-cue-line::after {
+    animation: none;
+    top: 30%;
+  }
+}
+@media (max-width: 599px) {
+  .tts .wo-copy {
+    bottom: calc(var(--strip-h, 70px) + 6vh);
+  }
+  .tts .wo-h {
+    font-size: 38px;
+  }
+  .tts .wo-place {
+    font-size: 10.5px;
+  }
+}

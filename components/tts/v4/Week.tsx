@@ -278,9 +278,12 @@ export default function Week() {
       <div className="w5-stage">
         {/* Tyler (relayed 2026-10-10): make it clearly one example of a
          * TTS project, with his example client. */}
+        {/* The client and the example are named by /way's opener
+         * (landing/WayOpen.tsx), so this line carries the next beat: the
+         * work leaving USC across the map. */}
         <h2 id="w5-intro" className="w5-intro">
-          <span className="w5-label w5-way">one example of a TTS project</span>
-          Say your client is a nonprofit in Ghana that needs donor outreach.
+          <span className="w5-label w5-way">the brief</span>
+          First, the work leaves USC.
         </h2>
 
         <div
