@@ -6,6 +6,7 @@ import { INSTAGRAM_URL } from "../links";
 import { CALENDLY_URL } from "@/lib/contact";
 import { easeOut3, prog } from "../engine/math";
 import { onFrame, P } from "../v4/choreo";
+import "./doors.css";
 
 /* The two doors at the end of the week (docs/RUBRIC-tts.md: two readers,
  * two doors). The field dissolves into paper behind them (grid.exit), so
@@ -43,6 +44,7 @@ export function Join() {
          * email signup is right here, no extra click, and the club's
          * Instagram to follow now. No dates until a real one exists. */}
         <div className="jn-door is-student">
+          <p className="jn-kicker">for USC students</p>
           <p className="jn-say">I&apos;m at USC. Teach me to build that.</p>
           <NotifyForm />
           <p className="jn-meta">
@@ -63,15 +65,17 @@ export function Join() {
           rel="noopener noreferrer"
           className="jn-door"
         >
+          <span className="jn-kicker">for companies and nonprofits</span>
           <span className="jn-say">
             I run a business. Book 30 minutes with Caleb.
           </span>
-          <span className="jn-meta">
-            calendly, opens in a new tab{" "}
+          <span className="jn-cta">
+            Book 30 minutes{" "}
             <span className="arrow" aria-hidden="true">
               &rarr;
             </span>
           </span>
+          <span className="jn-meta">calendly, opens in a new tab</span>
         </a>
       </div>
     </section>

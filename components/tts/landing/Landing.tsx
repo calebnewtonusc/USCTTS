@@ -8,6 +8,7 @@ import { mono } from "../v4/mono";
 import { NETWORK_PEOPLE } from "@/data/people";
 import Depth from "./Depth";
 import DotFloor from "./DotFloor";
+import Gather from "./Gather";
 import Network from "./Network";
 import Partners from "./Partners";
 import { Mentors } from "./People";
@@ -245,6 +246,8 @@ export default function Landing() {
             </div>
             <TeamStory />
           </section>
+
+          <Gather />
         </Sheet>
 
         <div className="v4-content">

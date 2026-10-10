@@ -1171,3 +1171,26 @@
 .tts .ld-seam + .ld-sec {
   margin-top: 0;
 }
+
+/* The sheet's end (Gather.tsx): USC's point grows from the bottom centre
+ * until the sheet is cardinal, matching the doors' ground below it. */
+.tts .ga {
+  position: relative;
+  height: 60vh;
+  height: 60svh;
+  margin-top: 0;
+  margin-bottom: calc(-1 * clamp(96px, 14vh, 160px));
+  overflow: hidden;
+  border-radius: 0 0 20px 20px;
+}
+.tts .ga-dot {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 300vmax;
+  height: 300vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle, #a3162b 0%, #a3162b 45%, #9b1226 100%);
+  transform: translate(-50%, -50%) scale(0.004);
+  will-change: transform;
+}

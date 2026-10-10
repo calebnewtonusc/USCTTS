@@ -1,0 +1,123 @@
+/* The two doors as real buttons (Caleb, 2026-10-10: "these aren't
+ * immediately percieved as interactive"). Each door is a raised card on
+ * the cardinal ground with a kicker, the sentence, and an action that looks
+ * like one: the student's email field and button in high contrast, the
+ * business card wholly clickable with a primary button. Overrides the
+ * older open-layout rules in v4.css, which the film work owns. */
+
+.tts .jn-inner {
+  gap: clamp(14px, 2vw, 24px);
+}
+.tts .jn-door,
+.tts .jn-door + .jn-door {
+  position: relative;
+  align-content: start;
+  gap: 22px;
+  min-height: 0;
+  padding: clamp(24px, 3vw, 40px);
+  border: 0;
+  border-radius: 28px;
+  background: rgba(255, 250, 240, 0.1);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 250, 240, 0.28),
+    0 30px 60px -36px rgba(40, 0, 8, 0.7);
+  transition:
+    background-color 200ms cubic-bezier(0, 0, 0.2, 1),
+    transform 200ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .jn-kicker {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 250, 240, 0.75);
+}
+.tts .jn-door .jn-say {
+  margin: 0;
+}
+/* The business door's primary button. */
+.tts .jn-cta {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  margin-top: 8px;
+  padding: 0 28px;
+  border-radius: 999px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #990000;
+  background: #fffaf0;
+  transition:
+    background-color 150ms cubic-bezier(0, 0, 0.2, 1),
+    transform 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .jn-cta .arrow {
+  font-size: 20px;
+  transition: translate 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+/* The student's form: a white field with ink text beside the cream button. */
+.tts .jn .nf-label {
+  color: rgba(255, 250, 240, 0.85);
+}
+.tts .jn .nf-row input.input {
+  color: #2a1b1e;
+  background: #fffaf0;
+  border-color: #fffaf0;
+  border-radius: 14px;
+}
+.tts .jn .nf-row button.btn {
+  border-radius: 14px;
+}
+.tts .jn .nf-row input.input::placeholder {
+  color: rgba(42, 27, 30, 0.45);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tts a.jn-door:hover,
+  .tts .v4:not(.is-dark) a.jn-door:hover {
+    background: rgba(255, 250, 240, 0.16);
+    transform: translateY(-4px);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 250, 240, 0.5),
+      0 40px 70px -36px rgba(40, 0, 8, 0.8);
+  }
+  .tts a.jn-door:hover .jn-cta {
+    background: #fff;
+  }
+  .tts a.jn-door:hover .jn-cta .arrow {
+    translate: 6px 0;
+  }
+
+}
+.tts a.jn-door:active {
+  transform: scale(0.985);
+  scale: 1;
+}
+.tts a.jn-door:focus-visible {
+  outline: 3px solid #fffaf0;
+  outline-offset: 3px;
+}
+@media (max-width: 767px) {
+  .tts .jn-door,
+  .tts .jn-door + .jn-door {
+    padding: 24px 20px;
+    border-radius: 22px;
+  }
+  .tts .jn-cta {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Home: the doors' ground starts as the same cardinal the sheet ends on,
+ * so the field never shows cream between them while it rains to red. */
+.tts .v4:not(.is-way) .jn {
+  position: relative;
+  margin-top: -24px;
+  padding-top: calc(14vh + 24px);
+  background: linear-gradient(#a3162b 0, #a3162b 24vh, rgba(163, 22, 43, 0) 70vh);
+}
