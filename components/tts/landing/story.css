@@ -50,13 +50,13 @@
 .tts .th-base,
 .tts .th-lit {
   position: absolute;
-  top: 0;
   left: 0;
   width: 2px;
   background-repeat: repeat-y;
   background-size: 2px 7px;
 }
 .tts .th-base {
+  top: 0;
   bottom: 0;
   background-image: radial-gradient(
     circle,
@@ -64,8 +64,29 @@
     transparent 1.3px
   );
 }
-.tts .th-lit {
+/* The lit thread and its point ride one sticky rail, so the browser holds
+ * the point at 45% of the screen on the compositor while the page scrolls.
+ * Moved from script every frame, the point scrolled with the page for a
+ * frame and then snapped back, and the lit line's height relaid the page
+ * each frame (Caleb, 2026-10-11: "Should the dot's Y position be moving? I
+ * think it looks choppy"). The lit tail runs up from the point and .th
+ * clips it to the thread, top and bottom only, so the glow still shows. */
+@media (min-width: 1200px) {
+  .tts .th {
+    clip-path: inset(0 -40px);
+  }
+}
+.tts .th-rail {
+  position: sticky;
+  top: 45vh;
+  top: 45svh;
+  display: block;
   height: 0;
+}
+.tts .th-lit {
+  bottom: 0;
+  height: 300vh;
+  background-position: 0 100%;
   background-image: radial-gradient(
     circle,
     var(--hot) 0.9px,
@@ -90,6 +111,9 @@
   box-shadow:
     inset 0 0 0 1.5px var(--hot),
     0 0 0 5px rgba(208, 16, 46, 0.14);
+}
+.tts .th-head.is-on {
+  opacity: 1;
 }
 .tts .th-head {
   position: absolute;

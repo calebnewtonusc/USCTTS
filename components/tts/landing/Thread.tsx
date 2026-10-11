@@ -38,10 +38,9 @@ export default function Thread() {
     const el = ref.current;
     const sheet = el?.parentElement;
     if (!el || !sheet) return;
-    const lit = el.querySelector<HTMLElement>(".th-lit");
     const head = el.querySelector<HTMLElement>(".th-head");
     const nodesBox = el.querySelector<HTMLElement>(".th-nodes");
-    if (!lit || !head || !nodesBox) return;
+    if (!head || !nodesBox) return;
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -68,38 +67,41 @@ export default function Thread() {
       );
     };
 
-    let last = -1;
+    // Only classes change here, and only when the point crosses a node:
+    // the point and the lit line are held by CSS (story.css, .th-rail).
+    let lastOn = -1;
+    let headOn: boolean | null = null;
     const paint = (y: number) => {
       const at = Math.max(0, Math.min(h, y));
-      if (Math.abs(at - last) < 0.5) return;
-      last = at;
-      lit.style.height = `${at.toFixed(1)}px`;
-      head.style.transform = `translate3d(0, ${at.toFixed(1)}px, 0)`;
-      head.style.opacity = at > 2 && at < h - 2 ? "1" : "0";
-      for (const m of marks) {
-        const on = at >= m.y - 1;
-        m.node.classList.toggle("is-on", on);
-        m.el.classList.toggle("is-on", on);
+      const show = at > 2 && at < h - 2;
+      if (show !== headOn) {
+        headOn = show;
+        head.classList.toggle("is-on", show);
       }
+      let n = 0;
+      for (const m of marks) if (at >= m.y - 1) n++;
+      if (n === lastOn) return;
+      lastOn = n;
+      marks.forEach((m, i) => {
+        m.node.classList.toggle("is-on", i < n);
+        m.el.classList.toggle("is-on", i < n);
+      });
     };
 
     measure();
     const ro = new ResizeObserver(() => {
       measure();
-      last = -1;
+      lastOn = -1;
     });
     ro.observe(sheet);
     if (reduced) {
       // Still: every node lit, no travelling point.
       paint(h);
-      head.style.opacity = "0";
+      head.classList.remove("is-on");
       return () => ro.disconnect();
     }
-    // The real scroll, never the followed one. The thread scrolls with the
-    // page, so its point only holds still on screen when its offset matches
-    // the page exactly. Off f.y, which lags each wheel notch on purpose, the
-    // point jumped up and eased back on every flick (Caleb, 2026-10-10:
-    // "the scroll circle on the left tweaks and bounces up and down").
+    // The real scroll, never the followed one, so a node lights as the
+    // sticky point (which tracks the real scroll) reaches it.
     const off = onFrame((f) => paint(window.scrollY + f.vh * 0.45 - top), 6);
     return () => {
       ro.disconnect();
@@ -110,9 +112,11 @@ export default function Thread() {
   return (
     <div ref={ref} className="th" aria-hidden="true">
       <span className="th-base" />
-      <span className="th-lit" />
       <span className="th-nodes" />
-      <span className="th-head" />
+      <span className="th-rail">
+        <span className="th-lit" />
+        <span className="th-head" />
+      </span>
     </div>
   );
 }
