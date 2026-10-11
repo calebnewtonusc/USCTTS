@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { clamp, easeOut3, prog } from "../engine/math";
+import { clamp, prog } from "../engine/math";
 import { onFrame } from "../v4/choreo";
 
 /*
@@ -38,9 +38,15 @@ export default function Gather() {
     ro.observe(document.body);
     let last = -1;
     const off = onFrame((f) => {
-      // Full by the time the band is 40% up the screen, so the paper it
-      // replaces never gets a moment to brighten the frame.
-      const k = easeOut3(clamp(prog(f.y + f.vh - top, 0, h * 0.4)));
+      // The growth spans the band plus most of a screen before it, and is
+      // full exactly as the band's foot reaches the bottom of the screen.
+      // Measured off the band alone it ran over 40% of a band that was later
+      // cut short, so white went to red in a few frames (Caleb, 2026-10-10:
+      // "The white to red at the end is like a 1 ms flashbang"). Smoothstep,
+      // so it eases in as well as out.
+      const run = h + f.vh * 0.8;
+      const p = clamp(prog(f.y + f.vh - (top - f.vh * 0.8), 0, run));
+      const k = p * p * (3 - 2 * p);
       const v = Math.round(k * 1000) / 1000;
       if (v === last) return;
       last = v;
