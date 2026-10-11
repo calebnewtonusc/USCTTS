@@ -30,7 +30,8 @@ import "./story.css";
  *
  *   the LA map and the USC dot, short ("the dot in LA is good")
  *   a separating tab, then "it goes into being a real website":
- *   1. who TTS is, big, on its clay city
+ *   1. who TTS is, set small and centred, no scene under it (Tyler,
+ *      2026-10-10: "make the text a little bit smaller... center it")
  *   2. the work, which leaves LA
  *   3. the network, where the night field comes back as lines of light
  *   4. the club advisors
@@ -46,6 +47,12 @@ import "./story.css";
  * a street or a person. docs/INTENT-home.md lists every visible element
  * and the shared rules.
  */
+// Tyler, 2026-10-10: "Go-To-Market", capitalised. A word joiner after each
+// hyphen keeps it on one line ("Go-To-" was breaking at 1440), and "and"
+// rides on the first line so it never sits alone.
+const WJ = String.fromCharCode(0x2060);
+const GO_TO_MARKET = `Go-${WJ}To-${WJ}Market`;
+
 export default function Landing() {
   // The grid's data starts with the HTML instead of after hydration. The
   // request must match loadGrid's fetch: same origin, CORS mode.
@@ -58,8 +65,20 @@ export default function Landing() {
         <div className="v4-content">
           <Opening
             short
-            lines={["USC's AI implementation", "and go-to-market lab."]}
+            lines={["USC's AI implementation and", `${GO_TO_MARKET} lab.`]}
           />
+          {/* Tyler, 2026-10-10 voice memo: "a little thing in the top right,
+           * now accepting applications for analysts on three different
+           * engagements". He named Yemen in that line and also said to take
+           * Yemen off, so the third is Kenya, the client he added. */}
+          <Link href="/apply" className="ld-now">
+            <span className="ld-now-dot" aria-hidden="true" />
+            <span>
+              Now accepting analyst applications for three international
+              engagements: Nigeria, Ghana and Kenya
+            </span>
+            <span aria-hidden="true">&rarr;</span>
+          </Link>
         </div>
 
         <Sheet>
@@ -108,38 +127,38 @@ export default function Landing() {
                   </p>
                   <h2 id="ld-about-h" className="ld-h" data-reveal="0">
                     Real clients,{" "}
-                    <em className="ld-accent">from Nigeria to Yemen.</em>
+                    <em className="ld-accent">from Nigeria to Kenya.</em>
                   </h2>
-                  {/* Tyler's voice memo, 2026-10-09: show what is special,
-                   * the international work. Only the place and the field he
-                   * named; nothing else is known yet. Nigeria's line matches
-                   * second-brain/core/now.md (stemmets.com). NEED: Yemen's
-                   * field, and where the cancer therapeutics client is. */}
+                  {/* Tyler's voice memo, 2026-10-10: Yemen off ("we don't
+                   * have that"), each line in his words, and Kenya added
+                   * without naming the client. */}
                   <ul className="ld-manifest" aria-label="Client projects">
                     <li data-reveal="1">
                       <span className="ld-m-code">NG</span>
                       <b>Nigeria</b>
                       <span className="ld-m-what">
-                        an AI curriculum for an education nonprofit
+                        Student education nonprofit, 10,000+ students
                       </span>
                     </li>
                     <li data-reveal="1">
                       <span className="ld-m-code">GH</span>
                       <b>Ghana</b>
-                      <span className="ld-m-what">healthcare</span>
+                      <span className="ld-m-what">
+                        Mobile healthcare unit, over 9,000 rural patients
+                      </span>
                     </li>
                     <li data-reveal="2">
-                      <span className="ld-m-code">YE</span>
-                      <b>Yemen</b>
-                    </li>
-                    <li data-reveal="2">
-                      <span className="ld-m-code is-field" aria-hidden="true" />
-                      <b>Cancer therapeutics</b>
+                      <span className="ld-m-code">KE</span>
+                      <b>Kenya</b>
+                      <span className="ld-m-what">
+                        Mosquito treatment and cancer therapeutics
+                      </span>
                     </li>
                   </ul>
-                  <a href="#team" className="ld-btn" data-reveal="3">
-                    Learn more about TTS <span aria-hidden="true">&rarr;</span>
-                  </a>
+                  <Link href="/work-with-us" className="ld-btn" data-reveal="3">
+                    Learn more about TTS&apos;s clients{" "}
+                    <span aria-hidden="true">&rarr;</span>
+                  </Link>
                 </div>
                 {/* The film fills its half of the card edge to edge, the
                  * card's corners clipping it (Caleb, 2026-10-10, on the
@@ -192,7 +211,7 @@ export default function Landing() {
               <Mark n="04" label="club advisors" />
               <h2 id="ld-men-h" className="ld-h is-wide" data-reveal="0">
                 Club advisors,{" "}
-                <em className="ld-accent">open to a coffee chat anytime.</em>
+                <em className="ld-accent">actively helping TTS members.</em>
               </h2>
               <Mentors />
             </div>
@@ -263,8 +282,12 @@ export default function Landing() {
                       Come build the next one with us.
                     </em>
                   </p>
+                  <p className="ld-sign-now">
+                    Now accepting analysts for three international engagements,
+                    in Nigeria, Ghana and Kenya.
+                  </p>
                   <Link href="/apply" className="ld-btn">
-                    Join TTS <span aria-hidden="true">&rarr;</span>
+                    Apply to TTS <span aria-hidden="true">&rarr;</span>
                   </Link>
                 </div>
               </div>

@@ -21,8 +21,8 @@ import "./partners.css";
  * Valuations, checked 2026-10-10: the first company's $7.1B Series D is on
  * its own blog (clay.com/blog/series-d, 2026-09-09); the $20B round was
  * reported by The Information on 2025-09-11 and not confirmed by the
- * company, hence "as reported". Sagar Tiwari worked at the first company
- * (Caleb, 2026-10-10).
+ * company, hence "as reported". The credit line is only "Through Blue
+ * Modern Advisory" (Tyler, 2026-10-10: "don't say our advisor").
  */
 const ROWS = [
   {
@@ -141,7 +141,7 @@ export default function Partners() {
 
         <p className="pt-meta" data-reveal="3">
           <span className="pt-dot" aria-hidden="true" />
-          Through Blue Modern Advisory. Our advisor Sagar Tiwari worked at Clay.
+          Through Blue Modern Advisory.
         </p>
       </div>
     </div>

@@ -20,11 +20,8 @@ import { hash, loadStreets, pick } from "./dots";
  * (dots.ts), each line is one person, each face is that person and links to
  * their LinkedIn in a new tab. Elizabeth's and Senai's lines pass through
  * Microsoft first, where both worked before (data/people.ts). Matthew and
- * Kevin co-founded TTS; their faces are in the advisors section, so here
- * they are their initials (a face appears once on home).
- *
- * Albert Chung's employer stays off on purpose (people.ts: "We shouldn't
- * flex palantir"), so his line ends at him, with his role, and no company.
+ * Kevin co-founded TTS and show their faces here too (Tyler, 2026-10-10).
+ * Albert Chung is off the wall (people.ts, NETWORK_PEOPLE).
  */
 
 type Mark = { src: string; w: number; h: number } | { type: string };
@@ -69,7 +66,6 @@ const LAYOUT: Record<string, [number, number, Node["tone"]]> = {
   Microsoft: [31, 16, "sky"],
   Apple: [30, 44, "gold"],
   "Roxborough Group": [31, 70, "leaf"],
-  "role:Albert Chung": [30, 92, "blush"],
   Reddit: [52, 10, "blush"],
   Bloomberg: [51, 37, "gold"],
   "Capital One": [52, 63, "sky"],

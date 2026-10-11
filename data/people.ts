@@ -104,6 +104,8 @@ export const INACTIVE_CABINET: Person[] = [
 // Caleb's instruction on 2026-09-22: the advisory board and alumni all stay,
 // on both sites. This is the bench the cold outreach actually points at.
 export const ADVISORS: Person[] = [
+  // Order is Tyler's, from his 2026-10-10 voice memo: Chris Swain, Sagar
+  // Tiwari, Matthew Kim, Kevin, Duncan, then Andrew Laffoon.
   // Faculty advisor, per Caleb on 2026-10-05. Title, headshot and background
   // from his IYA faculty page, iovine-young.usc.edu/people/chris-swain (read
   // 2026-10-10): "co-founded three venture-backed companies", "led 50+
@@ -126,6 +128,27 @@ export const ADVISORS: Person[] = [
       },
       { label: "Co-founded the EA Game Innovation Lab at USC", logo: "/tts/marks/ea.svg" },
       { label: "Founding member of R/GA", logo: "/tts/marks/rga.png" },
+    ],
+  },
+  // Sagar: Stanford GSB (second-brain/core/people.md, confirmed by Caleb
+  // 2026-10-05), former McKinsey (site at 9a698f2, and Tyler's voice memo),
+  // past president of 180 Degrees Consulting at USC (people.md, confirmed by
+  // Caleb 2026-09-04). Formerly at Tiderock and at Clay (Caleb,
+  // 2026-10-10); the "Hydroc" in Tyler's 2026-10-09 memo was Tiderock.
+  {
+    name: "Sagar Tiwari",
+    role: "MBA, ex-McKinsey",
+    company: "Stanford GSB",
+    status: "advisor",
+    link: "https://www.linkedin.com/in/sagart851/",
+    photo: "/img/sagar_shot.jpeg",
+    logo: "/tts/marks/stanford.png",
+    background: [
+      { label: "MBA, Stanford GSB", logo: "/tts/marks/stanford.png" },
+      { label: "Formerly at McKinsey & Company", logo: "/tts/marks/mckinsey.png" },
+      { label: "Formerly at Tide Rock", logo: "/tts/marks/tiderock.svg" },
+      { label: "Formerly at Clay", logo: "/tts/partners/clay.png" },
+      { label: "Past president, 180 Degrees Consulting at USC", logo: "/tts/marks/180dc.png" },
     ],
   },
   // Matthew and Kevin co-founded TTS ("OG Co-Founder", site at 37795eb).
@@ -174,27 +197,6 @@ export const ADVISORS: Person[] = [
       { label: "Mentors USC students through GenCollege Christian Fellowship", type: "GenCollege" },
     ],
   },
-  // Sagar: Stanford GSB (second-brain/core/people.md, confirmed by Caleb
-  // 2026-10-05), former McKinsey (site at 9a698f2, and Tyler's voice memo),
-  // past president of 180 Degrees Consulting at USC (people.md, confirmed by
-  // Caleb 2026-09-04). Formerly at Tiderock and at Clay (Caleb,
-  // 2026-10-10); the "Hydroc" in Tyler's 2026-10-09 memo was Tiderock.
-  {
-    name: "Sagar Tiwari",
-    role: "MBA, ex-McKinsey",
-    company: "Stanford GSB",
-    status: "advisor",
-    link: "https://www.linkedin.com/in/sagart851/",
-    photo: "/img/sagar_shot.jpeg",
-    logo: "/tts/marks/stanford.png",
-    background: [
-      { label: "MBA, Stanford GSB", logo: "/tts/marks/stanford.png" },
-      { label: "Formerly at McKinsey & Company", logo: "/tts/marks/mckinsey.png" },
-      { label: "Formerly at Tide Rock", logo: "/tts/marks/tiderock.svg" },
-      { label: "Formerly at Clay", logo: "/tts/partners/clay.png" },
-      { label: "Past president, 180 Degrees Consulting at USC", logo: "/tts/marks/180dc.png" },
-    ],
-  },
   {
     name: "Andrew Laffoon",
     role: "Founder and CEO",
@@ -237,18 +239,18 @@ export const ALUMNI: Person[] = [
   { name: "Kelly Kim", role: "JD Candidate", company: "USC Gould", status: "alumni", link: "https://www.linkedin.com/in/kelly-kim-usc", photo: "/img/alumni/kellykim.jpeg" },
 ];
 
-/* Everyone who started at TTS: the fifteen alumni plus Matthew Kim and
+/* Everyone who started at TTS: the alumni plus Matthew Kim and
  * Kevin Sangmuah, who co-founded it ("OG Co-Founder" on the site at
  * 37795eb). The other advisors never were members, so they stay off home's
  * "See where TTS can get you" wall (Network.tsx). */
 export const NETWORK_PEOPLE: Person[] = [
-  ...ALUMNI,
-  // Without their photos: their faces are in the advisors section, and a
-  // face appears once on home (coordinator, 2026-10-10). Their tiles keep
-  // the company mark and their first names.
-  ...ADVISORS.filter((p) => p.name === "Matthew Kim" || p.name === "Kevin Sangmuah").map(
-    (p) => ({ ...p, photo: undefined }),
-  ),
+  // Albert Chung is off the wall (Tyler, 2026-10-10): his employer can't
+  // be shown, and where he is deployed isn't on record, so his tile was a
+  // line to nowhere. He stays in ALUMNI.
+  ...ALUMNI.filter((p) => p.name !== "Albert Chung"),
+  // With their photos (Tyler, 2026-10-10: "Kevin and Matthew Kim's
+  // pictures seem to be deleted, so get those back").
+  ...ADVISORS.filter((p) => p.name === "Matthew Kim" || p.name === "Kevin Sangmuah"),
 ];
 
 /** Companies the network actually reaches, for a logo wall. Sourced, not claimed. */
