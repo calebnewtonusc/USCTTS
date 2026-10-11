@@ -2,14 +2,8 @@
  * student's story only. Same world as home (docs/INTENT-home.md, "One
  * world"): the field's points, USC's cardinal point, mono for small data. */
 
-html:has(.jo) {
-  scroll-behavior: smooth;
-}
-@media (prefers-reduced-motion: reduce) {
-  html:has(.jo) {
-    scroll-behavior: auto;
-  }
-}
+/* No page-wide smooth scroll: the one same-page link, back up to the
+ * signup, dissolves on its own (JoinEnd.tsx). */
 
 .tts .jo {
   --hot: #d0102e;
@@ -258,69 +252,153 @@ html:has(.jo) {
   );
 }
 
-/* 2 and 3. Full-screen bands of their own colour. */
-.tts .jo-sec {
+/* 2 and 3. Pinned bands: the section is the scroll length, the band holds
+ * still under the nav for all of it, one screen tall, its content filling
+ * it (Caleb, 2026-10-10, on 400px of empty blush over the old build band:
+ * "Terrible storytelling and use of space"). */
+.tts .jo-pin {
+  position: relative;
+}
+/* Four stops at about 0.8 of a screen each, plus the screen the band
+ * itself takes. */
+.tts .jo-pin-path {
+  height: 420vh;
+  height: 420svh;
+}
+.tts .jo-pin-build {
+  height: 300vh;
+  height: 300svh;
+}
+.tts .jo-band {
+  /* The panel fills the band's height, up to a size that still reads as
+   * one object on a tall screen. */
+  --pad: clamp(24px, 5vh, 56px);
+  --panel-h: min(
+    720px,
+    calc(100svh - var(--nav-h, 64px) - 16px - 2 * var(--pad))
+  );
+  position: sticky;
+  top: calc(var(--nav-h, 64px) + 8px);
   display: grid;
   align-content: center;
-  min-height: 92vh;
-  min-height: 92svh;
+  height: calc(100vh - var(--nav-h, 64px) - 16px);
+  height: calc(100svh - var(--nav-h, 64px) - 16px);
   margin: 0 clamp(8px, 1.6vw, 24px);
-  padding-block: clamp(72px, 10vh, 120px);
+  padding-block: var(--pad);
   border-radius: 32px;
+  overflow: hidden;
 }
-.tts .jo-sec.is-sky {
+.tts .jo-band.is-sky {
   background: #e6f0f9;
 }
-.tts .jo-sec.is-paper {
+.tts .jo-band.is-paper {
   background: #fbe9e3;
 }
 .tts .jo-h2 {
   max-width: 18ch;
-  margin: 0 0 clamp(32px, 5vh, 56px);
+  margin: 0;
   font-size: clamp(34px, 4.4vw, 68px);
   font-weight: 400;
   line-height: 1.02;
   letter-spacing: -0.03em;
 }
-.tts .jo-split {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  gap: clamp(32px, 5vw, 72px);
-  align-items: center;
-}
-.tts .jo-split .jo-h2 {
-  margin-bottom: 0;
+/* Beside a figure the heading is quiet and the figure is loud
+ * (library/crafts/website.md, tcombinator.org: uselemma.ai runs 36px heads
+ * beside a 544px figure). */
+.tts .jo-h2.is-sm {
+  max-width: 15ch;
+  font-size: clamp(30px, 3.1vw, 46px);
+  line-height: 1.06;
 }
 
-/* The path: four stops on a dotted thread, the point travelling once. */
-.tts .jo-path {
+/* ---- 01: the path ---- */
+.tts .jo-path-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(32px, 5vw, 80px);
+  align-items: center;
+}
+.tts .jo-stops {
   position: relative;
+  margin-top: clamp(28px, 5vh, 52px);
+}
+.tts .jo-stops ol {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 24px;
+  gap: clamp(12px, 3vh, 30px);
 }
-.tts .jo-path::before {
-  content: "";
+.tts .jo-stops li {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding-left: 34px;
+  white-space: nowrap;
+  color: var(--ink-3, #a1969a);
+  transition: color 300ms var(--ease);
+}
+.tts .jo-stops li b {
+  font-size: clamp(20px, 2.1vw, 30px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.tts .jo-stops li .jo-n {
+  font-size: 12px;
+  color: inherit;
+}
+.tts .jo-stops li[data-state="done"] {
+  color: var(--ink-2);
+}
+.tts .jo-stops li[data-state="on"] {
+  color: var(--ink);
+}
+.tts .jo-stops li[data-state="on"] .jo-n {
+  color: var(--cardinal);
+}
+.tts .jo-stop-dot {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  overflow: visible;
+}
+.tts .jo-stop-dot circle {
+  fill: #e6f0f9;
+  stroke: rgba(153, 0, 0, 0.45);
+  stroke-width: 2;
+  transition:
+    fill 300ms var(--ease),
+    stroke 300ms var(--ease);
+}
+.tts .jo-stops li[data-state="done"] .jo-stop-dot circle,
+.tts .jo-stops li[data-state="on"] .jo-stop-dot circle {
+  fill: var(--cardinal);
+  stroke: var(--cardinal);
+}
+/* The thread the point rides, through the dots' centres. */
+.tts .jo-stops-line {
   position: absolute;
   left: 6px;
-  right: 0;
-  top: 6px;
-  height: 2px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
   background-image: radial-gradient(
     circle,
     rgba(153, 0, 0, 0.45) 0.9px,
     transparent 1.3px
   );
-  background-size: 7px 2px;
-  background-repeat: repeat-x;
+  background-size: 2px 7px;
+  background-repeat: repeat-y;
 }
-.tts .jo-path-head {
+.tts .jo-stops-head {
   position: absolute;
-  top: 0;
   left: 0;
+  top: 0;
+  z-index: 1;
   width: 14px;
   height: 14px;
   border-radius: 50%;
@@ -328,88 +406,592 @@ html:has(.jo) {
   box-shadow:
     0 0 0 6px rgba(208, 16, 46, 0.18),
     0 0 18px 4px rgba(208, 16, 46, 0.35);
-  opacity: 0;
+  will-change: transform;
 }
-.tts .jo-path[data-run="go"] .jo-path-head {
-  animation: jo-travel 2.4s cubic-bezier(0.45, 0, 0.2, 1) forwards;
-}
-@keyframes jo-travel {
-  0% {
-    opacity: 0;
-    left: 0;
-  }
-  8% {
-    opacity: 1;
-  }
-  92% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    left: calc(75% + 18px);
-  }
-}
-.tts .jo-path li {
+
+/* The stage: what the member has in hand. */
+.tts .jo-stage {
   position: relative;
   display: grid;
-  align-content: start;
-  gap: 10px;
-  padding: 40px 22px 26px 0;
-  opacity: 0.35;
-  transform: translate3d(0, 14px, 0);
-  transition:
-    opacity 500ms cubic-bezier(0.2, 0.6, 0.2, 1),
-    transform 500ms cubic-bezier(0.2, 0.6, 0.2, 1);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 20px;
+  height: var(--panel-h);
+  margin: 0;
+  padding: clamp(20px, 3vw, 40px);
+  border-radius: 24px;
+  background: #fbfdff;
+  box-shadow:
+    0 1px 2px rgba(28, 21, 23, 0.05),
+    0 40px 80px -48px rgba(44, 106, 166, 0.5);
 }
-.tts .jo-path[data-run="go"] li {
-  opacity: 1;
-  transform: none;
-  transition-delay: calc(var(--i) * 560ms + 200ms);
+.tts .jo-stage-art {
+  position: relative;
+  min-height: 0;
 }
-.tts .jo-path[data-run="done"] li {
-  opacity: 1;
-  transform: none;
+.tts .jo-stage-caps {
+  position: relative;
+  min-height: 3.2em;
 }
-.tts .jo-path-dot {
+.tts .jo-stage-cap {
   position: absolute;
+  inset: 0 0 auto 0;
+  margin: 0;
+  max-width: 44ch;
+  font-size: clamp(17px, 1.35vw, 20px);
+  line-height: 1.4;
+  color: var(--ink-2);
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+}
+.tts .jo-stage-cap:first-child {
+  opacity: 1;
+  visibility: visible;
+}
+.tts .jo-stage-t {
+  display: none;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* Step 1, the application. */
+.tts .jo-app {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  gap: clamp(16px, 3vh, 28px);
+  will-change: transform, opacity;
+}
+.tts .jo-app-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--rule, rgba(42, 27, 30, 0.14));
+  font-size: clamp(20px, 1.8vw, 26px);
+  letter-spacing: -0.02em;
+}
+.tts .jo-app-k,
+.tts .jo-app-l {
+  font-family: var(--mono-f);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+}
+.tts .jo-app-f {
+  display: grid;
+  gap: 12px;
+}
+.tts .jo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.tts .jo-chip {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: clamp(16px, 1.3vw, 19px);
+  color: var(--ink-2);
+  box-shadow: inset 0 0 0 1px rgba(42, 27, 30, 0.18);
+  transition:
+    color 250ms var(--ease),
+    background-color 250ms var(--ease),
+    box-shadow 250ms var(--ease);
+}
+.tts .jo-chip[data-on="true"] {
+  color: #fff;
+  background: var(--cardinal);
+  box-shadow: none;
+}
+.tts .jo-app-jobs {
+  display: grid;
+}
+.tts .jo-app-job {
+  grid-area: 1 / 1;
+  margin: 0;
+  font-family: var(--mono-f);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  opacity: 0;
+  transform: translate3d(0, 6px, 0);
+  transition:
+    opacity 250ms var(--ease),
+    transform 250ms var(--ease);
+}
+.tts .jo-app-job[data-on="true"] {
+  opacity: 1;
+  transform: none;
+}
+.tts .jo-app-why {
+  display: grid;
+  gap: 14px;
+  padding: 6px 0;
+}
+.tts .jo-app-why i {
+  display: block;
+  height: 1px;
+  background: rgba(42, 27, 30, 0.16);
+}
+.tts .jo-app-stamp {
+  justify-self: end;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-family: var(--mono-f);
+  font-size: 12px;
+  color: var(--cardinal);
+  box-shadow: inset 0 0 0 1.5px var(--cardinal);
+  opacity: 0;
+  transform: rotate(-4deg) scale(1.25);
+  transition:
+    opacity 220ms var(--ease),
+    transform 320ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.tts .jo-app[data-read="true"] .jo-app-stamp {
+  opacity: 1;
+  transform: rotate(-4deg) scale(1);
+}
+
+/* Steps 2 to 4, the machine. */
+.tts .jo-mach {
+  --wire: 0;
+  --run: 0;
+  --client: 0;
+  --out: 0;
+  --g: 12px;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+}
+.tts .jo-mach-in {
+  margin-left: 40px;
+  font-family: var(--mono-f);
+  font-size: 11.5px;
+  color: var(--ink-2);
+  opacity: var(--wire);
+}
+/* The pieces stack down a wire in their own left gutter: the wire draws
+ * through their centres on the practice build, the run travels it, and
+ * the drop carries it on into the client's project. Positions come from
+ * Path.tsx, measured, so the wire meets every centre at any size. */
+.tts .jo-pcs {
+  position: relative;
+  display: grid;
+  gap: var(--g);
+  padding-left: 40px;
+}
+.tts .jo-pcs ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--g);
+}
+.tts .jo-pc {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: clamp(40px, 6.6vh, 64px);
+  padding: 8px 18px;
+  border-radius: 14px;
+  background-color: #fbfdff;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(153, 0, 0, 0.05) 0 6px,
+    transparent 6px 12px
+  );
+  box-shadow: inset 0 0 0 1.5px rgba(153, 0, 0, 0.22);
+  color: var(--ink-3, #a1969a);
+  transition:
+    background-color 300ms var(--ease),
+    color 300ms var(--ease),
+    box-shadow 300ms var(--ease),
+    transform 300ms var(--ease);
+}
+.tts .jo-pc[data-lit="true"] {
+  color: #fff;
+  background-color: var(--cardinal);
+  background-image: none;
+  box-shadow: 0 14px 26px -18px rgba(153, 0, 0, 0.8);
+}
+.tts .jo-pc-n {
+  font-family: var(--mono-f);
+  font-size: 11.5px;
+  opacity: 0.8;
+}
+.tts .jo-pc-name {
+  flex: 1;
+  font-size: clamp(16px, 1.35vw, 20px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.tts .jo-pc-ok {
+  font-family: var(--mono-f);
+  font-size: 11px;
+  color: #ffcc00;
+  opacity: 0;
+  transform: translate3d(-6px, 0, 0);
+  transition:
+    opacity 200ms var(--ease),
+    transform 300ms var(--ease);
+}
+.tts .jo-pc[data-lit="true"] .jo-pc-ok {
+  opacity: 1;
+  transform: none;
+}
+.tts .jo-wire,
+.tts .jo-drop {
+  position: absolute;
+  left: 15px;
   top: 0;
-  left: 0;
+  width: 2px;
+  height: 0;
+  background: var(--cardinal);
+}
+.tts .jo-runner {
+  position: absolute;
+  z-index: 2;
+  left: 16px;
+  top: 0;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: #ffcc00;
+  box-shadow:
+    0 0 0 5px rgba(255, 204, 0, 0.3),
+    0 0 16px 4px rgba(255, 204, 0, 0.5);
+  opacity: 0;
+  transition: opacity 200ms var(--ease);
+}
+.tts .jo-mach[data-run="true"] .jo-runner {
+  opacity: 1;
+}
+.tts .jo-client {
+  position: relative;
+  justify-self: stretch;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 14px;
+  row-gap: 4px;
+  align-items: center;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: #0d1020;
+  color: #fff7e6;
+  opacity: var(--client);
+  transform: translate3d(0, calc((1 - var(--client)) * 18px), 0);
+}
+.tts .jo-client-pin {
+  grid-row: 1 / 3;
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #e6f0f9;
-  box-shadow: inset 0 0 0 2px var(--cardinal);
-  transition: background-color 300ms;
+  box-shadow: inset 0 0 0 2px #ffcc00;
+  transition: background-color 250ms var(--ease);
 }
-.tts .jo-path[data-run="go"] .jo-path-dot,
-.tts .jo-path[data-run="done"] .jo-path-dot {
-  background: var(--hot);
-  transition-delay: calc(var(--i) * 560ms + 200ms);
+.tts .jo-mach[data-live="true"] .jo-client-pin {
+  background: #ffcc00;
 }
-.tts .jo-path .jo-n {
-  font-size: 12px;
-}
-.tts .jo-path b {
-  font-size: clamp(24px, 2.2vw, 32px);
+.tts .jo-client-t {
+  font-size: 17px;
   font-weight: 500;
-  letter-spacing: -0.02em;
 }
-.tts .jo-path li > span:last-child {
-  font-size: 16px;
-  line-height: 1.4;
-  color: var(--ink-2);
+.tts .jo-client-s {
+  font-family: var(--mono-f);
+  font-size: 11.5px;
+  color: rgba(255, 241, 204, 0.75);
+}
+.tts .jo-client-live {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  color: #0d1020;
+  background: #ffcc00;
+  opacity: 0.25;
+  transition: opacity 250ms var(--ease);
+}
+.tts .jo-mach[data-live="true"] .jo-client-live {
+  opacity: 1;
 }
 
-/* The member's build. */
-.tts .jo-panel {
-  margin: 0;
-  border-radius: 18px;
-  overflow: hidden;
-  border: 0;
-  box-shadow: 0 30px 60px -36px rgba(122, 31, 31, 0.45);
+/* ---- 02: the build ---- */
+/* The mirror of 01: the panel leads on the left and the heading answers
+ * it on the right, so the two pinned bands never read as one. */
+.tts .jo-build-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+  gap: clamp(32px, 5vw, 80px);
+  align-items: center;
 }
-.tts .jo-cap {
-  padding: 10px 16px 12px;
+.tts .jo-beats {
+  list-style: none;
+  margin: clamp(28px, 5vh, 48px) 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  font-family: var(--mono-f);
+  font-size: 12.5px;
+  color: var(--ink-3, #a1969a);
+}
+.tts .jo-beats li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: color 300ms var(--ease);
+}
+.tts .jo-beats li[data-state="done"] {
+  color: var(--ink-2);
+}
+.tts .jo-beats li[data-state="on"] {
+  color: var(--ink);
+}
+.tts .jo-beat-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+  transition: background-color 300ms var(--ease);
+}
+.tts .jo-beats li[data-state="done"] .jo-beat-dot {
+  background: var(--ink-2);
+  box-shadow: none;
+}
+.tts .jo-beats li[data-state="on"] .jo-beat-dot {
+  background: var(--hot);
+  box-shadow: 0 0 0 4px rgba(208, 16, 46, 0.2);
+}
+.tts .jo-run {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: var(--panel-h);
+  margin: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 1px 2px rgba(28, 21, 23, 0.05),
+    0 40px 80px -48px rgba(122, 31, 31, 0.5);
+}
+.tts .jo-run-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--rule, rgba(42, 27, 30, 0.14));
+  font-family: var(--mono-f);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.tts .jo-run-st {
+  color: var(--cardinal);
+  font-variant-numeric: tabular-nums;
+}
+.tts .jo-run-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.tts .jo-leads {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+}
+/* Once the first draft opens, the rest of the kept list waits its turn at
+ * the foot of the panel. */
+.tts .jo-foot {
+  display: grid;
+  margin-top: auto;
+}
+.tts .jo-foot > * {
+  grid-area: 1 / 1;
+  align-self: end;
+}
+.tts .jo-next {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0 22px;
+  padding: 16px 0 18px;
+  border-top: 1px dashed rgba(153, 0, 0, 0.3);
+  font-family: var(--mono-f);
+  font-size: 12px;
+  color: var(--ink-2);
+  opacity: var(--open, 0);
+}
+.tts .jo-next span {
+  display: inline-block;
+  width: 6ch;
+  color: var(--cardinal);
+}
+/* What the member taught the AI, under the list while it builds. It shares
+ * the panel's foot with the queue above and gives way to it. */
+.tts .jo-rules {
+  display: grid;
+  gap: 8px;
+  margin: 0 22px;
+  padding: 16px 0 18px;
+  border-top: 1px dashed rgba(153, 0, 0, 0.3);
+  font-family: var(--mono-f);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  opacity: calc(1 - var(--open, 0));
+}
+.tts .jo-rules div {
+  display: grid;
+  grid-template-columns: 6ch minmax(0, 1fr);
+  gap: 12px;
+}
+.tts .jo-rules dt {
+  color: var(--cardinal);
+}
+.tts .jo-rules dd {
+  margin: 0;
+}
+.tts .jo-lead {
+  --fold: 0;
+  /* Folding rows give their height to the opening email. */
+  max-height: calc((1 - var(--fold)) * 120px);
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+}
+.tts .jo-lead + .jo-lead .jo-lead-row {
+  border-top: 1px solid var(--rule, rgba(42, 27, 30, 0.1));
+}
+.tts .jo-lead-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: clamp(14px, 2.6vh, 26px) 22px;
+}
+.tts .jo-lead-biz {
+  font-size: clamp(17px, 1.4vw, 21px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.tts .jo-lead-why {
+  font-size: clamp(15px, 1.25vw, 18px);
+  color: var(--ink-2);
+}
+.tts .jo-lead-st {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: var(--mono-f);
+  font-size: 11.5px;
+  white-space: nowrap;
+  color: #1f5c8f;
+  background: #e6f0f9;
+}
+.tts .jo-lead[data-dropped="true"] .jo-lead-biz,
+.tts .jo-lead[data-dropped="true"] .jo-lead-why {
+  color: var(--ink-3, #a1969a);
+  text-decoration: line-through;
+  text-decoration-color: rgba(153, 0, 0, 0.5);
+}
+.tts .jo-lead[data-keep="false"] .jo-lead-st {
+  color: var(--ink-2);
+  background: rgba(42, 27, 30, 0.06);
+}
+.tts .jo-lead[data-st="drafting"] .jo-lead-st,
+.tts .jo-lead[data-st="drafted"] .jo-lead-st {
+  color: #fff;
+  background: var(--cardinal);
+}
+/* The first row, once open, gives its reason to the email's subject. */
+.tts .jo-lead:first-child .jo-lead-why {
+  opacity: calc(1 - var(--open, 0));
+}
+.tts .jo-pin-build {
+  --open: 0;
+}
+.tts .jo-lead:first-child {
+  max-height: none;
+}
+.tts .jo-mail {
+  opacity: 0;
+  visibility: hidden;
+}
+.tts .jo-mail-in {
+  overflow: hidden;
+  margin: 0 22px;
+  max-height: calc(var(--open) * 520px);
+}
+.tts .jo-mail-h {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 0;
+  padding: 14px 0 12px;
+  border-top: 1px dashed rgba(153, 0, 0, 0.3);
+  font-family: var(--mono-f);
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+.tts .jo-mail-h span:first-child {
+  color: var(--cardinal);
+}
+.tts .jo-mail-body {
+  min-height: 4.6em;
+  margin: 0 0 22px;
+  font-size: clamp(19px, 1.75vw, 26px);
+  line-height: 1.5;
+  letter-spacing: -0.005em;
+}
+/* The rules the draft follows, once it's written. */
+.tts .jo-mail-rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  font-family: var(--mono-f);
+  font-size: 11.5px;
+  opacity: 0;
+  transform: translate3d(0, 8px, 0);
+  transition:
+    opacity 300ms var(--ease),
+    transform 300ms var(--ease);
+}
+.tts .jo-mail-rules li {
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: var(--ink-2);
+  background: rgba(153, 0, 0, 0.06);
+}
+.tts .jo-pin-build[data-drafted="true"] .jo-mail-rules {
+  opacity: 1;
+  transform: none;
+}
+.tts .jo-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 2px;
+  vertical-align: -0.18em;
+  background: var(--cardinal);
+  opacity: 0;
+}
+.tts .jo-mail-body[data-typing="true"] .jo-caret {
+  opacity: 1;
+}
+.tts .jo-run .jo-cap {
+  padding: 12px 22px 14px;
   font-family: var(--mono-f);
   font-size: 11.5px;
   color: var(--ink-2);
@@ -460,18 +1042,151 @@ html:has(.jo) {
   outline-color: #fff;
 }
 
-@media (max-width: 999px) {
-  .tts .jo-path {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    row-gap: 8px;
+/* Phones and narrow tablets: the band stacks, the stops become a row of
+ * dots with the step's name moving into its caption, and the panel fills
+ * what's left of the screen. */
+@media (max-width: 899px) {
+  /* A flex column all the way down, so the panel takes exactly what the
+   * heading leaves of the screen. */
+  .tts .jo-band {
+    display: flex;
+    flex-direction: column;
+    padding-block: 20px;
   }
-  .tts .jo-path::before,
-  .tts .jo-path-head {
+  .tts .jo-path-grid,
+  .tts .jo-build-grid {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .tts .jo-stage,
+  .tts .jo-run {
+    flex: 1;
+  }
+  .tts .jo-build-side {
+    order: -1;
+  }
+  .tts .jo-band .jo-mark {
+    margin-bottom: 10px;
+  }
+  .tts .jo-h2.is-sm {
+    max-width: 20ch;
+    font-size: clamp(26px, 6.6vw, 34px);
+  }
+  .tts .jo-stops {
+    margin-top: 18px;
+  }
+  .tts .jo-stops ol {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+  }
+  .tts .jo-stops li {
+    padding: 22px 0 0;
+  }
+  .tts .jo-stops li b {
     display: none;
+  }
+  .tts .jo-stop-dot {
+    top: 0;
+    margin-top: 0;
+  }
+  .tts .jo-stops-line {
+    top: 6px;
+    bottom: auto;
+    left: 6px;
+    right: 25%;
+    width: auto;
+    height: 2px;
+    background-size: 7px 2px;
+    background-repeat: repeat-x;
+  }
+  .tts .jo-stage,
+  .tts .jo-run {
+    height: auto;
+    min-height: 0;
+  }
+  .tts .jo-run-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .tts .jo-rules {
+    gap: 4px;
+    padding: 10px 0 12px;
+    font-size: 11.5px;
+  }
+  .tts .jo-rules div:first-child {
+    display: none;
+  }
+  .tts .jo-stage {
+    padding: 18px;
+    gap: 14px;
+  }
+  .tts .jo-stage-caps {
+    min-height: 4.3em;
+  }
+  .tts .jo-stage-cap {
+    font-size: 16px;
+  }
+  .tts .jo-stage-t {
+    display: inline;
+  }
+  .tts .jo-app {
+    gap: 14px;
+  }
+  .tts .jo-chip {
+    padding: 8px 14px;
+    font-size: 15px;
+  }
+  .tts .jo-mach {
+    --g: 8px;
+    gap: 10px;
+  }
+  .tts .jo-pc {
+    min-height: 40px;
+    padding: 6px 14px;
+  }
+  .tts .jo-client {
+    padding: 12px 14px;
+  }
+  .tts .jo-beats {
+    display: none;
+  }
+  .tts .jo-run-bar {
+    padding: 12px 16px;
+    font-size: 11.5px;
+  }
+  .tts .jo-lead-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px 12px;
+    padding: 10px 16px;
+  }
+  .tts .jo-lead-biz {
+    font-size: 16px;
+  }
+  .tts .jo-lead-why {
+    grid-row: 2;
+    font-size: 14.5px;
+  }
+  .tts .jo-lead-st {
+    grid-row: 1 / 3;
+    grid-column: 2;
+  }
+  .tts .jo-mail-in {
+    margin: 0 16px;
+  }
+  .tts .jo-mail-body {
+    min-height: 0;
+    font-size: 16px;
+  }
+  .tts .jo-run .jo-cap {
+    padding: 10px 16px 12px;
   }
 }
 @media (max-width: 899px) {
-  .tts .jo-split,
   .tts .jo-hero-in {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -500,15 +1215,6 @@ html:has(.jo) {
   }
 }
 @media (max-width: 599px) {
-  .tts .jo-path {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .tts .jo-path li {
-    padding: 0 0 18px 30px;
-  }
-  .tts .jo-path-dot {
-    top: 6px;
-  }
   .tts .jo-action {
     padding: 16px;
   }
@@ -516,13 +1222,13 @@ html:has(.jo) {
     width: 100%;
   }
   .tts .jo-hero,
-  .tts .jo-sec,
+  .tts .jo-band,
   .tts .jo-end {
     border-radius: 24px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tts .jo-path-head {
+  .tts .jo-stops-head {
     display: none;
   }
 }

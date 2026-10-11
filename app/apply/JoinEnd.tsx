@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type React from "react";
 import DotFloor from "@/components/tts/landing/DotFloor";
 import "./joinend.css";
 
@@ -9,6 +10,40 @@ import "./joinend.css";
  * so no frame flashes brighter before the red, and the streets around USC
  * fill the band behind the words (joinend.css). Then one action: apply when
  * the form is open, and until then a jump back to the email signup. */
+/* Back up to the signup is most of the page away now that 01 and 02 are
+ * pinned (about nine screens), and a smooth scroll that far reads as a
+ * strobe (library/crafts/website.md: 1.85 screens in one frame across a
+ * 13-screen pin). So it dissolves: the page fades, moves under the veil to
+ * just below the form, and glides the last 0.6 of a screen in while it
+ * fades back. Reduced motion goes straight there. */
+function toList(e: React.MouseEvent<HTMLAnchorElement>) {
+  const t = document.getElementById("apply");
+  if (!t) return;
+  e.preventDefault();
+  const r = t.getBoundingClientRect();
+  const goal = Math.max(
+    0,
+    r.top + scrollY - Math.max(0, (innerHeight - r.height) / 2),
+  );
+  const focus = () =>
+    t.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+  const main = document.querySelector<HTMLElement>("main");
+  if (!main || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    scrollTo({ top: goal, behavior: "auto" });
+    focus();
+    return;
+  }
+  main.style.transition = "opacity 220ms cubic-bezier(0.4, 0, 1, 1)";
+  main.style.opacity = "0";
+  setTimeout(() => {
+    scrollTo({ top: goal + innerHeight * 0.6, behavior: "auto" });
+    main.style.transition = "opacity 520ms cubic-bezier(0, 0, 0.2, 1)";
+    main.style.opacity = "";
+    scrollTo({ top: goal, behavior: "smooth" });
+    setTimeout(focus, 560);
+  }, 230);
+}
+
 export default function JoinEnd({
   open,
   formUrl,
@@ -68,6 +103,13 @@ export default function JoinEnd({
             ? "Applications are open now."
             : "Get an email the day applications open."}
         </h2>
+        {/* The student's last question before signing up is whether this
+         * is legit; the partnership is the answer (docs/COPY-tts.md, the
+         * stack moment, always "through Blue Modern Advisory"). */}
+        <p className="jo-end-sub">
+          We&apos;re official Clay and Perplexity partners through Blue Modern
+          Advisory, so as a member you build with both.
+        </p>
         {open ? (
           <a
             className="jo-apply is-light"
@@ -78,7 +120,7 @@ export default function JoinEnd({
             Apply on Google Forms <span aria-hidden="true">&rarr;</span>
           </a>
         ) : (
-          <a className="jo-apply is-light" href="#apply">
+          <a className="jo-apply is-light" href="#apply" onClick={toList}>
             Get on the list <span aria-hidden="true">&uarr;</span>
           </a>
         )}

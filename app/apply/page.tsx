@@ -99,38 +99,16 @@ export default function ApplyPage() {
           <DotFloor win={[-5200, -900, 5200, 900]} max={2200} alpha={0.26} />
         </div>
 
-        {/* 2. The path. */}
-        <section className="jo-sec is-sky" aria-labelledby="jo-path-h">
-          <div className="jo-wrap">
-            <p className="jo-mark">
-              <span className="jo-n">01</span> how it goes
-            </p>
-            <h2 id="jo-path-h" className="jo-h2">
-              From your first build night <em>to real company work.</em>
-            </h2>
-            <Path />
-          </div>
-        </section>
+        {/* 2. The path, pinned: the point travels the four stops while
+         * the panel shows what the member has in hand at each (Path.tsx). */}
+        <Path />
 
         <div className="jo-seam" data-transition aria-hidden="true">
           <DotFloor win={[-5200, -900, 5200, 900]} max={2200} alpha={0.26} />
         </div>
 
-        {/* 3. A member's build, running. */}
-        <section className="jo-sec is-paper" aria-labelledby="jo-build-h">
-          <div className="jo-wrap jo-split">
-            <div>
-              <p className="jo-mark">
-                <span className="jo-n">02</span> what you&apos;d build
-              </p>
-              <h2 id="jo-build-h" className="jo-h2">
-                A list of who&apos;s worth reaching,{" "}
-                <em>with the first email drafted.</em>
-              </h2>
-            </div>
-            <LeadRun />
-          </div>
-        </section>
+        {/* 3. A member's build, happening as you scroll (LeadRun.tsx). */}
+        <LeadRun />
 
         {/* 4. The action again, on the cardinal the site ends on. */}
         <JoinEnd open={APPLICATIONS_OPEN} formUrl={APPLY_FORM_URL} />

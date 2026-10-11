@@ -35,6 +35,16 @@
   max-width: 16ch;
   font-size: clamp(40px, 6vw, 96px);
 }
+/* The proof line sits under the heading and the button, full width. */
+.tts .jo .jo-end-sub {
+  flex-basis: 100%;
+  order: 1;
+  max-width: 52ch;
+  margin: 0;
+  font-size: clamp(16px, 1.3vw, 19px);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.84);
+}
 @media (prefers-reduced-motion: reduce) {
   .tts .jo-end-floor {
     animation: none;
