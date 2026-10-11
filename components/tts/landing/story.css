@@ -202,6 +202,17 @@
   max-width: none;
   padding-inline: clamp(8px, 1.6vw, 24px);
 }
+/* The thread owns the left margin from 1200px up. A wide card that ran into
+ * it put the dotted line and its point straight through the copy (Caleb,
+ * 2026-10-10: "it's under stuff it shouldn't be under"), so the card starts
+ * 32px past the thread, the same formula the thread uses for its own x. */
+@media (min-width: 1200px) {
+  .tts .ld-wrap.is-wide {
+    padding-left: calc(
+      max(20px, calc((100% - var(--wide)) / 2 + var(--gutter) - 52px)) + 32px
+    );
+  }
+}
 .tts .ld-work {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
