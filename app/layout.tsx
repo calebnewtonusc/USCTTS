@@ -57,7 +57,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${inter.variable} h-full`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           type="application/ld+json"
@@ -69,7 +73,7 @@ export default function RootLayout({
               url: "https://www.usctts.com",
               logo: {
                 "@type": "ImageObject",
-                url: "https://www.usctts.com/img/tts-logo.png",
+                url: "https://www.usctts.com/favicon.png",
                 width: 512,
                 height: 512,
               },
