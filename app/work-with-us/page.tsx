@@ -163,7 +163,11 @@ export default function WorkWithUsPage() {
           <DotFloor win={[-5200, -900, 5200, 900]} max={2200} alpha={0.26} />
         </div>
 
-        {/* 3. What we'd build instead, each one shown changing (Builds.tsx). */}
+        {/* 3. What we build for each job eating their week, each one shown
+         * changing from the problem to the build (Builds.tsx). Caleb,
+         * 2026-10-11, on "We'd build this instead.": copy that leaves a
+         * reader asking "instead of what" breaks the page's story. Each
+         * heading picks up the one before it. */}
         <Builds />
 
         {/* 4. The work is real, and it isn't only in LA. */}

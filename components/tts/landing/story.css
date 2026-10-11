@@ -337,8 +337,16 @@
  * edge at the canvas box; now every dot field fades out before its box. */
 .tts .nw-floor,
 .tts .dfl {
-  -webkit-mask-image: radial-gradient(ellipse 72% 70% at 50% 50%, #000 58%, transparent 100%);
-  mask-image: radial-gradient(ellipse 72% 70% at 50% 50%, #000 58%, transparent 100%);
+  -webkit-mask-image: radial-gradient(
+    ellipse 72% 70% at 50% 50%,
+    #000 58%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 72% 70% at 50% 50%,
+    #000 58%,
+    transparent 100%
+  );
 }
 .tts .nw-usc {
   position: absolute;
@@ -1068,8 +1076,11 @@
  * thirds, so the doors are rising while the red is still landing. */
 .tts .ga {
   position: relative;
-  height: 34vh;
-  height: 34svh;
+  /* 2026-10-11: at 34vh with -22vh under the doors, a 300px slab of plain
+   * cardinal sat over them at 1440 ("the bottom is kinda tweak"). 26 over
+   * -22 leaves one short breath of red, and the doors carry the rest. */
+  height: 26vh;
+  height: 26svh;
   margin-top: 0;
   margin-bottom: -22vh;
   margin-bottom: -22svh;

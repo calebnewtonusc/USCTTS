@@ -9,6 +9,8 @@
  * clay city that sat under it is gone, "too big of a thing to scroll
  * through". Its film (public/tts/home/world) stays on disk for a lower spot.
  */
+import WhoTiles from "./WhoTiles";
+
 export default function Statement() {
   return (
     <>
@@ -19,6 +21,7 @@ export default function Statement() {
       <p className="ld-say-sub" data-reveal="1">
         USC students build it, then hand it off to the client&apos;s own team.
       </p>
+      <WhoTiles />
     </>
   );
 }

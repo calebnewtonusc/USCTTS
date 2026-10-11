@@ -91,7 +91,6 @@
   .tts a.jn-door:hover .jn-cta .arrow {
     translate: 6px 0;
   }
-
 }
 .tts a.jn-door:active {
   transform: scale(0.985);
@@ -113,11 +112,54 @@
   }
 }
 
+/* The doors rise once, together, on translate and opacity only, so the
+ * hover's transform never fights the reveal. */
+.tts .jn .jn-door {
+  opacity: 0;
+  translate: 0 40px;
+  transition:
+    opacity 700ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    translate 900ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    background-color 200ms cubic-bezier(0, 0, 0.2, 1),
+    transform 200ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tts .jn.is-in .jn-door {
+  opacity: 1;
+  translate: 0 0;
+}
+.tts .jn.is-in .jn-door + .jn-door {
+  transition-delay: 80ms, 80ms, 0ms, 0ms, 0ms;
+}
+@media (prefers-reduced-motion: reduce), (scripting: none) {
+  .tts .jn .jn-door {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* The doors' layer sits above the sheet (.ld, z-index 2). The sheet's red
+ * end runs 22vh under the doors, and at z-index 1 it painted over their
+ * top edges, so both cards read as cut off (Caleb's 2026-10-11 screenshot). */
+.tts .v4-content:has(> .jn) {
+  z-index: 3;
+}
+
 /* Home: the doors' ground starts as the same cardinal the sheet ends on,
- * so the field never shows cream between them while it rains to red. */
+ * so the field never shows cream between them while it rains to red. The
+ * top was 14vh + 6vh of empty red over the doors (Caleb's 2026-10-11
+ * screenshot: 380px of nothing at 1440), now one short breath. */
 .tts .v4:not(.is-way) .jn {
   position: relative;
   margin-top: -24px;
-  padding-top: calc(6vh + 24px);
-  background: linear-gradient(#a3162b 0, #a3162b 24vh, rgba(163, 22, 43, 0) 70vh);
+  /* Above the sheet's red end (Gather, .ld at z-index 2), which runs 22vh
+   * under the doors and was painting over their top edges, so the cards
+   * read as cut off. */
+  z-index: 3;
+  padding-top: 24px;
+  background: linear-gradient(
+    #a3162b 0,
+    #a3162b 24vh,
+    rgba(163, 22, 43, 0) 70vh
+  );
 }

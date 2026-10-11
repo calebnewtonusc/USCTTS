@@ -4,8 +4,6 @@ import { useEffect, useRef } from "react";
 import NotifyForm from "@/app/apply/NotifyForm";
 import { INSTAGRAM_URL } from "../links";
 import { CALENDLY_URL } from "@/lib/contact";
-import { easeOut3, prog } from "../engine/math";
-import { onFrame, P } from "../v4/choreo";
 import "./doors.css";
 
 /* The two doors at the end of the week (docs/RUBRIC-tts.md: two readers,
@@ -20,18 +18,23 @@ export function Join() {
   useEffect(() => {
     const el = sec.current;
     if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const doors = [...el.querySelectorAll<HTMLElement>(".jn-door")];
-    return onFrame(() => {
-      const k = easeOut3(prog(P.join, 0.05, 0.5));
-      // The doors rise while the cardinal washes in (review 4: an empty
-      // red screen held before them).
-      const o = prog(P.join, 0.04, 0.28);
-      doors.forEach((d, i) => {
-        d.style.transform = `translate3d(0, ${((1 - k) * (60 + i * 50)).toFixed(1)}px, 0)`;
-        d.style.opacity = o.toFixed(3);
-      });
-    });
+    // One reveal when the doors arrive, both together. The per-frame
+    // scroll scrub staggered them 50px apart and fought the doors' own
+    // 200ms transform transition, so they stuttered and sat uneven
+    // (Caleb, 2026-10-11: "the animation is choppy and unintentional").
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          el.classList.add("is-in");
+          io.disconnect();
+        }
+      },
+      // As soon as the doors' top clears the bottom tenth, so the red
+      // never scrolls by empty while they wait for a 20% threshold.
+      { threshold: 0, rootMargin: "0px 0px -10% 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   /* No headline over the doors (RUBRIC, "No X, Y headline over a

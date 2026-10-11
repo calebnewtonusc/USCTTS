@@ -175,7 +175,8 @@ export default function Builds() {
               <span className="co-n">02</span> what we build
             </p>
             <h2 id="co-build-h" className="bw-h">
-              We&apos;d build <em>this instead.</em>
+              Four jobs eating your week,{" "}
+              <em>and what we build for each.</em>
             </h2>
             <div className="bw-kinds">
               <span className="bw-line" aria-hidden="true" />
