@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import DotFloor from "@/components/tts/landing/DotFloor";
+import "./joinend.css";
 
 /* The join page's close: USC's point grows out of the paper until the band
  * is cardinal, the same ending as home (components/tts/landing/Gather.tsx),
- * so no frame flashes brighter before the red. Then one action: apply when
+ * so no frame flashes brighter before the red, and the streets around USC
+ * fill the band behind the words (joinend.css). Then one action: apply when
  * the form is open, and until then a jump back to the email signup. */
 export default function JoinEnd({
   open,
@@ -50,6 +53,15 @@ export default function JoinEnd({
   return (
     <section ref={ref} className="jo-end" aria-labelledby="jo-end-h">
       <span className="jo-end-dot" aria-hidden="true" />
+      <div className="jo-end-floor" aria-hidden="true">
+        <DotFloor
+          win={[-5200, -1400, 5200, 1400]}
+          color="#ffffff"
+          alpha={0.55}
+          max={2600}
+          hold
+        />
+      </div>
       <div className="jo-wrap jo-end-in">
         <h2 id="jo-end-h" className="jo-end-h">
           {open

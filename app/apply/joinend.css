@@ -1,0 +1,42 @@
+/* The join page's close (JoinEnd.tsx). Caleb, 2026-10-10, on the earlier
+ * version: one sentence and a button on 1.3 screens of flat cardinal, the
+ * same mistake as an empty advisor band. Now the band is as tall as what
+ * it holds, and the city around USC fills it: the opener's streets in
+ * white points, drifting slowly once the red has landed. */
+.tts .jo .jo-end {
+  min-height: 0;
+  padding-block: clamp(64px, 8vw, 112px);
+}
+.tts .jo-end-floor {
+  position: absolute;
+  inset: -6% -4%;
+  pointer-events: none;
+  opacity: 0.9;
+  animation: jo-end-drift 22s ease-in-out infinite alternate;
+}
+.tts .jo-end-floor canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+@keyframes jo-end-drift {
+  from {
+    translate: -2% 0;
+  }
+  to {
+    translate: 2% -3%;
+  }
+}
+.tts .jo .jo-end-in {
+  position: relative;
+  align-items: flex-end;
+}
+.tts .jo .jo-end-h {
+  max-width: 16ch;
+  font-size: clamp(40px, 6vw, 96px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tts .jo-end-floor {
+    animation: none;
+  }
+}

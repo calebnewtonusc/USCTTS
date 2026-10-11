@@ -5,6 +5,7 @@ import DotFloor from "@/components/tts/landing/DotFloor";
 import WorldArcs, { type Place } from "@/components/tts/landing/WorldArcs";
 import { mono } from "@/components/tts/v4/mono";
 import { CALENDLY_URL } from "@/lib/contact";
+import Drift from "@/components/tts/Drift";
 import Inbox from "./Inbox";
 import "@/components/tts/pages.css";
 import "./company.css";
@@ -102,6 +103,10 @@ function BookButton({ big = false }: { big?: boolean }) {
   );
 }
 
+/* Scroll depth per card (components/tts/Drift.tsx): each of the four builds
+ * passes at its own rate, so the row separates as it scrolls by. */
+const DRIFT = ["0.1", "0.14", "0.18", "0.12"];
+
 export default function WorkWithUsPage() {
   return (
     <Shell>
@@ -154,7 +159,11 @@ export default function WorkWithUsPage() {
             </h2>
             <ol className="co-builds">
               {BUILDS.map((b, i) => (
-                <li key={b.kind} className={`co-build ${b.tone}`}>
+                <li
+                  key={b.kind}
+                  className={`co-build ${b.tone}`}
+                  data-drift={DRIFT[i % DRIFT.length]}
+                >
                   <span className="co-build-k">
                     <span className="co-n">
                       {String(i + 1).padStart(2, "0")}
@@ -191,8 +200,14 @@ export default function WorkWithUsPage() {
             <h2 id="co-world-h" className="co-h2">
               Our client work <em>reaches from Nigeria to Yemen.</em>
             </h2>
-            <WorldArcs places={PLACES} />
-            <ul className="co-legend" aria-label="Client projects">
+            <div data-drift="0.16">
+              <WorldArcs places={PLACES} />
+            </div>
+            <ul
+              className="co-legend"
+              aria-label="Client projects"
+              data-drift="0.11"
+            >
               <li>
                 <span className="co-code">NG</span> Nigeria, an AI curriculum
                 for an education nonprofit
@@ -214,7 +229,7 @@ export default function WorkWithUsPage() {
         {/* 4. The tools, and 5. how a project runs, side by side. */}
         <section className="co-sec" aria-labelledby="co-how-h">
           <div className="co-wrap co-how">
-            <div className="co-tools">
+            <div className="co-tools" data-drift="0.11">
               <p className="co-mark">
                 <span className="co-n">03</span> the tools
               </p>
@@ -252,7 +267,7 @@ export default function WorkWithUsPage() {
               <h2 id="co-how-h" className="co-h2 is-small">
                 From one call <em>to a handover.</em>
               </h2>
-              <ol className="co-steps">
+              <ol className="co-steps" data-drift="0.17">
                 {STEPS.map((s) => (
                   <li key={s.n}>
                     <span className="co-step-dot" aria-hidden="true" />
@@ -272,6 +287,17 @@ export default function WorkWithUsPage() {
 
         {/* 6. The one call. */}
         <section className="co-end" aria-labelledby="co-end-h">
+          {/* The streets around USC under the one call, drifting, so the
+           * band's open right side holds the city it answers from. */}
+          <div className="co-end-floor" aria-hidden="true">
+            <DotFloor
+              win={[-5200, -1600, 5200, 1600]}
+              color="#ffffff"
+              alpha={0.5}
+              max={2800}
+              hold
+            />
+          </div>
           <div className="co-wrap co-end-in">
             <h2 id="co-end-h" className="co-end-h">
               Tell us what&apos;s eating your team&apos;s time.
@@ -286,6 +312,7 @@ export default function WorkWithUsPage() {
           </div>
         </section>
       </div>
+      <Drift scope=".co" />
     </Shell>
   );
 }

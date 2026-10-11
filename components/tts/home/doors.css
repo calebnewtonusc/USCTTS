@@ -118,6 +118,6 @@
 .tts .v4:not(.is-way) .jn {
   position: relative;
   margin-top: -24px;
-  padding-top: calc(14vh + 24px);
+  padding-top: calc(6vh + 24px);
   background: linear-gradient(#a3162b 0, #a3162b 24vh, rgba(163, 22, 43, 0) 70vh);
 }

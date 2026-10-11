@@ -119,12 +119,12 @@ export const ADVISORS: Person[] = [
     link: "https://iovine-young.usc.edu/people/chris-swain",
     background: [
       { label: "Associate Professor of Teaching, USC Iovine and Young Academy", logo: "/tts/marks/usc.svg" },
-      { label: "Co-founded three venture-backed companies", type: "3" },
+      { label: "Co-founded three venture-backed companies", type: "Three startups" },
       {
         label: "Led 50+ products for Disney, Intel, Sony, IBM and others",
         logos: ["/tts/marks/disney.svg", "/tts/marks/intel.svg", "/tts/marks/sony.svg", "/tts/marks/ibm.svg"],
       },
-      { label: "Co-founded the EA Game Innovation Lab at USC", logos: ["/tts/marks/ea.svg", "/tts/marks/usc.svg"] },
+      { label: "Co-founded the EA Game Innovation Lab at USC", logo: "/tts/marks/ea.svg" },
       { label: "Founding member of R/GA", logo: "/tts/marks/rga.png" },
     ],
   },

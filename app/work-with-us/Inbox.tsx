@@ -36,7 +36,7 @@ export default function Inbox() {
   }, []);
 
   return (
-    <figure className="ix-panel" aria-label={`An example front desk inbox with ${END} unread emails`}>
+    <figure className="ix-panel" data-drift="0.15" aria-label={`An example front desk inbox with ${END} unread emails`}>
       <div className="ix-bar">
         <span>A small business inbox, for example</span>
         <span className="ix-count">{n} unread</span>
