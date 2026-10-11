@@ -284,8 +284,16 @@
     padding: 18px;
     border-radius: 24px;
   }
+  /* Safari stretched the photo slot to its grid row, whose only child is
+   * the absolutely placed img, so aspect-ratio never applied and every
+   * portrait but Andrew's (the one band with a min-height) drew 0px tall
+   * (Caleb on his iPhone, 2026-10-11: "Andrew laffoon is the only face I
+   * see"; WebKit measured matthew, kevin and duncan at 0). align-self:
+   * start lets the ratio set the height. */
   .tts .ad-photo {
     min-height: 0;
+    align-self: start;
+    width: 100%;
     aspect-ratio: 4 / 3;
     border-radius: 16px;
   }
