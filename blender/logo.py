@@ -82,11 +82,18 @@ def build_woven(m):
     # band down each side.
     for name, r, mat in (("outer", 1.0, m["cardinal"]), ("mid", 0.72, m["gold"]), ("inner", 0.44, m["cream"])):
         tube(arc(r), 0.14, mat, name)
-    rod = 0.085
-    front = -0.16  # just proud of the bands so the T reads as passing through them
+    # Caleb, 2026-10-10: "Make the T the same width of the yellow, as if part
+    # of the yellow was black". The T's rod is the bands' own 0.14, and it sits
+    # a hair in front of them, so its arms read as a stretch of the gold band
+    # turned ink rather than a thinner stroke laid over it (it was 0.085).
+    # And, 8:07pm: "The T should be fully visible none of the white should
+    # block it". At 0.02 proud the cream band's front swallowed the stem's
+    # foot; 0.16 proud puts the whole T in front of every band.
+    rod = 0.14
+    front = -0.16
     def at(points):
         return [(x, y) for x, y in points]
-    stem = tube(at([(0.0, 0.06), (0.0, 0.72)]), rod, m["ink"], "stem")
+    stem = tube(at([(0.0, 0.2), (0.0, 0.72)]), rod, m["ink"], "stem")
     stem.location.y = front
     span = math.radians(30)
     steps = 24
@@ -97,7 +104,7 @@ def build_woven(m):
             pts.append((0.72 * math.cos(a), 0.72 * math.sin(a)))
         arm = tube(pts, rod, m["ink"], f"arm_{side}")
         arm.location.y = front
-    dot = ball(0.0, 0.06, rod * 1.7, m["cardinal"], "usc")
+    dot = ball(0.0, 0.06, 0.145, m["cardinal"], "usc")  # the dot keeps its size
     dot.location.y = front
 
 
@@ -121,6 +128,67 @@ def build_t(m, scale, base):
     ball(0.0, base + 0.1 * s, rod * 1.6, m["cardinal"], "usc")
 
 
+def slab(verts2d, depth, y0, mat, name):
+    """A flat-faced extrusion of a 2D outline (x, z) between y0 and y0 +
+    depth, with a hairline bevel so the edges read crisp, not soft."""
+    import bmesh
+    bm = bmesh.new()
+    front = [bm.verts.new((x, y0, z)) for x, z in verts2d]
+    back = [bm.verts.new((x, y0 + depth, z)) for x, z in verts2d]
+    bm.faces.new(front)
+    bm.faces.new(list(reversed(back)))
+    n = len(verts2d)
+    for i in range(n):
+        j = (i + 1) % n
+        bm.faces.new((front[i], front[j], back[j], back[i]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(name, me)
+    ob.data.materials.append(mat)
+    bpy.context.collection.objects.link(ob)
+    bev = ob.modifiers.new("crisp", "BEVEL")
+    bev.width = 0.008
+    bev.segments = 2
+    bev.limit_method = "ANGLE"
+    return ob
+
+
+def sector(r_mid, width, a0, a1, steps=96):
+    """The outline of a band of the arch: an annular sector with flat ends."""
+    ri, ro = r_mid - width / 2, r_mid + width / 2
+    out = [(ro * math.cos(a0 + (a1 - a0) * i / steps), ro * math.sin(a0 + (a1 - a0) * i / steps))
+           for i in range(steps + 1)]
+    inn = [(ri * math.cos(a1 - (a1 - a0) * i / steps), ri * math.sin(a1 - (a1 - a0) * i / steps))
+           for i in range(steps + 1)]
+    return out + inn
+
+
+def build_tech(m):
+    """The engineered reading (Caleb, 8:08pm: "a bit more tech-y like the
+    perplexity logo without making it crowded/ugly... I still want it to be
+    simple"). The same three arches and T, drawn as one stroke weight: every
+    band and stroke 0.2 wide with exact 0.08 gaps, flat cut ends, square
+    sections, and the USC ball as a flat round node. Nothing added."""
+    W, D = 0.2, 0.2
+    for name, r, mat in (("outer", 1.0, m["cardinal"]), ("mid", 0.72, m["gold"]), ("inner", 0.44, m["cream"])):
+        slab(sector(r, W, 0.0, math.pi), D, -D / 2, mat, name)
+    front = -D / 2 - 0.06  # the T sits a step proud of every band
+    span = math.radians(30)
+    slab(sector(0.72, W, math.pi / 2 - span, math.pi / 2 + span, steps=32), D, front, m["ink"], "bar")
+    top = 0.72 - W / 2 + 0.02
+    slab([(-W / 2, 0.2), (W / 2, 0.2), (W / 2, top), (-W / 2, top)], D, front, m["ink"], "stem")
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.15, depth=D, vertices=64, location=(0.0, front + D / 2, 0.07),
+                                        rotation=(math.pi / 2, 0, 0))
+    node = bpy.context.active_object
+    node.name = "usc"
+    node.data.materials.append(m["cardinal"])
+    bev = node.modifiers.new("crisp", "BEVEL")
+    bev.width = 0.008
+    bev.segments = 2
+
+
 def build_glyph(m):
     # One puffy cardinal T and the gold dot, nothing else.
     rod = 0.16
@@ -142,6 +210,8 @@ def stage(variant, out):
     }
     if variant == "woven":
         build_woven(m)
+    elif variant == "tech":
+        build_tech(m)
     elif variant == "arch":
         build_arch(m, True)
     elif variant == "stack":

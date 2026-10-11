@@ -651,7 +651,8 @@ def writer_world(holder, w, h):
     M.new_mesh_obj("Ridge", bm, M.clay("9CC4B4", rough=0.8, bump=0.3))
 
     # a little USC across the road: halls with cardinal roofs, a campanile
-    cx, cy = 3.9, 9.0  # right of the machine, clear of the card copy and the paper
+    # right of the machine, clear of the card copy; at x 3.9 the paper hid it
+    cx, cy = 7.6, 9.5
     M.rounded_box("Campanile", (0.45, 0.45, 2.2), H.clay("cream"), bevel=0.05, location=(cx, cy, 1.1))
     M.rounded_box("Belfry", (0.54, 0.54, 0.32), H.clay("card"), bevel=0.05, location=(cx, cy, 2.36))
     bm = bmesh.new()
