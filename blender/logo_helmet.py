@@ -36,10 +36,14 @@ import logo as L  # noqa: E402
 AX, AY, AZ = 1.12, 0.9, 1.04  # the dome's half-axes: long front to back
 
 
-def grainy(name, color, rough=0.6, grain=0.38):
+def grainy(name, color, rough=0.6, grain=0.6):
+    """logo.py's material with a coarser, stronger grain: at helmet scale
+    its scale-70 bump vanished in the first still."""
     m = L.clay(name, color, rough)
     bump = next(n for n in m.node_tree.nodes if n.type == "BUMP")
     bump.inputs["Strength"].default_value = grain
+    noise = next(n for n in m.node_tree.nodes if n.type == "TEX_NOISE")
+    noise.inputs["Scale"].default_value = 38.0
     return m
 
 
@@ -66,8 +70,8 @@ def helmet(mat):
     # the open bottom, cut flat
     floor_cut = cutter("CutFloor", (4, 4, 2), (0, 0, -1.6))
     # the face opening as a T: an eye slit across, a slot down the middle
-    bar = cutter("CutBar", (1.0, 1.16, 0.2), (-1.0, 0, 0.12))
-    stem = cutter("CutStem", (1.0, 0.26, 0.8), (-1.0, 0, -0.26))
+    bar = cutter("CutBar", (1.0, 1.2, 0.26), (-1.0, 0, 0.14))
+    stem = cutter("CutStem", (1.0, 0.32, 0.9), (-1.0, 0, -0.3))
     for c in (floor_cut, bar, stem):
         b = h.modifiers.new(c.name, "BOOLEAN")
         b.operation = "DIFFERENCE"
@@ -95,8 +99,9 @@ def crest(mat):
     for p in parts:
         p.parent = holder
     # stood on the back of the dome, its foot sunk into the clay
-    x = 0.5
-    z = AZ * math.sqrt(max(0.0, 1 - (x / AX) ** 2)) + 0.4
+    x = 0.55
+    # 0.4 above the dome left the S floating in the first still
+    z = AZ * math.sqrt(max(0.0, 1 - (x / AX) ** 2)) + 0.28
     holder.location = (x, 0, z)
     holder.rotation_euler = (0, math.radians(-18), 0)  # leans back with the dome
     return holder
@@ -165,7 +170,7 @@ def main():
         if o.name.startswith("Cut"):
             o.parent = mark
     # three-quarters: the face (-x) turned toward the camera and the left
-    mark.rotation_euler = Euler((0, 0, math.radians(32)))
+    mark.rotation_euler = Euler((0, 0, math.radians(42)))  # 32 hid the T edge-on
     mark.location = (0, 0, 0.62)
 
     bpy.ops.mesh.primitive_circle_add(vertices=96, radius=2.6, fill_type="NGON", location=(0, 0, 0))
