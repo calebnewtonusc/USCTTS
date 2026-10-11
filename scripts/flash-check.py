@@ -39,6 +39,13 @@ ARGS = ["--use-angle=metal", "--enable-gpu", "--ignore-gpu-blocklist"]
 LUM_JUMP = 0.08
 HUE_JUMP = 40.0
 SAT_MIN = 0.18
+# A hue jump also needs the saturated pixels' hue histogram to move: L1
+# distance over 0.6 of a possible 2. The peak alone flips between two
+# near-equal hues on a still scene. Measured 2026-10-11 on /way's green
+# film world: grass against the cream table flipped the peak 45 <-> 95 on
+# eight neighbour pairs with L1 0.04 to 0.19, while the iris from the blue
+# map into the film measured 1.29 and 1.75.
+HIST_JUMP = 0.6
 
 
 def stats(path):
@@ -55,9 +62,13 @@ def stats(path):
     hue = None
     if share > 0.15:
         h = (hsv[..., 0][sat] * 360.0).astype(np.int32) // 10
-        hue = float(np.bincount(h, minlength=36).argmax() * 10 + 5)
+        counts = np.bincount(h, minlength=36).astype(np.float64)
+        hue = float(counts.argmax() * 10 + 5)
+        hist = [round(float(v), 4) for v in counts / counts.sum()]
+    else:
+        hist = None
     return {"lum": round(lum, 4), "white": round(white, 3), "red": round(red, 3), "hue": hue,
-            "sat_share": round(share, 3)}
+            "hist": hist, "sat_share": round(share, 3)}
 
 
 def hue_dist(a, b):
@@ -108,7 +119,9 @@ def main():
         if abs(cur["lum"] - prev["lum"]) > LUM_JUMP:
             why.append(f"luminance {prev['lum']:.3f} -> {cur['lum']:.3f}")
         if prev["hue"] is not None and cur["hue"] is not None and hue_dist(prev["hue"], cur["hue"]) > HUE_JUMP:
-            why.append(f"hue {prev['hue']:.0f} -> {cur['hue']:.0f}")
+            moved = sum(abs(x - y) for x, y in zip(prev["hist"], cur["hist"]))
+            if moved > HIST_JUMP:
+                why.append(f"hue {prev['hue']:.0f} -> {cur['hue']:.0f} (histogram moved {moved:.2f})")
         if why:
             flags.append({"steps": [prev["step"], cur["step"]], "y": [prev["y"], cur["y"]], "why": why})
     for r in rows:

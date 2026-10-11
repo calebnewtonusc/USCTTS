@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { clamp, lerp, prog, smooth } from "../engine/math";
+import { clamp, easeInOut3, lerp, prog, smooth } from "../engine/math";
 import {
   FILM_FRAMES,
   filmShare,
@@ -109,7 +109,8 @@ export default function Week() {
     /* The film: a still under reduced motion, otherwise a canvas the
      * scroll draws frames into (filmSeq.ts). Nothing downloads until the
      * dive is about 1.5 screens away (review 4: 5.3 MB at scrollY 0). */
-    const portrait = window.innerWidth < 768 && window.innerHeight > window.innerWidth;
+    const portrait =
+      window.innerWidth < 768 && window.innerHeight > window.innerWidth;
     let seq: Film | null = null;
     let pending = false;
     if (box && reduced) {
@@ -144,7 +145,8 @@ export default function Week() {
           // Box-Muller, one sample a pixel.
           const u = Math.random() || 1e-6;
           const v = Math.random();
-          const z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) * 0.17;
+          const z =
+            Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) * 0.17;
           // 2.2 here read at about 2.5 times the render's grain in a dpr 2
           // crop of the live film; 1 lands near its 0.026.
           const a = Math.min(1, Math.abs(z) * 0.26);
@@ -167,7 +169,10 @@ export default function Week() {
       .then((j: unknown) => {
         if (!j || typeof j !== "object") return;
         const list = Object.entries(j as Record<string, unknown>)
-          .filter((e): e is [string, [number, number]] => Array.isArray(e[1]) && STAGE_NAME[e[0]] !== undefined)
+          .filter(
+            (e): e is [string, [number, number]] =>
+              Array.isArray(e[1]) && STAGE_NAME[e[0]] !== undefined,
+          )
           .map(([k, [from, to]]) => ({ name: STAGE_NAME[k], from, to }))
           .sort((x, y) => x.from - y.from);
         if (!list.length) return;
@@ -224,16 +229,26 @@ export default function Week() {
         // into red", "it seems super unintentional that it goes back to
         // the map", "Lazy ass transition").
         const diag = Math.hypot(f.vw, f.vh) * 1.6;
-        const open = prog(p, WEEK.filmIn[0], WEEK.filmIn[1]);
+        // The film's share of the screen grows evenly with scroll, from the
+        // point to the corners. Grown exponentially to 1.6 diagonals, the
+        // circle covered the screen a third of the way in and swallowed most
+        // of it in one 33px step (flash check, 2026-10-11: hue histogram
+        // moved 1.57, then 1.18 eased).
+        const k = prog(p, WEEK.filmIn[0], WEEK.filmIn[1]);
         const POINT = 6;
-        const r = POINT * Math.pow(diag / POINT, open);
+        const cover = Math.hypot(f.vw, f.vh) * 0.54;
+        const r = k < 1 ? POINT + (cover - POINT) * Math.sqrt(k) : diag;
         const o = p >= WEEK.filmIn[0] ? 1 : 0;
         film.style.opacity = o.toFixed(3);
         film.style.visibility = o > 0.002 ? "visible" : "hidden";
         film.style.setProperty("--r", `${r.toFixed(1)}px`);
         film.classList.toggle("is-shrinking", r < diag * 0.999);
         // The doors' sheet gathers its cardinal points as it arrives.
-        if (join) join.style.setProperty("--g", smooth(prog(p, WEEK.out[0], 1)).toFixed(3));
+        if (join)
+          join.style.setProperty(
+            "--g",
+            smooth(prog(p, WEEK.out[0], 1)).toFixed(3),
+          );
         // The x-ray hint loop runs only while the film fills the screen,
         // the grain only while any of it shows.
         film.classList.toggle("is-parked", o > 0.98);
@@ -268,7 +283,9 @@ export default function Week() {
         // mask's solid core still covers the whole frame.
         const fade =
           st.name === "pullback"
-            ? smooth(prog(easeInOut3(prog(p, WEEK.out[0], WEEK.out[1])), 0, 0.06))
+            ? smooth(
+                prog(easeInOut3(prog(p, WEEK.out[0], WEEK.out[1])), 0, 0.06),
+              )
             : smooth(prog(t, 0.84, 1));
         const o = smooth(prog(t, t0, t0 + 0.16)) * (1 - fade);
         c.style.opacity = o.toFixed(3);
@@ -301,11 +318,7 @@ export default function Week() {
           First, the work leaves USC.
         </h2>
 
-        <div
-          className="w5-glow"
-          aria-hidden="true"
-         
-        />
+        <div className="w5-glow" aria-hidden="true" />
 
         <div className="w5-film">
           <div className="w4-body">

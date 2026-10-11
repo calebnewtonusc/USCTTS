@@ -62,8 +62,13 @@ export const WEEK = {
   // diving, the film opens out of the client node at the screen's centre,
   // its first frame looking straight down on the red lead as a dot the size
   // of the node, and both cameras keep zooming in at about the same rate.
-  filmIn: [0.014, 0.022],
-  film: [0.014, 0.99],
+  // 2026-10-11: at 0.008 of the week the iris opened in about 70px of
+  // scroll, one wheel notch, and the flash check read the blue map to the
+  // film as a cut (hue histogram moved 1.75 between two steps). At 0.022 it
+  // still moved 1.21 per 66px step of the pre-push check; 0.038 is about
+  // 340px, five steps of an even area reveal.
+  filmIn: [0.012, 0.05],
+  film: [0.012, 0.99],
   // The ending: the film settles on its wide golden shot and the doors'
   // cardinal sheet rises over it (v4.css, ".is-way .jn"); the readouts
   // leave first so nothing collides with the doors.
@@ -74,7 +79,13 @@ export const WEEK = {
 
 /* The film's stages, in frames at 30 fps: public/tts/machine/stages.json,
  * also loaded at runtime (Week.tsx) so a re-render needs no code change. */
-export type Stage = "tray" | "sorter" | "typewriter" | "mailbox" | "blocks" | "pullback";
+export type Stage =
+  | "tray"
+  | "sorter"
+  | "typewriter"
+  | "mailbox"
+  | "blocks"
+  | "pullback";
 export const STAGES: { name: Stage; from: number; to: number }[] = [
   { name: "tray", from: 14, to: 48 },
   { name: "sorter", from: 48, to: 166 },
@@ -96,7 +107,9 @@ const RACK = { frames: 44, share: 0.0157 };
 export const filmShare = (p: number) => {
   const k = prog(p, WEEK.film[0], WEEK.film[1]);
   const r = RACK.frames / FILM_FRAMES.n;
-  return k < RACK.share ? (k / RACK.share) * r : r + ((k - RACK.share) / (1 - RACK.share)) * (1 - r);
+  return k < RACK.share
+    ? (k / RACK.share) * r
+    : r + ((k - RACK.share) / (1 - RACK.share)) * (1 - r);
 };
 
 export type Phase = "intro" | "travel" | "dive" | Stage | "out";
@@ -157,7 +170,8 @@ function run(now: number) {
   const y = window.scrollY;
   // A jump of more than three screens (the scrollbar dragged, a key like
   // End) lands: following it would replay a whole chapter in a blur.
-  if (fy < 0 || reducedMotion || Math.abs(y - fy) > 3 * window.innerHeight) fy = y;
+  if (fy < 0 || reducedMotion || Math.abs(y - fy) > 3 * window.innerHeight)
+    fy = y;
   else {
     const gap = now - lastRun;
     const dt = gap > 50 ? 1 / 60 : gap / 1000;
@@ -321,7 +335,13 @@ function regions(f: Frame) {
   if (wi > 0.35) mode = "topdown";
   // The field reads at full strength while it's the stage; the film covers
   // it from the dive to the pull-back.
-  const mapWorks = bump(P.week, WEEK.heat[0], WEEK.heat[0] + 0.03, D0, D0 + 0.03);
+  const mapWorks = bump(
+    P.week,
+    WEEK.heat[0],
+    WEEK.heat[0] + 0.03,
+    D0,
+    D0 + 0.03,
+  );
   dim = lerp(dim, 0.4 - 0.25 * mapWorks, wi);
   // No heat map in v5: the worth-reaching flare read as a red blob above
   // the script's line (freshman review 2).
@@ -504,7 +524,10 @@ export function glideTo(target: number) {
 }
 
 /** The document y where a region's progress reaches p. */
-export function yAt(id: "open" | "partners" | "week" | "alumni" | "join", p: number) {
+export function yAt(
+  id: "open" | "partners" | "week" | "alumni" | "join",
+  p: number,
+) {
   const vh = window.innerHeight;
   const el = document.getElementById(`v4-${id}`);
   if (!el) return 0;
