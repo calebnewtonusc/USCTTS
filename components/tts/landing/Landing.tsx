@@ -9,6 +9,8 @@ import { NETWORK_PEOPLE } from "@/data/people";
 import Depth from "./Depth";
 import DotFloor from "./DotFloor";
 import Gather from "./Gather";
+import HeroLoop from "./HeroLoop";
+import LogoLoop from "./LogoLoop";
 import Network from "./Network";
 import Partners from "./Partners";
 import { Mentors } from "./People";
@@ -110,16 +112,11 @@ export default function Landing() {
                     className="ld-work-floor"
                   />
                   <div className="ld-frame is-blush">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src="/tts/home/mailbox-720.webp"
-                      srcSet="/tts/home/mailbox-720.webp 720w, /tts/home/mailbox-1440.webp 1440w"
-                      sizes="(min-width: 900px) 560px, 100vw"
-                      alt="A gold clay mailbox with its red flag up and a sealed letter going out on its open door"
-                      width={1440}
-                      height={1080}
-                      loading="lazy"
-                      decoding="async"
+                    <HeroLoop
+                      name="/tts/home/mailbox"
+                      width={1120}
+                      height={840}
+                      label="A gold clay mailbox: letters fly in on dotted trails, its red flag pops up, and it hops and sends a sealed letter back out"
                     />
                   </div>
                 </div>
@@ -242,11 +239,20 @@ export default function Landing() {
           </section>
 
           {/* 06. The team, told as the comeback. */}
-          <section id="team" className="ld-sec ld-team" aria-labelledby="ld-team-h">
+          <section
+            id="team"
+            className="ld-sec ld-team"
+            aria-labelledby="ld-team-h"
+          >
             <div className="ld-wrap">
               <Mark n="06" label="the team" />
             </div>
             <TeamStory />
+            {/* The sign-off: the mark bounces, jumps, spins, lands and
+             * wobbles, then holds before the loop (LogoLoop.tsx). */}
+            <div className="ld-sign">
+              <LogoLoop className="ld-sign-mark" />
+            </div>
           </section>
 
           <Gather />

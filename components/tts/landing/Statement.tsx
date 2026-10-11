@@ -1,4 +1,5 @@
 import DotFloor from "./DotFloor";
+import HeroLoop from "./HeroLoop";
 
 /*
  * Who TTS is, the first thing on home's sheet (Tyler, 2026-10-09: a big
@@ -32,15 +33,15 @@ export default function Statement() {
           className="ld-ground-floor"
         />
         <div className="ld-frame is-world">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/tts/home/world-1200.webp"
-            srcSet="/tts/home/world-1200.webp 1200w, /tts/home/world-2400.webp 2400w"
-            sizes="(min-width: 1280px) 1184px, 100vw"
-            alt="A clay Los Angeles at golden hour: green hills, a downtown of rounded towers, palm trees, and USC's cardinal tower with a red map dot above it, joined by a freeway"
-            width={2400}
-            height={1200}
-            decoding="async"
+          {/* Caleb, 2026-10-10: "they need to be 3d animated videos like
+           * the clay site". The city never stops moving: clouds drift, palms
+           * sway, cars run the freeway, USC's pin sends a ring into it. */}
+          <HeroLoop
+            name="/tts/home/world"
+            width={1280}
+            height={640}
+            mobileWidth={720}
+            label="A clay Los Angeles at golden hour: green hills, a downtown of rounded towers, palm trees, and USC's cardinal tower with a red map dot above it, joined by a freeway"
           />
         </div>
       </div>

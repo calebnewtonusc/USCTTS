@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Shell from "@/components/tts/Shell";
 import DotFloor from "@/components/tts/landing/DotFloor";
-import WorldArcs from "@/components/tts/landing/WorldArcs";
+import HeroLoop from "@/components/tts/landing/HeroLoop";
 import { mono } from "@/components/tts/v4/mono";
 import { INSTAGRAM_URL } from "@/components/tts/links";
 import { APPLY_FORM_URL, APPLICATIONS_OPEN } from "@/lib/apply";
@@ -25,8 +25,8 @@ export const metadata: Metadata = {
  * the promise with the one action, the path from the first build night to
  * real company work, a member's build running, and the action again. It
  * repeats nothing from home: no client list, no partner line, no logos or
- * faces, no clay still. The visual is built in the page (the dot world with
- * USC's point) until /apply's own loop exists. The signup form and where it
+ * faces, no clay still. The visual is /apply's own looping render, a
+ * video like every 3D scene on the site, never a still. The signup form and where it
  * submits (NotifyForm, /api/notify) are unchanged. Every section stays
  * under 25 words of body copy; tools/section-check.mjs enforces 40.
  */
@@ -70,18 +70,28 @@ export default function ApplyPage() {
       <div className={`pgx jo ${mono.variable}`}>
         {/* 1. The promise and the one action. */}
         <section className="jo-hero" aria-labelledby="jo-h">
-          <div className="jo-world" aria-hidden="true">
-            <WorldArcs places={[]} />
-          </div>
           <div className="jo-wrap jo-hero-in">
-            <p className="jo-mark is-light">
-              <span className="jo-dot" aria-hidden="true" />
-              join TTS
-            </p>
-            <h1 id="jo-h" className="jo-h1">
-              Build real AI for <em>clients anywhere in the world.</em>
-            </h1>
-            <ApplyAction id="apply" />
+            <div>
+              <p className="jo-mark is-light">
+                <span className="jo-dot" aria-hidden="true" />
+                join TTS
+              </p>
+              <h1 id="jo-h" className="jo-h1">
+                Build real AI for <em>clients anywhere in the world.</em>
+              </h1>
+              <ApplyAction id="apply" />
+            </div>
+            {/* /apply's own loop (blender/loops.py, apply): a student's
+             * laptop types a project, it pops out of the screen and lands
+             * on a small globe as a cardinal pin. */}
+            <div className="jo-fig">
+              <HeroLoop
+                name="/tts/home/apply"
+                width={1120}
+                height={840}
+                label="A gold laptop on a desk types a project, which pops out of the screen and lands on a small globe as a cardinal pin"
+              />
+            </div>
           </div>
         </section>
 
@@ -90,11 +100,7 @@ export default function ApplyPage() {
         </div>
 
         {/* 2. The path. */}
-        <section
-          className="jo-sec is-sky"
-          aria-labelledby="jo-path-h"
-         
-        >
+        <section className="jo-sec is-sky" aria-labelledby="jo-path-h">
           <div className="jo-wrap">
             <p className="jo-mark">
               <span className="jo-n">01</span> how it goes
