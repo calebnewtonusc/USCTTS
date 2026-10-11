@@ -47,7 +47,8 @@ const PLACES: Place[] = [
     up: true,
   },
   { id: "gh", name: "Ghana", note: "healthcare", lat: 7.95, lon: -1.02 },
-  { id: "ye", name: "Yemen", lat: 15.55, lon: 48.52 },
+  // Tyler, 2026-10-10: Yemen off ("we don't have that"), Kenya on.
+  { id: "ke", name: "Kenya", lat: -0.02, lon: 37.91 },
 ];
 
 function BookButton({ big = false }: { big?: boolean }) {
@@ -172,7 +173,7 @@ export default function WorkWithUsPage() {
               <span className="co-n">03</span> real work
             </p>
             <h2 id="co-world-h" className="co-h2">
-              Our client work <em>reaches from Nigeria to Yemen.</em>
+              Our client work <em>reaches from Nigeria to Kenya.</em>
             </h2>
             <div data-drift="0.16">
               <WorldArcs places={PLACES} />
@@ -183,18 +184,16 @@ export default function WorkWithUsPage() {
               data-drift="0.11"
             >
               <li>
-                <span className="co-code">NG</span> Nigeria, an AI curriculum
-                for an education nonprofit
+                <span className="co-code">NG</span> Nigeria, a student
+                education nonprofit, 10,000+ students
               </li>
               <li>
-                <span className="co-code">GH</span> Ghana, healthcare
+                <span className="co-code">GH</span> Ghana, a mobile healthcare unit,
+                over 9,000 rural patients
               </li>
               <li>
-                <span className="co-code">YE</span> Yemen
-              </li>
-              <li>
-                <span className="co-code is-field" aria-hidden="true" /> Cancer
-                therapeutics
+                <span className="co-code">KE</span> Kenya, mosquito treatment
+                and cancer therapeutics
               </li>
             </ul>
           </div>
