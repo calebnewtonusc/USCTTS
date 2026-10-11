@@ -137,6 +137,7 @@ Caleb, 2026-10-10: "Should we move the people page into the main page? The ppl p
 - One pinned stage, 560vh. The roster is 30 points, one a seat, empty rings while "For over a year, Trojan Tech Solutions sat dormant, with nobody in it."; Matthew Kim's cardinal point (his initials, "Matthew Kim handed it on") with red threads to Caleb's and Tyler's seats, their faces landing there, under the handoff line; Emily joining and the rest of the seats filling outward from the three in clay colours along thin lines, each pulled in by a neighbour, under "So they started over, with Emily Zhao on design...". Lines never share the screen (the /members version overlapped at 0.3). The seats are a picture of dormant and full, not a member count. Both.
 - "About three months later, it had a real roster." alone, big, as the roster sits back. Both.
 - The three faces travel out of their seats into the team cards, the same three photographs, so a face is on the page once and the story's last move is the content: "Meet the team.", three tinted cards (gold, sky, blush) with name, role in mono, the background line from data/people.ts, and a link (Caleb's site, Tyler's LinkedIn; Emily has none on record). Professional photos only, never an AI-generated team image. Amber stays off: it is in stealth. Both.
+
 ## 7. The doors (cardinal world)
 
 - The cardinal raining in across the city as the sheet ends: the field returns for the ending. Both.
@@ -150,20 +151,28 @@ Caleb, 2026-10-10: "Should we move the people page into the main page? The ppl p
 No file appears twice and no scene appears twice. The machine scene is in
 exactly one place, the /way film.
 
-| Where                  | File                                                                                                                                | Source                                                      |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| home, opener and doors | public/tts/grid/la-grid.bin (poster.jpg until WebGL draws)                                                                          | OpenStreetMap, public/tts/grid/README.md                    |
-| home, who we are       | public/tts/home/world-1200.webp, world-2400.webp                                                                                    | blender/heroes.py --hero world                              |
-| home, partners         | public/tts/partners/clay.png, perplexity.svg                                                                                        | the partners' official marks                                |
-| home, our work         | public/tts/home/mailbox-720.webp, mailbox-1440.webp                                                                                 | blender/heroes.py --hero mailbox                            |
+This holds across the whole site, not just home and /way: no asset or visual
+appears on two pages, or twice on one page, and no clay scene ships as a
+still. A clay slot waits for its loop with a visual built in the page
+(Caleb, 2026-10-10: "NEVER REPEAT THINGS AND NEVER MAKE 3d STILLS").
+tools/section-check.mjs (npm run check:sections) flags both. /apply's hero
+is the dot world with USC's point (WorldArcs, no places) until its own loop
+renders.
+
+| Where                  | File                                                                                                                                                                | Source                                                                                                                                                  |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| home, opener and doors | public/tts/grid/la-grid.bin (poster.jpg until WebGL draws)                                                                                                          | OpenStreetMap, public/tts/grid/README.md                                                                                                                |
+| home, who we are       | public/tts/home/world-1200.webp, world-2400.webp                                                                                                                    | blender/heroes.py --hero world                                                                                                                          |
+| home, partners         | public/tts/partners/clay.png, perplexity.svg                                                                                                                        | the partners' official marks                                                                                                                            |
+| home, our work         | public/tts/home/mailbox-720.webp, mailbox-1440.webp                                                                                                                 | blender/heroes.py --hero mailbox                                                                                                                        |
 | home, network          | public/tts/grid/la-grid.bin (the floor), public/tts/alumni/(name).svg, public/tts/marks/{mckinsey.png,nbcuniversal.svg,uscgould.png}, public/img/alumni/(name).jpeg | OpenStreetMap; company marks (Commons: NBCUniversal 2026 Logo (flat).svg and USC Gould logo.png, both public domain); alumni photos from data/people.ts |
-| home, advisors         | public/img/{chris_swain,matthew,kevin,duncan,sagar,andrew}\_shot.\*, public/tts/marks/{mckinsey,reddit,google,stanford,mixbook}.png (trimmed from public/img/logos) | data/people.ts                                              |
-| home, TTS way card     | public/tts/home/writer-1200.webp, writer-2400.webp                                                                                  | blender/heroes.py --hero writer                             |
-| home, team story       | public/img/{caleb,tyler,emily}\_shot.\*                                                                                             | data/people.ts                                              |
-| /way, opener           | none: a canvas graticule and great circle (WayOpen.tsx); the field under it is la-grid.bin |
-| /way, doors            | public/tts/grid/la-grid.bin                                                                                                         | OpenStreetMap                                               |
-| /way, the film         | public/tts/machine/seq/{land-2560,land-1280,port-1440,port-720}/\*.webp, still-land.webp and still-port.webp under reduced motion   | blender/machine.py, the only place the full machine appears |
-| /way, x-ray            | public/tts/manim/{gtm_score,gtm_score_on_cardinal,email_draft,crm_merge,teach_curve}.{mov,webm,png}                                 | manim/scenes.py                                             |
+| home, advisors         | public/img/{chris_swain,matthew,kevin,duncan,sagar,andrew}\_shot.\*, public/tts/marks/{mckinsey,reddit,google,stanford,mixbook}.png (trimmed from public/img/logos) | data/people.ts                                                                                                                                          |
+| home, TTS way card     | public/tts/home/writer-1200.webp, writer-2400.webp                                                                                                                  | blender/heroes.py --hero writer                                                                                                                         |
+| home, team story       | public/img/{caleb,tyler,emily}\_shot.\*                                                                                                                             | data/people.ts                                                                                                                                          |
+| /way, opener           | none: a canvas graticule and great circle (WayOpen.tsx); the field under it is la-grid.bin                                                                          |
+| /way, doors            | public/tts/grid/la-grid.bin                                                                                                                                         | OpenStreetMap                                                                                                                                           |
+| /way, the film         | public/tts/machine/seq/{land-2560,land-1280,port-1440,port-720}/\*.webp, still-land.webp and still-port.webp under reduced motion                                   | blender/machine.py, the only place the full machine appears                                                                                             |
+| /way, x-ray            | public/tts/manim/{gtm_score,gtm_score_on_cardinal,email_draft,crm_merge,teach_curve}.{mov,webm,png}                                                                 | manim/scenes.py                                                                                                                                         |
 
 Every face appears once on home. Matthew Kim and Kevin Sangmuah are both
 on the network wall (they co-founded TTS) and in the advisors section, so
