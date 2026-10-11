@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { usePin } from "./usePin";
+import { usePin } from "@/components/tts/usePin";
 
 /*
  * 01, how it goes (Caleb, 2026-10-10, on the four equal columns this

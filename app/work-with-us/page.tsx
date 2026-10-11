@@ -6,9 +6,12 @@ import WorldArcs, { type Place } from "@/components/tts/landing/WorldArcs";
 import { mono } from "@/components/tts/v4/mono";
 import { CALENDLY_URL } from "@/lib/contact";
 import Drift from "@/components/tts/Drift";
+import Builds from "./Builds";
+import HowRuns from "./HowRuns";
 import Inbox from "./Inbox";
 import "@/components/tts/pages.css";
 import "./company.css";
+import "./story.css";
 
 export const metadata: Metadata = {
   title: "For companies | Trojan Tech Solutions",
@@ -18,11 +21,13 @@ export const metadata: Metadata = {
 
 /*
  * For companies (Caleb, 2026-10-10: "The company page lame af"). The reader
- * is a business owner who doesn't know much about AI. The page is one trip:
- * the week they already have (an example inbox), what we'd build instead
- * (the four things TTS builds, each one problem and one build), the real
- * work around the world, the tools it's built on, how a project runs, and
- * one call to book. Same world as home (docs/INTENT-home.md, "One world"):
+ * is a business owner who doesn't know much about AI, often arriving from a
+ * cold email. The page answers their questions in the order they ask them:
+ * what is this (the inbox and the fix), can students really do it (the
+ * official partnership, straight after), what exactly would you build (each
+ * of the four shown changing), have you done it for anyone (the world map),
+ * what does it cost my team in time (one call, the build, the handover), and
+ * how do I start (one call to book). Same world as home (docs/INTENT-home.md, "One world"):
  * the field's points, USC's cardinal point, mono for small data.
  *
  * Facts only from disk: the four things are Caleb's own list (RUBRIC, home's
@@ -30,33 +35,6 @@ export const metadata: Metadata = {
  * 2026-10-09); the partners line is Statement.tsx's. No client is named and
  * no result is claimed. The examples are examples of the work, labelled so.
  */
-
-const BUILDS = [
-  {
-    kind: "automations",
-    tone: "is-blush",
-    problem: "The same emails, all week",
-    build: "AI drafts the replies, you approve them",
-  },
-  {
-    kind: "CRMs",
-    tone: "is-sky",
-    problem: "Leads in a spreadsheet",
-    build: "A CRM that fills itself in",
-  },
-  {
-    kind: "outbound",
-    tone: "is-gold",
-    problem: "Hours finding who to sell to",
-    build: "A list of who's worth reaching, and the first email",
-  },
-  {
-    kind: "training",
-    tone: "is-leaf",
-    problem: "Staff new to AI",
-    build: "Lessons built around their own work",
-  },
-];
 
 // Country centres: the sources name countries, never cities.
 const PLACES: Place[] = [
@@ -72,24 +50,6 @@ const PLACES: Place[] = [
   { id: "ye", name: "Yemen", lat: 15.55, lon: 48.52 },
 ];
 
-const STEPS = [
-  {
-    n: "01",
-    title: "A 30-minute call",
-    line: "Tell us what's eating your team's time.",
-  },
-  {
-    n: "02",
-    title: "We build it in your tools",
-    line: "Wherever you are, in the software you already use.",
-  },
-  {
-    n: "03",
-    title: "We hand it to your team",
-    line: "We teach your team to run it.",
-  },
-];
-
 function BookButton({ big = false }: { big?: boolean }) {
   return (
     <a
@@ -102,10 +62,6 @@ function BookButton({ big = false }: { big?: boolean }) {
     </a>
   );
 }
-
-/* Scroll depth per card (components/tts/Drift.tsx): each of the four builds
- * passes at its own rate, so the row separates as it scrolls by. */
-const DRIFT = ["0.1", "0.14", "0.18", "0.12"];
 
 export default function WorkWithUsPage() {
   return (
@@ -156,54 +112,64 @@ export default function WorkWithUsPage() {
           </div>
         </section>
 
-        {/* 2. What we'd build instead. */}
-        <section className="co-sec" aria-labelledby="co-build-h">
-          <div className="co-wrap">
+        {/* 2. Who we build with, straight after the promise: the owner's
+         * first question is whether students can really do this, and the
+         * partnership is the strongest answer (Caleb, 2026-10-10: "lead
+         * with it"). The marks are loud; the BMA credit stays one quiet
+         * line under them. */}
+        <section className="cp" aria-labelledby="co-pt-h">
+          <div className="co-wrap cp-in">
             <p className="co-mark">
-              <span className="co-n">01</span> what we build
+              <span className="co-n">01</span> who we build with
             </p>
-            <h2 id="co-build-h" className="co-h2">
-              We&apos;d build <em>this instead.</em>
+            <h2 id="co-pt-h" className="cp-h">
+              Built on Clay and Perplexity, <em>as their official partners.</em>
             </h2>
-            <ol className="co-builds">
-              {BUILDS.map((b, i) => (
-                <li
-                  key={b.kind}
-                  className={`co-build ${b.tone}`}
-                  data-drift={DRIFT[i % DRIFT.length]}
-                >
-                  <span className="co-build-k">
-                    <span className="co-n">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>{" "}
-                    {b.kind}
-                  </span>
-                  <span className="co-build-p">{b.problem}</span>
-                  {/* The turn from the problem to the build, in the field's
-                   * points: five dots and a head. */}
-                  <svg
-                    className="co-build-arrow"
-                    viewBox="0 0 44 10"
-                    aria-hidden="true"
-                  >
-                    {[2, 9, 16, 23, 30].map((x) => (
-                      <circle key={x} cx={x} cy="5" r="1.2" />
-                    ))}
-                    <path d="M35 1.5 L41 5 L35 8.5" />
-                  </svg>
-                  <b className="co-build-b">{b.build}</b>
-                </li>
-              ))}
-            </ol>
-            <p className="co-note">examples of the work, not past clients</p>
+            <ul className="cp-marks" aria-label="Our official partners">
+              <li className="cp-tile is-clay" data-drift="0.12">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/tts/partners/clay.png"
+                  alt="Clay"
+                  width={800}
+                  height={252}
+                />
+              </li>
+              <li className="cp-tile is-pplx" data-drift="0.2">
+                <span className="cp-pplx">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/tts/partners/perplexity.svg"
+                    alt=""
+                    width={24}
+                    height={24}
+                  />
+                  Perplexity
+                </span>
+              </li>
+            </ul>
+            <p className="cp-line">
+              The tools real companies pay for to find their customers, set up
+              inside your business.
+            </p>
+            <p className="co-via">
+              Official partners through Blue Modern Advisory
+            </p>
           </div>
         </section>
 
-        {/* 3. The work is real, and it isn't only in LA. */}
+        <div className="co-seam" data-transition aria-hidden="true">
+          <DotFloor win={[-5200, -900, 5200, 900]} max={2200} alpha={0.26} />
+        </div>
+
+        {/* 3. What we'd build instead, each one shown changing (Builds.tsx). */}
+        <Builds />
+
+        {/* 4. The work is real, and it isn't only in LA. */}
         <section className="co-world" aria-labelledby="co-world-h">
           <div className="co-wrap">
             <p className="co-mark is-light">
-              <span className="co-n">02</span> real work
+              <span className="co-n">03</span> real work
             </p>
             <h2 id="co-world-h" className="co-h2">
               Our client work <em>reaches from Nigeria to Yemen.</em>
@@ -234,64 +200,8 @@ export default function WorkWithUsPage() {
           </div>
         </section>
 
-        {/* 4. The tools, and 5. how a project runs, side by side. */}
-        <section className="co-sec" aria-labelledby="co-how-h">
-          <div className="co-wrap co-how">
-            <div className="co-tools" data-drift="0.11">
-              <p className="co-mark">
-                <span className="co-n">03</span> the tools
-              </p>
-              <p className="co-tools-line">
-                Built on Clay and Perplexity, the tools real companies pay for
-                to find their customers.
-              </p>
-              <div className="co-marks">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/tts/partners/clay.png"
-                  alt="Clay"
-                  width={110}
-                  height={35}
-                />
-                <span className="co-pplx">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/tts/partners/perplexity.svg"
-                    alt=""
-                    width={28}
-                    height={28}
-                  />
-                  Perplexity
-                </span>
-              </div>
-              <p className="co-via">
-                Official partners through Blue Modern Advisory
-              </p>
-            </div>
-            <div className="co-steps-wrap">
-              <p className="co-mark">
-                <span className="co-n">04</span> how it runs
-              </p>
-              <h2 id="co-how-h" className="co-h2 is-small">
-                From one call <em>to a handover.</em>
-              </h2>
-              <ol className="co-steps" data-drift="0.17">
-                {STEPS.map((s) => (
-                  <li key={s.n}>
-                    <span className="co-step-dot" aria-hidden="true" />
-                    <span className="co-n">{s.n}</span>
-                    <b>{s.title}</b>
-                    <span>{s.line}</span>
-                  </li>
-                ))}
-              </ol>
-              <Link href="/way" className="co-way">
-                Follow one project, start to finish, in 3D{" "}
-                <span aria-hidden="true">&rarr;</span>
-              </Link>
-            </div>
-          </div>
-        </section>
+        {/* 5. How a project runs, one point along three steps (HowRuns.tsx). */}
+        <HowRuns />
 
         {/* 6. The one call. */}
         <section className="co-end" aria-labelledby="co-end-h">

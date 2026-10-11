@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { DRAFT, PROMPT, QUALIFY } from "@/components/tts/v4/weekData";
-import { usePin } from "./usePin";
+import { usePin } from "@/components/tts/usePin";
 
 /*
  * 02, what you'd build (Caleb, 2026-10-10, on the static three-row table
