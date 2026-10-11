@@ -52,7 +52,14 @@ export default function Footer({
           )}
         </ul>
         <p>
-          <span className="footer-dot" aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="footer-mark"
+            src="/tts/brand/mark-48.png"
+            alt=""
+            width={48}
+            height={48}
+          />
           Trojan Tech Solutions, a student organization at USC.{" "}
           <a
             href="https://www.openstreetmap.org/copyright"

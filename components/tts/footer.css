@@ -53,6 +53,18 @@
   text-underline-offset: 4px;
 }
 /* USC's point, the site's one recurring mark, in place of a logo. */
+.tts footer.footer .footer-mark {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  margin: -6px 8px -6px 0;
+  padding: 2px;
+  vertical-align: middle;
+  /* A cream chip, since the red helmet on the cardinal footer read as a
+   * smudge. */
+  border-radius: 7px;
+  background: #fffaf0;
+}
 .tts footer.footer .footer-dot {
   display: inline-block;
   width: 8px;

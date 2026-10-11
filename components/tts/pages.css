@@ -825,6 +825,19 @@
 .tts header.nav .nav-mark {
   align-items: center;
 }
+.tts header.nav .nav-mark-logo {
+  display: block;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  margin: -4px 0;
+  transition: rotate 300ms cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tts header.nav .nav-mark:hover .nav-mark-logo {
+    rotate: -10deg;
+  }
+}
 .tts header.nav .nav-mark-dot {
   width: 10px;
   height: 10px;
