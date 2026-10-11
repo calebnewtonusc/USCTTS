@@ -51,7 +51,7 @@ PY
 for attempt in 1 2 3 4 5 6; do
   left=0
   for cut in land port; do
-    flags=(--res 2560)
+    flags=(--res 2880)
     [[ $cut == port ]] && flags=(--portrait --res 1440)
     echo "attempt $attempt $cut: removed $(sweep $R/$cut) bad frames"
     for run in $(missing $R/$cut); do
@@ -69,7 +69,7 @@ done
 FILM_SRC=$R FILM_OUT=public/tts/machine/seq-v2 python3 blender/encode_seq.py
 python3 - <<'PY'
 from PIL import Image
-for cut, size in (("land", (2560, 1440)), ("port", (1440, 2560))):
+for cut, size in (("land", (2880, 1620)), ("port", (1440, 2560))):
     im = Image.open(f"blender/renders-v2/{cut}/f0360.png").convert("RGB")
     im.resize(size, Image.LANCZOS).save(f"public/tts/machine/still-{cut}-v2.webp", "WEBP", quality=82, method=6)
 PY

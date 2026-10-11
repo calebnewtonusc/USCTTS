@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { clamp, easeInOut3, lerp, prog, smooth } from "../engine/math";
+import { clamp, lerp, prog, smooth } from "../engine/math";
 import {
   FILM_FRAMES,
   filmShare,
@@ -100,6 +100,7 @@ export default function Week() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
     const intro = el.querySelector<HTMLElement>(".w5-intro");
+    const join = document.getElementById("v4-join");
     const glow = el.querySelector<HTMLElement>(".w5-glow");
     const film = el.querySelector<HTMLElement>(".w5-film");
     const box = el.querySelector<HTMLElement>(".w4-film");
@@ -200,32 +201,39 @@ export default function Week() {
           intro.style.transform = `translate3d(0, ${lerp(30, -30, clamp(t)).toFixed(1)}px, 0)`;
       }
 
-      // Through the point: its glow grows from the screen's centre until
-      // it's the whole frame, in the film's ground colour.
+      // A warm halo on the point as the iris opens: the clay world's sunlit
+      // colour arriving in the grid's light before the film does.
       if (glow) {
-        const g = easeInOut3(
-          prog(p, WEEK.dive[0], WEEK.filmIn[0] + 0.002),
-        );
-        const gone = smooth(prog(p, WEEK.filmIn[1], WEEK.filmIn[1] + 0.01));
-        const o = smooth(prog(g, 0, 0.3)) * (1 - gone);
+        const g = prog(p, WEEK.filmIn[0] - 0.004, WEEK.filmIn[1]);
+        const o = Math.sin(Math.PI * clamp(g)) * 0.85;
         glow.style.opacity = o.toFixed(3);
         glow.style.visibility = o > 0.002 ? "visible" : "hidden";
-        glow.style.transform = `translate(-50%, -50%) scale(${lerp(0.02, 2.4, g).toFixed(3)})`;
+        glow.style.transform = `translate(-50%, -50%) scale(${(0.012 * Math.pow(60, clamp(g))).toFixed(4)})`;
       }
 
-      // The film crossfades in over the glow, then at the end shrinks back
-      // to the point it came from as the grid returns around it.
+      // The iris (choreo.ts WEEK.filmIn and WEEK.out): the film opens out of
+      // the point at the screen's centre and closes back into it. Its radius
+      // grows and shrinks exponentially, so it moves like the zoom around
+      // it, never like a fade between two pictures.
       if (film) {
-        const a = smooth(prog(p, WEEK.filmIn[0], WEEK.filmIn[1]));
-        const shrink = easeInOut3(prog(p, WEEK.out[0], WEEK.out[1]));
-        const o = a * (1 - smooth(prog(shrink, 0.85, 1)));
+        // It opens out of the point and never closes: the film ends on its
+        // wide golden shot and the doors rise over it on a cardinal sheet
+        // (v4.css, ".is-way .jn"), so nothing goes back to the map and
+        // there is no white field for the cardinal to flash out of
+        // (Caleb, 2026-10-10: "The ending is a white flash bang that turns
+        // into red", "it seems super unintentional that it goes back to
+        // the map", "Lazy ass transition").
+        const diag = Math.hypot(f.vw, f.vh) * 1.6;
+        const open = prog(p, WEEK.filmIn[0], WEEK.filmIn[1]);
+        const POINT = 6;
+        const r = POINT * Math.pow(diag / POINT, open);
+        const o = p >= WEEK.filmIn[0] ? 1 : 0;
         film.style.opacity = o.toFixed(3);
         film.style.visibility = o > 0.002 ? "visible" : "hidden";
-        // Feathered over most of its radius, so the closing film has no
-        // edge: it reads as the machine's light drawing in to a point.
-        const r = Math.hypot(f.vw, f.vh) * 1.8 * (1 - shrink) + 10;
-        film.style.setProperty("--r", `${r.toFixed(0)}px`);
-        film.classList.toggle("is-shrinking", shrink > 0);
+        film.style.setProperty("--r", `${r.toFixed(1)}px`);
+        film.classList.toggle("is-shrinking", r < diag * 0.999);
+        // The doors' sheet gathers its cardinal points as it arrives.
+        if (join) join.style.setProperty("--g", smooth(prog(p, WEEK.out[0], 1)).toFixed(3));
         // The x-ray hint loop runs only while the film fills the screen,
         // the grain only while any of it shows.
         film.classList.toggle("is-parked", o > 0.98);

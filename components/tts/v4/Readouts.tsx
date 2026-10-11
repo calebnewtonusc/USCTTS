@@ -127,7 +127,10 @@ export default function Readouts({ rail = true }: { rail?: boolean }) {
     const off = onFrame((f) => {
       // Comes in on the load clock once the streets are mostly drawn.
       // On home it leaves as the paper sheet comes up over the field.
+      // On /way they leave as the film settles, before the doors' sheet
+      // arrives, so the doors never slide in under the stage scrubber.
       const o =
+        (1 - smooth(prog(P.week, WEEK.out[0], WEEK.out[0] + 0.02))) *
         (1 - smooth(prog(P.join, 0.25, 0.6))) *
         (1 - smooth(prog(P.sheet, 0.2, 0.55))) *
         smooth(prog(INTRO.t, 0.5, 0.8));
