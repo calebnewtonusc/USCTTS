@@ -252,9 +252,16 @@ export default function Week() {
         // The pull-back's line waits for the camera to clear the mailbox,
         // which still fills its top left for the stage's first frames.
         const t0 = st.name === "pullback" ? 0.3 : 0;
-        // The pull-back's line stays until the film itself closes, so the
-        // zoomed-out machine always has its words (freshman review 2).
-        const fade = st.name === "pullback" ? 0 : smooth(prog(t, 0.84, 1));
+        // The pull-back's line stays while the zoomed-out machine fills
+        // the screen (freshman review 2), and leaves as the film starts to
+        // close: it sits inside the film's radial mask, which ate its first
+        // words from the left and left dark red type on the red glow
+        // (sweep, 2026-10-10). By 6% of the shrink it's gone, while the
+        // mask's solid core still covers the whole frame.
+        const fade =
+          st.name === "pullback"
+            ? smooth(prog(easeInOut3(prog(p, WEEK.out[0], WEEK.out[1])), 0, 0.06))
+            : smooth(prog(t, 0.84, 1));
         const o = smooth(prog(t, t0, t0 + 0.16)) * (1 - fade);
         c.style.opacity = o.toFixed(3);
         c.style.visibility = o > 0.002 ? "visible" : "hidden";
