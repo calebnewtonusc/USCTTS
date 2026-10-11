@@ -95,7 +95,12 @@ export default function Thread() {
       head.style.opacity = "0";
       return () => ro.disconnect();
     }
-    const off = onFrame((f) => paint(f.y + f.vh * 0.45 - top), 6);
+    // The real scroll, never the followed one. The thread scrolls with the
+    // page, so its point only holds still on screen when its offset matches
+    // the page exactly. Off f.y, which lags each wheel notch on purpose, the
+    // point jumped up and eased back on every flick (Caleb, 2026-10-10:
+    // "the scroll circle on the left tweaks and bounces up and down").
+    const off = onFrame((f) => paint(window.scrollY + f.vh * 0.45 - top), 6);
     return () => {
       ro.disconnect();
       off();
