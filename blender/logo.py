@@ -36,10 +36,10 @@ def clay(name, color, rough=0.62):
     # A fine noise bump is what reads as hand-pressed clay at logo size; a
     # smooth surface reads as plastic.
     noise = nt.nodes.new("ShaderNodeTexNoise")
-    noise.inputs["Scale"].default_value = 180.0
+    noise.inputs["Scale"].default_value = 70.0
     noise.inputs["Detail"].default_value = 6.0
     bump = nt.nodes.new("ShaderNodeBump")
-    bump.inputs["Strength"].default_value = 0.08
+    bump.inputs["Strength"].default_value = 0.22
     nt.links.new(noise.outputs["Fac"], bump.inputs["Height"])
     nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
     return m
@@ -72,6 +72,33 @@ def ball(x, y, r, mat, name):
 
 def arc(radius, steps=96):
     return [(radius * math.cos(math.pi * i / steps), radius * math.sin(math.pi * i / steps)) for i in range(steps + 1)]
+
+
+def build_woven(m):
+    # Caleb, 2026-10-10: "the middle of the t rises up through the white and
+    # yellow, and then has short curvy rods that follow outward down the
+    # yellow for a little bit". The bands make the arch; the T is ours: a stem
+    # from the USC dot up through cream and gold, its arms riding the gold
+    # band down each side.
+    for name, r, mat in (("outer", 1.0, m["cardinal"]), ("mid", 0.72, m["gold"]), ("inner", 0.44, m["cream"])):
+        tube(arc(r), 0.14, mat, name)
+    rod = 0.085
+    front = -0.16  # just proud of the bands so the T reads as passing through them
+    def at(points):
+        return [(x, y) for x, y in points]
+    stem = tube(at([(0.0, 0.06), (0.0, 0.72)]), rod, m["ink"], "stem")
+    stem.location.y = front
+    span = math.radians(30)
+    steps = 24
+    for side, sign in (("left", 1), ("right", -1)):
+        pts = []
+        for i in range(steps + 1):
+            a = math.pi / 2 + sign * span * i / steps
+            pts.append((0.72 * math.cos(a), 0.72 * math.sin(a)))
+        arm = tube(pts, rod, m["ink"], f"arm_{side}")
+        arm.location.y = front
+    dot = ball(0.0, 0.06, rod * 1.7, m["cardinal"], "usc")
+    dot.location.y = front
 
 
 def build_arch(m, with_t):
@@ -113,17 +140,16 @@ def stage(variant, out):
         "cream": clay("cream", CREAM),
         "ink": clay("ink", INK, 0.45),
     }
-    if variant == "arch":
+    if variant == "woven":
+        build_woven(m)
+    elif variant == "arch":
         build_arch(m, True)
     elif variant == "stack":
         build_arch(m, False)
     else:
         build_glyph(m)
-
-    # Shadow catcher so the mark sits on something, like the clay heroes.
-    bpy.ops.mesh.primitive_plane_add(size=20, location=(0, 0, -0.14))
-    floor = bpy.context.active_object
-    floor.is_shadow_catcher = True
+    # No floor: v2's shadow catcher rendered as an opaque white plane under
+    # EEVEE, so the mark ships on a clean alpha.
 
     cam_data = bpy.data.cameras.new("cam")
     cam_data.lens = 85
@@ -135,14 +161,14 @@ def stage(variant, out):
     sc.camera = cam
 
     key = bpy.data.lights.new("key", "AREA")
-    key.energy = 900
+    key.energy = 380
     key.size = 6
     k = bpy.data.objects.new("key", key)
     k.location = (-3.0, -4.0, 5.0)
     k.rotation_euler = (math.radians(50), 0, math.radians(-35))
     bpy.context.collection.objects.link(k)
     fill = bpy.data.lights.new("fill", "AREA")
-    fill.energy = 250
+    fill.energy = 110
     fill.size = 8
     f = bpy.data.objects.new("fill", fill)
     f.location = (4.0, -3.0, 2.0)

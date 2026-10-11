@@ -96,6 +96,29 @@ def seam(frames):
     print(f"seam: last->first {wrap:.3f}, median step {med:.3f}, max step {max(steps):.3f}, ratio {wrap / max(med, 1e-6):.2f}")
 
 
+def encode_alpha(frames, src, name):
+    """A transparent loop (the logo): VP9 with alpha for Chrome and Firefox,
+    HEVC with alpha for Safari, which drops the alpha plane of a VP9 WebM.
+    No grain: it would land on the page as speckle around the mark."""
+    w, h = Image.open(frames[0]).size
+    pattern = os.path.join(src, "f_%04d.png")
+    base = os.path.join(OUT, f"{name}-loop-{w}")
+    ffmpeg(["-framerate", str(FPS), "-i", pattern, "-c:v", "libvpx-vp9", "-pix_fmt", "yuva420p",
+            "-crf", "24", "-b:v", "0", "-auto-alt-ref", "0", "-row-mt", "1", "-deadline", "good",
+            "-cpu-used", "2", "-an", base + ".webm"])
+    ffmpeg(["-framerate", str(FPS), "-i", pattern, "-c:v", "hevc_videotoolbox", "-pix_fmt", "bgra",
+            "-alpha_quality", "0.9", "-b:v", "6M", "-tag:v", "hvc1", "-movflags", "+faststart", "-an",
+            base + ".mp4"])
+    poster = Image.open(frames[0]).convert("RGBA")
+    for pw in (w, w // 2):
+        cut = poster if pw == w else poster.resize((pw, pw * h // w), Image.LANCZOS)
+        out = os.path.join(OUT, f"{name}-poster-{pw}.webp")
+        cut.save(out, "WEBP", quality=90, method=6)
+        print(os.path.relpath(out), f"{os.path.getsize(out) / 1e3:.0f} KB")
+    for f in (base + ".webm", base + ".mp4"):
+        print(os.path.relpath(f), f"{os.path.getsize(f) / 1e3:.0f} KB")
+
+
 def main():
     src, name = sys.argv[1], sys.argv[2]
     mobile = int(sys.argv[sys.argv.index("--mobile") + 1]) if "--mobile" in sys.argv else 0
@@ -104,6 +127,9 @@ def main():
     if len(frames) != FPS * 6 or bad:
         sys.exit(f"expected {FPS * 6} finished frames, found {len(frames)} ({len(bad)} empty placeholders)")
     seam(frames)
+    if "--alpha" in sys.argv:
+        encode_alpha(frames, src, name)
+        return
     tmp = os.path.join(src, "graded")
     os.makedirs(tmp, exist_ok=True)
     w, h = Image.open(frames[0]).size

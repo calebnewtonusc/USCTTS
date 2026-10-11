@@ -843,8 +843,231 @@ def loop_world(w, h):
         animate(car, car_fn)
 
 
+
+# ---------------------------------------------------------------- apply
+
+def loop_apply(w, h):
+    """/apply's own scene, used nowhere else: a student's desk, a laptop
+    typing a project, the project popping out of the screen and landing on a
+    small globe as a cardinal pin. You'd build real AI for clients anywhere."""
+    T_POP, FLY = 2.3, 0.7
+    T_LAND = T_POP + FLY
+    T_CLEAR = 4.8
+
+    # the desk: a warm sweep, the frame's own peach
+    sw = H.sweep("tan")
+    sw.data.materials[0] = M.clay("F2C9A0", rough=0.7, bump=0.5)
+
+    # laptop: a gold base, a navy lid tilted back, code typing on its screen
+    lx, ly = -0.3, 0.12
+    base = M.rounded_box("LapBase", (0.92, 0.62, 0.05), H.clay("gold"), bevel=0.02, location=(lx, ly, 0.025))
+    keys = M.rounded_box("LapKeys", (0.76, 0.3, 0.012), H.clay("gold_deep", rough=0.6), bevel=0.005,
+                         subdiv=0, location=(lx, ly + 0.07, 0.052))
+    pad = M.rounded_box("LapPad", (0.26, 0.14, 0.008), H.clay("cream", rough=0.6), bevel=0.004, subdiv=0,
+                        location=(lx, ly - 0.19, 0.051))
+    hinge = Vector((lx, ly + 0.31, 0.05))
+    lid = M.rounded_box("LapLid", (0.92, 0.04, 0.6), H.clay("gold"), bevel=0.02, location=(0, 0, 0.3))
+    screen = M.rounded_box("LapScreen", (0.8, 0.012, 0.48), H.clay("navy", rough=0.45), bevel=0.01, subdiv=0,
+                           location=(0, -0.022, 0.31))
+    lid_g = group("Lid", [], hinge)
+    for o in (lid, screen):
+        o.parent = lid_g
+    lid_g.rotation_euler = (math.radians(-14), 0, 0)
+    laptop = group("Laptop", [base, keys, pad, lid_g], (lx, ly, 0.0))
+
+    # code bars on the screen, typed one after another, cleared before the loop ends
+    bars = [(0.42, "cream"), (0.3, "gold"), (0.5, "cream"), (0.22, "card"), (0.36, "cream"), (0.28, "gold")]
+    x_left = -0.34
+    for i, (bw, key) in enumerate(bars):
+        bar = M.rounded_box(f"Code{i}", (1.0, 0.006, 0.034), H.clay(key, rough=0.5), bevel=0.003, subdiv=0)
+        bar.parent = lid_g
+        z = 0.49 - i * 0.068
+        t0 = 0.15 + i * 0.3
+
+        def bar_fn(t, bw=bw, z=z, t0=t0, i=i):
+            grow = smooth((t - t0) / 0.26)
+            clear = smooth((t - (T_CLEAR + 0.06 * (len(bars) - i))) / 0.18)
+            ln = bw * grow * (1 - clear)
+            if ln < 1e-4:
+                return trs((x_left, -0.03, z), scale=(1e-4,) * 3)
+            return trs((x_left + ln / 2, -0.03, z), scale=(ln, 1.0, 1.0))
+
+        animate(bar, bar_fn)
+
+    lap_base = laptop.matrix_basis.copy()
+
+    def lap_fn(t):
+        s_ = 1.0 + 0.008 * wave(t, 2)
+        for i in range(len(bars)):
+            s_ -= 0.012 * kick(t - (0.15 + i * 0.3), freq=4, damp=12)
+        if T_POP - 0.3 <= t < T_POP:
+            s_ -= 0.08 * smooth((t - (T_POP - 0.3)) / 0.3)
+        elif T_POP <= t < T_POP + 0.08:
+            s_ -= 0.08 * (1 - smooth((t - T_POP) / 0.08))
+        s_ += 0.06 * kick(t - T_POP, freq=3, damp=8, attack=0.02)
+        return lap_base @ Matrix.Diagonal(Vector(tuple(squash(s_)) + (1,)))
+
+    animate(laptop, lap_fn)
+
+    # a cardinal mug with steam that rises forever
+    mx, my = 0.42, -0.42
+    mug = M.cylinder("Mug", 0.1, 0.22, H.clay("card", rough=0.45), location=(mx, my, 0.11), bevel=0.02)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.06, minor_radius=0.018, location=(mx + 0.11, my, 0.12),
+                                     rotation=(math.pi / 2, 0, 0))
+    handle = bpy.context.active_object
+    handle.data.materials.append(H.clay("card", rough=0.45))
+    bpy.ops.object.shade_smooth()
+    M.cylinder("Coffee", 0.085, 0.01, H.clay("ink", rough=0.3), location=(mx, my, 0.215), bevel=0.0)
+    paper = H.clay("paper", rough=0.8)
+    for k in range(3):
+        puff = M.sphere("Steam", 0.045, paper, location=(mx, my, 0.3))
+
+        def puff_fn(t, k=k):
+            u = ((t / 2.0) + k / 3) % 1.0  # each puff rises for 2 s, three in flight
+            r = 0.035 + 0.04 * u
+            k_ = smooth(u / 0.15) * (1 - smooth((u - 0.6) / 0.4))
+            x = mx + 0.025 * math.sin(math.tau * (u * 1.5 + k * 0.3))
+            return trs((x, my, 0.27 + 0.42 * u), scale=(max(k_, 1e-4) * r / 0.045,) * 3)
+
+        animate(puff, puff_fn)
+
+    # books stacked behind the laptop
+    b1 = M.rounded_box("Book", (0.5, 0.36, 0.07), H.clay("sky"), bevel=0.02, location=(-1.05, 0.55, 0.035))
+    b1.rotation_euler = (0, 0, math.radians(12))
+    b2 = M.rounded_box("Book", (0.44, 0.32, 0.06), H.clay("leaf"), bevel=0.02, location=(-1.03, 0.55, 0.1))
+    b2.rotation_euler = (0, 0, math.radians(-6))
+
+    # the globe on its stand, where the project lands
+    gx, gy = 0.86, 0.32
+    stand = M.cylinder("GlobeFoot", 0.15, 0.04, H.clay("gold"), location=(gx, gy, 0.02), bevel=0.015)
+    post = M.cylinder("GlobePost", 0.025, 0.2, H.clay("gold_deep"), location=(gx, gy, 0.13), bevel=0.008)
+    gz = 0.04 + 0.2 + 0.26
+    ball_ = M.sphere("Globe", 0.26, H.clay("sky", rough=0.45), location=(gx, gy, gz))
+    land = []
+    rnd = random.Random(4)
+    for (th, ph, r) in [(0.4, 0.9, 0.13), (1.1, 1.3, 0.1), (2.2, 0.7, 0.12), (3.0, 1.6, 0.09), (4.2, 1.0, 0.13),
+                        (5.3, 1.9, 0.1), (0.9, 2.2, 0.08)]:
+        d = Vector((math.sin(ph) * math.cos(th), math.sin(ph) * math.sin(th), math.cos(ph)))
+        c = M.sphere("Land", r, H.clay("leaf", rough=0.55), location=Vector((gx, gy, gz)) + d * 0.235)
+        c.scale = (1.0, 1.0, 0.35)
+        c.rotation_euler = d.to_track_quat("Z", "Y").to_euler()
+        land.append(c)
+    globe = group("GlobeGrp", [ball_] + land, (gx, gy, gz))
+    stand_g = group("Stand", [stand, post, globe], (gx, gy, 0.0))
+    top = Vector((gx, gy, gz + 0.26))
+    pin_dot = M.sphere("PinDot", 0.06, H.clay("card", rough=0.35), location=(0, 0, 0.16))
+    bm = bmesh.new()
+    bmesh.ops.create_cone(bm, cap_ends=True, segments=32, radius1=0.052, radius2=0.0, depth=0.12)
+    pin_tip = M.new_mesh_obj("PinTip", bm, H.clay("card", rough=0.35))
+    pin_tip.location = (0, 0, 0.08)
+    pin_tip.rotation_euler = (math.pi, 0, 0)
+    pin = group("Pin", [pin_dot, pin_tip], (0, 0, 0))
+    pin.parent = globe
+    bpy.context.view_layer.update()
+    pin_local = globe.matrix_world.inverted() @ (top - Vector((0, 0, 0.02)))
+
+    def pin_fn(t):
+        k = M.back_out(clamp01((t - T_LAND) / 0.3), s=2.2) * (1 - smooth((t - T_CLEAR) / 0.25))
+        k = max(k, 1e-4)
+        s_ = 1 - 0.18 * kick(t - T_LAND - 0.25, freq=3, damp=8)
+        sq = squash(s_)
+        return trs(pin_local, scale=(k * sq.x, k * sq.y, k * sq.z))
+
+    animate(pin, pin_fn)
+
+    st_base = stand_g.matrix_basis.copy()
+    gl_base = globe.matrix_basis.copy()
+
+    def stand_fn(t):
+        s_ = 1 - 0.1 * kick(t - T_LAND, freq=2.8, damp=7, attack=0.02)
+        return st_base @ Matrix.Diagonal(Vector(tuple(squash(s_)) + (1,)))
+
+    def globe_fn(t):
+        # a slow nod, and a wobble when the project lands on it
+        a = math.radians(4) * wave(t, 1) + math.radians(9) * kick(t - T_LAND, freq=1.8, damp=4)
+        return gl_base @ Euler((a * 0.4, a, 0)).to_matrix().to_4x4()
+
+    animate(stand_g, stand_fn)
+    animate(globe, globe_fn)
+
+    # the project: a gold block that pops out of the screen and flies to the globe
+    blk = M.rounded_box("Project", (0.13, 0.13, 0.13), H.clay("gold", rough=0.4), bevel=0.04)
+    blk_g = group("ProjectGrp", [blk], (0, 0, 0))
+    bpy.context.view_layer.update()
+    p0 = lid_g.matrix_world @ Vector((0, -0.08, 0.3))
+    p2 = top + Vector((0, 0, 0.06))
+    p1 = (p0 + p2) / 2 + Vector((0, -0.25, 0.75))
+
+    def blk_fn(t):
+        x = (t - T_POP) / FLY
+        if x < 0 or x > 1.12:
+            return trs(p0, scale=(1e-4,) * 3)
+        u = clamp01(x)
+        p = bezier(p0, p1, p2, 0.6 * u + 0.4 * smooth(u))
+        v = bezier_d(p0, p1, p2, u)
+        grow = M.back_out(clamp01(x / 0.18))
+        gone = 1 - smooth((x - 1.0) / 0.12)
+        st_ = 1 + 0.25 * math.sin(math.pi * u)
+        k = max(0.9 * grow * gone, 1e-4)
+        spin = Euler((u * math.tau * 0.75, u * math.pi, 0)).to_matrix().to_4x4()
+        aim = v.normalized().to_track_quat("Z", "Y").to_matrix().to_4x4()
+        return trs(p, aim) @ Matrix.Diagonal(Vector((k / math.sqrt(st_), k / math.sqrt(st_), k * st_, 1))) \
+            @ spin
+
+    animate(blk_g, blk_fn)
+
+    # a cardinal trail of dots behind it, and a ring of dots where it lands
+    card = H.clay("card", rough=0.38)
+    K = 11
+    for k in range(K):
+        uk = 0.08 + 0.84 * k / (K - 1)
+        pk = bezier(p0, p1, p2, uk)
+        xs = [j / 300 for j in range(301)]
+        xk = min(xs, key=lambda x: abs(0.6 * x + 0.4 * smooth(x) - uk))
+        tk = T_POP + xk * FLY
+        d = bead("Trail", card, pk, 0.018)
+
+        def tr_fn(t, tk=tk, pk=pk):
+            x = t - tk
+            if x < 0 or x > 0.7:
+                return trs(pk, scale=(1e-4,) * 3)
+            k_ = M.back_out(clamp01(x / 0.12)) * (1 - smooth((x - 0.25) / 0.45))
+            return trs(pk, scale=(max(0.018 * k_, 1e-4),) * 3)
+
+        animate(d, tr_fn)
+
+    NR = 28
+    for k in range(NR):
+        a = k * math.tau / NR
+
+        def ring_fn(t, a=a):
+            x = t - T_LAND
+            if x < 0 or x > 1.4:
+                return trs((gx, gy, -1), scale=(1e-4,) * 3)
+            rr = 0.2 + 1.3 * ease_out(x / 1.4)
+            fade = smooth(x / 0.1) * (1 - smooth((x - 0.5) / 0.9))
+            rb = max(0.022 * fade, 1e-4)
+            return trs((gx + math.cos(a) * rr, gy + math.sin(a) * rr, rb * 0.8), scale=(rb,) * 3)
+
+        animate(bead("RingDot", card, (0, 0, 0), 0.022), ring_fn)
+
+    floor = M.clay("D9A47A", rough=0.6, bump=0.4)
+
+    def avoid(x, y):
+        return (abs(x - lx) < 0.56 and abs(y - ly) < 0.42) or math.hypot(x - mx, y - my) < 0.22 \
+            or math.hypot(x - gx, y - gy) < 0.22 or (abs(x + 1.04) < 0.32 and abs(y - 0.55) < 0.26)
+
+    dot_floor((gx, gy), 3.0, 0.17, 0.016, floor, hops=[(T_LAND, 0.035, 2.4)], keep=0.8, seed=9, avoid=avoid)
+
+    # light and camera, solved on the whole desk
+    ctr, rad = H.subject_bounds([laptop, stand_g, mug])
+    H.area_key(ctr, az=-38, el=52, dist=4.4, size=1.3, power=330, color=(1.0, 0.95, 0.88))
+    H.world_fill("FBE2C8", "F2CDA8", 0.6)
+    H.solved_camera(ctr + Vector((0, 0, 0.12)), rad, az=16, el=24, lens=55, share=1.05, aspect=w / h,
+                    place_x=0.5, place_y=0.47, fstop=4.0)
+
 LOOPS = {"mailbox": (loop_mailbox, 4 / 3, 1200), "writer": (loop_writer, 16 / 9, 2400),
-         "world": (loop_world, 2.0, 2400)}
+         "world": (loop_world, 2.0, 2400), "apply": (loop_apply, 4 / 3, 1200)}
 
 
 def main():
