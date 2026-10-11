@@ -230,7 +230,11 @@
 .tts .ld-work-pic {
   position: relative;
   min-height: 100%;
-  background: #f1c8bd;
+  /* The film's own pink floor met the blush card on a straight vertical
+   * edge, a box the reader could see (site-gate seam, 2026-10-11: 85 levels
+   * off at the edge). Its inner edge now melts into the card. */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 22%);
+  mask-image: linear-gradient(to right, transparent 0, #000 22%);
 }
 .tts .ld-work-pic video {
   position: absolute;
@@ -906,6 +910,8 @@
   .tts .ld-work-pic {
     aspect-ratio: 4 / 3;
     min-height: 0;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 22%);
   }
   .tts .nw-map {
     height: auto;
