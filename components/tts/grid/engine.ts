@@ -151,6 +151,7 @@ export function createGridEngine(
     uProtect: { value: new THREE.Vector4() },
     uProtectOn: { value: 0 },
     uProtectM: { value: 0 },
+    uSunSoft: { value: 1 },
   };
   const matOpts = {
     uniforms,
@@ -818,6 +819,7 @@ export function createGridEngine(
     uniforms.uDim.value = follow.dim;
     uniforms.uExit.value = follow.exit;
     uniforms.uPointerAmt.value = pointerAmt;
+    uniforms.uSunSoft.value = grid.sunSoft;
     applyWorld(follow.world);
     projectLit();
     renderer.render(scene, camera);

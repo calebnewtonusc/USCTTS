@@ -62,6 +62,8 @@ export const grid = {
   // draw the conduits that carry them up into the lead list. Empty when the
   // agent is off.
   lit: [] as [number, number][],
+  // 1 home's sunrise front, 0 /way's even daybreak (grid/transitions.ts).
+  sunSoft: 1,
   isDark: true, // WRITTEN BY THE ENGINE each frame from the eased world: true means put light text over the field
 };
 

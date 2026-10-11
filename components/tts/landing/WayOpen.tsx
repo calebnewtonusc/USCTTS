@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { clamp } from "../engine/math";
+import { clamp, prog, smooth } from "../engine/math";
+import { onFrame, P } from "../v4/choreo";
+import { grid } from "../grid/store";
 
 /*
  * /way's own opening (Caleb, 2026-10-10: "why tf the top of the tts way page
@@ -18,7 +20,19 @@ import { clamp } from "../engine/math";
  *
  * Ghana's point is the country's centre (about 7.9 N, 1.0 W), not a city:
  * the example names the country only.
+ *
+ * The way down to LA is the map's own camera. The map pins while the copy
+ * scrolls off, then the runway (P.open) dives it into USC's point, the
+ * world's points flying out past the edges, and its navy hands off to the
+ * LA field underneath, which is still the same night navy. Then the day
+ * comes up over the city, evenly (choreo.ts, the sunrise). It replaced the
+ * panel lifting away on a navy-to-clear gradient, which read as a fog band
+ * over the map (Caleb, 2026-10-11: "Never make these untasteful ah
+ * animations/transitions ever again").
  */
+// How far the camera dives, as zoom: at 34 the 5 degree graticule is about
+// a screen apart at 1440, so the last points are leaving the frame.
+const DIVE_ZOOM = 34;
 
 const USC: [number, number] = [34.0224, -118.2851];
 const GHANA: [number, number] = [7.95, -1.02];
@@ -66,6 +80,9 @@ export default function WayOpen() {
     if (!c) return;
     const ctx = c.getContext("2d");
     if (!ctx) return;
+    // The city's sunrise under the dive is a crisp day line, not home's
+    // soft front (grid/transitions.ts uSunSoft).
+    grid.sunSoft = 0;
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -83,10 +100,21 @@ export default function WayOpen() {
     let s = 1;
     let ox = 0;
     let oy = 0;
-    const px = (la: number, lo: number): [number, number] => [
+    // The dive: zoom about USC's point while it slides to the centre.
+    let Z = 1;
+    let fx = 0;
+    let fy = 0;
+    const base = (la: number, lo: number): [number, number] => [
       ox + (lo - view.lo0) * s,
       oy + (view.la1 - la) * s,
     ];
+    const px = (la: number, lo: number): [number, number] => {
+      const [x, y] = base(la, lo);
+      const [ux, uy] = base(USC[0], USC[1]);
+      return [fx + (x - ux) * Z, fy + (y - uy) * Z];
+    };
+    let fade = 1;
+    const sky = c.parentElement?.querySelector<HTMLElement>(".wo-sky");
 
     const size = () => {
       const r = c.getBoundingClientRect();
@@ -109,8 +137,23 @@ export default function WayOpen() {
     };
 
     const draw = (now: number) => {
+      // Slow off the mark and quickening, like a camera starting to fall;
+      // in log space, so every notch of scroll zooms by the same ratio.
+      // The copy has mostly scrolled off by P.open 0.3; the dive runs from
+      // there into USC, then the city underneath takes over.
+      const d = reduced ? 0 : prog(P.open, 0.12, 0.5) ** 1.5;
+      Z = Math.pow(DIVE_ZOOM, d);
+      const [ux, uy] = base(USC[0], USC[1]);
+      const slide = smooth(prog(d, 0, 0.6));
+      fx = ux + (w / 2 - ux) * slide;
+      fy = uy + (h / 2 - uy) * slide;
+      // The navy goes while the field under it is still night (its day
+      // comes up from P.open 0.48), the points as they leave.
+      if (sky) sky.style.opacity = (1 - smooth(prog(P.open, 0.3, 0.46))).toFixed(3);
+      fade = 1 - smooth(prog(P.open, 0.36, 0.5));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
+      ctx.globalAlpha = fade;
       // The graticule: one point per 5 degrees, every other one a little
       // brighter on the 10s, in the street gold at low alpha.
       for (let la = -60; la <= 85; la += 5) {
@@ -174,7 +217,9 @@ export default function WayOpen() {
         // Ghana's label reads to the left of its point, inside the screen.
         const left = el.dataset.place === "gh" ? " translateX(-100%)" : "";
         el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)${left}`;
+        el.style.opacity = fade.toFixed(3);
       });
+      ctx.globalAlpha = 1;
     };
 
     const loop = (now: number) => {
@@ -200,7 +245,14 @@ export default function WayOpen() {
         raf = requestAnimationFrame(loop);
     };
     document.addEventListener("visibilitychange", onVis);
+    // Under reduced motion the loop never runs; the scroll still fades the
+    // navy away.
+    const off = onFrame(() => {
+      if (reduced && visible) draw(performance.now());
+    }, 3);
     return () => {
+      grid.sunSoft = 1;
+      off();
       ro.disconnect();
       io.disconnect();
       cancelAnimationFrame(raf);
@@ -210,8 +262,8 @@ export default function WayOpen() {
 
   return (
     <section id="v4-open" className="wo" aria-labelledby="wo-h">
-      <div className="wo-panel">
       <div className="wo-map" aria-hidden="true">
+        <div className="wo-sky" />
         <canvas ref={cv} className="wo-canvas" />
         <span className="wo-place is-usc" data-place="usc">
           <b>USC</b> Los Angeles
@@ -220,24 +272,25 @@ export default function WayOpen() {
           <b>Ghana</b> the client
         </span>
       </div>
-      <div className="wo-copy">
-        <p className="wo-label">
-          <span className="wo-dot" aria-hidden="true" />
-          one example of a TTS project
-        </p>
-        <h1 id="wo-h" className="wo-h">
-          Say your client is a nonprofit in Ghana{" "}
-          <em>that needs donor outreach.</em>
-        </h1>
-        <p className="wo-sub">
-          Here&apos;s how a TTS team takes it from the first lead to the
-          handover.
-        </p>
-        <span className="wo-cue" aria-hidden="true">
-          <span className="wo-cue-line" />
-          scroll
-        </span>
-      </div>
+      <div className="wo-panel">
+        <div className="wo-copy">
+          <p className="wo-label">
+            <span className="wo-dot" aria-hidden="true" />
+            one example of a TTS project
+          </p>
+          <h1 id="wo-h" className="wo-h">
+            Say your client is a nonprofit in Ghana{" "}
+            <em>that needs donor outreach.</em>
+          </h1>
+          <p className="wo-sub">
+            Here&apos;s how a TTS team takes it from the first lead to the
+            handover.
+          </p>
+          <span className="wo-cue" aria-hidden="true">
+            <span className="wo-cue-line" />
+            scroll
+          </span>
+        </div>
       </div>
     </section>
   );

@@ -1,43 +1,47 @@
 /* /way's own opener (WayOpen.tsx): the client, at the scale of the world,
- * in the field's language. The panel is the opener's night navy, so when
- * it lifts off the LA field underneath, its fading lower edge and the field
- * are the same colour and there is no seam. One-world rules:
+ * in the field's language. The map's camera dives from the world into
+ * USC's point, and its night navy gives way to the LA field's, the same
+ * colour, so the city is simply there under it. One-world rules:
  * docs/INTENT-home.md. */
 
 .tts .wo {
   position: relative;
   /* Under the transparent nav too, so the city never shows above it. */
   margin-top: calc(-1 * var(--nav-h));
-  /* Half a screen of runway past the panel: the field turns to dawn over
-   * it (choreo.ts, P.open) while the panel lifts away. */
-  height: 150vh;
-  height: 150svh;
+  /* A screen and a half of runway past the panel (choreo.ts, P.open):
+   * the copy leaves over the world map, the map dives into USC and hands
+   * off to the city at night, then the day comes up over the city. */
+  height: 250vh;
+  height: 250svh;
+}
+/* The map pins for the runway while its camera dives into USC
+ * (WayOpen.tsx), and the copy scrolls away over it. Its navy is a layer of
+ * its own, so the hand-off to the field is an opacity change on the
+ * compositor, and there is no gradient edge anywhere. */
+.tts .wo-map {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  margin-bottom: -100vh;
+  margin-bottom: -100svh;
+  overflow: hidden;
+}
+.tts .wo-sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 70% at 70% 40%, #1b2140, transparent 75%), #0d1020;
+  will-change: opacity;
 }
 .tts .wo-panel {
   position: relative;
   height: 100vh;
   height: 100svh;
   color: #fff7e6;
-  background:
-    radial-gradient(60% 70% at 70% 40%, #1b2140, transparent 75%), #0d1020;
-}
-/* The panel's lower edge dissolves into the field below it. */
-.tts .wo-panel::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  height: 32vh;
-  background: linear-gradient(#0d1020, rgba(13, 16, 32, 0));
-  pointer-events: none;
-}
-.tts .wo-map {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
 }
 .tts .wo-canvas {
+  position: relative;
   display: block;
   width: 100%;
   height: 100%;
@@ -132,25 +136,29 @@
   overflow: hidden;
   background: rgba(255, 241, 204, 0.22);
 }
+/* Transform only. It animated top, which laid the whole page out on every
+ * frame for as long as /way was open, the opener long scrolled away
+ * (Chrome trace parked on a caption, 2026-10-11: 183 layouts in 3s). */
 .tts .wo-cue-line::after {
   content: "";
   position: absolute;
   left: 0;
-  top: -40%;
+  top: 0;
   width: 1px;
   height: 40%;
   background: #fff7e6;
+  transform: translateY(-100%);
   animation: wo-cue 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 @keyframes wo-cue {
   to {
-    top: 100%;
+    transform: translateY(250%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .tts .wo-cue-line::after {
     animation: none;
-    top: 30%;
+    transform: translateY(75%);
   }
 }
 @media (max-width: 599px) {

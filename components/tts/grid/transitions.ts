@@ -36,6 +36,13 @@ uniform vec2 uFocus;
 // band never washes out a caption (review 3).
 uniform vec4 uProtect;
 uniform float uProtectOn, uProtectM;
+// 1 is home's sunrise, a wide soft front with a glowing crest. 0 is /way's:
+// the day comes up over the whole city at once, no front at all. On /way
+// the front read as a fog band over the map (Caleb, 2026-10-11, a
+// screenshot at about 266px of scroll: "Never make these untasteful ah
+// animations/transitions ever again"), and a crisp front instead wiped the
+// screen in one wheel notch.
+uniform float uSunSoft;
 
 // Broad, smooth patches, the same function as washNoise() in TypeScript.
 float washNoise(vec2 p) { return 0.5 + 0.25 * (sin(p.x / 1900.0 + 1.3) * cos(p.y / 2300.0 - 0.7) + sin((p.x + p.y) / 3100.0 + 2.1)); }
@@ -48,6 +55,7 @@ float transM(vec2 p, out float crest) {
   if (uT <= 0.0) return 0.0;
   if (uT >= 1.0) return 1.0;
   if (uMode < 0.5) {
+    if (uSunSoft < 0.5) return uT;
     float x = sunX(p), s = sunS(uT);
     crest = exp(-pow((x - s - 500.0) / 700.0, 2.0));
     return smoothstep(s - 900.0, s + 1600.0, x);

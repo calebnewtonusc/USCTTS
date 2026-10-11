@@ -984,30 +984,9 @@
   visibility: hidden;
   will-change: transform, opacity;
 }
-/* The warm halo on the point while the iris opens (Week.tsx): the clay
- * world's sunlit peach, so light carries across the seam before the film. */
-.tts .w5-glow {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 100vmax;
-  height: 100vmax;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 221, 186, 0.9) 0 18%,
-    rgba(255, 221, 186, 0) 60%
-  );
-  transform: translate(-50%, -50%) scale(0.02);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  will-change: transform, opacity;
-}
 /* The film fills the stage under the nav, on its own ground, so its edges
  * never show at any aspect. */
 .tts .w5-film {
-  --r: 2000px;
   position: absolute;
   inset: var(--nav-h) 0 0 0;
   background: #f4efe6;
@@ -1018,21 +997,6 @@
   --ink-2: #6f6264;
   --ink-3: #a1969a;
   --rule: rgba(42, 27, 30, 0.14);
-}
-/* The iris: the film opens out of the point and closes back into it, a
- * circle on the screen's centre with a soft edge (Week.tsx sets --r). The
- * class name predates the opening half. */
-.tts .w5-film.is-shrinking {
-  -webkit-mask-image: radial-gradient(
-    circle at 50% calc(50% - var(--nav-h) / 2),
-    #000 calc(var(--r) * 0.72),
-    transparent var(--r)
-  );
-  mask-image: radial-gradient(
-    circle at 50% calc(50% - var(--nav-h) / 2),
-    #000 calc(var(--r) * 0.72),
-    transparent var(--r)
-  );
 }
 .tts .w5-film .w4-body {
   position: absolute;
@@ -1298,18 +1262,30 @@
  * to a new offset 12 times a second while any of the film shows, the
  * film's own grain shifting per frame as the render's did, and is gone
  * under reduced motion, where the film is a still. */
+/* The tile steps by moving the layer, not its background: stepping
+ * background-position repainted the whole screen 12 times a second while a
+ * reader sat on a caption (Chrome trace, 2026-10-11: 36 full paints in 3s).
+ * The layer overhangs the film by more than one step on every side, and
+ * .w4-body clips it. */
 .tts .w5-grain {
   position: absolute;
-  inset: 0;
+  inset: -240px;
   pointer-events: none;
   opacity: 0.9;
+  will-change: transform;
+}
+.tts .w5-film .w4-body {
+  overflow: hidden;
 }
 .tts .w5-film.is-on .w5-grain {
   animation: w5-grain 1s steps(12) infinite;
 }
 @keyframes w5-grain {
+  from {
+    transform: translate3d(-200px, -120px, 0);
+  }
   to {
-    background-position: 731px 389px;
+    transform: translate3d(131px, 189px, 0);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1326,4 +1302,155 @@
   position: relative;
   margin-top: -50vh;
   margin-top: -50svh;
+}
+
+/* The way in (Week.tsx, choreo.ts WEEK.pass): a layer of the film's clouds
+ * the camera falls through. Each cloud is a screen wide, centred on its
+ * flat face (67% down the render), and only ever moved and scaled by
+ * transform, so the pass is all compositor. It sits over the film and
+ * under the captions. */
+.tts .w5-pass {
+  position: absolute;
+  inset: var(--nav-h) 0 0 0;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
+.tts .w5-puff {
+  position: absolute;
+  left: 0;
+  top: calc(50% - 100vw * 480 / 1220 * 0.67);
+  width: 100vw;
+  aspect-ratio: 1220 / 480;
+  background: center / 100% 100% no-repeat;
+  transform-origin: 50% 67%;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+/* Seen from above, the layer's undersides are in their own shade: the
+ * renders' faces read 0.87, a jump of 0.11 off the 0.77 map in one flash
+ * check step and 0.1 a step back down to the film's 0.66. At 0.88 they sit
+ * level with the map. */
+.tts .w5-pass {
+  filter: brightness(0.88);
+}
+
+/* Each caption sits on the flat face of a cloud (Caleb, 2026-10-11: "3d
+ * clouds that pop up in the video", poofy, flat bottom, flat front for the
+ * text). The cloud is the caption's own box drawn bigger than the text: its
+ * face is the render's lower 60%, its puffs rise above. It pops up on the
+ * clock when its stage starts, with a little overshoot, then holds still. */
+.tts .w5-cap {
+  padding: 1.1em 1.5em 1.3em;
+  transform-origin: 50% 100%;
+  transition:
+    opacity 0.22s ease-in,
+    transform 0.26s ease-in,
+    visibility 0s linear 0.26s;
+}
+/* The caption's box is the cloud's face: in the cropped render the face
+ * runs from 10% to 89% across and from 37.5% to 96.5% down, so the render
+ * is drawn that much bigger than the box on each side. */
+.tts .w5-cloud {
+  position: absolute;
+  z-index: -1;
+  left: -12.7%;
+  right: -13.9%;
+  top: -63.6%;
+  bottom: -5.9%;
+  background: center / 100% 100% no-repeat;
+}
+/* A soft contact shadow on the film under the flat bottom. */
+.tts .w5-cloud::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -9%;
+  height: 16%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(42, 27, 30, 0.22), transparent);
+}
+.tts .w5-cap .w5-line,
+.tts .w5-cap .w5-label {
+  text-shadow: none;
+  color: #2a1b1e;
+}
+.tts .w5-cap .w5-label {
+  color: #7a6a62;
+}
+.tts .w5-cap.is-down {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate3d(0, 10px, 0) scale(0.86);
+}
+.tts .w5-cap.is-up {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: none;
+  animation: w5-pop 0.62s both;
+}
+@keyframes w5-pop {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 34px, 0) scale(0.35, 0.3);
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  45% {
+    opacity: 1;
+    transform: translate3d(0, -6px, 0) scale(1.07, 1.1);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
+  }
+  70% {
+    transform: translate3d(0, 2px, 0) scale(0.97, 0.95);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tts .w5-cap.is-up {
+    animation: none;
+  }
+  .tts .w5-cap,
+  .tts .w5-cap.is-down {
+    transform: none;
+    transition: opacity 0.2s linear;
+  }
+}
+/* On a phone the cloud is drawn about 27% wider than its face and 64% of
+ * the face taller, so the caption sits in from both edges and far enough
+ * down that the whole cloud shows under the nav: edge to edge at 48px from
+ * the top, it read as a cut-off band (390x844 render, 2026-10-11). */
+@media (max-width: 767px) {
+  .tts .w5-cap,
+  .tts .w5-cap.is-tr,
+  .tts .w5-cap.is-tl,
+  .tts .w5-cap.is-tc,
+  .tts .w5-cap.is-mr {
+    top: 104px;
+    left: 12%;
+    right: 12%;
+    padding: 0.7em 0.9em 0.9em;
+  }
+  .tts .w5-cap.is-big .w5-line,
+  .tts .w5-cap.is-mid .w5-line {
+    font-size: 21px;
+    line-height: 1.18;
+  }
+}
+/* The meetings line sits mid right; at 32vw its cloud stretched tall. */
+@media (min-width: 768px) {
+  .tts .w5-cap.is-mr {
+    max-width: min(560px, 40vw);
+  }
+  .tts .w5-cap.is-tr,
+  .tts .w5-cap.is-tl,
+  .tts .w5-cap.is-tc {
+    top: 96px;
+  }
 }

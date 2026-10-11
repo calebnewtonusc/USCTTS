@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { clamp, easeInOut3, lerp, prog, smooth } from "../engine/math";
+import { clamp, lerp, prog, smooth } from "../engine/math";
 import {
   FILM_FRAMES,
   filmShare,
@@ -19,10 +19,10 @@ import { attachXray } from "./xrayLine";
 /*
  * The dive and the machine (docs/SCRIPT-v5.md, beats 4 to 6). The grid is
  * the city and the clay machine is what happens inside one point of it. The
- * camera dives through the client's point, its glow fills the screen in the
- * film's ground colour, and the film's first frame, the same colour, racks
- * into focus. The film plays under the scroll, one stage per caption. At the
- * end it pulls back to a point of light on the grid, and the rain begins.
+ * camera dives toward the client's point and falls through a layer of the
+ * film's clouds, and the film's own descent carries on under them. The film
+ * plays under the scroll, one stage per caption, each caption on a cloud of
+ * its own. It ends on its wide shot, under the doors.
  *
  * Reader: a USC student. They're the main character; the Ghana nonprofit
  * is the client, and an example. One scroll value drives all of it, P.week.
@@ -90,6 +90,31 @@ const CAPTIONS: { stage: Stage; line: string; label?: string; at: string }[] = [
   },
 ];
 
+/* The clouds (blender/clouds.py, rendered in Nalana): three shapes, each
+ * cut flat underneath and flat in front, on transparency. The captions sit
+ * on their faces and the way in falls through a layer of them. */
+const CLOUDS = [
+  "/tts/machine/cloud-1.webp",
+  "/tts/machine/cloud-2.webp",
+  "/tts/machine/cloud-3.webp",
+];
+// The cropped render's width over its height (v4.css sizes them to match),
+// and the share of that height its flat face covers.
+const CLOUD_ASPECT = 1220 / 480;
+const FACE_H = 0.59;
+/* The way in's cloud layer: one cloud nearly on the centre line, whose face
+ * covers the frame at the swap, and five around it, all leaving along their
+ * own directions as they part. s scales each against the camera's growth,
+ * r is how far off the centre it sits, in its own widths. */
+const PUFFS = [
+  { img: 0, s: 1.0, r: 0.04, dx: 0.3, dy: -1 },
+  { img: 1, s: 0.8, r: 0.3, dx: -1, dy: -0.35 },
+  { img: 2, s: 0.75, r: 0.3, dx: 1, dy: -0.3 },
+  { img: 2, s: 0.7, r: 0.32, dx: -0.8, dy: 0.7 },
+  { img: 1, s: 0.72, r: 0.3, dx: 0.85, dy: 0.65 },
+  { img: 0, s: 0.62, r: 0.36, dx: 0.1, dy: 1 },
+];
+
 export default function Week() {
   const root = useRef<HTMLElement>(null);
 
@@ -101,7 +126,10 @@ export default function Week() {
     ).matches;
     const intro = el.querySelector<HTMLElement>(".w5-intro");
     const join = document.getElementById("v4-join");
-    const glow = el.querySelector<HTMLElement>(".w5-glow");
+    const pass = el.querySelector<HTMLElement>(".w5-pass");
+    const puffs = [...el.querySelectorAll<HTMLElement>(".w5-puff")];
+    let shown = 0;
+    let lastNow = 0;
     const film = el.querySelector<HTMLElement>(".w5-film");
     const box = el.querySelector<HTMLElement>(".w4-film");
     const caps = [...el.querySelectorAll<HTMLElement>(".w5-cap")];
@@ -206,92 +234,108 @@ export default function Week() {
           intro.style.transform = `translate3d(0, ${lerp(30, -30, clamp(t)).toFixed(1)}px, 0)`;
       }
 
-      // A warm halo on the point as the iris opens: the clay world's sunlit
-      // colour arriving in the grid's light before the film does.
-      if (glow) {
-        const g = prog(p, WEEK.filmIn[0] - 0.004, WEEK.filmIn[1]);
-        const o = Math.sin(Math.PI * clamp(g)) * 0.85;
-        glow.style.opacity = o.toFixed(3);
-        glow.style.visibility = o > 0.002 ? "visible" : "hidden";
-        glow.style.transform = `translate(-50%, -50%) scale(${(0.012 * Math.pow(60, clamp(g))).toFixed(4)})`;
+      // The way in (choreo.ts WEEK.pass): the camera falls through a layer
+      // of clouds over the client's point. They rise out of the point,
+      // close over the map by WEEK.swap, where the film takes the screen
+      // under them, then break past the edges as the film's own descent
+      // carries on. Each cloud grows on one exponential, the camera's, and
+      // its distance from the centre grows with it, plus an outward drift
+      // after the swap that parts them. No mask anywhere.
+      const k = prog(p, WEEK.pass[0], WEEK.pass[1]);
+      const passOn = !reduced && k > 0 && k < 1;
+      if (pass) {
+        pass.style.visibility = passOn ? "visible" : "hidden";
+        if (passOn) {
+          // 0.04 of a screen wide at the start, 2.4 at the swap (one cloud's
+          // face then covers the frame), 3.6 at the end.
+          const half = k < 0.5;
+          const S = half
+            ? 0.04 * Math.pow(60, 2 * k)
+            : 2.4 * (1 + prog(k, 0.5, 1) * 0.5);
+          // Parting over the whole second half: at 1.9 and eased in, the
+          // middle cloud cleared the frame in about 50px of scroll.
+          const part = half ? 0 : 1.5 * smooth(prog(k, 0.5, 1));
+          const haze = smooth(prog(k, 0, 0.1));
+          // Each cloud is a screen wide in CSS and only ever scaled and
+          // moved here, so the pass never lays anything out.
+          const w = f.vw;
+          const h = w / CLOUD_ASPECT;
+          // On a tall screen the middle cloud's face has to grow until it
+          // covers the stage's height at the swap, not only its width.
+          const fit = Math.max(1, (f.vh - 56) / (FACE_H * h * 2.4));
+          puffs.forEach((el, i) => {
+            const c = PUFFS[i];
+            const sc = S * c.s * fit;
+            const x = c.dx * (c.r + part) * w * sc;
+            const y = c.dy * (c.r + part) * h * sc;
+            el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) scale(${sc.toFixed(4)})`;
+            el.style.opacity = haze.toFixed(3);
+          });
+        }
       }
 
-      // The iris (choreo.ts WEEK.filmIn and WEEK.out): the film opens out of
-      // the point at the screen's centre and closes back into it. Its radius
-      // grows and shrinks exponentially, so it moves like the zoom around
-      // it, never like a fade between two pictures.
       if (film) {
-        // It opens out of the point and never closes: the film ends on its
-        // wide golden shot and the doors rise over it on a cardinal sheet
-        // (v4.css, ".is-way .jn"), so nothing goes back to the map and
-        // there is no white field for the cardinal to flash out of
-        // (Caleb, 2026-10-10: "The ending is a white flash bang that turns
-        // into red", "it seems super unintentional that it goes back to
-        // the map", "Lazy ass transition").
-        const diag = Math.hypot(f.vw, f.vh) * 1.6;
-        // The film's share of the screen grows evenly with scroll, from the
-        // point to the corners. Grown exponentially to 1.6 diagonals, the
-        // circle covered the screen a third of the way in and swallowed most
-        // of it in one 33px step (flash check, 2026-10-11: hue histogram
-        // moved 1.57, then 1.18 eased).
-        const k = prog(p, WEEK.filmIn[0], WEEK.filmIn[1]);
-        const POINT = 6;
-        const cover = Math.hypot(f.vw, f.vh) * 0.54;
-        const r = k < 1 ? POINT + (cover - POINT) * Math.sqrt(k) : diag;
-        const o = p >= WEEK.filmIn[0] ? 1 : 0;
-        film.style.opacity = o.toFixed(3);
-        film.style.visibility = o > 0.002 ? "visible" : "hidden";
-        film.style.setProperty("--r", `${r.toFixed(1)}px`);
-        film.classList.toggle("is-shrinking", r < diag * 0.999);
+        // The film never closes: it ends on its wide golden shot and the
+        // doors rise over it on a cardinal sheet (v4.css, ".is-way .jn"),
+        // so nothing goes back to the map and there is no white field for
+        // the cardinal to flash out of (Caleb, 2026-10-10: "The ending is a
+        // white flash bang that turns into red", "Lazy ass transition").
+        const on = p >= WEEK.swap || (reduced && p >= WEEK.pass[0]);
+        film.style.opacity = on ? "1" : "0";
+        film.style.visibility = on ? "visible" : "hidden";
         // The doors' sheet gathers its cardinal points as it arrives.
         if (join)
           join.style.setProperty(
             "--g",
             smooth(prog(p, WEEK.out[0], 1)).toFixed(3),
           );
-        // The x-ray hint loop runs only while the film fills the screen,
-        // the grain only while any of it shows.
-        film.classList.toggle("is-parked", o > 0.98);
-        film.classList.toggle("is-on", o > 0.002);
+        // The x-ray hint loop runs only once the clouds have cleared, the
+        // grain while any of the film shows.
+        film.classList.toggle("is-parked", on && k >= 1);
+        film.classList.toggle("is-on", on);
       }
 
-      // The film draws its frame while it's on screen at all.
-      // While the scroll is moving it blends the two nearest frames; once
-      // it settles it lands on one, since a parked blend of two frames
-      // across a fast camera move read as a double exposure (live dpr 2
-      // crops, 2026-10-10).
+      // The film draws its frame while it's on screen at all. While the
+      // scroll moves it blends the two nearest frames; once it settles it
+      // eases onto one, since a parked blend across a fast camera move read
+      // as a double exposure (live dpr 2 crops, 2026-10-10). It used to
+      // jump to the rounded frame the moment the follower stopped, a
+      // visible tick every time a reader paused on a caption.
       if (seq && film && film.style.visibility !== "hidden") {
         const at = filmShare(p) * FILM_FRAMES.n - 1;
         const moving = Math.abs(f.y - window.scrollY) > 0.5;
-        seq.draw(moving ? at : Math.round(at));
+        const target = moving ? at : Math.round(at);
+        const dt = lastNow ? Math.min(0.05, (f.now - lastNow) / 1000) : 1;
+        shown =
+          moving || Math.abs(target - shown) > 3
+            ? target
+            : shown + (target - shown) * (1 - Math.exp(-dt * 14));
+        if (Math.abs(target - shown) < 0.01) shown = target;
+        else kick();
+        seq.draw(shown);
       }
+      lastNow = f.now;
 
-      // Each caption rides its stage's frames.
+      // Each caption's cloud pops up when its stage starts and holds still
+      // while it's read (Caleb, 2026-10-11: "3d clouds that pop up in the
+      // video", "cute animations"). The pop is v4.css's, on the clock, not
+      // the scroll, so a parked reader sees a cloud that has landed.
       const fr = filmShare(p) * FILM_FRAMES.n;
       caps.forEach((c, i) => {
         const st = STAGES.find((x) => x.name === CAPTIONS[i].stage);
         if (!st) return;
         const t = prog(fr, st.from, st.to);
         // The pull-back's line waits for the camera to clear the mailbox,
-        // which still fills its top left for the stage's first frames.
-        const t0 = st.name === "pullback" ? 0.3 : 0;
-        // The pull-back's line stays while the zoomed-out machine fills
-        // the screen (freshman review 2), and leaves as the film starts to
-        // close: it sits inside the film's radial mask, which ate its first
-        // words from the left and left dark red type on the red glow
-        // (sweep, 2026-10-10). By 6% of the shrink it's gone, while the
-        // mask's solid core still covers the whole frame.
-        const fade =
-          st.name === "pullback"
-            ? smooth(
-                prog(easeInOut3(prog(p, WEEK.out[0], WEEK.out[1])), 0, 0.06),
-              )
-            : smooth(prog(t, 0.84, 1));
-        const o = smooth(prog(t, t0, t0 + 0.16)) * (1 - fade);
-        c.style.opacity = o.toFixed(3);
-        c.style.visibility = o > 0.002 ? "visible" : "hidden";
-        if (!reduced)
-          c.style.transform = `translate3d(0, ${lerp(26, -26, t).toFixed(1)}px, 0)`;
+        // which still fills its top left for the stage's first frames, and
+        // leaves as the doors' sheet starts to rise.
+        const pull = st.name === "pullback";
+        const up = pull
+          ? t >= 0.3 && p < WEEK.out[0] + 0.003
+          : t > 0.02 && t < 0.9;
+        if (up !== c.classList.contains("is-up")) {
+          c.classList.toggle("is-up", up);
+          c.classList.toggle("is-down", !up);
+        }
       });
 
       xray.frame(p);
@@ -318,7 +362,15 @@ export default function Week() {
           First, the work leaves USC.
         </h2>
 
-        <div className="w5-glow" aria-hidden="true" />
+        <div className="w5-pass" aria-hidden="true">
+          {PUFFS.map((c, i) => (
+            <i
+              key={i}
+              className="w5-puff"
+              style={{ backgroundImage: `url(${CLOUDS[c.img]})` }}
+            />
+          ))}
+        </div>
 
         <div className="w5-film">
           <div className="w4-body">
@@ -349,8 +401,13 @@ export default function Week() {
           >
             x-ray
           </button>
-          {CAPTIONS.map((c) => (
+          {CAPTIONS.map((c, i) => (
             <div key={c.stage} className={`w5-cap ${c.at}`}>
+              <i
+                className="w5-cloud"
+                aria-hidden="true"
+                style={{ backgroundImage: `url(${CLOUDS[i % CLOUDS.length]})` }}
+              />
               {c.label && <p className="w5-label">{c.label}</p>}
               <p className="w5-line">{c.line}</p>
             </div>

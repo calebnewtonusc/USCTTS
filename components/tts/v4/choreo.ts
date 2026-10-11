@@ -50,25 +50,25 @@ export const INTRO = { t: 0 };
 export const WEEK = {
   // The agent leaves USC as the week arrives, under the script's line.
   travel: [0.0, 0.02],
-  // Through the point: the camera dives and the glow fills the frame in
-  // the film's #F4EFE6 straight from the blue map (review 4: no red world
-  // here, no blank hold after). Tightened 2026-10-09 ("Fix everything"):
-  // the glow, the crossfade and the rack focus were 0.7 of a screen of
-  // flat frames at 1440 (dull.py, grey spread under 20); they now run in
-  // about a third of that.
-  dive: [0.0, 0.022],
-  // The iris (Caleb, 2026-10-10: "Transitions between the city dot grid
-  // part and the clay part is so shit"). While the grid's camera is still
-  // diving, the film opens out of the client node at the screen's centre,
-  // its first frame looking straight down on the red lead as a dot the size
-  // of the node, and both cameras keep zooming in at about the same rate.
-  // 2026-10-11: at 0.008 of the week the iris opened in about 70px of
-  // scroll, one wheel notch, and the flash check read the blue map to the
-  // film as a cut (hue histogram moved 1.75 between two steps). At 0.022 it
-  // still moved 1.21 per 66px step of the pre-push check; 0.038 is about
-  // 340px, five steps of an even area reveal.
-  filmIn: [0.012, 0.05],
-  film: [0.012, 0.99],
+  // Through the point: the camera dives toward the client's block, and
+  // keeps diving until the cloud layer has closed over it (WEEK.swap).
+  dive: [0.0, 0.038],
+  // The way in. Caleb, 2026-10-11, of the iris that was here and the fog
+  // band at the opener: "Never make these untasteful ah
+  // animations/transitions ever again"; the move has to belong to the
+  // world, like the film's own camera carrying you in. So the camera falls
+  // through a layer of the film's clouds: they come up out of the client's
+  // point, close over the map by the middle, and the film's first aerial is
+  // under them as they break past the edges. About 450px of scroll at
+  // 1440x900: the iris's history (0.008 read as a cut, 0.038 passed) says
+  // the change needs five or more 72px flash-check steps, and the clouds
+  // sit between the two in brightness (map 0.76, clouds about 0.85, the
+  // film's first frame 0.66) and carry no hue, so neither side's colour
+  // jumps into the other.
+  pass: [0.012, 0.068],
+  // Under full cover, the middle of the pass: the film is there from here.
+  swap: 0.04,
+  film: [0.04, 0.99],
   // The ending: the film settles on its wide golden shot and the doors'
   // cardinal sheet rises over it (v4.css, ".is-way .jn"); the readouts
   // leave first so nothing collides with the doors.
@@ -99,11 +99,14 @@ export const FILM_FRAMES = { n: 375 };
 /** Share of the film at a point of the week's scroll. */
 /* The film's first 44 frames are its descent, straight down on the lead to
  * the follow camera (blender/machine.py OPEN_FRAMES). Their share is set so
- * the film's zoom starts at the grid's: the grid ends its dive at about
- * 228 log-units of zoom per unit of scroll (1.6 x ln(60/2.6) / 0.022), and
- * the film's distance falls 1.6 x ln(30/3.4) over its descent, so
- * 3.49 / (228 x 0.976) = 0.0157 of the film's scroll. */
-const RACK = { frames: 44, share: 0.0157 };
+ * the film's zoom carries on from the grid's. With the clouds between the
+ * two cameras the rates no longer have to match, so the descent runs
+ * slower than the grid's dive did. Its frames turn from sand to grass at
+ * about 0.1 of the hue histogram a frame, so a 72px flash check step may
+ * hold six of them: at 0.0249 of the film's scroll one step moved 0.90,
+ * at 0.045 still 0.73 (2026-10-11). 0.07 is about 540px, starting as the
+ * clouds part. */
+const RACK = { frames: 44, share: 0.07 };
 export const filmShare = (p: number) => {
   const k = prog(p, WEEK.film[0], WEEK.film[1]);
   const r = RACK.frames / FILM_FRAMES.n;
@@ -271,9 +274,9 @@ function regions(f: Frame) {
   store.covered =
     underSheet ||
     // On /way the film never closes, so the field stays covered from the
-    // iris until the doors' sheet has the screen (P.join 0.6), and the two
+    // clouds until the doors' sheet has the screen (P.join 0.6), and the two
     // canvases never draw at once (Caleb: "The scroll is soooo choppy").
-    (P.weekIn >= 1 && P.week > WEEK.filmIn[1] + 0.001 && P.join < 0.6);
+    (P.weekIn >= 1 && P.week > WEEK.swap + 0.001 && P.join < 0.6);
   const doc = document.documentElement.scrollHeight - f.vh;
   P.page = doc > 0 ? clamp(f.y / doc) : 0;
 
@@ -315,7 +318,7 @@ function regions(f: Frame) {
   // out to the point, which is the agent's light at the screen's centre.
   const [D0, D1] = WEEK.dive;
   // The dive accelerates and never brakes (k^1.6), and the zoom moves in
-  // log space, so at the iris it is still zooming at a steady rate for the
+  // log space, so under the clouds it is still zooming at a steady rate for the
   // film to carry on. The pull-back is the mirror: full speed out of the
   // point, easing as the city settles.
   const diveK = prog(P.week, D0, D1) ** 1.6;
@@ -386,13 +389,19 @@ function regions(f: Frame) {
   // Join. Each change has its own form (grid/transitions.ts): a sunrise,
   // a heat map, a dive, and rain.
   const seg = [
-    // Sunrise, over most of the opening's runway.
-    smooth(prog(P.open, 0.1, 0.95)),
-    // Sky to cardinal to cream both pass once the iris covers the whole
-    // frame, so the grid around the opening iris stays the blue map and the
+    // Sunrise, over most of the opening's runway. On /way (grid.sunSoft 0)
+    // the day comes up evenly over the city once the world map has dived
+    // into it, over about 900px at 1440x900: the flash check allows 8% of
+    // brightness per 72px step and night to sky is 0.05 to 0.84. Over
+    // 700px it rose 0.083 in a step.
+    store.sunSoft
+      ? smooth(prog(P.open, 0.1, 0.95))
+      : prog(P.open, 0.34, 1),
+    // Sky to cardinal to cream both pass once the film covers the whole
+    // frame, so the grid under the clouds stays the blue map and the
     // reader never sees the red world at the dive (review 4).
-    smooth(prog(P.week, WEEK.filmIn[1] + 0.002, WEEK.filmIn[1] + 0.006)),
-    smooth(prog(P.week, WEEK.filmIn[1] + 0.006, WEEK.filmIn[1] + 0.01)),
+    smooth(prog(P.week, WEEK.swap + 0.002, WEEK.swap + 0.006)),
+    smooth(prog(P.week, WEEK.swap + 0.006, WEEK.swap + 0.01)),
     // Rain, finished across the whole city by Join's 0.4, before the camera
     // lifts and the doors come up (review 3: the ending must be clean).
     // It starts as Friday clears (the week's last screen) and runs on into

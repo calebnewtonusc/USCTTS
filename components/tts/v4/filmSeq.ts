@@ -137,7 +137,11 @@ export function createFilm(
 
   function decodeAround(L: Layer, at: number) {
     const c = Math.round(at);
-    const half = Math.floor(L.keep / 2);
+    // The window must fit the budget: half = keep/2 asked for keep + 1
+    // frames, so every rest evicted one and decoded it again, forever
+    // (Chrome trace parked on a caption, 2026-10-11: 80 decodes and 90
+    // redraws in 3s with nothing moving).
+    const half = Math.floor((L.keep - 1) / 2);
     for (let d = 0; d <= half; d++) {
       for (const i of d ? [c + d, c - d] : [c]) {
         if (i < 0 || i >= n) continue;
