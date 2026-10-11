@@ -14,10 +14,10 @@ import "./partners.css";
  * numerals that count up once with a light sweep across them. The glass is
  * on these two numbers and nowhere else on the site.
  *
- * The wow comes from scale, never from the claim. The sourced fact is that
- * members build on both through the partner Blue Modern Advisory (Caleb,
- * 2026-10-04: "We are OFFICIAL Partners of clay and perplexity through
- * bma"); the page never says TTS itself is partnered with either.
+ * The headline says it outright. Caleb, 2026-10-10, after a call where both
+ * companies confirmed TTS is partnered with them through Blue Modern
+ * Advisory: "it's gotta be loud and clear that we're official partners".
+ * The BMA credit stays one quiet line under the numbers.
  * Valuations, checked 2026-10-10: the first company's $7.1B Series D is on
  * its own blog (clay.com/blog/series-d, 2026-09-09); the $20B round was
  * reported by The Information on 2025-09-11 and not confirmed by the
@@ -100,10 +100,10 @@ export default function Partners() {
 
       <div className="ld-wrap pt-in">
         <h2 id="ld-pt-h" className="pt-h" data-reveal="0">
-          Members build on <em>Clay</em> and <em>Perplexity.</em>
+          Official partners of <em>Clay</em> and <em>Perplexity.</em>
         </h2>
 
-        <ul className="pt-row" aria-label="What members build on">
+        <ul className="pt-row" aria-label="Our official partners">
           {ROWS.map((r, i) => (
             <li
               key={r.id}
@@ -141,8 +141,7 @@ export default function Partners() {
 
         <p className="pt-meta" data-reveal="3">
           <span className="pt-dot" aria-hidden="true" />
-          Official partners through Blue Modern Advisory. Our advisor Sagar
-          Tiwari worked at Clay.
+          Through Blue Modern Advisory. Our advisor Sagar Tiwari worked at Clay.
         </p>
       </div>
     </div>
