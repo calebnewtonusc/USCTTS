@@ -332,6 +332,14 @@
   height: 100%;
   pointer-events: none;
 }
+/* No hard cutoffs (Caleb, 2026-10-04, and again 2026-10-10 on this map:
+ * "wtf did I say abt hard cutoffs"). The field's points stopped on a straight
+ * edge at the canvas box; now every dot field fades out before its box. */
+.tts .nw-floor,
+.tts .dfl {
+  -webkit-mask-image: radial-gradient(ellipse 72% 70% at 50% 50%, #000 58%, transparent 100%);
+  mask-image: radial-gradient(ellipse 72% 70% at 50% 50%, #000 58%, transparent 100%);
+}
 .tts .nw-usc {
   position: absolute;
   z-index: 2;
