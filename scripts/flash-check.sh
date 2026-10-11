@@ -6,7 +6,8 @@
 set -euo pipefail
 cd "${0:A:h}/.."
 STEPS=${1:-150}
-PORT=3918
+# FLASH_PORT overrides it: on 2026-10-10 another project's dev server held 3918
+PORT=${FLASH_PORT:-3918}
 export NEXT_DIST_DIR=.next-flash
 npx next build >/tmp/flash-check-build.log 2>&1 || { tail -20 /tmp/flash-check-build.log; exit 1; }
 npx next start -p $PORT >/tmp/flash-check-serve.log 2>&1 &
