@@ -54,7 +54,9 @@ export default function Partners() {
     }
     let id = 0;
     const run = () => {
-      el.querySelectorAll(".pt-cell").forEach((c) => c.classList.add("is-sweep"));
+      el.querySelectorAll(".pt-cell").forEach((c) =>
+        c.classList.add("is-sweep"),
+      );
       const t0 = performance.now();
       const step = (now: number) => {
         const k = easeOut3(Math.min(1, (now - t0) / COUNT_MS));
@@ -121,7 +123,12 @@ export default function Partners() {
                 ) : (
                   <span className="pt-pplx">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/tts/partners/perplexity.svg" alt="" width={24} height={24} />
+                    <img
+                      src="/tts/partners/perplexity.svg"
+                      alt=""
+                      width={24}
+                      height={24}
+                    />
                     Perplexity
                   </span>
                 )}
@@ -134,8 +141,8 @@ export default function Partners() {
 
         <p className="pt-meta" data-reveal="3">
           <span className="pt-dot" aria-hidden="true" />
-          through our partner Blue Modern Advisory. Our advisor Sagar Tiwari
-          worked at Clay.
+          Official partners through Blue Modern Advisory. Our advisor Sagar
+          Tiwari worked at Clay.
         </p>
       </div>
     </div>

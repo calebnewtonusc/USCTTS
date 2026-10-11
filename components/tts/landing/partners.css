@@ -206,7 +206,9 @@
   margin: 0;
   font-family: var(--mono);
   font-size: 13px;
-  color: rgba(255, 241, 204, 0.82);
+  /* Quiet on purpose: the partnership is a note under the marks, not a
+   * headline (Caleb, 2026-10-10, after the call confirming it with both). */
+  color: rgba(255, 241, 204, 0.62);
 }
 .tts .pt-dot {
   flex: none;

@@ -370,6 +370,15 @@
   display: block;
   height: auto;
 }
+/* The partnership, as a quiet note under the marks, never a headline. */
+.tts .co-via {
+  margin: 14px 0 0;
+  font-family: var(--mono-f, ui-monospace, Menlo, monospace);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
+  opacity: 0.8;
+}
 .tts .co-pplx {
   display: flex;
   align-items: center;

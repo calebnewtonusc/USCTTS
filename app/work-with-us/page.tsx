@@ -59,7 +59,14 @@ const BUILDS = [
 
 // Country centres: the sources name countries, never cities.
 const PLACES: Place[] = [
-  { id: "ng", name: "Nigeria", note: "AI curriculum", lat: 9.08, lon: 8.68, up: true },
+  {
+    id: "ng",
+    name: "Nigeria",
+    note: "AI curriculum",
+    lat: 9.08,
+    lon: 8.68,
+    up: true,
+  },
   { id: "gh", name: "Ghana", note: "healthcare", lat: 7.95, lon: -1.02 },
   { id: "ye", name: "Yemen", lat: 15.55, lon: 48.52 },
 ];
@@ -157,7 +164,11 @@ export default function WorkWithUsPage() {
                   <span className="co-build-p">{b.problem}</span>
                   {/* The turn from the problem to the build, in the field's
                    * points: five dots and a head. */}
-                  <svg className="co-build-arrow" viewBox="0 0 44 10" aria-hidden="true">
+                  <svg
+                    className="co-build-arrow"
+                    viewBox="0 0 44 10"
+                    aria-hidden="true"
+                  >
                     {[2, 9, 16, 23, 30].map((x) => (
                       <circle key={x} cx={x} cy="5" r="1.2" />
                     ))}
@@ -209,8 +220,7 @@ export default function WorkWithUsPage() {
               </p>
               <p className="co-tools-line">
                 Built on Clay and Perplexity, the tools real companies pay for
-                to find their customers, through our partner Blue Modern
-                Advisory.
+                to find their customers.
               </p>
               <div className="co-marks">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -231,6 +241,9 @@ export default function WorkWithUsPage() {
                   Perplexity
                 </span>
               </div>
+              <p className="co-via">
+                Official partners through Blue Modern Advisory
+              </p>
             </div>
             <div className="co-steps-wrap">
               <p className="co-mark">
