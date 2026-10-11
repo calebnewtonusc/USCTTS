@@ -10,6 +10,7 @@ import Depth from "./Depth";
 import DotFloor from "./DotFloor";
 import Gather from "./Gather";
 import HeroLoop from "./HeroLoop";
+import "./city.css";
 import Network from "./Network";
 import Partners from "./Partners";
 import { Mentors } from "./People";
@@ -118,6 +119,26 @@ export default function Landing() {
 
           {/* 02. The work leaves LA. */}
           <section className="ld-sec ld-about" aria-labelledby="ld-about-h">
+            {/* The city, back with a job (Caleb, 2026-10-11: "I mess w the
+             * city tho it's tuff. It needs to be intentional"). Tyler cut it
+             * from under who we are as "too big of a thing to scroll
+             * through" and said it could go lower. Here it is a short wide
+             * band that sets up the next line: the clay LA, USC's tower and
+             * the road out of town, then "And the work doesn't stay in LA." */}
+            <div className="ld-wrap is-wide">
+              <figure className="ld-city" data-reveal="0">
+                <HeroLoop
+                  name="/tts/home/world"
+                  width={1280}
+                  height={640}
+                  mobileWidth={720}
+                  label="A clay Los Angeles at golden hour: USC's cardinal tower with a red map dot above it, downtown's rounded towers, palm trees, and a road with cars heading out of town"
+                />
+                <figcaption className="ld-city-cap">
+                  It starts here, at USC.
+                </figcaption>
+              </figure>
+            </div>
             <div className="ld-wrap is-wide">
               <div className="ld-card is-blush ld-work">
                 <div className="ld-work-copy">
