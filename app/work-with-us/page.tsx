@@ -124,18 +124,26 @@ export default function WorkWithUsPage() {
             />
           </div>
           <div className="co-wrap co-hero-in">
-            <div className="co-hero-copy">
+            {/* The pain in the visitor's words, then the fix, with the
+             * example inbox beside the lede as the proof (Caleb,
+             * 2026-10-10, on "Sound like your front desk?": "This question
+             * doesn't rlly make sense with no context???"). The 41 and the
+             * hour are the example card's own (Inbox.tsx); no result is
+             * claimed. */}
+            <div className="co-hero-head">
               <p className="co-mark is-light">
                 <span className="co-dot" aria-hidden="true" />
                 for companies and nonprofits
               </p>
               <h1 id="co-h" className="co-h1">
-                Sound like <em>your front desk?</em>
+                <span>41 unread before 10am?</span>{" "}
+                <em>We build the AI that answers them.</em>
               </h1>
+            </div>
+            <div className="co-hero-copy">
               <p className="co-lede">
-                USC students build the AI that takes it off your plate:
-                automations, CRMs, outbound, and training for your team,
-                anywhere in the world.
+                USC students take it off your plate: automations, CRMs,
+                outbound, and training for your team, anywhere in the world.
               </p>
               <div className="co-actions">
                 <BookButton />
