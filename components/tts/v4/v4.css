@@ -1023,22 +1023,30 @@
   right: calc(var(--gutter) - 8px);
   z-index: 8;
 }
+/* Captions keep to the nav's column, never the screen's edge: at 1690 a
+ * right-aligned line set a gutter in from the edge showed cut off at the
+ * right ("First you find ever", "finding l", Caleb's screenshot,
+ * 2026-10-10), so on wide screens they now sit as far in as the nav's own
+ * Join button. */
+.tts .w5-film {
+  --cap-in: max(var(--gutter), calc((100% - var(--wide)) / 2 + var(--gutter)));
+}
 .tts .w5-cap {
   position: absolute;
   z-index: 4;
-  max-width: min(520px, calc(100% - 2 * var(--gutter)));
+  max-width: min(520px, calc(100% - 2 * var(--cap-in)));
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   will-change: transform, opacity;
 }
 .tts .w5-cap.is-tr {
-  right: var(--gutter);
+  right: var(--cap-in);
   top: 56px;
   text-align: right;
 }
 .tts .w5-cap.is-tl {
-  left: var(--gutter);
+  left: var(--cap-in);
   top: 56px;
 }
 .tts .w5-label {
@@ -1097,7 +1105,7 @@
   overflow: hidden;
 }
 .tts .w5-cap.is-mr {
-  right: var(--gutter);
+  right: var(--cap-in);
   top: 50%;
   margin-top: -2.4em;
   max-width: min(440px, 32vw);
