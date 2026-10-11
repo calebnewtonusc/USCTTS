@@ -386,7 +386,10 @@
 }
 .tts .ld-sign-mark {
   display: block;
-  width: clamp(180px, 24vw, 340px);
+  /* The helmet loop leaves room in frame for its jump, so at rest the mark
+   * fills about half the square and read small at the old 24vw
+   * (2026-10-11). */
+  width: clamp(240px, 32vw, 460px);
   height: auto;
   aspect-ratio: 1;
 }

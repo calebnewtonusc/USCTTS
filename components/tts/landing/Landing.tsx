@@ -273,7 +273,7 @@ export default function Landing() {
                   name="/tts/home/logo"
                   width={640}
                   height={640}
-                  label="The Trojan Tech Solutions mark, a clay arch in cardinal, gold and cream with an ink T, bouncing, spinning and landing"
+                  label="The Trojan Tech Solutions mark, a red helmet with two T eye slots and a gold crest, bouncing, jumping into a spin and landing with a wobble"
                 />
                 <div className="ld-sign-copy">
                   <p className="ld-sign-line">
