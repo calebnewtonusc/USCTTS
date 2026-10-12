@@ -18,6 +18,23 @@ import numpy as np
 from PIL import Image
 
 SRC = sys.argv[1]
+
+
+def grade(im):
+    """Bright white with sky in the shade. Straight out of the render the
+    clouds read flat grey against the graded film (Caleb, 2026-10-11: "The
+    clouds look dead inside"): the lit side goes most of the way to white,
+    and the shaded side keeps its shape in a cool sky blue, the way a
+    cloud's underside takes the sky's colour."""
+    a = np.asarray(im).astype(np.float32) / 255
+    rgb, al = a[..., :3], a[..., 3:]
+    lum = (rgb * [0.2126, 0.7152, 0.0722]).sum(-1, keepdims=True)
+    lit = rgb + (1 - rgb) * 0.4
+    shade = np.clip((0.93 - lum) * 4.0, 0, 1)
+    sky = np.array([0.72, 0.82, 1.0], np.float32)
+    out = lit * (1 - shade * 0.5) + sky * lit * shade * 0.5
+    out = np.concatenate([np.clip(out, 0, 1), al], -1)
+    return Image.fromarray((out * 255).round().astype(np.uint8), "RGBA")
 HERE = os.path.join(os.path.dirname(__file__), "..")
 OUT = os.path.join(HERE, "public", "tts", "machine")
 rows = []
@@ -28,7 +45,7 @@ while os.path.exists(os.path.join(SRC, f"cloud-{k}.png")):
     ys, xs = np.where(a)
     m = 12
     box = (xs.min() - m, ys.min() - m, xs.max() + m + 1, ys.max() + m + 1)
-    crop = im.crop(box)
+    crop = grade(im.crop(box))
     crop.save(os.path.join(OUT, f"cloud-{k}.webp"), "WEBP", quality=88, method=6, alpha_quality=90)
     al = np.asarray(crop)[..., 3] > 128
     W, H = crop.size
