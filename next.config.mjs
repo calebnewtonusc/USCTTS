@@ -30,8 +30,21 @@ const nextConfig = {
       // the main page". The roster and the comeback story are home's #team.
       { source: "/members", destination: "/#team", permanent: true },
     ];
-    if (!TC_ORIGIN) return about;
+    // The bare domain keeps its path on the way to www. GoDaddy's forwarding
+    // sent usctts.com/way to www's home and every other path to a 404
+    // (2026-10-11); the apex now reaches this app through Cloudflare, and
+    // this sends it on with the path.
+    const apex = [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "usctts.com" }],
+        destination: "https://www.usctts.com/:path*",
+        permanent: true,
+      },
+    ];
+    if (!TC_ORIGIN) return [...apex, ...about];
     return [
+      ...apex,
       ...about,
       { source: "/tc", destination: TC_ORIGIN, permanent: false },
       { source: "/tc/:path*", destination: `${TC_ORIGIN}/:path*`, permanent: false },
