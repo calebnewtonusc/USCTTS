@@ -104,9 +104,9 @@ export const FILM_FRAMES = { n: 375 };
  * slower than the grid's dive did. Its frames turn from sand to grass at
  * about 0.1 of the hue histogram a frame, so a 72px flash check step may
  * hold six of them: at 0.0249 of the film's scroll one step moved 0.90,
- * at 0.045 still 0.73 (2026-10-11). 0.07 is about 540px, starting as the
- * clouds part. */
-const RACK = { frames: 44, share: 0.07 };
+ * at 0.045 still 0.73, at 0.07 0.61 once the pass took new cloud shapes
+ * (2026-10-11). 0.08 is about 620px, starting as the clouds part. */
+const RACK = { frames: 44, share: 0.08 };
 export const filmShare = (p: number) => {
   const k = prog(p, WEEK.film[0], WEEK.film[1]);
   const r = RACK.frames / FILM_FRAMES.n;
