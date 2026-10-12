@@ -1022,7 +1022,7 @@
 .tts .w5-cap {
   position: absolute;
   z-index: 4;
-  max-width: min(520px, calc(100% - 2 * var(--cap-in)));
+  max-width: min(420px, calc(100% - 2 * var(--cap-in)));
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -1047,13 +1047,15 @@
   letter-spacing: -0.015em;
   text-wrap: balance;
 }
+/* Sized so a cloud takes a corner, not a third of the frame: at 3.2vw a
+ * two-line caption's cloud covered the typewriter it was about. */
 .tts .w5-cap.is-big .w5-line {
-  font-size: clamp(28px, 3.2vw, 52px);
-  line-height: 1.08;
+  font-size: clamp(22px, 2.2vw, 36px);
+  line-height: 1.12;
 }
 .tts .w5-cap.is-mid .w5-line {
-  font-size: clamp(22px, 2.2vw, 34px);
-  line-height: 1.2;
+  font-size: clamp(19px, 1.6vw, 26px);
+  line-height: 1.22;
 }
 @media (min-width: 1800px) {
   .tts .w5-label {
@@ -1451,6 +1453,6 @@
   .tts .w5-cap.is-tr,
   .tts .w5-cap.is-tl,
   .tts .w5-cap.is-tc {
-    top: 96px;
+    top: 64px;
   }
 }

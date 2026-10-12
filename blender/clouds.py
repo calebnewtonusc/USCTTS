@@ -21,26 +21,21 @@ import bpy
 OUT = sys.argv[sys.argv.index("--") + 1] if "--" in sys.argv else "/tmp/clouds"
 os.makedirs(OUT, exist_ok=True)
 
-# Three shapes, so six captions don't wear one cloud. Each is a small
-# rounded slab that fills the middle, puffs (x, z, r) on the front plane so
-# the cut face itself has a bumpy cloud outline, and a row behind them for
-# depth over the top. The first try, puffs alone cut further back, gave
-# scattered flat discs and a wavy bottom; the second, a big slab with puffs
-# scaled up, merged into one flat grey block (renders, 2026-10-11).
-SLAB = (1.55, 0.25, 0.22)   # half sizes of the filler, before the cuts
+# Three shapes, so six captions don't wear one cloud. Each is a soft
+# rounded body with many small puffs over it, (x, z, r), so the bumps stay
+# gentle, and only the bottom is cut flat. Earlier tries cut the front flat
+# too and it read as a chopped block (Caleb, 2026-10-11: "I didn't mean the
+# clouds are literally flat, I just meant not completely huge bumps").
+BODY = (1.7, 0.42, 0.3)   # half sizes of the rounded body
 SHAPES = [
-    [(-1.95, 0.42, 0.5), (-1.3, 0.62, 0.62), (-0.55, 0.9, 0.74), (0.3, 1.02, 0.8),
-     (1.1, 0.82, 0.68), (1.8, 0.5, 0.55), (-0.9, 0.32, 0.5), (0.0, 0.32, 0.5),
-     (0.9, 0.32, 0.5)],
-    [(-1.9, 0.45, 0.52), (-1.15, 0.85, 0.74), (-0.3, 0.7, 0.6), (0.5, 0.98, 0.78),
-     (1.3, 0.72, 0.62), (1.95, 0.42, 0.5), (-0.7, 0.32, 0.5), (0.3, 0.32, 0.5),
-     (1.2, 0.32, 0.48)],
-    [(-2.0, 0.4, 0.48), (-1.35, 0.72, 0.64), (-0.45, 0.98, 0.8), (0.45, 0.78, 0.64),
-     (1.25, 0.95, 0.72), (1.95, 0.48, 0.52), (-1.0, 0.32, 0.5), (0.0, 0.32, 0.5),
-     (1.0, 0.32, 0.5)],
+    [(-1.95, 0.42, 0.42), (-1.5, 0.7, 0.48), (-0.95, 0.88, 0.52), (-0.35, 1.0, 0.56),
+     (0.25, 1.04, 0.56), (0.85, 0.92, 0.52), (1.4, 0.74, 0.48), (1.9, 0.46, 0.42)],
+    [(-1.9, 0.46, 0.44), (-1.4, 0.82, 0.5), (-0.8, 0.96, 0.54), (-0.2, 0.9, 0.5),
+     (0.4, 1.06, 0.56), (1.0, 0.94, 0.52), (1.5, 0.7, 0.46), (1.95, 0.42, 0.4)],
+    [(-1.95, 0.44, 0.42), (-1.45, 0.76, 0.5), (-0.85, 1.02, 0.56), (-0.25, 0.92, 0.5),
+     (0.35, 0.98, 0.54), (0.95, 1.04, 0.54), (1.5, 0.76, 0.48), (1.95, 0.44, 0.42)],
 ]
-FACE_Y = -0.22   # the flat front, toward the camera (camera looks along +y)
-BOTTOM_Z = 0.12  # the flat underside
+BOTTOM_Z = 0.14  # the flat underside
 
 
 def reset():
@@ -83,17 +78,14 @@ def cloud(puffs, seed):
     mb.threshold = 0.6
     ob = bpy.data.objects.new("cloud", mb)
     bpy.context.collection.objects.link(ob)
-    base = mb.elements.new(type="CUBE")
-    base.co = (0, 0.1, 0.5)
-    base.size_x, base.size_y, base.size_z = SLAB
-    base.radius = 0.5
+    base = mb.elements.new(type="ELLIPSOID")
+    base.co = (0, 0.15, 0.5)
+    base.size_x, base.size_y, base.size_z = BODY
+    base.radius = 0.75
     for x, z, r in puffs:
-        # The front row makes the face's outline; the row behind sits
-        # higher and fuller, so the tops read as round puffs over the flat
-        # face (render 3 read as a cookie cutter with a thin rim).
-        for y, k, dz in ((0.0, 1.0, 0.0), (0.45, 1.12, 0.22)):
+        for y, k in ((-0.12, 1.0), (0.4, 1.05)):
             e = mb.elements.new()
-            e.co = (x + random.uniform(-0.05, 0.05), y, z + dz)
+            e.co = (x + random.uniform(-0.04, 0.04), y, z + random.uniform(-0.03, 0.03))
             e.radius = r * k
     bpy.context.view_layer.objects.active = ob
     ob.select_set(True)
@@ -101,8 +93,8 @@ def cloud(puffs, seed):
     me = bpy.context.active_object
     bm = bmesh.new()
     bm.from_mesh(me.data)
-    # Flat underneath, flat in front: cut and cap both.
-    for co, no in (((0, 0, BOTTOM_Z), (0, 0, -1)), ((0, FACE_Y, 0), (0, -1, 0))):
+    # Flat underneath only.
+    for co, no in (((0, 0, BOTTOM_Z), (0, 0, -1)),):
         geom = bm.verts[:] + bm.edges[:] + bm.faces[:]
         res = bmesh.ops.bisect_plane(bm, geom=geom, plane_co=co, plane_no=no, clear_outer=True)
         edges = [g for g in res["geom_cut"] if isinstance(g, bmesh.types.BMEdge)]

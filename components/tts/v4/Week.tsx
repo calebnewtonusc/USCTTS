@@ -47,7 +47,16 @@ const STAGE_NAME: Record<string, Stage> = {
   out: "pullback",
 };
 
-/* One line per stage, verbatim from Tyler's voice memo (relayed
+/* Each caption sits where its stage's machine never goes: the stages'
+ * frames were scored for what sits under each corner and checked by eye at
+ * each stage's start, middle and end (2026-10-11, after the typewriter's
+ * caption covered the typewriter: "Never block important things when they
+ * should be shown!"). Top right for all but the typewriter, whose roller
+ * reaches into it; its left is only the last stage's chute. The middle
+ * right sat on the meetings stack and its falling ball, the top left on
+ * the mailbox.
+ *
+ * One line per stage, verbatim from Tyler's voice memo (relayed
  * 2026-10-10), each with a mono label naming the skill. The example is one
  * TTS project, a Ghana nonprofit's donor outreach; no tool brand appears
  * in the walkthrough. */
@@ -68,25 +77,25 @@ const CAPTIONS: { stage: Stage; line: string; label?: string; at: string }[] = [
     stage: "typewriter",
     line: "The team drafts the first email, and it writes well-tailored copy from there.",
     label: "prompting",
-    at: "is-tc is-mid",
+    at: "is-tl is-mid",
   },
   {
     stage: "mailbox",
     line: "Every reply lands in the client's CRM and gets answered with AI.",
     label: "the CRM",
-    at: "is-tl is-mid",
+    at: "is-tr is-mid",
   },
   {
     stage: "blocks",
     line: "Meetings start appearing on the client's calendar within a week.",
     label: "meetings booked",
-    at: "is-mr is-big",
+    at: "is-tr is-big",
   },
   {
     stage: "pullback",
     line: "Then we teach the client to run it and hand it off as a full software project.",
     label: "the handoff",
-    at: "is-tl is-big",
+    at: "is-tr is-big",
   },
 ];
 
