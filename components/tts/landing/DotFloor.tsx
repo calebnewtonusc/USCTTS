@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { clamp, easeOut3, prog, smooth } from "../engine/math";
 import { onFrame } from "../v4/choreo";
 import { hash, loadStreets, pick } from "./dots";
+import "./dotfloor.css";
 
 /*
  * A floor of the opener's points, drawn in 2D: the real LA streets around
