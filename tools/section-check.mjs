@@ -17,6 +17,14 @@
  *   4. the same image src appears more than once across all pages
  *   5. a clay render (/tts/home/, /tts/heroes/, /tts/apply/) ships as a still
  *      img with no <video> in the same slot
+ *   6. in WebKit as an iPhone 15 Pro, the page scrolls sideways
+ *   7. in WebKit as an iPhone 15 Pro, a visible img, video or canvas is under
+ *      2px tall
+ *
+ * 6 and 7 run in WebKit because Chromium passed both while Caleb's iPhone
+ * failed: five advisor faces drawn 0px tall (36f3af5), then /apply and
+ * /work-with-us at 33,554,432px wide and the our-work mailbox 0px tall
+ * (1d2ec97, 2026-10-11). Chromium at 390 showed none of the three.
  *
  * A top-level section is a <section> in <main> not inside another
  * <section>. Nav and footer are never checked. Known, owned exceptions live
@@ -26,7 +34,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { chromium } from "playwright";
+import { chromium, devices, webkit } from "playwright";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
@@ -318,6 +326,54 @@ try {
       }
       await ctx.close();
     }
+  }
+  const phone = await webkit.launch();
+  try {
+    const ctx = await phone.newContext({ ...devices["iPhone 15 Pro"] });
+    for (const path of PAGES) {
+      const page = await ctx.newPage();
+      await page.goto(BASE + path, { waitUntil: "load" });
+      await page.waitForTimeout(2500);
+      const got = await page.evaluate(() => ({
+        over: document.documentElement.scrollWidth - window.innerWidth,
+        flat: [...document.querySelectorAll("img,video,canvas")]
+          .filter((e) => {
+            const r = e.getBoundingClientRect();
+            const s = getComputedStyle(e);
+            return (
+              r.height < 2 &&
+              s.display !== "none" &&
+              s.visibility !== "hidden" &&
+              !e.closest("[aria-hidden=true]")
+            );
+          })
+          .map((e) =>
+            String(
+              e.currentSrc || e.getAttribute("src") || e.className || e.tagName,
+            ).slice(0, 80),
+          ),
+      }));
+      if (got.over > 1)
+        report(
+          "overflow",
+          path,
+          "iphone",
+          "page",
+          `scrolls ${got.over}px sideways in iPhone Safari`,
+        );
+      for (const f of got.flat)
+        report(
+          "flat",
+          path,
+          "iphone",
+          f,
+          `${f} draws under 2px tall in iPhone Safari`,
+        );
+      await page.close();
+    }
+    await ctx.close();
+  } finally {
+    await phone.close();
   }
 } finally {
   await browser.close();
