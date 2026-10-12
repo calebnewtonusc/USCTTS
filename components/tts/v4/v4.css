@@ -1022,7 +1022,7 @@
 .tts .w5-cap {
   position: absolute;
   z-index: 4;
-  max-width: min(420px, calc(100% - 2 * var(--cap-in)));
+  max-width: min(clamp(260px, 25vw, 360px), calc(100% - 2 * var(--cap-in)));
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -1047,14 +1047,11 @@
   letter-spacing: -0.015em;
   text-wrap: balance;
 }
-/* Sized so a cloud takes a corner, not a third of the frame: at 3.2vw a
- * two-line caption's cloud covered the typewriter it was about. */
-.tts .w5-cap.is-big .w5-line {
-  font-size: clamp(22px, 2.2vw, 36px);
-  line-height: 1.12;
-}
+/* Sized so a cloud takes a corner, not a third of the frame: at 3.2vw, then
+ * 2.2vw, a caption's cloud still covered the typewriter it was about. */
+.tts .w5-cap.is-big .w5-line,
 .tts .w5-cap.is-mid .w5-line {
-  font-size: clamp(19px, 1.6vw, 26px);
+  font-size: clamp(15px, 1.3vw, 23px);
   line-height: 1.22;
 }
 @media (min-width: 1800px) {
@@ -1062,7 +1059,7 @@
     font-size: 13.5px;
   }
   .tts .w5-cap {
-    max-width: 680px;
+    max-width: 420px;
   }
 }
 @media (max-width: 767px) {
@@ -1308,7 +1305,7 @@
 
 /* The way in (Week.tsx, choreo.ts WEEK.pass): a layer of the film's clouds
  * the camera falls through. Each cloud is a screen wide, centred on its
- * body (62% down the render), and only ever moved and scaled by
+ * body, and only ever moved and scaled by
  * transform, so the pass is all compositor. It sits over the film and
  * under the captions. */
 .tts .w5-pass {
@@ -1322,11 +1319,8 @@
 .tts .w5-puff {
   position: absolute;
   left: 0;
-  top: calc(50% - 100vw * 410 / 1220 * 0.62);
   width: 100vw;
-  aspect-ratio: 1220 / 410;
   background: center / 100% 100% no-repeat;
-  transform-origin: 50% 62%;
   opacity: 0;
   will-change: transform, opacity;
 }
@@ -1351,18 +1345,14 @@
     transform 0.26s ease-in,
     visibility 0s linear 0.26s;
 }
-/* The caption's box is the cloud's body: in the cropped render the body
- * under the bumps runs from 12% to 88% across and 32% to 92% down, so the
- * render is drawn that much bigger than the box on each side. The clouds
- * are rounded all over, only the bottom flat (Caleb, 2026-10-11, of clouds
+/* The caption's box is the cloud's body: each render is drawn past the
+ * box by its own measured insets (Week.tsx, clouds.ts), so the text sits
+ * under the bumps on six different shapes. Rounded all over, only the
+ * bottom flat (Caleb, 2026-10-11, of clouds
  * cut flat in front: "It looks like you chopped the block"). */
 .tts .w5-cloud {
   position: absolute;
   z-index: -1;
-  left: -15.8%;
-  right: -15.8%;
-  top: -53.3%;
-  bottom: -13.3%;
   background: center / 100% 100% no-repeat;
 }
 /* A soft contact shadow on the film under the flat bottom. */
@@ -1443,8 +1433,8 @@
   }
   .tts .w5-cap.is-big .w5-line,
   .tts .w5-cap.is-mid .w5-line {
-    font-size: 21px;
-    line-height: 1.18;
+    font-size: 18px;
+    line-height: 1.2;
   }
 }
 /* The meetings line sits mid right; at 32vw its cloud stretched tall. */
@@ -1457,4 +1447,12 @@
   .tts .w5-cap.is-tc {
     top: 64px;
   }
+}
+
+/* A caption that steps aside as the camera brings the machine to it glides
+ * there (Week.tsx place); a parked reader never sees it move. */
+.tts .w5-cap.is-up.is-gliding {
+  transition:
+    left 0.45s cubic-bezier(0.3, 0, 0.2, 1),
+    top 0.45s cubic-bezier(0.3, 0, 0.2, 1);
 }

@@ -21,17 +21,31 @@ import bpy
 OUT = sys.argv[sys.argv.index("--") + 1] if "--" in sys.argv else "/tmp/clouds"
 os.makedirs(OUT, exist_ok=True)
 
-# Three shapes, so six captions don't wear one cloud. Each is a loaf of
-# overlapping puffs, rounded all over, with a row of smaller puffs on top so
-# the bumps stay gentle, and only the bottom cut flat. Earlier tries cut the
-# front flat too and read as a chopped block (Caleb, 2026-10-11: "I didn't
-# mean the clouds are literally flat, I just meant not completely huge
-# bumps"); an ellipsoid body with puffs on it never filled in and rendered
-# as a string of beads. Each shape is its top row: (x, z, r).
+# Six shapes, one per caption, each its own build (Caleb, 2026-10-11:
+# "Each cloud should be a slightly diff shape! Some taller, some rounder,
+# some wider"). A shape is the loaf's half width, its rows of even puffs as
+# (z, r), and its bumps on top as (x, z, r). Rounded all over, only the
+# bottom cut flat: cut flat in front too they read as a chopped block, and
+# an ellipsoid body with puffs on it rendered as a string of beads.
 SHAPES = [
-    [(-1.55, 0.98, 0.42), (-0.9, 1.12, 0.5), (-0.2, 1.2, 0.54), (0.5, 1.14, 0.5), (1.2, 1.0, 0.44)],
-    [(-1.5, 1.04, 0.46), (-0.8, 1.18, 0.52), (0.0, 1.08, 0.46), (0.7, 1.2, 0.52), (1.35, 1.0, 0.42)],
-    [(-1.45, 1.0, 0.44), (-0.75, 1.2, 0.54), (0.05, 1.1, 0.48), (0.8, 1.16, 0.5), (1.45, 0.98, 0.42)],
+    # wide and low
+    (2.0, [(0.42, 0.56), (0.72, 0.52)],
+     [(-1.55, 0.98, 0.42), (-0.9, 1.12, 0.5), (-0.2, 1.2, 0.54), (0.5, 1.14, 0.5), (1.2, 1.0, 0.44)]),
+    # taller
+    (1.45, [(0.42, 0.56), (0.74, 0.56), (1.06, 0.52)],
+     [(-1.0, 1.32, 0.46), (-0.3, 1.5, 0.56), (0.45, 1.42, 0.52), (1.05, 1.28, 0.44)]),
+    # round, one big dome
+    (1.15, [(0.42, 0.6), (0.78, 0.62)],
+     [(-0.75, 1.08, 0.5), (0.0, 1.36, 0.72), (0.75, 1.1, 0.5)]),
+    # wide with a big middle
+    (1.9, [(0.42, 0.54), (0.7, 0.5)],
+     [(-1.45, 0.94, 0.4), (-0.75, 1.06, 0.46), (0.0, 1.3, 0.66), (0.75, 1.08, 0.46), (1.45, 0.92, 0.4)]),
+    # lopsided, high on the left
+    (1.6, [(0.42, 0.56), (0.74, 0.54)],
+     [(-1.1, 1.3, 0.62), (-0.35, 1.2, 0.54), (0.4, 1.06, 0.46), (1.05, 0.98, 0.42)]),
+    # medium, high on the right
+    (1.55, [(0.42, 0.56), (0.74, 0.54)],
+     [(-1.1, 0.98, 0.42), (-0.45, 1.08, 0.48), (0.3, 1.22, 0.56), (1.0, 1.3, 0.6)]),
 ]
 BOTTOM_Z = 0.16  # the flat underside
 
@@ -56,7 +70,7 @@ def reset():
         pass
     sc.render.film_transparent = True
     sc.render.resolution_x = 1500
-    sc.render.resolution_y = 760
+    sc.render.resolution_y = 1000
     sc.render.image_settings.file_format = "PNG"
     sc.render.image_settings.color_mode = "RGBA"
     try:
@@ -68,7 +82,8 @@ def reset():
     return sc
 
 
-def cloud(puffs, seed):
+def cloud(shape, seed):
+    xs, rows, bumps = shape
     random.seed(seed)
     mb = bpy.data.metaballs.new("cloud")
     mb.resolution = 0.05
@@ -76,21 +91,19 @@ def cloud(puffs, seed):
     mb.threshold = 0.6
     ob = bpy.data.objects.new("cloud", mb)
     bpy.context.collection.objects.link(ob)
-    # The loaf: two rows of even puffs, front and back, low and middle.
+    # The loaf: rows of even puffs, front and back.
+    n = max(7, int(xs * 7.5))
     for y in (-0.15, 0.3):
-        for z, r, xs in ((0.42, 0.56, 2.0), (0.74, 0.54, 1.75)):
-            n = 15
+        for z, r in rows:
             for i in range(n):
                 x = -xs + 2 * xs * i / (n - 1)
                 e = mb.elements.new()
                 e.co = (x + random.uniform(-0.03, 0.03), y, z)
                 e.radius = r * (0.88 if abs(x) > xs - 0.3 else 1.0)
-    # The gentle bumps on top.
-    for x, z, r in puffs:
+    # The bumps, low and full so each melts into the loaf.
+    for x, z, r in bumps:
         for y in (-0.05, 0.3):
             e = mb.elements.new()
-            # Lower and fuller than drawn, so each bump melts into the
-            # loaf instead of sitting on it like a bead (render 7).
             e.co = (x + random.uniform(-0.04, 0.04), y, z - 0.14)
             e.radius = r * 1.28
     bpy.context.view_layer.objects.active = ob
@@ -191,7 +204,7 @@ def camera(sc):
     sc.collection.objects.link(co)
     # Straight at the face, a few degrees from above, so the puffs on top
     # read as round and the face stays a near-rectangle for the type.
-    co.location = (0, -10, 1.0 + 10 * math.tan(math.radians(11)))
+    co.location = (0, -10, 1.1 + 10 * math.tan(math.radians(11)))
     co.rotation_euler = (math.radians(90 - 11), 0, 0)
     sc.camera = co
 

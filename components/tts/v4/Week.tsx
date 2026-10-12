@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { clamp, lerp, prog, smooth } from "../engine/math";
 import {
   FILM_FRAMES,
@@ -15,6 +15,7 @@ import {
 import { createFilm, type Film } from "./filmSeq";
 import XrayViews from "./Xray";
 import { attachXray } from "./xrayLine";
+import { CLOUD_DATA } from "./clouds";
 
 /*
  * The dive and the machine (docs/SCRIPT-v5.md, beats 4 to 6). The grid is
@@ -99,30 +100,86 @@ const CAPTIONS: { stage: Stage; line: string; label?: string; at: string }[] = [
   },
 ];
 
-/* The clouds (blender/clouds.py, rendered in Nalana): three shapes, each
- * cut flat underneath and flat in front, on transparency. The captions sit
- * on their faces and the way in falls through a layer of them. */
-const CLOUDS = [
-  "/tts/machine/cloud-1.webp",
-  "/tts/machine/cloud-2.webp",
-  "/tts/machine/cloud-3.webp",
-];
-// The cropped render's width over its height (v4.css sizes them to match),
-// and the share of that height its body (under the bumps) covers.
-const CLOUD_ASPECT = 1220 / 410;
-const FACE_H = 0.6;
+/* The clouds (blender/clouds.py, rendered in Nalana): six shapes, one per
+ * caption, rounded all over with the bottom flat, on transparency. Each
+ * carries its cropped render's width over height and where its body (under
+ * the bumps, where the text sits) is, as insets the render is drawn past
+ * the caption's box by: left, top, right, bottom, each a share of the box.
+ * Measured off the renders by scripts/cloud-crop.py. */
+const CLOUDS: { src: string; aspect: number; inset: [number, number, number, number] }[] =
+  CLOUD_DATA;
 /* The way in's cloud layer: one cloud nearly on the centre line, whose face
  * covers the frame at the swap, and five around it, all leaving along their
  * own directions as they part. s scales each against the camera's growth,
  * r is how far off the centre it sits, in its own widths. */
 const PUFFS = [
   { img: 0, s: 1.0, r: 0.04, dx: 0.3, dy: -1 },
-  { img: 1, s: 0.8, r: 0.3, dx: -1, dy: -0.35 },
-  { img: 2, s: 0.75, r: 0.3, dx: 1, dy: -0.3 },
-  { img: 2, s: 0.7, r: 0.32, dx: -0.8, dy: 0.7 },
-  { img: 1, s: 0.72, r: 0.3, dx: 0.85, dy: 0.65 },
+  { img: 3, s: 0.8, r: 0.3, dx: -1, dy: -0.35 },
+  { img: 4, s: 0.75, r: 0.3, dx: 1, dy: -0.3 },
+  { img: 4, s: 0.7, r: 0.32, dx: -0.8, dy: 0.7 },
+  { img: 3, s: 0.72, r: 0.3, dx: 0.85, dy: 0.65 },
   { img: 0, s: 0.62, r: 0.36, dx: 0.1, dy: 1 },
 ];
+
+/* Where a cloud's body centre sits down its render, as a share of the
+ * render's height. */
+const bodyY = (k: number) => {
+  const [, t, , b] = CLOUDS[k].inset;
+  return (t + 0.5) / (1 + t + b);
+};
+/* The share of a cloud's render its body covers, top to bottom. */
+const bodyH = (k: number) => {
+  const [, t, , b] = CLOUDS[k].inset;
+  return 1 / (1 + t + b);
+};
+/* A pass cloud: a screen wide, its body centred on the stage's middle,
+ * scaled about that point (v4.css .w5-puff). */
+const puffStyle = (k: number): CSSProperties => ({
+  backgroundImage: `url(${CLOUDS[k].src})`,
+  aspectRatio: String(CLOUDS[k].aspect),
+  top: `calc(50% - ${((100 / CLOUDS[k].aspect) * bodyY(k)).toFixed(3)}vw)`,
+  transformOrigin: `50% ${(bodyY(k) * 100).toFixed(1)}%`,
+});
+/* A caption's cloud: its render drawn past the caption's box by its own
+ * insets, so the text lands on the body. */
+const cloudStyle = (k: number): CSSProperties => {
+  const [l, t, r, b] = CLOUDS[k].inset;
+  return {
+    backgroundImage: `url(${CLOUDS[k].src})`,
+    left: `${(-l * 100).toFixed(1)}%`,
+    top: `${(-t * 100).toFixed(1)}%`,
+    right: `${(-r * 100).toFixed(1)}%`,
+    bottom: `${(-b * 100).toFixed(1)}%`,
+  };
+};
+
+/* Which cloud each caption rides, in CAPTIONS order: the low wide ones
+ * where the machine fills the frame, the tall and the round one on the
+ * meetings stack and the pull-back, which leave the most room. */
+const CAPTION_CLOUD = [0, 3, 4, 5, 1, 2];
+
+/* The machine's map (scripts/caption-room.py, room.json): per stage, a grid
+ * over the film's frame, one digit a cell for the share of the stage's
+ * frames the machine is in it; and every few frames, which cells it's in. */
+type Room = {
+  cols: number;
+  rows: number;
+  stages: Record<string, string>;
+  chunk: number;
+  chunks: string[];
+};
+const isRoom = (x: unknown): x is Room =>
+  !!x &&
+  typeof x === "object" &&
+  typeof (x as Room).cols === "number" &&
+  typeof (x as Room).rows === "number" &&
+  typeof (x as Room).stages === "object" &&
+  typeof (x as Room).chunk === "number" &&
+  Array.isArray((x as Room).chunks);
+const ROOM = "/tts/machine/room.json";
+const ROOM_KEY = Object.fromEntries(
+  Object.entries(STAGE_NAME).map(([k, v]) => [v, k]),
+) as Record<Stage, string>;
 
 export default function Week() {
   const root = useRef<HTMLElement>(null);
@@ -197,7 +254,10 @@ export default function Week() {
         grain.style.backgroundSize = `${(T / dprG).toFixed(2)}px`;
       }
     }
-    const onResize = () => seq?.resize();
+    const onResize = () => {
+      seq?.resize();
+      placeAll();
+    };
     window.addEventListener("resize", onResize);
 
     /* The film's own stage frames, from stages.json. */
@@ -220,6 +280,136 @@ export default function Week() {
       .catch(() => {});
 
     const xray = attachXray(el, reduced);
+
+    /* Each caption takes the emptiest spot along the film's top or bottom
+     * edge at the reader's own screen, scored against the machine's map
+     * for its stage, when its stage starts and on resize. Corners chosen by
+     * eye at 1440 still put the typewriter's caption on the typewriter at
+     * Caleb's window (2026-10-11: "Bro ur literally covering the typewriter
+     * lmao check all placements"). */
+    let room: { land: Room; port: Room } | null = null;
+    const at = new Map<number, { x: number; y: number; ci: number }>();
+    // Place caption i for film frame fr. Fresh (the pop) takes the best
+    // spot; after that it moves only when the machine is coming into it in
+    // the next few chunks and another spot is clear, and glides there.
+    const place = (c: HTMLElement, i: number, fr: number, fresh: boolean) => {
+      const R = room ? (portrait ? room.port : room.land) : null;
+      const g = R?.stages[ROOM_KEY[CAPTIONS[i].stage]];
+      if (!R || !g || !film) return;
+      const ci = Math.max(0, Math.floor(fr / R.chunk));
+      const prev = at.get(i);
+      if (!fresh && prev && prev.ci === ci) return;
+      // The machine in this chunk and the next, about 12 frames.
+      const near = (cell: number) => {
+        for (let k = ci; k < Math.min(R.chunks.length, ci + 2); k++)
+          if (R.chunks[k].charCodeAt(cell) === 49) return true;
+        return false;
+      };
+      const W = film.clientWidth;
+      const H = film.clientHeight;
+      const fw = portrait ? 9 : 16;
+      const fh = portrait ? 16 : 9;
+      const sc = Math.max(W / fw, H / fh);
+      const ox = (W - fw * sc) / 2;
+      const oy = (H - fh * sc) / 2;
+      const cw = (fw * sc) / R.cols;
+      const ch = (fh * sc) / R.rows;
+      const w = c.offsetWidth;
+      const h = c.offsetHeight;
+      const [il, it, ir, ib] = CLOUDS[CAPTION_CLOUD[i]].inset;
+      // How much machine sits under the whole cloud at box position x, y:
+      // [now, over the stage]. Now is what has to be clear; the stage
+      // average breaks ties so the cloud picks a spot that stays clear.
+      const score = (x: number, y: number) => {
+        const x0 = x - il * w;
+        const y0 = y - it * h;
+        const x1 = x + w + ir * w;
+        const y1 = y + h + ib * h;
+        let now = 0;
+        let all = 0;
+        const c0 = Math.max(0, Math.floor((x0 - ox) / cw));
+        const c1 = Math.min(R.cols - 1, Math.floor((x1 - ox) / cw));
+        const r0 = Math.max(0, Math.floor((y0 - oy) / ch));
+        const r1 = Math.min(R.rows - 1, Math.floor((y1 - oy) / ch));
+        for (let r = r0; r <= r1; r++)
+          for (let k = c0; k <= c1; k++) {
+            const ax =
+              Math.min(x1, ox + (k + 1) * cw) - Math.max(x0, ox + k * cw);
+            const ay =
+              Math.min(y1, oy + (r + 1) * ch) - Math.max(y0, oy + r * ch);
+            if (ax <= 0 || ay <= 0) continue;
+            const a = (ax * ay) / (cw * ch);
+            const cell = r * R.cols + k;
+            if (near(cell)) now += a;
+            all += ((g.charCodeAt(cell) - 48) / 9) * a;
+          }
+        return [now, all];
+      };
+      const mobile = W < 768;
+      // Clear of the nav above and the readouts below.
+      const yTop = Math.max(mobile ? 20 : 16, it * h + 10);
+      const yBot = H - h - ib * h - (mobile ? 96 : 104);
+      const yMid = (H - h) / 2;
+      // On a wide screen the caption may go past the nav's column, to
+      // where the film is clear (at 1920 the column held it against the
+      // typewriter's roller).
+      const pad = Math.max(16, (W - 1680) / 2 + 16);
+      const xMin = pad + il * w;
+      const xMax = W - pad - w - ir * w;
+      const xs = mobile
+        ? [c.offsetLeft]
+        : Array.from({ length: 9 }, (_, k) => xMax - ((xMax - xMin) * k) / 8);
+      const ys = mobile ? [yTop, yBot] : [yTop, yMid, yBot];
+      // Top right first, then along the top, then the middle and the
+      // bottom: a small lean to the top, and a spot must beat the best so
+      // far by a quarter of a cell to take over.
+      const cost = (x: number, y: number) => {
+        const [now, all] = score(x, y);
+        return now * 10 + all + (y === yTop ? 0 : y === yMid ? 0.3 : 0.6);
+      };
+      let best = { x: xs[0], y: yTop, s: Infinity };
+      for (const y of ys)
+        for (const x of xs) {
+          const v = cost(x, y);
+          if (v < best.s - 0.25) best = { x, y, s: v };
+        }
+      if (!fresh && prev) {
+        // Stay put unless the machine is arriving here and the new spot
+        // has under half as much of it coming. A whole cell of margin kept
+        // the tray's caption on its yellow block at 1680 (cover check).
+        const [nowHere] = score(prev.x, prev.y);
+        const [nowBest] = score(best.x, best.y);
+        if (nowHere < 0.05 || nowBest > nowHere * 0.5) {
+          at.set(i, { ...prev, ci });
+          return;
+        }
+      }
+      at.set(i, { x: best.x, y: best.y, ci });
+      c.classList.toggle("is-gliding", !fresh);
+      c.style.top = `${best.y.toFixed(0)}px`;
+      c.style.bottom = "auto";
+      if (!mobile) {
+        c.style.left = `${best.x.toFixed(0)}px`;
+        c.style.right = "auto";
+        c.style.textAlign = best.x + w / 2 > W / 2 ? "right" : "left";
+      }
+    };
+    const placeAll = () => {
+      const fr = filmShare(P.week) * FILM_FRAMES.n;
+      caps.forEach((c, i) => {
+        if (c.classList.contains("is-up")) place(c, i, fr, true);
+      });
+    };
+    fetch(ROOM)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: unknown) => {
+        const o = j as { land?: unknown; port?: unknown } | null;
+        if (o && isRoom(o.land) && isRoom(o.port)) {
+          room = { land: o.land, port: o.port };
+          placeAll();
+        }
+      })
+      .catch(() => {});
 
     const off = onFrame((f) => {
       const p = P.week;
@@ -268,10 +458,10 @@ export default function Week() {
           // Each cloud is a screen wide in CSS and only ever scaled and
           // moved here, so the pass never lays anything out.
           const w = f.vw;
-          const h = w / CLOUD_ASPECT;
+          const h = w / CLOUDS[PUFFS[0].img].aspect;
           // On a tall screen the middle cloud's face has to grow until it
           // covers the stage's height at the swap, not only its width.
-          const fit = Math.max(1, (f.vh - 56) / (FACE_H * h * 2.4));
+          const fit = Math.max(1, (f.vh - 56) / (bodyH(PUFFS[0].img) * h * 2.4));
           puffs.forEach((el, i) => {
             const c = PUFFS[i];
             const sc = S * c.s * fit;
@@ -341,7 +531,9 @@ export default function Week() {
         const up = pull
           ? t >= 0.3 && p < WEEK.out[0] + 0.003
           : t > 0.02 && t < 0.9;
+        if (up && c.classList.contains("is-up")) place(c, i, fr, false);
         if (up !== c.classList.contains("is-up")) {
+          if (up) place(c, i, fr, true);
           c.classList.toggle("is-up", up);
           c.classList.toggle("is-down", !up);
         }
@@ -376,7 +568,7 @@ export default function Week() {
             <i
               key={i}
               className="w5-puff"
-              style={{ backgroundImage: `url(${CLOUDS[c.img]})` }}
+              style={puffStyle(c.img)}
             />
           ))}
         </div>
@@ -415,7 +607,7 @@ export default function Week() {
               <i
                 className="w5-cloud"
                 aria-hidden="true"
-                style={{ backgroundImage: `url(${CLOUDS[i % CLOUDS.length]})` }}
+                style={cloudStyle(CAPTION_CLOUD[i])}
               />
               {c.label && <p className="w5-label">{c.label}</p>}
               <p className="w5-line">{c.line}</p>
