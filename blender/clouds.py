@@ -21,21 +21,19 @@ import bpy
 OUT = sys.argv[sys.argv.index("--") + 1] if "--" in sys.argv else "/tmp/clouds"
 os.makedirs(OUT, exist_ok=True)
 
-# Three shapes, so six captions don't wear one cloud. Each is a soft
-# rounded body with many small puffs over it, (x, z, r), so the bumps stay
-# gentle, and only the bottom is cut flat. Earlier tries cut the front flat
-# too and it read as a chopped block (Caleb, 2026-10-11: "I didn't mean the
-# clouds are literally flat, I just meant not completely huge bumps").
-BODY = (1.7, 0.42, 0.3)   # half sizes of the rounded body
+# Three shapes, so six captions don't wear one cloud. Each is a loaf of
+# overlapping puffs, rounded all over, with a row of smaller puffs on top so
+# the bumps stay gentle, and only the bottom cut flat. Earlier tries cut the
+# front flat too and read as a chopped block (Caleb, 2026-10-11: "I didn't
+# mean the clouds are literally flat, I just meant not completely huge
+# bumps"); an ellipsoid body with puffs on it never filled in and rendered
+# as a string of beads. Each shape is its top row: (x, z, r).
 SHAPES = [
-    [(-1.95, 0.42, 0.42), (-1.5, 0.7, 0.48), (-0.95, 0.88, 0.52), (-0.35, 1.0, 0.56),
-     (0.25, 1.04, 0.56), (0.85, 0.92, 0.52), (1.4, 0.74, 0.48), (1.9, 0.46, 0.42)],
-    [(-1.9, 0.46, 0.44), (-1.4, 0.82, 0.5), (-0.8, 0.96, 0.54), (-0.2, 0.9, 0.5),
-     (0.4, 1.06, 0.56), (1.0, 0.94, 0.52), (1.5, 0.7, 0.46), (1.95, 0.42, 0.4)],
-    [(-1.95, 0.44, 0.42), (-1.45, 0.76, 0.5), (-0.85, 1.02, 0.56), (-0.25, 0.92, 0.5),
-     (0.35, 0.98, 0.54), (0.95, 1.04, 0.54), (1.5, 0.76, 0.48), (1.95, 0.44, 0.42)],
+    [(-1.55, 0.98, 0.42), (-0.9, 1.12, 0.5), (-0.2, 1.2, 0.54), (0.5, 1.14, 0.5), (1.2, 1.0, 0.44)],
+    [(-1.5, 1.04, 0.46), (-0.8, 1.18, 0.52), (0.0, 1.08, 0.46), (0.7, 1.2, 0.52), (1.35, 1.0, 0.42)],
+    [(-1.45, 1.0, 0.44), (-0.75, 1.2, 0.54), (0.05, 1.1, 0.48), (0.8, 1.16, 0.5), (1.45, 0.98, 0.42)],
 ]
-BOTTOM_Z = 0.14  # the flat underside
+BOTTOM_Z = 0.16  # the flat underside
 
 
 def reset():
@@ -78,15 +76,23 @@ def cloud(puffs, seed):
     mb.threshold = 0.6
     ob = bpy.data.objects.new("cloud", mb)
     bpy.context.collection.objects.link(ob)
-    base = mb.elements.new(type="ELLIPSOID")
-    base.co = (0, 0.15, 0.5)
-    base.size_x, base.size_y, base.size_z = BODY
-    base.radius = 0.75
+    # The loaf: two rows of even puffs, front and back, low and middle.
+    for y in (-0.15, 0.3):
+        for z, r, xs in ((0.42, 0.56, 2.0), (0.74, 0.54, 1.75)):
+            n = 15
+            for i in range(n):
+                x = -xs + 2 * xs * i / (n - 1)
+                e = mb.elements.new()
+                e.co = (x + random.uniform(-0.03, 0.03), y, z)
+                e.radius = r * (0.88 if abs(x) > xs - 0.3 else 1.0)
+    # The gentle bumps on top.
     for x, z, r in puffs:
-        for y, k in ((-0.12, 1.0), (0.4, 1.05)):
+        for y in (-0.05, 0.3):
             e = mb.elements.new()
-            e.co = (x + random.uniform(-0.04, 0.04), y, z + random.uniform(-0.03, 0.03))
-            e.radius = r * k
+            # Lower and fuller than drawn, so each bump melts into the
+            # loaf instead of sitting on it like a bead (render 7).
+            e.co = (x + random.uniform(-0.04, 0.04), y, z - 0.14)
+            e.radius = r * 1.28
     bpy.context.view_layer.objects.active = ob
     ob.select_set(True)
     bpy.ops.object.convert(target="MESH")

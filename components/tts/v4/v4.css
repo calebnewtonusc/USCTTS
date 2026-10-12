@@ -1308,7 +1308,7 @@
 
 /* The way in (Week.tsx, choreo.ts WEEK.pass): a layer of the film's clouds
  * the camera falls through. Each cloud is a screen wide, centred on its
- * flat face (67% down the render), and only ever moved and scaled by
+ * body (62% down the render), and only ever moved and scaled by
  * transform, so the pass is all compositor. It sits over the film and
  * under the captions. */
 .tts .w5-pass {
@@ -1322,11 +1322,11 @@
 .tts .w5-puff {
   position: absolute;
   left: 0;
-  top: calc(50% - 100vw * 480 / 1220 * 0.67);
+  top: calc(50% - 100vw * 410 / 1220 * 0.62);
   width: 100vw;
-  aspect-ratio: 1220 / 480;
+  aspect-ratio: 1220 / 410;
   background: center / 100% 100% no-repeat;
-  transform-origin: 50% 67%;
+  transform-origin: 50% 62%;
   opacity: 0;
   will-change: transform, opacity;
 }
@@ -1338,10 +1338,10 @@
   filter: brightness(0.88);
 }
 
-/* Each caption sits on the flat face of a cloud (Caleb, 2026-10-11: "3d
- * clouds that pop up in the video", poofy, flat bottom, flat front for the
- * text). The cloud is the caption's own box drawn bigger than the text: its
- * face is the render's lower 60%, its puffs rise above. It pops up on the
+/* Each caption sits on a cloud (Caleb, 2026-10-11: "3d clouds that pop up
+ * in the video", poofy, flat bottom). The cloud is the caption's own box
+ * drawn bigger than the text: the text sits on its body and its bumps rise
+ * above. It pops up on the
  * clock when its stage starts, with a little overshoot, then holds still. */
 .tts .w5-cap {
   padding: 1.1em 1.5em 1.3em;
@@ -1351,16 +1351,18 @@
     transform 0.26s ease-in,
     visibility 0s linear 0.26s;
 }
-/* The caption's box is the cloud's face: in the cropped render the face
- * runs from 10% to 89% across and from 37.5% to 96.5% down, so the render
- * is drawn that much bigger than the box on each side. */
+/* The caption's box is the cloud's body: in the cropped render the body
+ * under the bumps runs from 12% to 88% across and 32% to 92% down, so the
+ * render is drawn that much bigger than the box on each side. The clouds
+ * are rounded all over, only the bottom flat (Caleb, 2026-10-11, of clouds
+ * cut flat in front: "It looks like you chopped the block"). */
 .tts .w5-cloud {
   position: absolute;
   z-index: -1;
-  left: -12.7%;
-  right: -13.9%;
-  top: -63.6%;
-  bottom: -5.9%;
+  left: -15.8%;
+  right: -15.8%;
+  top: -53.3%;
+  bottom: -13.3%;
   background: center / 100% 100% no-repeat;
 }
 /* A soft contact shadow on the film under the flat bottom. */

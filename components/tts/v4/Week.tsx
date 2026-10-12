@@ -108,9 +108,9 @@ const CLOUDS = [
   "/tts/machine/cloud-3.webp",
 ];
 // The cropped render's width over its height (v4.css sizes them to match),
-// and the share of that height its flat face covers.
-const CLOUD_ASPECT = 1220 / 480;
-const FACE_H = 0.59;
+// and the share of that height its body (under the bumps) covers.
+const CLOUD_ASPECT = 1220 / 410;
+const FACE_H = 0.6;
 /* The way in's cloud layer: one cloud nearly on the centre line, whose face
  * covers the frame at the swap, and five around it, all leaving along their
  * own directions as they part. s scales each against the camera's growth,
