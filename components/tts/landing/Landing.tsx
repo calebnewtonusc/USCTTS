@@ -10,7 +10,6 @@ import Depth from "./Depth";
 import DotFloor from "./DotFloor";
 import Gather from "./Gather";
 import HeroLoop from "./HeroLoop";
-import LogoLoop from "./LogoLoop";
 import Network from "./Network";
 import Partners from "./Partners";
 import { Mentors } from "./People";
@@ -100,26 +99,8 @@ export default function Landing() {
 
           {/* 02. The work leaves LA. */}
           <section className="ld-sec ld-about" aria-labelledby="ld-about-h">
-            <div className="ld-wrap">
+            <div className="ld-wrap is-wide">
               <div className="ld-card is-blush ld-work">
-                <div className="ld-work-pic" data-reveal="1">
-                  <DotFloor
-                    win={[-2400, -1800, 2400, 1800]}
-                    color="#7a1f1f"
-                    alpha={0.34}
-                    max={2400}
-                    hold
-                    className="ld-work-floor"
-                  />
-                  <div className="ld-frame is-blush">
-                    <HeroLoop
-                      name="/tts/home/mailbox"
-                      width={1120}
-                      height={840}
-                      label="A gold clay mailbox: letters fly in on dotted trails, its red flag pops up, and it hops and sends a sealed letter back out"
-                    />
-                  </div>
-                </div>
                 <div className="ld-work-copy">
                   <Mark n="02" label="our work" />
                   <p className="ld-lead" data-reveal="0">
@@ -159,6 +140,18 @@ export default function Landing() {
                   <a href="#team" className="ld-btn" data-reveal="3">
                     Learn more about TTS <span aria-hidden="true">&rarr;</span>
                   </a>
+                </div>
+                {/* The film fills its half of the card edge to edge, the
+                 * card's corners clipping it (Caleb, 2026-10-10, on the
+                 * reference cards: "fills the space exactly how it should
+                 * without overdoing it"). */}
+                <div className="ld-work-pic">
+                  <HeroLoop
+                    name="/tts/home/mailbox"
+                    width={1120}
+                    height={840}
+                    label="A gold clay mailbox: letters fly in on dotted trails, its red flag pops up, and it hops and sends a sealed letter back out"
+                  />
                 </div>
               </div>
             </div>
@@ -209,18 +202,19 @@ export default function Landing() {
           <section className="ld-sec ld-way" aria-labelledby="ld-way-h">
             <div className="ld-wrap">
               <Mark n="05" label="the TTS way" />
+            </div>
+            <div className="ld-wrap is-wide">
               <Link href="/way" className="ld-way-card" data-reveal="0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                {/* The typewriter drafting on a campus lawn at golden hour:
+                 * palms sway, clouds drift, cars run the road behind (Caleb,
+                 * 2026-10-10: "needs a lively background environment"). */}
+                <HeroLoop
                   className="ld-way-img"
-                  src="/tts/home/writer-1200.webp"
-                  srcSet="/tts/home/writer-1200.webp 1200w, /tts/home/writer-2400.webp 2400w"
-                  sizes="(min-width: 1280px) 1184px, 100vw"
-                  alt=""
-                  width={2400}
-                  height={1350}
-                  loading="lazy"
-                  decoding="async"
+                  name="/tts/home/writer"
+                  width={1280}
+                  height={720}
+                  mobileWidth={720}
+                  label=""
                 />
                 <span className="ld-way-copy">
                   <span id="ld-way-h" className="ld-way-h">
@@ -250,8 +244,30 @@ export default function Landing() {
             <TeamStory />
             {/* The sign-off: the mark bounces, jumps, spins, lands and
              * wobbles, then holds before the loop (LogoLoop.tsx). */}
-            <div className="ld-sign">
-              <LogoLoop className="ld-sign-mark" />
+            <div className="ld-wrap">
+              {/* Never the mark alone on paper (Caleb, 2026-10-10: "the
+               * logo should not be on its own"): it signs off beside the
+               * closing line and the way in. */}
+              <div className="ld-sign">
+                <HeroLoop
+                  className="ld-sign-mark"
+                  name="/tts/home/logo"
+                  width={640}
+                  height={640}
+                  label="The Trojan Tech Solutions mark, a clay arch in cardinal, gold and cream with an ink T, bouncing, spinning and landing"
+                />
+                <div className="ld-sign-copy">
+                  <p className="ld-sign-line">
+                    That&apos;s TTS.{" "}
+                    <em className="ld-accent">
+                      Come build the next one with us.
+                    </em>
+                  </p>
+                  <Link href="/apply" className="ld-btn">
+                    Join TTS <span aria-hidden="true">&rarr;</span>
+                  </Link>
+                </div>
+              </div>
             </div>
           </section>
 

@@ -119,6 +119,38 @@ def encode_alpha(frames, src, name):
         print(os.path.relpath(f), f"{os.path.getsize(f) / 1e3:.0f} KB")
 
 
+def encode_onto(frames, src, name, hexcol):
+    """A transparent loop flattened onto the page colour it sits on, then
+    encoded like any opaque loop. Caleb, 2026-10-10, on the alpha logo:
+    "you can see a boarder around the video". The shadow catcher's haze
+    reached the frame edges, so the box showed. Here the alpha is faded to
+    zero over the outer 10% of the frame, so every edge pixel is exactly
+    the page colour, and there is no grain or vignette to tell them apart."""
+    bg = np.array([int(hexcol.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)], np.float32) / 255.0
+    w, h = Image.open(frames[0]).size
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    edge = np.minimum(np.minimum(xx, w - 1 - xx) / (0.1 * w), np.minimum(yy, h - 1 - yy) / (0.1 * h))
+    edge = np.clip(edge, 0, 1)
+    edge = (edge * edge * (3 - 2 * edge))[..., None]
+    tmp = os.path.join(src, "flat")
+    os.makedirs(tmp, exist_ok=True)
+    for i, f in enumerate(frames):
+        a = np.asarray(Image.open(f).convert("RGBA")).astype(np.float32) / 255.0
+        al = a[..., 3:4] * edge
+        rgb = a[..., :3] * al + bg * (1 - al)
+        g = Image.fromarray((np.clip(rgb, 0, 1) * 255 + 0.5).astype(np.uint8))
+        g.save(os.path.join(tmp, f"g_{i:04d}.png"), compress_level=1)
+        if i == 0:
+            for pw in (w, w // 2):
+                cut = g if pw == w else g.resize((pw, round(h * pw / w)), Image.LANCZOS)
+                out = os.path.join(OUT, f"{name}-poster-{pw}.webp")
+                cut.save(out, "WEBP", quality=92, method=6)
+                print(os.path.relpath(out), cut.size)
+    encode(os.path.join(tmp, "g_%04d.png"), os.path.join(OUT, f"{name}-loop-{w}"), w, h)
+    if "--keep" not in sys.argv:
+        shutil.rmtree(tmp)
+
+
 def main():
     global FPS
     src, name = sys.argv[1], sys.argv[2]
@@ -130,6 +162,9 @@ def main():
     if len(frames) != FPS * 6 or bad:
         sys.exit(f"expected {FPS * 6} finished frames, found {len(frames)} ({len(bad)} empty placeholders)")
     seam(frames)
+    if "--onto" in sys.argv:
+        encode_onto(frames, src, name, sys.argv[sys.argv.index("--onto") + 1])
+        return
     if "--alpha" in sys.argv:
         encode_alpha(frames, src, name)
         return

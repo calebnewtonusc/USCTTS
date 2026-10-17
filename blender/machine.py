@@ -49,6 +49,16 @@ HEX = {
     "ink": "1A1416",
     "lilac": "B7A6D6",
     "creamdeep": "EFE4CB",
+    # the v2 world (build_world_env, ground_tint)
+    "sand": "EFDDB8",
+    "curb": "F7EEDC",
+    "leaf": "86B862",
+    "leaflight": "9CC870",
+    "leafdeep": "4E9650",
+    "tan": "E6CFA6",
+    "coral": "EF8B76",
+    "card_roof": "B4162E",
+    "road": "D8CEC2",
 }
 
 
@@ -161,6 +171,87 @@ def add_wobble(ob, strength):
     d.texture_coords = "GLOBAL"
 
 
+# ---------------------------------------------------------------- the v2 world
+
+PLAZA = (-0.9, -0.25, 7.4, 3.9)  # centre x, y and semi-axes of the sand plaza
+
+
+def terrain_h(x, y):
+    """Flat on and around the plaza, rolling grass past it, hills behind."""
+    px, py, pa, pb = PLAZA
+    d = math.sqrt(((x - px) / pa) ** 2 + ((y - py) / pb) ** 2)
+    k = min(1.0, max(0.0, (d - 1.5) / 1.4))
+    k = k * k * (3 - 2 * k)
+    z = 0.32 * math.sin(x * 0.31 + 0.8) * math.cos(y * 0.27) + 0.18 * math.sin(x * 0.7 + y * 0.5)
+    for cx, cy, a, sg in [(-14, 22, 5.5, 6.5), (-2, 24, 4.2, 6.0), (10, 22, 6.0, 7.0), (24, 26, 5.0, 7.5),
+                          (-28, 24, 4.5, 7.0), (-24, 4, 2.6, 5.0), (22, 2, 2.8, 5.5)]:
+        z += a * math.exp(-((x - cx) ** 2 + (y - cy) ** 2) / (2 * sg * sg))
+    return max(0.0, z) * k
+
+
+def ground_tint(nt, tc):
+    """Sand inside the plaza ellipse, a cream curb at its edge, grass past it,
+    the grass mottled light and dark so a wide shot has texture."""
+    px, py, pa, pb = PLAZA
+    geo = nt.nodes.new("ShaderNodeNewGeometry")
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(geo.outputs["Position"], sep.inputs["Vector"])
+
+    def axis(sock, c, a):
+        sub = nt.nodes.new("ShaderNodeMath")
+        sub.operation = "SUBTRACT"
+        nt.links.new(sock, sub.inputs[0])
+        sub.inputs[1].default_value = c
+        div = nt.nodes.new("ShaderNodeMath")
+        div.operation = "DIVIDE"
+        nt.links.new(sub.outputs[0], div.inputs[0])
+        div.inputs[1].default_value = a
+        sq = nt.nodes.new("ShaderNodeMath")
+        sq.operation = "MULTIPLY"
+        nt.links.new(div.outputs[0], sq.inputs[0])
+        nt.links.new(div.outputs[0], sq.inputs[1])
+        return sq.outputs[0]
+
+    add = nt.nodes.new("ShaderNodeMath")
+    add.operation = "ADD"
+    nt.links.new(axis(sep.outputs["X"], px, pa), add.inputs[0])
+    nt.links.new(axis(sep.outputs["Y"], py, pb), add.inputs[1])
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    els = ramp.color_ramp.elements
+    els[0].position = 0.0
+    els[0].color = hexcol("sand")
+    els[1].position = 0.86
+    els[1].color = hexcol("sand")
+    for pos, key in ((0.9, "curb"), (0.97, "curb"), (1.0, "road"), (1.17, "road"), (1.2, "curb"),
+                     (1.24, "leaf")):
+        e = els.new(pos)
+        e.color = hexcol(key)
+    ramp.color_ramp.interpolation = "EASE"
+    nt.links.new(add.outputs[0], ramp.inputs["Fac"])
+    # mottling on the grass only: a slow noise between leaf and a deeper leaf
+    noise = nt.nodes.new("ShaderNodeTexNoise")
+    noise.inputs["Scale"].default_value = 0.09
+    noise.inputs["Detail"].default_value = 3.0
+    nt.links.new(geo.outputs["Position"], noise.inputs["Vector"])
+    mot = nt.nodes.new("ShaderNodeMix")
+    mot.data_type = "RGBA"
+    mot.blend_type = "MIX"
+    nt.links.new(noise.outputs["Fac"], mot.inputs["Factor"])
+    mot.inputs[6].default_value = hexcol("leafdeep")
+    mot.inputs[7].default_value = hexcol("leaflight")
+    grass = nt.nodes.new("ShaderNodeMath")
+    grass.operation = "GREATER_THAN"
+    nt.links.new(add.outputs[0], grass.inputs[0])
+    grass.inputs[1].default_value = 1.24
+    pick = nt.nodes.new("ShaderNodeMix")
+    pick.data_type = "RGBA"
+    pick.blend_type = "MIX"
+    nt.links.new(grass.outputs[0], pick.inputs["Factor"])
+    nt.links.new(ramp.outputs["Color"], pick.inputs[6])
+    nt.links.new(mot.outputs[2], pick.inputs[7])
+    return pick.outputs[2]
+
+
 # ---------------------------------------------------------------- materials
 
 _mats = {}
@@ -177,8 +268,11 @@ _mats = {}
 LOOK = {"name": "v1"}
 
 
-def clay(key, color=None, rough=0.58, bump=1.0):
-    """Matte clay: soft sheen, fine grain bump, a slow lumpy bump, tiny value drift."""
+def clay(key, color=None, rough=0.58, bump=1.0, tint=None):
+    """Matte clay: soft sheen, fine grain bump, a slow lumpy bump, tiny value drift.
+
+    tint, when given, is a function (node_tree, tex_coord_node) returning a
+    colour socket that replaces the flat colour (the v2 ground uses it)."""
     name = f"clay_{key}_{LOOK['name']}"
     if name in _mats:
         return _mats[name]
@@ -221,6 +315,8 @@ def clay(key, color=None, rough=0.58, bump=1.0):
     mix.blend_type = "MULTIPLY"
     mix.inputs["Factor"].default_value = 1.0
     mix.inputs[6].default_value = col
+    if tint is not None:
+        nt.links.new(tint(nt, tc), mix.inputs[6])
     ramp_n = nt.nodes.new("ShaderNodeMapRange")
     ramp_n.inputs["To Min"].default_value = 0.955
     ramp_n.inputs["To Max"].default_value = 1.025
@@ -393,7 +489,25 @@ def light_rig(**over):
     lp = nt.nodes.new("ShaderNodeLightPath")
     bright = nt.nodes.new("ShaderNodeBackground")
     bright.inputs["Strength"].default_value = cfg["world_strength"] * cfg["camera_bg"]
-    nt.links.new(cr.outputs["Color"], bright.inputs["Color"])
+    if LOOK["name"] == "v2":
+        # the sky the camera sees: peach at the horizon to blue overhead.
+        # Incoming points back toward the camera, so up is negative Z.
+        up = nt.nodes.new("ShaderNodeMath")
+        up.operation = "MULTIPLY"
+        up.inputs[1].default_value = -1.0
+        nt.links.new(sep.outputs["Z"], up.inputs[0])
+        upc = nt.nodes.new("ShaderNodeClamp")
+        nt.links.new(up.outputs[0], upc.inputs["Value"])
+        sky = nt.nodes.new("ShaderNodeValToRGB")
+        sky.color_ramp.elements[0].position = 0.0
+        sky.color_ramp.elements[0].color = hexcol("FFDDBA")
+        sky.color_ramp.elements[1].position = 0.32
+        sky.color_ramp.elements[1].color = hexcol("8CC4EC")
+        nt.links.new(upc.outputs["Result"], sky.inputs["Fac"])
+        nt.links.new(sky.outputs["Color"], bright.inputs["Color"])
+        bright.inputs["Strength"].default_value = 1.0
+    else:
+        nt.links.new(cr.outputs["Color"], bright.inputs["Color"])
     mixs = nt.nodes.new("ShaderNodeMixShader")
     nt.links.new(lp.outputs["Is Camera Ray"], mixs.inputs[0])
     nt.links.new(bg.outputs[0], mixs.inputs[1])
@@ -718,6 +832,8 @@ class Machine:
         self.build_chute2()
         self.build_chute3_and_stack()
         self.build_props()
+        if LOOK["name"] == "v2":
+            self.build_world_env()
         self.build_light_world()
 
     def collide(self, ob, animated=False):
@@ -726,8 +842,22 @@ class Machine:
 
     def build_ground(self):
         bm = bmesh.new()
-        bmesh.ops.create_circle(bm, cap_ends=True, radius=80, segments=96)
-        ground = new_mesh_obj("Ground", bm, clay("ground", rough=0.85, bump=0.6), smooth_shade=False)
+        if LOOK["name"] == "v2":
+            nx, ny = 170, 150
+            x0, x1, y0, y1 = -60.0, 60.0, -45.0, 60.0
+            grid = []
+            for j in range(ny + 1):
+                y = y0 + (y1 - y0) * j / ny
+                grid.append([bm.verts.new((x0 + (x1 - x0) * i / nx, y, terrain_h(x0 + (x1 - x0) * i / nx, y)))
+                             for i in range(nx + 1)])
+            for j in range(ny):
+                for i in range(nx):
+                    bm.faces.new((grid[j][i], grid[j][i + 1], grid[j + 1][i + 1], grid[j + 1][i]))
+            ground = new_mesh_obj("Ground", bm, clay("envground", color=hexcol("leaf"), rough=0.85, bump=0.8, tint=ground_tint),
+                                  smooth_shade=True)
+        else:
+            bmesh.ops.create_circle(bm, cap_ends=True, radius=80, segments=96)
+            ground = new_mesh_obj("Ground", bm, clay("ground", rough=0.85, bump=0.6), smooth_shade=False)
         # reject hole: a real hole with a dark throat, so a falling ball reads as gone
         cutter = cylinder("HoleCutter", 0.2, 1.0, None, location=(self.hole_c.x, self.hole_c.y, 0), bevel=0)
         cutter.hide_render = cutter.hide_viewport = True
@@ -1064,6 +1194,106 @@ class Machine:
         for o in objs:
             if o.parent is None and o.type == "EMPTY" and not o.name.endswith("_place"):
                 o.location = (-1.0, 0.75, zd)
+
+    def build_world_env(self):
+        """The clay world around the machine (v2 only). Caleb on the film's
+        handoff frame, 2026-10-10: "there is no lively environment around
+        this". A sand plaza under the machine so it stays the subject, grass
+        and rolling hills past it, a small town and USC's cardinal tower on
+        the back hill, palms, round trees, bushes and clouds. None of it is
+        a collider: the ball audit only ever sees the machine and the flat
+        ground it stands on."""
+        rnd = random.Random(21)
+        px, py, pa, pb = PLAZA
+
+        def pd(x, y):
+            return ((x - px) / pa) ** 2 + ((y - py) / pb) ** 2
+
+        for (x, y, h, key) in [(-7.5, 19.0, 1.6, "cream"), (-6.3, 19.6, 2.3, "sky"), (-4.9, 18.8, 1.4, "coral"),
+                               (3.2, 19.4, 2.0, "cream"), (4.6, 18.6, 1.3, "gold"), (5.9, 19.8, 2.6, "sky"),
+                               (7.4, 19.0, 1.7, "coral"), (-0.4, 20.4, 1.2, "cream")]:
+            z = terrain_h(x, y)
+            rounded_box("EnvHouse", (1.1, 1.0, h), clay(key), bevel=0.12, location=(x, y, z + h / 2))
+            rounded_box("EnvRoof", (1.22, 1.12, 0.18), clay("card_roof"), bevel=0.06, location=(x, y, z + h + 0.07))
+        # USC's tower on the back hill, the one cardinal landmark
+        tx, ty = -2.4, 18.9
+        tz = terrain_h(tx, ty)
+        rounded_box("EnvCampanile", (0.7, 0.7, 3.6), clay("cream"), bevel=0.08, location=(tx, ty, tz + 1.8))
+        rounded_box("EnvBelfry", (0.86, 0.86, 0.5), clay("cardinal"), bevel=0.08, location=(tx, ty, tz + 3.85))
+        bm = bmesh.new()
+        bmesh.ops.create_cone(bm, cap_ends=True, segments=4, radius1=0.66, radius2=0.0, depth=1.0)
+        sp = new_mesh_obj("EnvSpire", bm, clay("cardinal"), smooth_shade=False)
+        sp.location = (tx, ty, tz + 4.6)
+        sp.rotation_euler = (0, 0, math.pi / 4)
+        # palms at the plaza's back and sides, never between a camera and the machine
+        for (x, y, h) in [(-9.6, 1.4, 2.6), (-8.8, -2.6, 2.2), (6.4, 2.4, 2.8), (7.2, -1.9, 2.3), (-6.4, 4.6, 2.4),
+                          (3.6, 4.9, 2.7), (0.6, 5.4, 2.2), (-3.2, 5.6, 2.9), (9.4, 4.4, 2.5), (-11.6, 4.2, 2.7)]:
+            z = terrain_h(x, y)
+            lean = rnd.uniform(-0.1, 0.1)
+            tr = cylinder("EnvTrunk", 0.07, h, clay("tan"), location=(x, y, z + h / 2), bevel=0.02)
+            tr.rotation_euler = (lean, rnd.uniform(-0.1, 0.1), 0)
+            top = Vector((x, y, z)) + tr.rotation_euler.to_matrix() @ Vector((0, 0, h))
+            for f in range(8):
+                a = f * math.tau / 8 + rnd.uniform(-0.2, 0.2)
+                fr = sphere("EnvFrond", 0.18, clay("leafdeep"))
+                fr.scale = (2.9, 0.75, 0.3)
+                fr.location = top + Vector((math.cos(a) * 0.42, math.sin(a) * 0.42, -0.08))
+                fr.rotation_euler = (0, math.radians(24), a)
+            sphere("EnvCrown", 0.12, clay("tan"), location=top)
+        # round trees and bushes on the grass, outside the plaza
+        placed = 0
+        while placed < 70:
+            x, y = rnd.uniform(-26, 22), rnd.uniform(-14, 17)
+            d = pd(x, y)
+            if d < 1.35:
+                continue
+            # keep the cameras' fronts clear near the machine
+            if y < -4.5 and abs(x - px) < 9 and d < 3.0:
+                continue
+            z = terrain_h(x, y)
+            if rnd.random() < 0.3:
+                th = rnd.uniform(0.8, 1.3)
+                cylinder("EnvTreeTrunk", 0.08, th, clay("tan"), location=(x, y, z + th / 2), bevel=0.02)
+                sphere("EnvCanopy", rnd.uniform(0.55, 0.85), clay(rnd.choice(["leaf", "leafdeep"])),
+                       location=(x, y, z + th + 0.45))
+            else:
+                r = rnd.uniform(0.22, 0.5)
+                sphere("EnvBush", r, clay(rnd.choice(["leaf", "leafdeep"])), location=(x, y, z + r * 0.55))
+            placed += 1
+        ts = frame_times()
+        # clouds in the sky, far back, drifting east a little the whole film
+        for (cx, cz, k) in [(-22, 12.5, 2.2), (-6, 14.5, 1.8), (10, 13.0, 2.0), (26, 15.0, 2.4)]:
+            holder = bpy.data.objects.new("EnvCloudDrift", None)
+            link(holder)
+            for (ox, oz, r) in [(0, 0, 0.62), (0.7, -0.1, 0.48), (-0.7, -0.12, 0.5), (0.3, 0.32, 0.45)]:
+                c = sphere("EnvCloud", r * k, clay("cream", rough=0.75), location=(cx + ox * k, 46.0, cz + oz * k))
+                c.parent = holder
+            bake_matrices(holder, [Matrix.Translation((0.35 * (t - T0), 0, 0)) for t in ts])
+        # Little clay cars driving the ring road round the plaza: the
+        # background motion behind every close-up (Caleb, 2026-10-10: "Sad
+        # as empty background. make it alive"). The road's centre line is the
+        # plaza ellipse scaled by 1.045; each car's heading is the tangent.
+        ra, rb = pa * 1.045, pb * 1.045
+        for n, (key, th0, w) in enumerate([("gold", 0.3, 0.22), ("sky", 1.6, 0.22), ("coral", 2.9, 0.22),
+                                           ("cream", 4.0, -0.2), ("cardinal", 5.2, -0.2), ("sky", 0.9, -0.2)]):
+            car = bpy.data.objects.new(f"EnvCar{n}", None)
+            link(car)
+            lane = 0.18 if w > 0 else -0.18  # two lanes, opposite ways
+            parts = [rounded_box("EnvCarBody", (0.62, 0.3, 0.16), clay(key), bevel=0.06, location=(0, 0, 0.14)),
+                     rounded_box("EnvCarCab", (0.32, 0.26, 0.14), clay("cream"), bevel=0.05, location=(-0.04, 0, 0.28))]
+            for (wx, wy) in [(-0.2, -0.15), (0.2, -0.15), (-0.2, 0.15), (0.2, 0.15)]:
+                parts.append(cylinder("EnvWheel", 0.065, 0.05, clay("ink", rough=0.8), location=(wx, wy, 0.065),
+                                      axis="Y", bevel=0.01))
+            for o in parts:
+                o.parent = car
+            mats = []
+            for t in ts:
+                th = th0 + w * (t - T0)
+                f = 1.0 + lane / max(ra, rb)
+                x, y = px + ra * f * math.cos(th), py + rb * f * math.sin(th)
+                dx, dy = -ra * math.sin(th) * w, rb * math.cos(th) * w
+                mats.append(Matrix.Translation((x, y, 0.0)) @ Matrix.Rotation(math.atan2(dy, dx), 4, "Z"))
+            bake_matrices(car, mats)
 
     def build_light_world(self):
         light_rig()
@@ -1649,6 +1879,10 @@ def audit(m, show, every=1):
 
 # ---------------------------------------------------------------- camera
 
+# Frames of the v2 opening descent, from straight down on the lead to the
+# follow camera. choreo.ts RACK.frames must match it.
+OPEN_FRAMES = 44
+
 def build_camera(m, show, portrait=False):
     sc = bpy.context.scene
     cam = bpy.data.objects.new("Camera", bpy.data.cameras.new("Camera"))
@@ -1675,30 +1909,67 @@ def build_camera(m, show, portrait=False):
     pad = np.pad(arr, ((30, 30), (0, 0)), mode="edge")
     sm = np.stack([np.convolve(pad[:, d], w, mode="valid") for d in range(3)], axis=1)
     wide_target = Vector((-0.95, -0.05, 1.0))
+    wide_v2 = Vector((-0.6, 0.6, 2.6))
     st = show.stage_times()
     out0, t_end = st["out"]
     locs, rots, focus, lens, fstops = [], [], [], [], []
+    v2 = LOOK["name"] == "v2"
+    # v2 seams (Caleb, 2026-10-10: "Transitions between the city dot grid part
+    # and the clay part is so shit"). The page dives straight down through a
+    # point of light on the LA grid and irises the film open from that point,
+    # so the film opens straight down on the red lead, a dot at the centre of
+    # the frame, and keeps descending at a constant rate in log distance, the
+    # way the grid's zoom does. It ends by rising straight up over the world
+    # until the page irises it shut into the point again.
+    OPEN = OPEN_FRAMES / FPS
+    D_TOP = 30.0  # the ball is about 1% of the frame wide from here at 50mm
+    follow_d = 3.4 if v2 else 4.4  # v2 frames the machine tighter (Caleb: "blurry af")
+    # The ending holds the low golden wide shot, and /way's doors rise over
+    # it on a cardinal sheet (Caleb, 2026-10-10: going back to the map read
+    # as "super unintentional"). No closing rise, so RISE is 0.
+    RISE = 0.0
     for f, t in enumerate(ts):
         tgt = Vector(sm[min(f + 6, len(sm) - 1)])
         tgt.z -= 0.05
-        # opening: very close and defocused, then rack and pull back onto the tray
-        o = smoother((t - T0 - 0.2) / 1.1)
-        reveal = smoother((t - out0) / (t_end - out0))
+        reveal = smoother((t - out0) / ((t_end - RISE if v2 else t_end) - out0))
         az = math.radians(-26 + 18 * (t / 10.0)) * (1 - reveal) + math.radians(-14) * reveal
-        el = math.radians(21 * (1 - reveal) + 34 * reveal)
-        follow = (4.4 + 0.3 * math.sin(t * 0.6))
-        dist = (1.1 * (1 - o) + follow * o) * (1 - reveal) + 24.0 * reveal
-        lens.append(50 * (1 - reveal) + 40 * reveal)
+        # v2's wide handoff shot is low (14 degrees, 32mm), so the hills, the
+        # town and the sky stand behind the machine; at v1's 34 degrees the
+        # first world preview showed only grass (2026-10-10).
+        el = math.radians(21 * (1 - reveal) + (14 if v2 else 34) * reveal)
+        follow = (follow_d + 0.3 * math.sin(t * 0.6))
+        if v2:
+            u = min(1.0, max(0.0, (t - T0) / OPEN))
+            # distance falls at a constant log rate, easing only at the end
+            e = 1 - (1 - u) ** 1.6
+            dist0 = math.exp(math.log(D_TOP) * (1 - e) + math.log(follow) * e)
+            tilt = smoother((u - 0.45) / 0.55)
+            el = math.radians(89.5) * (1 - tilt) + el * tilt
+            ball = Vector(arr[f]) if u < 1 else tgt
+            target = ball.lerp(tgt, tilt)
+            dist = dist0 * (1 - reveal) + 22.0 * reveal
+            # the closing rise: straight up over the world, log rate
+            r2 = smoother((t - (t_end - RISE)) / RISE) if RISE > 0 else 0.0
+            if r2 > 0:
+                el = el * (1 - r2) + math.radians(89.5) * r2
+                dist = math.exp(math.log(dist) * (1 - r2) + math.log(70.0) * r2)
+            target = target.lerp(wide_v2, reveal)
+            lens.append(50 * (1 - reveal) + 32 * reveal)
+            fstops.append(5.6)
+        else:
+            o = smoother((t - T0 - 0.2) / 1.1)
+            dist = (1.1 * (1 - o) + follow * o) * (1 - reveal) + 24.0 * reveal
+            lens.append(50 * (1 - reveal) + 40 * reveal)
+            target = tgt.lerp(wide_target, reveal)
+            fstops.append(1.0 * (1 - o) + 5.6 * o)
         if portrait:
             dist *= 1.45 * (1 - reveal) + 1.05 * reveal
-        target = tgt.lerp(wide_target, reveal)
         d = Vector((math.sin(az) * math.cos(el), -math.cos(az) * math.cos(el), math.sin(el)))
         pos = target + d * dist
         locs.append(pos)
         rots.append((target - pos).to_track_quat("-Z", "Y"))
         sharp = (target - pos).length
-        focus.append(14.0 * (1 - o) + sharp * o)
-        fstops.append(1.0 * (1 - o) + 5.6 * o)
+        focus.append(sharp if v2 else 14.0 * (1 - o) + sharp * o)
     bake_matrices(cam, [Matrix.LocRotScale(p, q, Vector((1, 1, 1))) for p, q in zip(locs, rots)])
     fcurve_bake(cam.data, "dof.focus_distance", [focus])
     fcurve_bake(cam.data, "lens", [lens])
@@ -1839,6 +2110,9 @@ def setup_render(res_x, res_y, samples, threshold=0.02, grain=True):
     end_t = ts[-1]
     full_v = [1.0 - smoother((t - T0 - 0.15) / 0.6) for t in ts]
     edge_v = [smoother((t - (end_t - 1.0)) / 0.9) for t in ts]
+    if LOOK["name"] == "v2":
+        full_v = [0.0] * len(ts)
+        edge_v = [0.0] * len(ts)
     fcurve_bake(ng, 'nodes["FullFade"].inputs[1].default_value', [full_v])
     fcurve_bake(ng, 'nodes["EdgeFade"].inputs[1].default_value', [edge_v])
     _BOOKEND["vig"] = [0.86 + 0.14 * max(fv, ev) for fv, ev in zip(full_v, edge_v)]

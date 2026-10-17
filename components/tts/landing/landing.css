@@ -354,15 +354,41 @@
   }
 }
 
-/* ---- the sign-off: the mark's loop under the team story ---- */
+/* ---- the sign-off: the mark's loop beside the closing line and the way
+ * in, one band. The film is flattened onto this paper at encode time
+ * (encode_loops.py --onto), so its edge never shows. ---- */
 .tts .ld-sign {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(20px, 4vw, 64px);
   padding-block: clamp(40px, 8vh, 96px) clamp(24px, 4vh, 48px);
 }
 .tts .ld-sign-mark {
   display: block;
-  width: clamp(160px, 18vw, 260px);
+  width: clamp(180px, 24vw, 340px);
   height: auto;
   aspect-ratio: 1;
+}
+.tts .ld-sign-copy {
+  display: grid;
+  gap: 24px;
+  justify-items: start;
+}
+.tts .ld-sign-line {
+  max-width: 18ch;
+  margin: 0;
+  font-size: clamp(30px, 3.8vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+@media (max-width: 599px) {
+  .tts .ld-sign {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+  }
+  .tts .ld-sign-copy {
+    justify-items: center;
+  }
 }

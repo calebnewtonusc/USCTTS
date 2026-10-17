@@ -194,24 +194,40 @@
 }
 
 /* ---- 02, the work ---- */
+/* Caleb, 2026-10-10, pointing at clay.com's cards: the card takes nearly
+ * the page's width, the copy keeps the left half, and the film fills the
+ * right half edge to edge, top to bottom, clipped by the card's corners.
+ * The old card was inset 120px a side with the film a fifth of it. */
+.tts .ld-wrap.is-wide {
+  max-width: none;
+  padding-inline: clamp(8px, 1.6vw, 24px);
+}
 .tts .ld-work {
   display: grid;
-  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
-  gap: clamp(28px, 4vw, 64px);
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  min-height: min(84vh, 820px);
+  min-height: min(84svh, 820px);
+  padding: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+.tts .ld-work-copy {
+  align-self: center;
+  padding: clamp(28px, 5vw, 88px);
 }
 .tts .ld-work-pic {
   position: relative;
-  padding: clamp(16px, 2.4vw, 36px);
+  min-height: 100%;
+  background: #f1c8bd;
 }
-.tts .ld-work-floor {
-  border-radius: 24px;
-  -webkit-mask-image: radial-gradient(closest-side, #000 70%, transparent);
-  mask-image: radial-gradient(closest-side, #000 70%, transparent);
-}
-.tts .ld-work .ld-frame {
-  position: relative;
-  aspect-ratio: 4 / 3;
+.tts .ld-work-pic video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .tts .ld-lead {
   margin: 0 0 6px;
@@ -699,7 +715,8 @@
 }
 .tts .ts-final {
   position: absolute;
-  inset: calc(var(--nav-h) + 20px) clamp(8px, 1.6vw, 24px) clamp(8px, 1.6vw, 24px);
+  inset: calc(var(--nav-h) + 20px) clamp(8px, 1.6vw, 24px)
+    clamp(8px, 1.6vw, 24px);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 20px;
@@ -709,7 +726,9 @@
  * past it so its point never sits on a face. */
 @media (min-width: 1200px) {
   .tts .ts-final {
-    left: calc(max(20px, (100% - var(--wide)) / 2 + var(--gutter) - 52px) + 28px);
+    left: calc(
+      max(20px, (100% - var(--wide)) / 2 + var(--gutter) - 52px) + 28px
+    );
   }
 }
 .tts .ts[data-done="1"] .ts-final {
@@ -719,7 +738,10 @@
  * screen, edge to edge, each a tall portrait with the name huge on it. */
 .tts .ts-head {
   margin: 0;
-  padding-inline: max(var(--gutter), calc((100% - var(--wide)) / 2 + var(--gutter)));
+  padding-inline: max(
+    var(--gutter),
+    calc((100% - var(--wide)) / 2 + var(--gutter))
+  );
   font-size: clamp(34px, 4vw, 60px);
   font-weight: 400;
   line-height: 1.04;
@@ -852,6 +874,11 @@
 @media (max-width: 899px) {
   .tts .ld-work {
     grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+  .tts .ld-work-pic {
+    aspect-ratio: 4 / 3;
+    min-height: 0;
   }
   .tts .nw-map {
     height: auto;
@@ -963,9 +990,6 @@
 }
 
 @media (max-width: 599px) {
-  
-  
-  
   .tts .ld-manifest li {
     grid-template-columns: 44px minmax(0, 1fr);
   }
@@ -1004,7 +1028,8 @@
   pointer-events: none;
 }
 .tts .ld-mentors,
-.tts .ld-about,
+/* The work card sizes itself (.ld-work): centring it in 86vh left about
+ * 300px of bare paper above it. */
 .tts .ld-way {
   min-height: 86vh;
   min-height: 86svh;
@@ -1051,4 +1076,11 @@ html:has(.tts .v4) {
 }
 html[data-hold="1"] {
   overflow: hidden;
+}
+
+/* The way card runs nearly the page's width like the work card; its film
+ * stays inside one screen. */
+.tts .ld-way .ld-way-img {
+  max-height: min(82vh, 820px);
+  max-height: min(82svh, 820px);
 }
