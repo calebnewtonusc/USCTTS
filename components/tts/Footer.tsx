@@ -55,7 +55,7 @@ export default function Footer({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className="footer-mark"
-            src="/tts/brand/mark-48.png"
+            src="/tts/brand/mark-a15-48.png"
             alt=""
             width={48}
             height={48}

@@ -53,12 +53,12 @@ export default function Nav() {
     <header className={cls}>
       <nav className="nav-inner" aria-label="Main">
         <Link href="/" className="nav-mark" onClick={close}>
-          {/* The v13 helmet, the club's mark since 2026-10-11 (Caleb: "A red
+          {/* The A15 helmet, the club's mark since 2026-10-21 (Caleb: "A red
            * dot is not our logo"). */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className="nav-mark-logo"
-            src="/tts/brand/mark-96.png"
+            src="/tts/brand/mark-a15-96.png"
             alt=""
             width={96}
             height={96}

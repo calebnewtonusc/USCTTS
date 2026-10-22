@@ -24,13 +24,13 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        // The v13 helmet, Caleb's final mark (2026-10-11). A new file name,
+        // The A15 helmet, Caleb's pick (2026-10-21). A new file name,
         // not a swap at the old one, because iMessage and Slack cache a
         // preview by its image URL.
-        url: "/tts/brand/og.png",
+        url: "/tts/brand/og-a15.png",
         width: 1200,
         height: 630,
-        alt: "Trojan Tech Solutions, the red helmet mark beside the name",
+        alt: "Trojan Tech Solutions, the red helmet with TTS in its face openings, beside the name",
       },
     ],
   },
@@ -39,15 +39,15 @@ export const metadata: Metadata = {
     title: "Trojan Tech Solutions",
     description:
       "USC's AI implementation and go-to-market lab. Students build whatever AI a company or nonprofit needs, anywhere in the world: automations, CRMs, outbound, agents and training. They learn it by shipping it.",
-    images: ["/tts/brand/og.png"],
+    images: ["/tts/brand/og-a15.png"],
   },
   icons: {
     icon: [
-      { url: "/favicon.png?v=13", type: "image/png" },
-      { url: "/favicon.ico?v=13" },
+      { url: "/favicon.png?v=15", type: "image/png" },
+      { url: "/favicon.ico?v=15" },
     ],
-    shortcut: "/favicon.png?v=13",
-    apple: "/apple-touch-icon.png?v=13",
+    shortcut: "/favicon.png?v=15",
+    apple: "/apple-touch-icon.png?v=15",
   },
 };
 
