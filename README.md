@@ -1,6 +1,6 @@
 # USC Trojan Technology Solutions
 
-The official website for Trojan Technology Solutions (TTS) — USC's AI-native consulting and product club.
+The official website for Trojan Technology Solutions (TTS), USC's AI-native consulting and product club.
 
 Live: [usctts.com](https://usctts.com) *(connect to Vercel)*
 
@@ -78,7 +78,7 @@ NEXT_PUBLIC_SITE_URL=     # Production URL
 
 ## Deployment
 
-Push to `main` — Vercel auto-deploys. All environment variables set in Vercel dashboard.
+Push to `main`, Vercel auto-deploys. All environment variables set in Vercel dashboard.
 
 ---
 
