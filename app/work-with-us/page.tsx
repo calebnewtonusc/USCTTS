@@ -47,8 +47,8 @@ const PLACES: Place[] = [
     up: true,
   },
   { id: "gh", name: "Ghana", note: "healthcare", lat: 7.95, lon: -1.02 },
-  // Tyler, 2026-10-10: Yemen off ("we don't have that"), Kenya on.
-  { id: "ke", name: "Kenya", lat: -0.02, lon: 37.91 },
+  // Tyler, 2026-10-10: Yemen off ("we don't have that"). Kenya off
+  // 2026-11-12 (Caleb and Tyler) until that client is ready to be named.
 ];
 
 function BookButton({ big = false }: { big?: boolean }) {
@@ -177,7 +177,7 @@ export default function WorkWithUsPage() {
               <span className="co-n">03</span> real work
             </p>
             <h2 id="co-world-h" className="co-h2">
-              Our client work <em>reaches from Nigeria to Kenya.</em>
+              Our client work <em>reaches from Nigeria to Ghana.</em>
             </h2>
             <div data-drift="0.16">
               <WorldArcs places={PLACES} />
@@ -194,10 +194,6 @@ export default function WorkWithUsPage() {
               <li>
                 <span className="co-code">GH</span> Ghana, a mobile healthcare unit,
                 over 9,000 rural patients
-              </li>
-              <li>
-                <span className="co-code">KE</span> Kenya, mosquito treatment
-                and cancer therapeutics
               </li>
             </ul>
           </div>

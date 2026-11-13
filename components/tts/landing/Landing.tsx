@@ -70,12 +70,13 @@ export default function Landing() {
           {/* Tyler, 2026-10-10 voice memo: "a little thing in the top right,
            * now accepting applications for analysts on three different
            * engagements". He named Yemen in that line and also said to take
-           * Yemen off, so the third is Kenya, the client he added. */}
+           * Yemen off. Kenya came off 2026-11-12 (Caleb and Tyler) until that
+           * client is ready to be named. */}
           <Link href="/apply" className="ld-now">
             <span className="ld-now-dot" aria-hidden="true" />
             <span>
-              Now accepting analyst applications for three international
-              engagements: Nigeria, Ghana and Kenya
+              Now accepting analyst applications for international
+              engagements in Nigeria and Ghana
             </span>
             <span aria-hidden="true">&rarr;</span>
           </Link>
@@ -127,7 +128,7 @@ export default function Landing() {
                   </p>
                   <h2 id="ld-about-h" className="ld-h" data-reveal="0">
                     Real clients,{" "}
-                    <em className="ld-accent">from Nigeria to Kenya.</em>
+                    <em className="ld-accent">from Nigeria to Ghana.</em>
                   </h2>
                   {/* Tyler's voice memo, 2026-10-10: Yemen off ("we don't
                    * have that"), each line in his words, and Kenya added
@@ -145,13 +146,6 @@ export default function Landing() {
                       <b>Ghana</b>
                       <span className="ld-m-what">
                         Mobile healthcare unit, over 9,000 rural patients
-                      </span>
-                    </li>
-                    <li data-reveal="2">
-                      <span className="ld-m-code">KE</span>
-                      <b>Kenya</b>
-                      <span className="ld-m-what">
-                        Mosquito treatment and cancer therapeutics
                       </span>
                     </li>
                   </ul>
@@ -283,8 +277,8 @@ export default function Landing() {
                     </em>
                   </p>
                   <p className="ld-sign-now">
-                    Now accepting analysts for three international engagements,
-                    in Nigeria, Ghana and Kenya.
+                    Now accepting analysts for international engagements in
+                    Nigeria and Ghana.
                   </p>
                   <Link href="/apply" className="ld-btn">
                     Apply to TTS <span aria-hidden="true">&rarr;</span>
